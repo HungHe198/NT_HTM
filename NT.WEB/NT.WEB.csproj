@@ -11,4 +11,9 @@
     <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\NT.API\NT.API.csproj" />
+    <ProjectReference Include="..\NT.SHARED\NT.SHARED.csproj" />
+  </ItemGroup>
+
 </Project>
