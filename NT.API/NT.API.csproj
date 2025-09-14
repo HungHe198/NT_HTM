@@ -26,6 +26,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\NT.BLL\NT.BLL.csproj" />
+    <ProjectReference Include="..\NT.Infrastructure\NT.Infrastructure.csproj" />
+    <ProjectReference Include="..\NT.SHARED\NT.SHARED.csproj" />
   </ItemGroup>
 
 </Project>

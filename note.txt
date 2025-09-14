@@ -1,0 +1,20 @@
+﻿appsettings của ASP.NET Core là tập tin JSON chứa các cài đặt cho ứng dụng. Dưới đây là một ví dụ về nội dung của tập tin appsettings.json:
+{
+  "Logging": {
+	"LogLevel": {
+	  "Default": "Information",
+	  "Microsoft": "Warning",
+	  "Microsoft.Hosting.Lifetime": "Information"
+	}
+  },
+  "AllowedHosts": "*",
+  "ConnectionStrings": {
+	"DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=aspnet-MyApp-53f5e8c3-8b6e-4d6e-9f3e-2c9e4f5b6c7d;Trusted_Connection=True;MultipleActiveResultSets=true"
+  },
+  "AppSettings": {
+	"SiteTitle": "My ASP.NET Core Application",
+	"PageSize": 10
+  }
+}
+
+nó chưa hề được hoàn thiện, cần sửa lại logging và BugReporting cho đúng
