@@ -11,25 +11,13 @@ namespace NT.SHARED.Models
     {
         public Guid Id { get; private set; } = Guid.NewGuid();
         [Required, MaxLength(50)]
-        public string Name { get; private set; } = null!; // Tên độ cứng (VD: 4H)
-        [MaxLength(200)]
-        public string? Description { get; private set; } // Mô tả độ cứng
+        public string Level { get; private set; } = null!;
 
-        // Private constructor for EF
         private RodHardness() { }
 
-        // Public static factory
-        public static RodHardness Create(string name, string? description = null)
-        {
-            if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Tên độ cứng không được để trống", nameof(name));
-            return new RodHardness
-            {
-                Name = name,
-                Description = description
-            };
-        }
+        public static RodHardness Create(string level) => new RodHardness { Level = level };
 
-        // Navigation
-        public ICollection<ProductDetail> ProductDetails { get; private set; } = new List<ProductDetail>();
+        public ICollection<ProductDetailHardness> ProductDetailHardnesses { get; private set; } = new List<ProductDetailHardness>();
     }
+
 }

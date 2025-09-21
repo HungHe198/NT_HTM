@@ -13,34 +13,11 @@ namespace NT.SHARED.Configurations
     {
         public void Configure(EntityTypeBuilder<Permission> builder)
         {
-            builder.HasKey(p => p.Id);
-            builder.Property(p => p.Name)
-                .IsRequired()
-                .HasMaxLength(100);
-            builder.Property(p => p.Code)
-                .IsRequired()
-                .HasMaxLength(50);
-            builder.Property(p => p.Resource)
-                .IsRequired()
-                .HasMaxLength(50);
-            builder.Property(p => p.Action)
-                .IsRequired()
-                .HasMaxLength(50);
-            builder.Property(p => p.Endpoint)
-                .IsRequired()
-                .HasMaxLength(200);
-            builder.Property(p => p.HttpMethod)
-                .IsRequired()
-                .HasMaxLength(10);
-            builder.Property(p => p.ViewPath)
-                .IsRequired()
-                .HasMaxLength(200);
-            builder.Property(p => p.Description)
-                .HasMaxLength(100);
+            builder.HasKey(x => x.Id);
+            builder.Property(x => x.Code).IsRequired().HasMaxLength(150);
+            builder.Property(x => x.Action).IsRequired().HasMaxLength(50);
 
-            builder.HasMany(p => p.RolePermissions)
-                .WithOne(rp => rp.Permission)
-                .HasForeignKey(rp => rp.PermissionId);
+
         }
     }
 }

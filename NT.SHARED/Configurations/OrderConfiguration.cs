@@ -17,27 +17,22 @@ namespace NT.SHARED.Configurations
         {
             public void Configure(EntityTypeBuilder<Order> builder)
             {
-                builder.HasKey(o => o.Id);
-                builder.Property(o => o.UserId)
-                    .IsRequired();
-                builder.Property(o => o.OrderDate)
-                    .IsRequired();
-                builder.Property(o => o.TotalAmount)
-                    .IsRequired()
-                    .HasColumnType("decimal(18,2)");
-                builder.Property(o => o.Status)
-                    .IsRequired()
-                    .HasMaxLength(50);
-                builder.Property(o => o.ShippingAddress)
-                    .HasMaxLength(200);
+                builder.HasKey(x => x.Id);
 
-                builder.HasOne(o => o.User)
-                    .WithMany(u => u.Orders)
-                    .HasForeignKey(o => o.UserId);
+                builder.HasOne(x => x.Customer)
+                       .WithMany(c => c.Orders)
+                       .HasForeignKey(x => x.CustomerId)
+                       .OnDelete(DeleteBehavior.Cascade); // hợp lý: Xóa khách hàng thì đơn hàng mất luôn
 
-                builder.HasMany(o => o.OrderDetails)
-                    .WithOne(od => od.Order)
-                    .HasForeignKey(od => od.OrderId);
+                builder.HasOne(x => x.Coupon)
+                       .WithMany(c => c.Orders)
+                       .HasForeignKey(x => x.CouponId)
+                       .OnDelete(DeleteBehavior.SetNull); // xóa coupon thì Order giữ lại nhưng CouponId = null
+
+                builder.HasOne(x => x.CreatedByUser)
+                       .WithMany(u => u.Orders)
+                       .HasForeignKey(x => x.CreatedByUserId)
+                       .OnDelete(DeleteBehavior.NoAction); // tránh multiple cascade
             }
         }
     }

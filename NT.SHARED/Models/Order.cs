@@ -11,37 +11,39 @@ namespace NT.SHARED.Models
     {
         public Guid Id { get; private set; } = Guid.NewGuid();
         [Required]
-        public Guid UserId { get; private set; } // Khách hàng đặt hàng
+        public Guid CustomerId { get; private set; }
         [Required]
-        public DateTime OrderDate { get; private set; } // Ngày đặt hàng
-        [Required, Range(0, double.MaxValue)]
-        public decimal TotalAmount { get; private set; } // Tổng tiền
+        public Guid CreatedByUserId { get; private set; }
+        public DateTime CreatedTime { get; private set; }
+        public Guid? CouponId { get; private set; }
+        [Required]
+        public decimal TotalAmount { get; private set; }
+        public decimal DiscountAmount { get; private set; }
+        [Required]
+        public decimal FinalAmount { get; private set; }
         [Required, MaxLength(50)]
-        public string Status { get; private set; } = null!; // Trạng thái (VD: Pending)
-        [MaxLength(200)]
-        public string? ShippingAddress { get; private set; } // Địa chỉ giao hàng
+        public string Status { get; private set; } = null!;
 
-        // Private constructor for EF
         private Order() { }
 
-        // Public static factory
-        public static Order Create(Guid userId, decimal totalAmount, string status, string? shippingAddress = null)
+        public static Order Create(Guid customerId, Guid createdByUserId, DateTime createdTime, decimal total, decimal discount, decimal final, string status, Guid? couponId = null)
         {
-            if (userId == Guid.Empty) throw new ArgumentException("ID khách hàng không hợp lệ", nameof(userId));
-            if (totalAmount < 0) throw new ArgumentException("Tổng tiền phải lớn hơn hoặc bằng 0", nameof(totalAmount));
-            if (string.IsNullOrWhiteSpace(status)) throw new ArgumentException("Trạng thái không được để trống", nameof(status));
             return new Order
             {
-                UserId = userId,
-                OrderDate = DateTime.UtcNow,
-                TotalAmount = totalAmount,
+                CustomerId = customerId,
+                CreatedByUserId = createdByUserId,
+                CreatedTime = createdTime,
+                TotalAmount = total,
+                DiscountAmount = discount,
+                FinalAmount = final,
                 Status = status,
-                ShippingAddress = shippingAddress
+                CouponId = couponId
             };
         }
 
-        // Navigation
-        public User User { get; private set; } = null!;
+        public Customer Customer { get; private set; } = null!;
+        public User CreatedByUser { get; private set; } = null!;
+        public Coupon? Coupon { get; private set; }
         public ICollection<OrderDetail> OrderDetails { get; private set; } = new List<OrderDetail>();
     }
 }

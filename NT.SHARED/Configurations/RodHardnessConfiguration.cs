@@ -13,16 +13,7 @@ namespace NT.SHARED.Configurations
     {
         public void Configure(EntityTypeBuilder<RodHardness> builder)
         {
-            builder.HasKey(rh => rh.Id);
-            builder.Property(rh => rh.Name)
-                .IsRequired()
-                .HasMaxLength(50);
-            builder.Property(rh => rh.Description)
-                .HasMaxLength(200);
-
-            builder.HasMany(rh => rh.ProductDetails)
-                .WithOne(pd => pd.RodHardness)
-                .HasForeignKey(pd => pd.RodHardnessId);
+            builder.HasKey(x => x.Id);
         }
     }
 }

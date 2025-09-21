@@ -13,16 +13,8 @@ namespace NT.SHARED.Configurations
     {
         public void Configure(EntityTypeBuilder<RodLength> builder)
         {
-            builder.HasKey(rl => rl.Id);
-            builder.Property(rl => rl.Value)
-                .IsRequired();
-            builder.Property(rl => rl.Unit)
-                .IsRequired()
-                .HasMaxLength(10);
-
-            builder.HasMany(rl => rl.ProductDetails)
-                .WithOne(pd => pd.RodLength)
-                .HasForeignKey(pd => pd.RodLengthId);
+            builder.HasKey(x => x.Id);
         }
+    
     }
 }

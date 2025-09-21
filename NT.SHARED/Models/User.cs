@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace NT.SHARED.Models
 {
@@ -15,28 +10,33 @@ namespace NT.SHARED.Models
         [Required]
         public string PasswordHash { get; private set; } = null!;
         [Required]
-        public Guid ActorTypeId { get; private set; }
+        public bool Status { get; private set; } 
+        [Required]
+        public Guid RoleId { get; private set; }
 
-        // Private constructor for EF
         private User() { }
 
-        // Public static factory
-        public static User Create(string username, string passwordHash, Guid actorTypeId)
+        public static User Create(string username, string passwordHash, bool status, Guid roleId)
         {
-            if (string.IsNullOrWhiteSpace(username)) throw new ArgumentException("Không được để trống tài khoản", nameof(username));
-            if (string.IsNullOrWhiteSpace(passwordHash)) throw new ArgumentException("Mật khẩu không chính xác", nameof(passwordHash));
-            if (actorTypeId == Guid.Empty) throw new ArgumentException("Tài khoản chưa được cấp quyền sử dụng chức năng này", nameof(actorTypeId));
+            if (string.IsNullOrWhiteSpace(username)) throw new ArgumentException("Không được để trống username");
+            if (string.IsNullOrWhiteSpace(passwordHash)) throw new ArgumentException("Không được để trống password");
+            if (string.IsNullOrWhiteSpace(status.ToString())) throw new ArgumentException("Trạng thái không hợp lệ");
+            if (roleId == Guid.Empty) throw new ArgumentException("RoleId không hợp lệ");
+
             return new User
             {
                 Username = username,
                 PasswordHash = passwordHash,
-                ActorTypeId = actorTypeId
+                Status = status,
+                RoleId = roleId
             };
         }
 
         // Navigation
-        public ActorType ActorType { get; private set; } = null!;
-        public ICollection<UserRole> UserRoles { get; private set; } = new List<UserRole>();
+        public Role Role { get; private set; } = null!;
         public ICollection<Order> Orders { get; private set; } = new List<Order>();
+        public Admin? Admin { get; private set; }
+        public Employee? Employee { get; private set; }
+        public Customer? Customer { get; private set; }
     }
 }

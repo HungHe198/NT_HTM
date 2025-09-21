@@ -13,29 +13,11 @@ namespace NT.SHARED.Configurations
     {
         public void Configure(EntityTypeBuilder<User> builder)
         {
-            builder.HasKey(u => u.Id);
-            builder.Property(u => u.Username)
-                .IsRequired()
-                .HasMaxLength(100);
-            builder.Property(u => u.PasswordHash)
-                .IsRequired();
-            builder.Property(u => u.ActorTypeId)
-                .IsRequired();
 
-            builder.HasOne(u => u.ActorType)
-                .WithMany(a => a.Users)
-                .HasForeignKey(u => u.ActorTypeId)
-                .OnDelete(DeleteBehavior.Restrict); // Thay thế CASCADE bằng RESTRICT
+            builder.HasKey(x => x.Id);
+            builder.HasIndex(x => x.Username).IsUnique();
+            builder.HasOne(x => x.Role).WithMany(r => r.Users).HasForeignKey(x => x.RoleId);
 
-            builder.HasMany(u => u.UserRoles)
-                .WithOne(ur => ur.User)
-                .HasForeignKey(ur => ur.UserId)
-                .OnDelete(DeleteBehavior.Restrict); // Thay thế CASCADE bằng RESTRICT
-
-            builder.HasMany(u => u.Orders)
-                .WithOne(o => o.User)
-                .HasForeignKey(o => o.UserId)
-                .OnDelete(DeleteBehavior.Restrict); // Thay thế CASCADE bằng RESTRICT
         }
     }
 }

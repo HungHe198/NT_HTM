@@ -19,7 +19,7 @@ namespace NT.DAL.ContextFile
         {
         }
 
-        
+
 
         protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
         {
@@ -34,38 +34,52 @@ namespace NT.DAL.ContextFile
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Áp dụng các cấu hình từ NT.SHARED.Configuration
-            modelBuilder.ApplyConfiguration(new ActorTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new AdminConfiguration());
+            modelBuilder.ApplyConfiguration(new BrandConfiguration());
             modelBuilder.ApplyConfiguration(new CategoryConfiguration());
+            modelBuilder.ApplyConfiguration(new CouponConfiguration());
+            modelBuilder.ApplyConfiguration(new CustomerConfiguration());
+            modelBuilder.ApplyConfiguration(new EmployeeConfiguration());
             modelBuilder.ApplyConfiguration(new OrderConfiguration());
             modelBuilder.ApplyConfiguration(new OrderDetailConfiguration());
             modelBuilder.ApplyConfiguration(new PermissionConfiguration());
             modelBuilder.ApplyConfiguration(new ProductConfiguration());
+            modelBuilder.ApplyConfiguration(new ProductCategoryConfiguration());
             modelBuilder.ApplyConfiguration(new ProductDetailConfiguration());
+            modelBuilder.ApplyConfiguration(new ProductDetailColorConfiguration());
+            modelBuilder.ApplyConfiguration(new ProductDetailHardnessConfiguration());
+            modelBuilder.ApplyConfiguration(new ProductDetailLengthConfiguration());
             modelBuilder.ApplyConfiguration(new RodColorConfiguration());
             modelBuilder.ApplyConfiguration(new RodHardnessConfiguration());
             modelBuilder.ApplyConfiguration(new RodLengthConfiguration());
             modelBuilder.ApplyConfiguration(new RoleConfiguration());
             modelBuilder.ApplyConfiguration(new RolePermissionConfiguration());
             modelBuilder.ApplyConfiguration(new UserConfiguration());
-            modelBuilder.ApplyConfiguration(new UserRoleConfiguration());
-            modelBuilder.ApplyConfiguration(new CategoryProductConfiguration());
-
-            // Seed data (sử dụng factory methods)
-            SeedData(modelBuilder);
 
             base.OnModelCreating(modelBuilder);
         }
-        private static void SeedData(ModelBuilder modelBuilder)
-        {
-          
-        }
+        //private static void SeedData(ModelBuilder modelBuilder)
+        //{
+
+        //}
 
         public DbSet<User> Users { get; set; } = null!;
-        public DbSet<ActorType> ActorTypes { get; set; } = null!;
-        public DbSet<Permission> Permissions { get; set; } = null!;
-        public DbSet<Role> Roles { get; set; } = null!;
-        public DbSet<RolePermission> RolePermissions { get; set; } = null!;
-        public DbSet<UserRole> UserRoles { get; set; } = null!;
+        public DbSet<Admin> Admins { get; set; } = null!;
+        public DbSet<Employee> Employees { get; set; } = null!;
+        public DbSet<Customer> Customers { get; set; } = null!;
+        public DbSet<Product> Products { get; set; } = null!;
+        public DbSet<Category> Categories { get; set; } = null!;
+        public DbSet<ProductCategory> ProductCategories { get; set; } = null!;
+        public DbSet<Brand> Brands { get; set; } = null!;
+        public DbSet<ProductDetail> ProductDetails { get; set; } = null!;
+        public DbSet<RodColor> RodColors { get; set; } = null!;
+        public DbSet<ProductDetailColor> ProductDetailColors { get; set; } = null!;
+        public DbSet<RodHardness> RodHardnesses { get; set; } = null!;
+        public DbSet<ProductDetailHardness> ProductDetailHardnesses { get; set; } = null!;
+        public DbSet<RodLength> RodLengths { get; set; } = null!;
+        public DbSet<ProductDetailLength> ProductDetailLengths { get; set; } = null!;
+        public DbSet<Coupon> Coupons { get; set; } = null!;
+        public DbSet<Order> Orders { get; set; } = null!;
+        public DbSet<OrderDetail> OrderDetails { get; set; } = null!;
     }
 }

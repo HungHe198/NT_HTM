@@ -9,11 +9,11 @@ using System.Threading.Tasks;
 
 namespace NT.SHARED.Configurations
 {
-    public class RodColorConfiguration : IEntityTypeConfiguration<RodColor>
+    public class ProductDetailColorConfiguration : IEntityTypeConfiguration<ProductDetailColor>
     {
-        public void Configure(EntityTypeBuilder<RodColor> builder)
+        public void Configure(EntityTypeBuilder<ProductDetailColor> builder)
         {
-            builder.HasKey(x => x.Id);
+            builder.HasKey(x => new { x.ProductDetailId, x.RodColorId });
         }
     }
 }

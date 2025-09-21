@@ -11,26 +11,12 @@ namespace NT.SHARED.Models
     {
         public Guid Id { get; private set; } = Guid.NewGuid();
         [Required]
-        public decimal Value { get; private set; } // Độ dài (VD: 360)
-        [Required, MaxLength(10)]
-        public string Unit { get; private set; } = "cm"; // Đơn vị (mặc định cm)
+        public double Value { get; private set; }
 
-        // Private constructor for EF
         private RodLength() { }
 
-        // Public static factory
-        public static RodLength Create(decimal value, string unit = "cm")
-        {
-            if (value <= 0) throw new ArgumentException("Độ dài phải lớn hơn 0", nameof(value));
-            if (string.IsNullOrWhiteSpace(unit)) throw new ArgumentException("Đơn vị không được để trống", nameof(unit));
-            return new RodLength
-            {
-                Value = value,
-                Unit = unit
-            };
-        }
+        public static RodLength Create(double value) => new RodLength { Value = value };
 
-        // Navigation
-        public ICollection<ProductDetail> ProductDetails { get; private set; } = new List<ProductDetail>();
+        public ICollection<ProductDetailLength> ProductDetailLengths { get; private set; } = new List<ProductDetailLength>();
     }
 }

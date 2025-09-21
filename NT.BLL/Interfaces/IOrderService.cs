@@ -1,53 +1,26 @@
-using NT.SHARED.Models;
-
+Ôªøusing NT.SHARED.Models;
+using NT.BLL.Interfaces;
 namespace NT.BLL.Interface
 {
-    /// <summary>
-    /// D?ch v? qu?n l˝ ??n h‡ng.
-    /// </summary>
-    public interface IOrderService
+   
+
+   
+        /// <summary>
+        /// D·ªãch v·ª• qu·∫£n l√Ω ƒë∆°n h√†ng.
+        /// Cung c·∫•p c√°c ch·ª©c nƒÉng CRUD v√† thay ƒë·ªïi tr·∫°ng th√°i cho b·∫£ng <see cref="Order"/>.
+        /// </summary>
+        public interface IOrderService : IGenericService<Order>
     {
-        /// <summary>
-        /// L?y danh s·ch t?t c? ??n h‡ng.
-        /// </summary>
-        /// <returns>Danh s·ch ??n h‡ng.</returns>
-        Task<IEnumerable<Order>> GetAllAsync();
-
-        /// <summary>
-        /// L?y thÙng tin ??n h‡ng theo Id.
-        /// </summary>
-        /// <param name="id">Id ??n h‡ng.</param>
-        /// <returns>??n h‡ng ho?c null n?u khÙng tÏm th?y.</returns>
-        Task<Order?> GetByIdAsync(Guid id);
-
-        /// <summary>
-        /// ThÍm m?i ??n h‡ng.
-        /// </summary>
-        /// <param name="order">ThÙng tin ??n h‡ng.</param>
-        /// <param name="orderDetails">Chi ti?t ??n h‡ng.</param>
-        /// <returns>??n h‡ng ?„ thÍm.</returns>
-        Task<Order> AddAsync(Order order, IEnumerable<OrderDetail> orderDetails);
-
-        /// <summary>
-        /// C?p nh?t thÙng tin ??n h‡ng.
-        /// </summary>
-        /// <param name="order">ThÙng tin ??n h‡ng c?p nh?t.</param>
-        /// <returns>??n h‡ng sau khi c?p nh?t.</returns>
-        Task<Order> UpdateAsync(Order order);
-
-        /// <summary>
-        /// XÛa ??n h‡ng theo Id.
-        /// </summary>
-        /// <param name="id">Id ??n h‡ng.</param>
-        /// <returns>True n?u xÛa th‡nh cÙng, ng??c l?i l‡ false.</returns>
-        Task<bool> DeleteAsync(Guid id);
-
-        /// <summary>
-        /// Thay ??i tr?ng th·i ??n h‡ng.
-        /// </summary>
-        /// <param name="orderId">Id ??n h‡ng.</param>
-        /// <param name="newStatus">Tr?ng th·i m?i.</param>
-        /// <returns>??n h‡ng sau khi thay ??i tr?ng th·i.</returns>
-        Task<Order> ChangeStatusAsync(Guid orderId, string newStatus);
-    }
+           
+            /// <summary>
+            /// Thay ƒë·ªïi tr·∫°ng th√°i c·ªßa ƒë∆°n h√†ng.
+            /// </summary>
+            /// <param name="orderId">Id c·ªßa ƒë∆°n h√†ng c·∫ßn thay ƒë·ªïi tr·∫°ng th√°i.</param>
+            /// <param name="newStatus">Tr·∫°ng th√°i m·ªõi c·∫ßn c·∫≠p nh·∫≠t.</param>
+            /// <returns>
+            /// ƒê·ªëi t∆∞·ª£ng <see cref="Order"/> sau khi thay ƒë·ªïi tr·∫°ng th√°i.
+            /// </returns>
+            Task<Order> ChangeStatusAsync(Guid orderId, string newStatus);
+        }
+    
 }

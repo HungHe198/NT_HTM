@@ -4,13 +4,17 @@ namespace NT.BLL.Interface
 {
     /// <summary>
     /// D?ch v? qu?n lý quy?n truy c?p.
+    /// Cung c?p các ch?c n?ng CRUD cho b?ng <see cref="Permission"/>.
     /// </summary>
-    public interface IPermissionService
+    public interface IPermissionService : IGenericService<Permission>
     {
-        Task<IEnumerable<Permission>> GetAllAsync();
-        Task<Permission?> GetByIdAsync(Guid id);
-        Task<Permission> AddAsync(Permission permission);
-        Task<Permission> UpdateAsync(Permission permission);
-        Task<bool> DeleteAsync(Guid id);
+        // / t?m th?i không có gì ??c bi?t
+
+
+
+
+
+
+
     }
 }

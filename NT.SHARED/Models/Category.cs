@@ -10,26 +10,13 @@ namespace NT.SHARED.Models
     public class Category
     {
         public Guid Id { get; private set; } = Guid.NewGuid();
-        [Required, MaxLength(100)]
-        public string Name { get; private set; } = null!; // Tên danh mục (VD: Cần câu biển)
-        [MaxLength(200)]
-        public string? Description { get; private set; } // Mô tả danh mục
+        [Required, MaxLength(150)]
+        public string Name { get; private set; } = null!;
 
-        // Private constructor for EF
         private Category() { }
 
-        // Public static factory
-        public static Category Create(string name, string? description = null)
-        {
-            if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Tên danh mục không được để trống", nameof(name));
-            return new Category
-            {
-                Name = name,
-                Description = description
-            };
-        }
+        public static Category Create(string name) => new Category { Name = name };
 
-        // Navigation
-        public ICollection<CategoryProduct> CategoryProducts { get; private set; } = new List<CategoryProduct>();
+        public ICollection<ProductCategory> ProductCategories { get; private set; } = new List<ProductCategory>();
     }
 }

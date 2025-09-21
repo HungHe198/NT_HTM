@@ -8,21 +8,16 @@ namespace NT.SHARED.Configurations
     {
         public void Configure(EntityTypeBuilder<OrderDetail> builder)
         {
-            builder.HasKey(od => new { od.OrderId, od.ProductId, od.RodHardnessId, od.RodLengthId, od.RodColorId });
+            builder.HasKey(x => x.Id);
 
-            builder.HasOne(od => od.Order)
-                .WithMany(o => o.OrderDetails)
-                .HasForeignKey(od => od.OrderId);
+            builder.HasOne(x => x.Order)
+                   .WithMany(o => o.OrderDetails)
+                   .HasForeignKey(x => x.OrderId);
 
-            builder.HasOne(od => od.ProductDetail)
-                .WithMany(pd => pd.OrderDetails)
-                .HasForeignKey(od => new { od.ProductId, od.RodHardnessId, od.RodLengthId, od.RodColorId });
+            builder.HasOne(x => x.ProductDetail)
+                   .WithMany(p => p.OrderDetails)
+                   .HasForeignKey(x => x.ProductDetailId);
 
-            builder.Property(od => od.Quantity)
-                .IsRequired();
-            builder.Property(od => od.UnitPrice)
-                .IsRequired()
-                .HasColumnType("decimal(18,2)");
         }
     }
 }

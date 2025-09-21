@@ -12,31 +12,17 @@ namespace NT.SHARED.Models
         public Guid Id { get; private set; } = Guid.NewGuid();
         [Required, MaxLength(100)]
         public string Name { get; private set; } = null!;
-        [Required, MaxLength(50)]
-        public string Code { get; private set; } = null!; // VD: SUPER_ADMIN
-        [Required]
-        public Guid ActorTypeId { get; private set; }
 
-        // Private constructor for EF
         private Role() { }
 
-        // Public static factory
-        public static Role Create(string name, string code, Guid actorTypeId)
+        public static Role Create(string name)
         {
-            if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Invalid name", nameof(name));
-            if (string.IsNullOrWhiteSpace(code)) throw new ArgumentException("Invalid code", nameof(code));
-            if (actorTypeId == Guid.Empty) throw new ArgumentException("Invalid actor type ID", nameof(actorTypeId));
-            return new Role
-            {
-                Name = name,
-                Code = code,
-                ActorTypeId = actorTypeId
-            };
+            if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Tên role không hợp lệ");
+            return new Role { Name = name };
         }
 
-        // Navigation
-        public ActorType ActorType { get; private set; } = null!;
+        public ICollection<User> Users { get; private set; } = new List<User>();
         public ICollection<RolePermission> RolePermissions { get; private set; } = new List<RolePermission>();
-        public ICollection<UserRole> UserRoles { get; private set; } = new List<UserRole>();
     }
+
 }

@@ -1,17 +1,22 @@
-using NT.SHARED.Models;
+﻿using NT.SHARED.Models;
 
 namespace NT.BLL.Interface
 {
     /// <summary>
-    /// D?ch v? qu?n l� vai tr�.
+    /// Dịch vụ quản lý vai trò người dùng (Role).
+    /// Cung cấp các chức năng CRUD và lấy quyền của vai trò.
     /// </summary>
-    public interface IRoleService
+    public interface IRoleService : IGenericService<Role>
     {
-        Task<IEnumerable<Role>> GetAllAsync();
-        Task<Role?> GetByIdAsync(Guid id);
-        Task<Role> AddAsync(Role role);
-        Task<Role> UpdateAsync(Role role);
-        Task<bool> DeleteAsync(Guid id);
+        
+
+        /// <summary>
+        /// Lấy danh sách quyền (permissions) gắn với một vai trò.
+        /// </summary>
+        /// <param name="roleId">Id vai trò.</param>
+        /// <returns>
+        /// Tập hợp <see cref="IEnumerable{Permission}"/> chứa các quyền của vai trò.
+        /// </returns>
         Task<IEnumerable<Permission>> GetPermissionsAsync(Guid roleId);
     }
 }

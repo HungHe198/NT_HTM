@@ -13,30 +13,9 @@ namespace NT.SHARED.Configurations
     {
         public void Configure(EntityTypeBuilder<Role> builder)
         {
-            builder.HasKey(r => r.Id);
-            builder.Property(r => r.Name)
-                .IsRequired()
-                .HasMaxLength(100);
-            builder.Property(r => r.Code)
-                .IsRequired()
-                .HasMaxLength(50);
-            builder.Property(r => r.ActorTypeId)
-                .IsRequired();
+            builder.HasKey(x => x.Id);
+            builder.Property(x => x.Name).IsRequired().HasMaxLength(100);
 
-            builder.HasOne(r => r.ActorType)
-                .WithMany(a => a.Roles)
-                .HasForeignKey(r => r.ActorTypeId)
-                .OnDelete(DeleteBehavior.Restrict); // Thay thế CASCADE bằng RESTRICT
-
-            builder.HasMany(r => r.RolePermissions)
-                .WithOne(rp => rp.Role)
-                .HasForeignKey(rp => rp.RoleId)
-                .OnDelete(DeleteBehavior.Restrict); // Thay thế CASCADE bằng RESTRICT
-
-            builder.HasMany(r => r.UserRoles)
-                .WithOne(ur => ur.Role)
-                .HasForeignKey(ur => ur.RoleId)
-                .OnDelete(DeleteBehavior.Restrict); // Thay thế CASCADE bằng RESTRICT
         }
     }
 }

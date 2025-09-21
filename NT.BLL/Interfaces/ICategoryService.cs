@@ -1,16 +1,14 @@
+﻿using NT.BLL.Interfaces;
 using NT.SHARED.Models;
 
 namespace NT.BLL.Interface
 {
     /// <summary>
-    /// D?ch v? qu?n l� danh m?c s?n ph?m.
+    /// Dịch vụ quản lý danh mục sản phẩm.
+    /// Cung cấp các chức năng CRUD cho bảng <see cref="Category"/>.
     /// </summary>
-    public interface ICategoryService
+    public interface ICategoryService : IGenericService<Category>
     {
-        Task<IEnumerable<Category>> GetAllAsync();
-        Task<Category?> GetByIdAsync(Guid id);
-        Task<Category> AddAsync(Category category);
-        Task<Category> UpdateAsync(Category category);
-        Task<bool> DeleteAsync(Guid id);
+        // tạm thời không có gì đặc biệt
     }
 }

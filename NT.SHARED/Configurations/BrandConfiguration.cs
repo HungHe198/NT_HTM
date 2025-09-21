@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using NT.SHARED.Models;
 using System;
@@ -9,9 +10,9 @@ using System.Threading.Tasks;
 
 namespace NT.SHARED.Configurations
 {
-    public class RodColorConfiguration : IEntityTypeConfiguration<RodColor>
+    public class BrandConfiguration : IEntityTypeConfiguration<Brand>
     {
-        public void Configure(EntityTypeBuilder<RodColor> builder)
+        public void Configure(EntityTypeBuilder<Brand> builder)
         {
             builder.HasKey(x => x.Id);
         }

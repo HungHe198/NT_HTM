@@ -14,15 +14,15 @@ namespace NT.SHARED.Configurations
         public void Configure(EntityTypeBuilder<Category> builder)
         {
             builder.HasKey(c => c.Id);
+
             builder.Property(c => c.Name)
                 .IsRequired()
-                .HasMaxLength(100);
-            builder.Property(c => c.Description)
-                .HasMaxLength(200);
+                .HasMaxLength(150);
 
-            builder.HasMany(c => c.CategoryProducts)
-                .WithOne(cp => cp.Category)
-                .HasForeignKey(cp => cp.CategoryId);
+            builder.HasMany(c => c.ProductCategories)
+                .WithOne(pc => pc.Category)
+                .HasForeignKey(pc => pc.CategoryId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
