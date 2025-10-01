@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NT.SHARED.Configurations;
-using NT.SHARED.Configurations.NT.SHARED.Models.Configurations;
 using NT.SHARED.Models;
 using System;
 using System.Collections.Generic;
@@ -55,6 +54,8 @@ namespace NT.DAL.ContextFile
             modelBuilder.ApplyConfiguration(new RoleConfiguration());
             modelBuilder.ApplyConfiguration(new RolePermissionConfiguration());
             modelBuilder.ApplyConfiguration(new UserConfiguration());
+            modelBuilder.ApplyConfiguration(new CartConfiguration());
+            modelBuilder.ApplyConfiguration(new CartDetailConfiguration());
 
             base.OnModelCreating(modelBuilder);
         }
@@ -81,5 +82,7 @@ namespace NT.DAL.ContextFile
         public DbSet<Coupon> Coupons { get; set; } = null!;
         public DbSet<Order> Orders { get; set; } = null!;
         public DbSet<OrderDetail> OrderDetails { get; set; } = null!;
+        public DbSet<Cart> Carts { get; set; } = null!;
+        public DbSet<CartDetail> CartDetails { get; set; } = null!;
     }
 }

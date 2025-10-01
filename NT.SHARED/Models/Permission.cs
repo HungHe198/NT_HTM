@@ -24,7 +24,10 @@ namespace NT.SHARED.Models
         public static Permission Create(string code, string description, string resource, string action)
         {
             if (string.IsNullOrWhiteSpace(code)) throw new ArgumentException("Code không hợp lệ");
-            return new Permission { Code = code, Description = description, Resource = resource, Action = action };
+            if (string.IsNullOrWhiteSpace(description)) throw new ArgumentException("Description không hợp lệ");
+            if (string.IsNullOrWhiteSpace(resource)) throw new ArgumentException("Resource không hợp lệ");
+            if (string.IsNullOrWhiteSpace(action)) throw new ArgumentException("Action không hợp lệ");
+            return new Permission { Code = code.Trim(), Description = description.Trim(), Resource = resource.Trim(), Action = action.Trim() };
         }
 
         public ICollection<RolePermission> RolePermissions { get; private set; } = new List<RolePermission>();

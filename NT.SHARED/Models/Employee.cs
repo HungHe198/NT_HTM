@@ -22,7 +22,11 @@ namespace NT.SHARED.Models
 
         public static Employee Create(Guid userId, string fullName, string phone, decimal salary)
         {
-            return new Employee { Id = userId, FullName = fullName, PhoneNumber = phone, Salary = salary };
+            if (userId == Guid.Empty) throw new ArgumentException("UserId không hợp lệ");
+            if (string.IsNullOrWhiteSpace(fullName)) throw new ArgumentException("FullName không được để trống");
+            if (string.IsNullOrWhiteSpace(phone)) throw new ArgumentException("PhoneNumber không được để trống");
+            if (salary < 0) throw new ArgumentException("Salary không hợp lệ");
+            return new Employee { UserId = userId, FullName = fullName, PhoneNumber = phone, Salary = salary };
         }
 
         public User User { get; private set; } = null!;

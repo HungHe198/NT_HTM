@@ -15,7 +15,11 @@ namespace NT.SHARED.Models
 
         private Category() { }
 
-        public static Category Create(string name) => new Category { Name = name };
+        public static Category Create(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Tên danh mục không được để trống");
+            return new Category { Name = name.Trim() };
+        }
 
         public ICollection<ProductCategory> ProductCategories { get; private set; } = new List<ProductCategory>();
     }

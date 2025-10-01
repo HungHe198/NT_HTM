@@ -19,7 +19,8 @@ namespace NT.SHARED.Models
 
         public static Brand Create(string name, string? website = null)
         {
-            return new Brand { Name = name, Website = website };
+            if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Tên thương hiệu không được để trống");
+            return new Brand { Name = name.Trim(), Website = string.IsNullOrWhiteSpace(website) ? null : website };
         }
 
         public ICollection<Product> Products { get; private set; } = new List<Product>();

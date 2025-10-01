@@ -15,6 +15,7 @@ namespace NT.SHARED.Configurations
         {
             builder.HasKey(x => x.Id);
             builder.HasIndex(x => x.Code).IsUnique();
+            builder.Property(x => x.DiscountAmount).HasColumnType("decimal(18,2)");
         }
     }
 }

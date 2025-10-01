@@ -19,7 +19,9 @@ namespace NT.SHARED.Models
 
         public static Product Create(string name, Guid brandId)
         {
-            return new Product { Name = name, BrandId = brandId };
+            if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Tên sản phẩm không được để trống");
+            if (brandId == Guid.Empty) throw new ArgumentException("BrandId không hợp lệ");
+            return new Product { Name = name.Trim(), BrandId = brandId };
         }
 
         public Brand Brand { get; private set; } = null!;
