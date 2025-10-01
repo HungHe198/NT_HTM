@@ -15,7 +15,11 @@ namespace NT.SHARED.Models
 
         private RodHardness() { }
 
-        public static RodHardness Create(string level) => new RodHardness { Level = level };
+        public static RodHardness Create(string level)
+        {
+            if (string.IsNullOrWhiteSpace(level)) throw new ArgumentException("Độ cứng không được để trống");
+            return new RodHardness { Level = level.Trim() };
+        }
 
         public ICollection<ProductDetailHardness> ProductDetailHardnesses { get; private set; } = new List<ProductDetailHardness>();
     }

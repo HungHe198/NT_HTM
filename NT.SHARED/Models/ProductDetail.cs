@@ -29,5 +29,6 @@ namespace NT.SHARED.Models
         public ICollection<ProductDetailColor> ProductDetailColors { get; private set; } = new List<ProductDetailColor>();
         public ICollection<ProductDetailHardness> ProductDetailHardnesses { get; private set; } = new List<ProductDetailHardness>();
         public ICollection<ProductDetailLength> ProductDetailLengths { get; private set; } = new List<ProductDetailLength>();
+        public ICollection<CartDetail> CartDetails { get; private set; } = new List<CartDetail>();
     }
 }

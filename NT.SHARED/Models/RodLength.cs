@@ -15,7 +15,11 @@ namespace NT.SHARED.Models
 
         private RodLength() { }
 
-        public static RodLength Create(double value) => new RodLength { Value = value };
+        public static RodLength Create(double value)
+        {
+            if (value <= 0) throw new ArgumentException("Giá trị chiều dài phải > 0");
+            return new RodLength { Value = value };
+        }
 
         public ICollection<ProductDetailLength> ProductDetailLengths { get; private set; } = new List<ProductDetailLength>();
     }

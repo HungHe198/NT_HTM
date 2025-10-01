@@ -15,7 +15,11 @@ namespace NT.SHARED.Models
 
         private RodColor() { }
 
-        public static RodColor Create(string name) => new RodColor { Name = name };
+        public static RodColor Create(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Tên màu không được để trống");
+            return new RodColor { Name = name.Trim() };
+        }
 
         public ICollection<ProductDetailColor> ProductDetailColors { get; private set; } = new List<ProductDetailColor>();
     }

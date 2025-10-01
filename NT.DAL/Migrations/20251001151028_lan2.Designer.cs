@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NT.DAL.ContextFile;
 
@@ -11,9 +12,11 @@ using NT.DAL.ContextFile;
 namespace NT.DAL.Migrations
 {
     [DbContext(typeof(NTAppDbContext))]
-    partial class NTAppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251001151028_lan2")]
+    partial class lan2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -67,47 +70,6 @@ namespace NT.DAL.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Brands");
-                });
-
-            modelBuilder.Entity("NT.SHARED.Models.Cart", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("CustomerId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CustomerId")
-                        .IsUnique();
-
-                    b.ToTable("Carts");
-                });
-
-            modelBuilder.Entity("NT.SHARED.Models.CartDetail", b =>
-                {
-                    b.Property<Guid>("CartId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ProductDetailId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal>("PriceAtAdd")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
-
-                    b.HasKey("CartId", "ProductDetailId");
-
-                    b.HasIndex("ProductDetailId");
-
-                    b.ToTable("CartDetails");
                 });
 
             modelBuilder.Entity("NT.SHARED.Models.Category", b =>
@@ -560,36 +522,6 @@ namespace NT.DAL.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("NT.SHARED.Models.Cart", b =>
-                {
-                    b.HasOne("NT.SHARED.Models.Customer", "Customer")
-                        .WithOne("Cart")
-                        .HasForeignKey("NT.SHARED.Models.Cart", "CustomerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Customer");
-                });
-
-            modelBuilder.Entity("NT.SHARED.Models.CartDetail", b =>
-                {
-                    b.HasOne("NT.SHARED.Models.Cart", "Cart")
-                        .WithMany("CartDetails")
-                        .HasForeignKey("CartId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("NT.SHARED.Models.ProductDetail", "ProductDetail")
-                        .WithMany("CartDetails")
-                        .HasForeignKey("ProductDetailId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Cart");
-
-                    b.Navigation("ProductDetail");
-                });
-
             modelBuilder.Entity("NT.SHARED.Models.Customer", b =>
                 {
                     b.HasOne("NT.SHARED.Models.User", "User")
@@ -790,11 +722,6 @@ namespace NT.DAL.Migrations
                     b.Navigation("Products");
                 });
 
-            modelBuilder.Entity("NT.SHARED.Models.Cart", b =>
-                {
-                    b.Navigation("CartDetails");
-                });
-
             modelBuilder.Entity("NT.SHARED.Models.Category", b =>
                 {
                     b.Navigation("ProductCategories");
@@ -807,8 +734,6 @@ namespace NT.DAL.Migrations
 
             modelBuilder.Entity("NT.SHARED.Models.Customer", b =>
                 {
-                    b.Navigation("Cart");
-
                     b.Navigation("Orders");
                 });
 
@@ -831,8 +756,6 @@ namespace NT.DAL.Migrations
 
             modelBuilder.Entity("NT.SHARED.Models.ProductDetail", b =>
                 {
-                    b.Navigation("CartDetails");
-
                     b.Navigation("OrderDetails");
 
                     b.Navigation("ProductDetailColors");

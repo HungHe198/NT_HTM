@@ -22,10 +22,15 @@ namespace NT.SHARED.Models
 
         public static Customer Create(Guid userId, string fullName, string address, string phone)
         {
-            return new Customer { Id = userId, FullName = fullName, Address = address, PhoneNumber = phone };
+            if (userId == Guid.Empty) throw new ArgumentException("UserId không hợp lệ");
+            if (string.IsNullOrWhiteSpace(fullName)) throw new ArgumentException("FullName không được để trống");
+            if (string.IsNullOrWhiteSpace(address)) throw new ArgumentException("Address không được để trống");
+            if (string.IsNullOrWhiteSpace(phone)) throw new ArgumentException("PhoneNumber không được để trống");
+            return new Customer { UserId = userId, FullName = fullName, Address = address, PhoneNumber = phone };
         }
 
         public User User { get; private set; } = null!;
         public ICollection<Order> Orders { get; private set; } = new List<Order>();
+        public Cart? Cart { get; private set; }
     }
 }

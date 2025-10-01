@@ -21,7 +21,9 @@ namespace NT.SHARED.Models
         public static Admin Create(Guid userId, string fullName, string phoneNumber)
         {
             if (userId == Guid.Empty) throw new ArgumentException("UserId không hợp lệ");
-            return new Admin { Id = userId, FullName = fullName, PhoneNumber = phoneNumber };
+            if (string.IsNullOrWhiteSpace(fullName)) throw new ArgumentException("FullName không được để trống");
+            if (string.IsNullOrWhiteSpace(phoneNumber)) throw new ArgumentException("PhoneNumber không được để trống");
+            return new Admin { UserId = userId, FullName = fullName, PhoneNumber = phoneNumber };
         }
 
         public User User { get; private set; } = null!;

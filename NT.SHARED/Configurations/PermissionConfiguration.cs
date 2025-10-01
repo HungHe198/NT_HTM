@@ -16,8 +16,9 @@ namespace NT.SHARED.Configurations
             builder.HasKey(x => x.Id);
             builder.Property(x => x.Code).IsRequired().HasMaxLength(150);
             builder.Property(x => x.Action).IsRequired().HasMaxLength(50);
-
-
+            builder.Property(x => x.Description).IsRequired().HasMaxLength(200);
+            builder.Property(x => x.Resource).IsRequired().HasMaxLength(100);
+            builder.HasIndex(x => x.Code).IsUnique();
         }
     }
 }

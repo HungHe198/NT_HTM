@@ -20,7 +20,6 @@ namespace NT.SHARED.Models
         {
             if (string.IsNullOrWhiteSpace(username)) throw new ArgumentException("Không được để trống username");
             if (string.IsNullOrWhiteSpace(passwordHash)) throw new ArgumentException("Không được để trống password");
-            if (string.IsNullOrWhiteSpace(status.ToString())) throw new ArgumentException("Trạng thái không hợp lệ");
             if (roleId == Guid.Empty) throw new ArgumentException("RoleId không hợp lệ");
 
             return new User

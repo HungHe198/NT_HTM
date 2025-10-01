@@ -14,6 +14,7 @@ namespace NT.SHARED.Configurations
         public void Configure(EntityTypeBuilder<ProductDetail> builder)
         {
             builder.HasKey(x => x.Id);
+            builder.Property(x => x.Price).HasColumnType("decimal(18,2)");
             builder.HasOne(x => x.Product).WithMany(p => p.ProductDetails).HasForeignKey(x => x.ProductId);
         }
     }
