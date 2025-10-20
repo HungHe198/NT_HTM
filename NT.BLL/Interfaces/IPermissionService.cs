@@ -1,6 +1,6 @@
 using NT.SHARED.Models;
 
-namespace NT.BLL.Interface
+namespace NT.BLL.Interfaces
 {
     /// <summary>
     /// D?ch v? qu?n lý quy?n truy c?p.
@@ -8,13 +8,5 @@ namespace NT.BLL.Interface
     /// </summary>
     public interface IPermissionService : IGenericService<Permission>
     {
-        // / t?m th?i không có gì ??c bi?t
-
-
-
-
-
-
-
     }
 }

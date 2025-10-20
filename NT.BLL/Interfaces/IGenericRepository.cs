@@ -189,5 +189,11 @@ namespace NT.BLL.Interfaces
         /// </code>
         /// </example>
         Task SaveChangesAsync();
+
+        /// <summary>
+        /// Tìm kiếm theo điều kiện (predicate) để lấy tập bản ghi phù hợp.
+        /// Lưu ý: Chỉ sử dụng các biểu thức có thể dịch sang SQL (EF Core translatable).
+        /// </summary>
+        Task<IEnumerable<H>> FindAsync(Expression<Func<H, bool>> predicate);
     }
 }

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace NT.BLL.Interface
+namespace NT.BLL.Interfaces
 {
     /// <summary>
     /// Interface dịch vụ tổng quát cho các entity trong tầng Business Logic (BLL).

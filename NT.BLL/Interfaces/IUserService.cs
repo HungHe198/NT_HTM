@@ -1,6 +1,8 @@
-﻿using NT.SHARED.Models;
+﻿using System;
+using System.Collections.Generic;
+using NT.SHARED.Models;
 
-namespace NT.BLL.Interface
+namespace NT.BLL.Interfaces
 {
     /// <summary>
     /// Dịch vụ quản lý người dùng (User).
