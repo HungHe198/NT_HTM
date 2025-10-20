@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using System.Collections.Generic;
 
-namespace NT.BLL.Interface
+namespace NT.BLL.Interfaces
 {
     /// <summary>
     /// Interface tổng quát cho nghiệp vụ tìm kiếm theo tên

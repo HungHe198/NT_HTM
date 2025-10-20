@@ -4,6 +4,7 @@ using NT.DAL.ContextFile;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -83,6 +84,16 @@ namespace NT.DAL.Repositories
         public async Task SaveChangesAsync()
         {
             await _context.SaveChangesAsync();
+        }
+
+        /// <summary>
+        /// Tìm kiếm các entity theo điều kiện cho trước.
+        /// </summary>
+        /// <param name="predicate">Điều kiện để xác định các bản ghi cần tìm.</param>
+        /// <returns>Danh sách các entity thỏa mãn điều kiện.</returns>
+        public async Task<IEnumerable<H>> FindAsync(Expression<Func<H, bool>> predicate)
+        {
+            return await _dbSet.Where(predicate).ToListAsync();
         }
 
         /// <summary>

@@ -1,6 +1,6 @@
 using NT.SHARED.Models;
 
-namespace NT.BLL.Interface
+namespace NT.BLL.Interfaces
 {
     /// <summary>
     /// D?ch v? qu?n lý s?n ph?m (c?n câu).

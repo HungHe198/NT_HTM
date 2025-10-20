@@ -1,14 +1,12 @@
 ﻿using NT.SHARED.Models;
-using NT.BLL.Interfaces;
-namespace NT.BLL.Interface
+
+namespace NT.BLL.Interfaces
 {
     /// <summary>
     /// Dịch vụ quản lý hóa đơn.
     /// </summary>
     public interface IInvoiceService : IGenericService<Order>
     {
-        
-
         /// <summary>
         /// Xác nhận thanh toán hóa đơn.
         /// </summary>

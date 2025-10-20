@@ -1,7 +1,7 @@
 ﻿using NT.BLL.Interfaces;
 using NT.SHARED.Models;
 
-namespace NT.BLL.Interface
+namespace NT.BLL.Interfaces
 {
     /// <summary>
     /// Dịch vụ quản lý danh mục sản phẩm.
