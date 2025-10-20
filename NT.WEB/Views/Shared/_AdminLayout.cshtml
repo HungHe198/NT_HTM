@@ -1,0 +1,71 @@
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Admin Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+    <style>
+        body { background: #f9fafb; }
+        .sidebar { min-width: 220px; background: #fff; height: 100vh; }
+        .sidebar .nav-link.active { background: #f4f6fb; color: #1976d2; }
+        .sidebar .nav-link { color: #637381; }
+        .sidebar .nav-link i { margin-right: 10px; }
+        .content { padding: 2rem; }
+        .topbar { background: #fff; padding: 1rem 2rem; border-bottom: 1px solid #f0f0f0; }
+    </style>
+</head>
+<body>
+    <div class="d-flex">
+        <!-- Sidebar -->
+        <nav class="sidebar d-flex flex-column p-3">
+            <a href="/" class="mb-4 text-decoration-none">
+                <img src="/images/logo.png" alt="Logo" style="height:32px;">
+            </a>
+            <div class="mb-4">
+                <div class="fw-bold">Team 1 <span class="badge bg-light text-dark">Free</span></div>
+            </div>
+            <ul class="nav nav-pills flex-column mb-auto">
+                <li><a href="/Admin/Dashboard" class="nav-link active"><i class="fa fa-chart-line"></i>Dashboard</a></li>
+                <li><a href="/Admin/User" class="nav-link"><i class="fa fa-user"></i>User</a></li>
+                <li><a href="/Admin/Product" class="nav-link"><i class="fa fa-box"></i>Product</a></li>
+                <li><a href="/Admin/Blog" class="nav-link"><i class="fa fa-blog"></i>Blog</a></li>
+                <li><a href="/Account/Login" class="nav-link"><i class="fa fa-sign-in-alt"></i>Sign in</a></li>
+                <li><a href="/NotFound" class="nav-link"><i class="fa fa-ban"></i>Not found</a></li>
+            </ul>
+            <div class="mt-auto">
+                <div class="text-muted small mb-2">More features?</div>
+                <a href="#" class="btn btn-outline-primary w-100 mb-2">Upgrade to Pro</a>
+            </div>
+        </nav>
+        <!-- Main Content -->
+        <div class="flex-grow-1">
+            <!-- Topbar -->
+            <div class="topbar d-flex justify-content-end align-items-center">
+                <div class="me-3">
+                    <i class="fa fa-search"></i>
+                </div>
+                <div class="me-3">
+                    <img src="/images/flag-uk.png" alt="EN" style="height:20px;">
+                </div>
+                <div class="me-3 position-relative">
+                    <i class="fa fa-bell"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">2</span>
+                </div>
+                <div>
+                    <img src="/images/avatar.png" alt="User" class="rounded-circle" style="height:32px;">
+                </div>
+            </div>
+            <!-- Page Content -->
+            <main class="content">
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
