@@ -1,11 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using NT.SHARED.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NT.SHARED.Configurations
 {
@@ -13,23 +8,11 @@ namespace NT.SHARED.Configurations
     {
         public void Configure(EntityTypeBuilder<Employee> builder)
         {
-            builder.HasKey(e => e.Id);
-
-            builder.Property(e => e.FullName)
-                .IsRequired()
-                .HasMaxLength(100);
-
-            builder.Property(e => e.PhoneNumber)
-                .HasMaxLength(20);
-
-            builder.Property(e => e.Salary)
-                .HasColumnType("decimal(18,2)");
-
-            // 1-1: Employee <-> User
-            builder.HasOne(e => e.User)
-                   .WithOne(u => u.Employee)
-                   .HasForeignKey<Employee>(e => e.UserId)
-                   .OnDelete(DeleteBehavior.Cascade);
+            builder.ToTable("Employee");
+            builder.HasKey(x => x.Id);
+            builder.Property(x => x.Position).HasMaxLength(100);
+            builder.HasOne(x => x.User).WithOne(u => u.Employee).HasForeignKey<Employee>(x => x.UserId);
+            builder.HasOne<Employee>().WithMany().HasForeignKey(x => x.ManagerId).OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

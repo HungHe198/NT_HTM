@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System;
 
 namespace NT.SHARED.Models
 {
@@ -13,10 +8,9 @@ namespace NT.SHARED.Models
         public Guid PermissionId { get; private set; }
 
         private RolePermission() { }
-
         public static RolePermission Create(Guid roleId, Guid permissionId)
         {
-            if (roleId == Guid.Empty || permissionId == Guid.Empty) throw new ArgumentException("Không hợp lệ");
+            if (roleId == Guid.Empty || permissionId == Guid.Empty) throw new ArgumentException("Invalid ids");
             return new RolePermission { RoleId = roleId, PermissionId = permissionId };
         }
 

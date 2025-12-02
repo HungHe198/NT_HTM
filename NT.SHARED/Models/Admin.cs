@@ -1,29 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
+using System;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NT.SHARED.Models
 {
     public class Admin
     {
         public Guid Id { get; private set; } = Guid.NewGuid();
-        [Required, MaxLength(100)]
-        public string FullName { get; private set; } = null!;
-        [Required, MaxLength(20)]
-        public string PhoneNumber { get; private set; } = null!;
-        public Guid UserId { get; private set; } 
+        public Guid UserId { get; private set; }
+        [MaxLength(100)]
+        public string? Position { get; private set; }
+        public decimal? Salary { get; private set; }
 
         private Admin() { }
-
-        public static Admin Create(Guid userId, string fullName, string phoneNumber)
+        public static Admin Create(Guid userId, string? position = null, decimal? salary = null)
         {
-            if (userId == Guid.Empty) throw new ArgumentException("UserId không hợp lệ");
-            if (string.IsNullOrWhiteSpace(fullName)) throw new ArgumentException("FullName không được để trống");
-            if (string.IsNullOrWhiteSpace(phoneNumber)) throw new ArgumentException("PhoneNumber không được để trống");
-            return new Admin { UserId = userId, FullName = fullName, PhoneNumber = phoneNumber };
+            if (userId == Guid.Empty) throw new ArgumentException("UserId required");
+            return new Admin { UserId = userId, Position = string.IsNullOrWhiteSpace(position) ? null : position.Trim(), Salary = salary };
         }
 
         public User User { get; private set; } = null!;

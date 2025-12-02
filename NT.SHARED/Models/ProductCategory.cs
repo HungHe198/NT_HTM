@@ -1,24 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System;
 
 namespace NT.SHARED.Models
 {
     public class ProductCategory
     {
-        public Guid ProductId { get; private set; }
         public Guid CategoryId { get; private set; }
+        public Guid ProductId { get; private set; }
 
         private ProductCategory() { }
-
-        public static ProductCategory Create(Guid productId, Guid categoryId)
+        public static ProductCategory Create(Guid categoryId, Guid productId)
         {
-            return new ProductCategory { ProductId = productId, CategoryId = categoryId };
+            if (categoryId == Guid.Empty || productId == Guid.Empty) throw new ArgumentException("Invalid ids");
+            return new ProductCategory { CategoryId = categoryId, ProductId = productId };
         }
 
-        public Product Product { get; private set; } = null!;
         public Category Category { get; private set; } = null!;
+        public Product Product { get; private set; } = null!;
     }
 }

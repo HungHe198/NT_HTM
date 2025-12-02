@@ -1,11 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using NT.SHARED.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NT.SHARED.Configurations
 {
@@ -13,18 +8,10 @@ namespace NT.SHARED.Configurations
     {
         public void Configure(EntityTypeBuilder<RolePermission> builder)
         {
-            builder.HasKey(rp => new { rp.RoleId, rp.PermissionId });
-
-            builder.HasOne(rp => rp.Role)
-                   .WithMany(r => r.RolePermissions)
-                   .HasForeignKey(rp => rp.RoleId)
-                   .OnDelete(DeleteBehavior.Cascade);
-
-            builder.HasOne(rp => rp.Permission)
-                   .WithMany(p => p.RolePermissions)
-                   .HasForeignKey(rp => rp.PermissionId)
-                   .OnDelete(DeleteBehavior.Cascade);
-
+            builder.ToTable("RolePermission");
+            builder.HasKey(x => new { x.RoleId, x.PermissionId });
+            builder.HasOne(x => x.Role).WithMany(r => r.RolePermissions).HasForeignKey(x => x.RoleId);
+            builder.HasOne(x => x.Permission).WithMany(p => p.RolePermissions).HasForeignKey(x => x.PermissionId);
         }
     }
 }

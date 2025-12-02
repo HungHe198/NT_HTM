@@ -1,9 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NT.SHARED.Models
 {
@@ -12,13 +9,14 @@ namespace NT.SHARED.Models
         public Guid Id { get; private set; } = Guid.NewGuid();
         [Required, MaxLength(150)]
         public string Name { get; private set; } = null!;
+        [MaxLength(250)]
+        public string? Description { get; private set; }
 
         private Category() { }
-
-        public static Category Create(string name)
+        public static Category Create(string name, string? description = null)
         {
-            if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Tên danh mục không được để trống");
-            return new Category { Name = name.Trim() };
+            if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Category name required");
+            return new Category { Name = name.Trim(), Description = string.IsNullOrWhiteSpace(description) ? null : description.Trim() };
         }
 
         public ICollection<ProductCategory> ProductCategories { get; private set; } = new List<ProductCategory>();
