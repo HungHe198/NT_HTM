@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\NT.API\NT.API.csproj" />
+    <ProjectReference Include="..\NT.DAL\NT.DAL.csproj" />
     <ProjectReference Include="..\NT.SHARED\NT.SHARED.csproj" />
     <ProjectReference Include="..\NT.BLL\NT.BLL.csproj" />
   </ItemGroup>

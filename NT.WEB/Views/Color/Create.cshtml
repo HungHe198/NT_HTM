@@ -1,0 +1,26 @@
+@model NT.SHARED.Models.Color
+
+@{
+    ViewBag.Title = "Create Color";
+}
+
+<h1>Create Color</h1>
+
+<form asp-action="Create" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="form-group">
+        <label asp-for="Name"></label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="HexCode"></label>
+        <input asp-for="HexCode" class="form-control" placeholder="#FFFFFF" />
+        <span asp-validation-for="HexCode" class="text-danger"></span>
+    </div>
+
+    <button class="btn btn-primary" type="submit">Save</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>

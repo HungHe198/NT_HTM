@@ -1,7 +1,34 @@
+
+using NT.BLL.Interfaces;
+using NT.DAL.ContextFile;
+using NT.DAL.Repositories;
+using NT.WEB.Services;
+
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+// Register DbContext (NTAppDbContext has OnConfiguring with connection string fallback)
+ builder.Services.AddDbContext<NTAppDbContext>(options => { });
+
+// Register open-generic repository implementation for IGenericRepository<T>
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+
+// Register web services used by controllers
+builder.Services.AddScoped<ProductWebService>();
+builder.Services.AddScoped<ProductDetailWebService>();
+builder.Services.AddScoped<BrandWebService>();
+builder.Services.AddScoped<ColorWebService>();
+builder.Services.AddScoped<LengthWebService>();
+builder.Services.AddScoped<SurfaceFinishWebService>();
+builder.Services.AddScoped<HardnessWebService>();
+builder.Services.AddScoped<ElasticityWebService>();
+builder.Services.AddScoped<OriginCountryWebService>();
+builder.Services.AddScoped<ProductImageWebService>();
+builder.Services.AddScoped<VocherWebService>();
+builder.Services.AddScoped<OrdersWebService>();
 
 var app = builder.Build();
 

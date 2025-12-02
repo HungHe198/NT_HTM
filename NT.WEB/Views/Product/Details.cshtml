@@ -1,0 +1,47 @@
+@model NT.SHARED.Models.Product
+
+@{
+    ViewBag.Title = "Product Details";
+    var details = ViewBag.ProductDetails as IEnumerable<NT.SHARED.Models.ProductDetail> ?? Enumerable.Empty<NT.SHARED.Models.ProductDetail>();
+}
+
+<h1>Product Details</h1>
+
+<div>
+    <h4>@Model.Name (@Model.ProductCode)</h4>
+    <p>@Model.ShortDescription</p>
+</div>
+
+<p>
+    <a asp-action="CreateDetail" asp-route-productId="@Model.Id" class="btn btn-sm btn-primary">Add Product Detail</a>
+    <a asp-action="Index" class="btn btn-sm btn-secondary">Back to list</a>
+</p>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Price</th>
+            <th>Stock</th>
+            <th>IsActive</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach(var d in details)
+    {
+        <tr>
+            <td>@d.Id</td>
+            <td>@d.Price</td>
+            <td>@d.StockQuantity</td>
+            <td>@d.IsActive</td>
+            <td>
+                <a asp-action="EditDetail" asp-route-id="@d.Id">Edit</a> |
+                <form asp-action="DeleteDetail" asp-route-id="@d.Id" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-link p-0">Delete</button>
+                </form>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

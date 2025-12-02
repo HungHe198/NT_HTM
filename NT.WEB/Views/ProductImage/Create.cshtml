@@ -1,0 +1,27 @@
+@model NT.SHARED.Models.ProductImage
+
+@{
+    ViewBag.Title = "Create Product Image";
+}
+
+<h1>Create Product Image</h1>
+
+<form asp-action="Create" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="form-group">
+        <label asp-for="ProductDetailId"></label>
+        <input asp-for="ProductDetailId" class="form-control" />
+        <span asp-validation-for="ProductDetailId" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="ImageUrl"></label>
+        <input asp-for="ImageUrl" class="form-control" />
+        <span asp-validation-for="ImageUrl" class="text-danger"></span>
+        <small class="form-text text-muted">Enter a full URL or relative path to the image.</small>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>
