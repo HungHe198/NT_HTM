@@ -27,62 +27,84 @@ namespace NT.DAL.ContextFile
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer("Data Source=LEVANHUNG\\LEVANHUNG;Initial Catalog=DATN_NT;Integrated Security=True;Trust Server Certificate=True");
+            if (!optionsBuilder.IsConfigured)
+            {
+                optionsBuilder.UseSqlServer("Data Source=LEVANHUNG\\LEVANHUNG;Initial Catalog=DATN_NT;Integrated Security=True;Trust Server Certificate=True");
+            }
             base.OnConfiguring(optionsBuilder);
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            // Order: lookup & core security
+            modelBuilder.ApplyConfiguration(new RoleConfiguration());
+            modelBuilder.ApplyConfiguration(new PermissionConfiguration());
+            modelBuilder.ApplyConfiguration(new RolePermissionConfiguration());
+
+            // Users
+            modelBuilder.ApplyConfiguration(new UserConfiguration());
             modelBuilder.ApplyConfiguration(new AdminConfiguration());
+            modelBuilder.ApplyConfiguration(new EmployeeConfiguration());
+            modelBuilder.ApplyConfiguration(new CustomerConfiguration());
+
+            // Catalog roots
             modelBuilder.ApplyConfiguration(new BrandConfiguration());
             modelBuilder.ApplyConfiguration(new CategoryConfiguration());
-            modelBuilder.ApplyConfiguration(new CouponConfiguration());
-            modelBuilder.ApplyConfiguration(new CustomerConfiguration());
-            modelBuilder.ApplyConfiguration(new EmployeeConfiguration());
-            modelBuilder.ApplyConfiguration(new OrderConfiguration());
-            modelBuilder.ApplyConfiguration(new OrderDetailConfiguration());
-            modelBuilder.ApplyConfiguration(new PermissionConfiguration());
             modelBuilder.ApplyConfiguration(new ProductConfiguration());
             modelBuilder.ApplyConfiguration(new ProductCategoryConfiguration());
+
+            // Technical attribute tables
+            modelBuilder.ApplyConfiguration(new LengthConfiguration());
+            modelBuilder.ApplyConfiguration(new SurfaceFinishConfiguration());
+            modelBuilder.ApplyConfiguration(new HardnessConfiguration());
+            modelBuilder.ApplyConfiguration(new ElasticityConfiguration());
+            modelBuilder.ApplyConfiguration(new OriginCountryConfiguration());
+            modelBuilder.ApplyConfiguration(new ColorConfiguration());
+
+            // Product detail & media
             modelBuilder.ApplyConfiguration(new ProductDetailConfiguration());
-            modelBuilder.ApplyConfiguration(new ProductDetailColorConfiguration());
-            modelBuilder.ApplyConfiguration(new ProductDetailHardnessConfiguration());
-            modelBuilder.ApplyConfiguration(new ProductDetailLengthConfiguration());
-            modelBuilder.ApplyConfiguration(new RodColorConfiguration());
-            modelBuilder.ApplyConfiguration(new RodHardnessConfiguration());
-            modelBuilder.ApplyConfiguration(new RodLengthConfiguration());
-            modelBuilder.ApplyConfiguration(new RoleConfiguration());
-            modelBuilder.ApplyConfiguration(new RolePermissionConfiguration());
-            modelBuilder.ApplyConfiguration(new UserConfiguration());
+            modelBuilder.ApplyConfiguration(new ProductImageConfiguration());
+
+            // Cart
             modelBuilder.ApplyConfiguration(new CartConfiguration());
             modelBuilder.ApplyConfiguration(new CartDetailConfiguration());
 
+            // Payment & discount
+            modelBuilder.ApplyConfiguration(new PaymentMethodConfiguration());
+            modelBuilder.ApplyConfiguration(new VoucherConfiguration());
+
+            // Orders
+            modelBuilder.ApplyConfiguration(new OrderConfiguration());
+            modelBuilder.ApplyConfiguration(new OrderDetailConfiguration());
+
             base.OnModelCreating(modelBuilder);
         }
-        //private static void SeedData(ModelBuilder modelBuilder)
-        //{
 
-        //}
-
-        public DbSet<User> Users { get; set; } = null!;
-        public DbSet<Admin> Admins { get; set; } = null!;
-        public DbSet<Employee> Employees { get; set; } = null!;
-        public DbSet<Customer> Customers { get; set; } = null!;
-        public DbSet<Product> Products { get; set; } = null!;
-        public DbSet<Category> Categories { get; set; } = null!;
-        public DbSet<ProductCategory> ProductCategories { get; set; } = null!;
-        public DbSet<Brand> Brands { get; set; } = null!;
-        public DbSet<ProductDetail> ProductDetails { get; set; } = null!;
-        public DbSet<RodColor> RodColors { get; set; } = null!;
-        public DbSet<ProductDetailColor> ProductDetailColors { get; set; } = null!;
-        public DbSet<RodHardness> RodHardnesses { get; set; } = null!;
-        public DbSet<ProductDetailHardness> ProductDetailHardnesses { get; set; } = null!;
-        public DbSet<RodLength> RodLengths { get; set; } = null!;
-        public DbSet<ProductDetailLength> ProductDetailLengths { get; set; } = null!;
-        public DbSet<Coupon> Coupons { get; set; } = null!;
-        public DbSet<Order> Orders { get; set; } = null!;
-        public DbSet<OrderDetail> OrderDetails { get; set; } = null!;
-        public DbSet<Cart> Carts { get; set; } = null!;
-        public DbSet<CartDetail> CartDetails { get; set; } = null!;
+        // DbSets
+        public DbSet<Role> Roles => Set<Role>();
+        public DbSet<Permission> Permissions => Set<Permission>();
+        public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
+        public DbSet<User> Users => Set<User>();
+        public DbSet<Admin> Admins => Set<Admin>();
+        public DbSet<Employee> Employees => Set<Employee>();
+        public DbSet<Customer> Customers => Set<Customer>();
+        public DbSet<Brand> Brands => Set<Brand>();
+        public DbSet<Category> Categories => Set<Category>();
+        public DbSet<Product> Products => Set<Product>();
+        public DbSet<ProductCategory> ProductCategories => Set<ProductCategory>();
+        public DbSet<Length> Lengths => Set<Length>();
+        public DbSet<SurfaceFinish> SurfaceFinishes => Set<SurfaceFinish>();
+        public DbSet<Hardness> Hardnesses => Set<Hardness>();
+        public DbSet<Elasticity> Elasticities => Set<Elasticity>();
+        public DbSet<OriginCountry> OriginCountries => Set<OriginCountry>();
+        public DbSet<Color> Colors => Set<Color>();
+        public DbSet<ProductDetail> ProductDetails => Set<ProductDetail>();
+        public DbSet<ProductImage> ProductImages => Set<ProductImage>();
+        public DbSet<Cart> Carts => Set<Cart>();
+        public DbSet<CartDetail> CartDetails => Set<CartDetail>();
+        public DbSet<PaymentMethod> PaymentMethods => Set<PaymentMethod>();
+        public DbSet<Voucher> Vouchers => Set<Voucher>();
+        public DbSet<Order> Orders => Set<Order>();
+        public DbSet<OrderDetail> OrderDetails => Set<OrderDetail>();
     }
 }

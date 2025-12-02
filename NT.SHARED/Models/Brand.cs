@@ -1,9 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NT.SHARED.Models
 {
@@ -19,7 +16,7 @@ namespace NT.SHARED.Models
 
         public static Brand Create(string name, string? website = null)
         {
-            if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Tên thương hiệu không được để trống");
+            if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("T�n th??ng hi?u kh�ng ???c ?? tr?ng");
             return new Brand { Name = name.Trim(), Website = string.IsNullOrWhiteSpace(website) ? null : website };
         }
 

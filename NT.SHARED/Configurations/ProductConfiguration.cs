@@ -1,11 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using NT.SHARED.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NT.SHARED.Configurations
 {
@@ -13,16 +8,16 @@ namespace NT.SHARED.Configurations
     {
         public void Configure(EntityTypeBuilder<Product> builder)
         {
-            builder.HasKey(p => p.Id);
-
-            builder.Property(p => p.Name)
-                .IsRequired()
-                .HasMaxLength(200);
-
-            builder.HasMany(p => p.ProductCategories)
-                .WithOne(pc => pc.Product)
-                .HasForeignKey(pc => pc.ProductId)
-                .OnDelete(DeleteBehavior.Cascade);
+            builder.ToTable("Product");
+            builder.HasKey(x => x.Id);
+            builder.Property(x => x.ProductCode).IsRequired().HasMaxLength(50);
+            builder.Property(x => x.Name).IsRequired().HasMaxLength(200);
+            builder.Property(x => x.ShortDescription).HasMaxLength(500);
+            builder.Property(x => x.Thumbnail).HasMaxLength(300);
+            builder.Property(x => x.Status).HasMaxLength(50);
+            builder.Property(x => x.SeoTitle).HasMaxLength(200);
+            builder.Property(x => x.SeoDescription).HasMaxLength(300);
+            builder.HasOne(x => x.Brand).WithMany(b => b.Products).HasForeignKey(x => x.BrandId);
         }
     }
 }
