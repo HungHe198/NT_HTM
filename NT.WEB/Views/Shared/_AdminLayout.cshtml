@@ -1,6 +1,14 @@
 ﻿@{
     Layout = null;
 }
+@* PSEUDOCODE / PLAN:
+   - Replace hardcoded href attributes with Razor tag-helper attributes (asp-controller, asp-action).
+   - For each anchor currently using a path like "/X/Y" map to asp-controller="X" and asp-action="Y".
+   - Preserve classes, icons and texts.
+   - Keep the first link marked as active; other links remain non-active (you can add logic later to set active dynamically).
+   - Ensure tag helpers are used so routing will generate correct URLs based on routing configuration.
+*@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -30,18 +38,24 @@
                 <div class="fw-bold">Team 1 <span class="badge bg-light text-dark">Free</span></div>
             </div>
             <ul class="nav nav-pills flex-column mb-auto">
-                <li><a href="/Admin/Dashboard" class="nav-link active"><i class="fa fa-chart-line"></i>Thống Kê</a></li>
-                <li><a href="/Admin/User" class="nav-link"><i class="fa fa-user"></i>Tài Khoản</a></li>
-                <li><a href="/Admin/User" class="nav-link"><i class="fa fa-user"></i>Phân Quyền</a></li>
-                <li><a href="/Admin/Product" class="nav-link"><i class="fa fa-box"></i>Sản Phẩm</a></li>
-                <li><a href="/Admin/Blog" class="nav-link"><i class="fa fa-blog"></i>Hóa Đơn</a></li>
-                <li><a href="/Admin/Blog" class="nav-link"><i class="fa fa-blog"></i>Bán Hàng Tại Quầy</a></li>
-                <li><a href="/Admin/Blog" class="nav-link"><i class="fa fa-blog"></i>Mã Giảm Giá</a></li>
-                <li><a href="/Admin/Blog" class="nav-link"><i class="fa fa-blog"></i>Phương Thức Thanh Toán</a></li>
-                <li><a href="/Admin/Blog" class="nav-link"><i class="fa fa-blog"></i>Danh Mục</a></li>
-                <li><a href="/Admin/Blog" class="nav-link"><i class="fa fa-blog"></i>Nhà Sản Xuất</a></li>
-                <li><a href="/Account/Login" class="nav-link"><i class="fa fa-sign-in-alt"></i>Sign in</a></li>
-                <li><a href="/NotFound" class="nav-link"><i class="fa fa-ban"></i>Not found</a></li>
+                <li><a asp-controller="Admin"       asp-action="Index" class="nav-link active"><i class="fa fa-chart-line"></i>Thống Kê</a></li>
+                <li><a asp-controller="Admin"       asp-action="Index" class="nav-link"><i class="fa fa-user"></i>Tài Khoản</a></li>
+                <li><a asp-controller="Admin"       asp-action="Index" class="nav-link"><i class="fa fa-user"></i>Phân Quyền</a></li>
+                <li><a asp-controller="Product"     asp-action="Index" class="nav-link"><i class="fa fa-box"></i>Sản Phẩm</a></li>
+                <li><a asp-controller="Admin"       asp-action="Index" class="nav-link"><i class="fa fa-blog"></i>Hóa Đơn</a></li>
+                <li><a asp-controller="Admin"       asp-action="Index" class="nav-link"><i class="fa fa-blog"></i>Bán Hàng Tại Quầy</a></li>
+                <li><a asp-controller="Admin"       asp-action="Index" class="nav-link"><i class="fa fa-blog"></i>Mã Giảm Giá</a></li>
+                <li><a asp-controller="Admin"       asp-action="Index" class="nav-link"><i class="fa fa-blog"></i>Phương Thức Thanh Toán</a></li>
+                <li><a asp-controller="Admin"       asp-action="Index" class="nav-link"><i class="fa fa-blog"></i>Danh Mục</a></li>
+                <li><a asp-controller="Admin"       asp-action="Index" class="nav-link"><i class="fa fa-blog"></i>Nhà Sản Xuất</a></li>
+                <li><a asp-controller="Color"       asp-action="Index" class="nav-link"><i class="fa fa-blog"></i>Màu Sắc</a></li>
+                <li><a asp-controller="Length"       asp-action="Index" class="nav-link"><i class="fa fa-blog"></i>Độ Dài</a></li>
+                <li><a asp-controller="SurfaceFinish"       asp-action="Index" class="nav-link"><i class="fa fa-blog"></i>Lớp Phủ</a></li>   
+                <li><a asp-controller="OriginCountry"       asp-action="Index" class="nav-link"><i class="fa fa-blog"></i>Nơi Sản Xuất</a></li>   
+                <li><a asp-controller="Hardness"       asp-action="Index" class="nav-link"><i class="fa fa-blog"></i>Độ Cứng</a></li>   
+                <li><a asp-controller="Elasticty"       asp-action="Index" class="nav-link"><i class="fa fa-blog"></i>Độ Đàn Hồi</a></li>   
+                <li><a asp-controller="Account"     asp-action="Index" class="nav-link"><i class="fa fa-sign-in-alt"></i>Sign in</a></li>
+                <li><a asp-controller="NotFound"    asp-action="Index" class="nav-link"><i class="fa fa-ban"></i>Not found</a></li>
             </ul>
       @*       <div class="mt-auto">
                 <div class="text-muted small mb-2">More features?</div>
