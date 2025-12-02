@@ -1,0 +1,47 @@
+@model IEnumerable<NT.SHARED.Models.ProductImage>
+
+@{
+    ViewBag.Title = "Product Images";
+}
+
+<h1>Product Images</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Create New</a>
+</p>
+
+<form method="get" asp-action="Index" class="form-inline mb-3">
+    <input type="text" name="q" value="" class="form-control mr-2" placeholder="Search url..." />
+    <button type="submit" class="btn btn-secondary">Search</button>
+</form>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Preview</th>
+            <th>ImageUrl</th>
+            <th>ProductDetailId</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach(var pi in Model)
+    {
+        <tr>
+            <td>
+                @if (!string.IsNullOrWhiteSpace(pi.ImageUrl))
+                {
+                    <img src="@pi.ImageUrl" alt="img" style="max-height:60px; max-width:120px;" />
+                }
+            </td>
+            <td>@pi.ImageUrl</td>
+            <td>@pi.ProductDetailId</td>
+            <td>
+                <a asp-action="Details" asp-route-id="@pi.Id">Details</a> |
+                <a asp-action="Edit" asp-route-id="@pi.Id">Edit</a> |
+                <a asp-action="Delete" asp-route-id="@pi.Id">Delete</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

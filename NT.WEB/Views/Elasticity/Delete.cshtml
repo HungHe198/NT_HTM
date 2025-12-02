@@ -1,0 +1,16 @@
+@model NT.SHARED.Models.Elasticity
+
+@{
+    ViewBag.Title = "Delete Elasticity";
+}
+
+<h1>Delete Elasticity</h1>
+
+<h4>@Model.Name</h4>
+<p>@Model.Description</p>
+
+<form asp-action="Delete" method="post">
+    <input type="hidden" asp-for="Id" />
+    <button class="btn btn-danger" type="submit">Delete</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>

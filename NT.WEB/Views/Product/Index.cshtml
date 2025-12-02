@@ -1,0 +1,42 @@
+@model IEnumerable<NT.SHARED.Models.Product>
+
+@{
+    ViewBag.Title = "Products";
+}
+
+<h1>Products</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Create New Product</a>
+</p>
+
+<form method="get" asp-action="Index" class="form-inline mb-3">
+    <input type="text" name="q" value="" class="form-control mr-2" placeholder="Search name..." />
+    <button type="submit" class="btn btn-secondary">Search</button>
+</form>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ProductCode</th>
+            <th>Name</th>
+            <th>BrandId</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach(var p in Model)
+    {
+        <tr>
+            <td>@p.ProductCode</td>
+            <td>@p.Name</td>
+            <td>@p.BrandId</td>
+            <td>
+                <a asp-action="Details" asp-route-id="@p.Id">Details</a> |
+                <a asp-action="Edit" asp-route-id="@p.Id">Edit</a> |
+                <a asp-action="Delete" asp-route-id="@p.Id">Delete</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

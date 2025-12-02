@@ -1,0 +1,34 @@
+@model NT.SHARED.Models.ProductDetail
+
+@{
+    ViewBag.Title = "Create Product Detail";
+    var productId = ViewBag.ProductId as Guid? ?? Guid.Empty;
+}
+
+<h1>Create Product Detail</h1>
+
+<form asp-action="CreateDetail" method="post">
+    <input type="hidden" name="productId" value="@productId" />
+    <div class="form-group">
+        <label asp-for="Price"></label>
+        <input asp-for="Price" class="form-control" />
+        <span asp-validation-for="Price" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="StockQuantity"></label>
+        <input asp-for="StockQuantity" class="form-control" />
+        <span asp-validation-for="StockQuantity" class="text-danger"></span>
+    </div>
+    <!-- For simplicity: user provides FK GUIDs for related lookups; ideally replace with dropdowns -->
+    <div class="form-group">
+        <label asp-for="LengthId">LengthId (GUID)</label>
+        <input asp-for="LengthId" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="ColorId">ColorId (GUID)</label>
+        <input asp-for="ColorId" class="form-control" />
+    </div>
+    <!-- add other FK inputs similarly as needed -->
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a asp-action="Details" asp-route-id="@productId" class="btn btn-secondary">Cancel</a>
+</form>

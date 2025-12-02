@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using NT.SHARED.Models;
@@ -6,102 +6,80 @@ using NT.WEB.Services;
 
 namespace NT.WEB.Controllers
 {
-    public class BrandController : Controller
+    public class SurfaceFinishController : Controller
     {
-        private readonly BrandWebService _service;
+        private readonly SurfaceFinishWebService _service;
 
-        public BrandController(BrandWebService service)
+        public SurfaceFinishController(SurfaceFinishWebService service)
         {
             _service = service ?? throw new ArgumentNullException(nameof(service));
         }
 
-        // GET: /Brand
         public async Task<IActionResult> Index(string? q)
         {
             var model = string.IsNullOrWhiteSpace(q)
                 ? await _service.GetAllAsync()
                 : await _service.SearchByNameAsync(q);
-
             return View(model);
         }
 
-        // GET: /Brand/Details/{id}
         public async Task<IActionResult> Details(Guid id)
         {
             if (id == Guid.Empty) return BadRequest();
-
-            var brand = await _service.GetByIdAsync(id);
-            if (brand is null) return NotFound();
-
-            return View(brand);
+            var item = await _service.GetByIdAsync(id);
+            if (item is null) return NotFound();
+            return View(item);
         }
 
-        // GET: /Brand/Create
         public IActionResult Create() => View();
 
-        // POST: /Brand/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Brand model)
+        public async Task<IActionResult> Create(SurfaceFinish model)
         {
             if (!ModelState.IsValid) return View(model);
-
             await _service.AddAsync(model);
             await _service.SaveChangesAsync();
-
             return RedirectToAction(nameof(Index));
         }
 
-        // GET: /Brand/Edit/{id}
         public async Task<IActionResult> Edit(Guid id)
         {
             if (id == Guid.Empty) return BadRequest();
-
-            var brand = await _service.GetByIdAsync(id);
-            if (brand is null) return NotFound();
-
-            return View(brand);
+            var item = await _service.GetByIdAsync(id);
+            if (item is null) return NotFound();
+            return View(item);
         }
 
-        // POST: /Brand/Edit/{id}
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, Brand model)
+        public async Task<IActionResult> Edit(Guid id, SurfaceFinish model)
         {
             if (id == Guid.Empty || model is null || id != model.Id) return BadRequest();
             if (!ModelState.IsValid) return View(model);
-
             await _service.UpdateAsync(model);
             await _service.SaveChangesAsync();
-
             return RedirectToAction(nameof(Index));
         }
 
-        // GET: /Brand/Delete/{id}
         public async Task<IActionResult> Delete(Guid id)
         {
             if (id == Guid.Empty) return BadRequest();
-
-            var brand = await _service.GetByIdAsync(id);
-            if (brand is null) return NotFound();
-
-            return View(brand);
+            var item = await _service.GetByIdAsync(id);
+            if (item is null) return NotFound();
+            return View(item);
         }
 
-        // POST: /Brand/Delete/{id}
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
             if (id == Guid.Empty) return BadRequest();
-
             await _service.DeleteAsync(id);
             await _service.SaveChangesAsync();
-
             return RedirectToAction(nameof(Index));
         }
 
-        // Optional: AJAX / client search
         [HttpGet]
         public async Task<IActionResult> Search(string q)
         {

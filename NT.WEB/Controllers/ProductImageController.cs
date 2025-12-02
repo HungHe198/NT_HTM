@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using NT.SHARED.Models;
@@ -6,43 +6,42 @@ using NT.WEB.Services;
 
 namespace NT.WEB.Controllers
 {
-    public class BrandController : Controller
+    public class ProductImageController : Controller
     {
-        private readonly BrandWebService _service;
+        private readonly ProductImageWebService _service;
 
-        public BrandController(BrandWebService service)
+        public ProductImageController(ProductImageWebService service)
         {
             _service = service ?? throw new ArgumentNullException(nameof(service));
         }
 
-        // GET: /Brand
+        // GET: /ProductImage
         public async Task<IActionResult> Index(string? q)
         {
             var model = string.IsNullOrWhiteSpace(q)
                 ? await _service.GetAllAsync()
-                : await _service.SearchByNameAsync(q);
-
+                : await _service.SearchByUrlAsync(q);
             return View(model);
         }
 
-        // GET: /Brand/Details/{id}
+        // GET: /ProductImage/Details/{id}
         public async Task<IActionResult> Details(Guid id)
         {
             if (id == Guid.Empty) return BadRequest();
 
-            var brand = await _service.GetByIdAsync(id);
-            if (brand is null) return NotFound();
+            var item = await _service.GetByIdAsync(id);
+            if (item is null) return NotFound();
 
-            return View(brand);
+            return View(item);
         }
 
-        // GET: /Brand/Create
+        // GET: /ProductImage/Create
         public IActionResult Create() => View();
 
-        // POST: /Brand/Create
+        // POST: /ProductImage/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Brand model)
+        public async Task<IActionResult> Create(ProductImage model)
         {
             if (!ModelState.IsValid) return View(model);
 
@@ -52,21 +51,21 @@ namespace NT.WEB.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // GET: /Brand/Edit/{id}
+        // GET: /ProductImage/Edit/{id}
         public async Task<IActionResult> Edit(Guid id)
         {
             if (id == Guid.Empty) return BadRequest();
 
-            var brand = await _service.GetByIdAsync(id);
-            if (brand is null) return NotFound();
+            var item = await _service.GetByIdAsync(id);
+            if (item is null) return NotFound();
 
-            return View(brand);
+            return View(item);
         }
 
-        // POST: /Brand/Edit/{id}
+        // POST: /ProductImage/Edit/{id}
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, Brand model)
+        public async Task<IActionResult> Edit(Guid id, ProductImage model)
         {
             if (id == Guid.Empty || model is null || id != model.Id) return BadRequest();
             if (!ModelState.IsValid) return View(model);
@@ -77,18 +76,18 @@ namespace NT.WEB.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // GET: /Brand/Delete/{id}
+        // GET: /ProductImage/Delete/{id}
         public async Task<IActionResult> Delete(Guid id)
         {
             if (id == Guid.Empty) return BadRequest();
 
-            var brand = await _service.GetByIdAsync(id);
-            if (brand is null) return NotFound();
+            var item = await _service.GetByIdAsync(id);
+            if (item is null) return NotFound();
 
-            return View(brand);
+            return View(item);
         }
 
-        // POST: /Brand/Delete/{id}
+        // POST: /ProductImage/Delete/{id}
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
@@ -101,12 +100,13 @@ namespace NT.WEB.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // Optional: AJAX / client search
+        // Optional AJAX search by productDetailId
         [HttpGet]
-        public async Task<IActionResult> Search(string q)
+        public async Task<IActionResult> ByProductDetail(Guid productDetailId)
         {
-            var result = await _service.SearchByNameAsync(q);
-            return Json(result);
+            if (productDetailId == Guid.Empty) return BadRequest();
+            var items = await _service.GetByProductDetailIdAsync(productDetailId);
+            return Json(items);
         }
     }
 }
