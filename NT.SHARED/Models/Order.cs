@@ -5,20 +5,20 @@ namespace NT.SHARED.Models
 {
     public class Order
     {
-        public Guid Id { get; private set; } = Guid.NewGuid();
-        public Guid CustomerId { get; private set; }
-        public Guid? CouponId { get; private set; }
-        public Guid PaymentMethodId { get; private set; }
-        public Guid? CreatedByUserId { get; private set; }
-        public DateTime CreatedTime { get; private set; } = DateTime.UtcNow;
-        public decimal TotalAmount { get; private set; }
-        public decimal? DiscountAmount { get; private set; }
-        public decimal FinalAmount { get; private set; }
-        public string? Status { get; private set; }
-        public string? ShippingAddress { get; private set; }
-        public string? Note { get; private set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
+        public Guid CustomerId { get; set; }
+        public Guid? CouponId { get; set; }
+        public Guid PaymentMethodId { get; set; }
+        public Guid? CreatedByUserId { get; set; }
+        public DateTime CreatedTime { get; set; } = DateTime.UtcNow;
+        public decimal TotalAmount { get; set; }
+        public decimal? DiscountAmount { get; set; }
+        public decimal FinalAmount { get; set; }
+        public string? Status { get; set; }
+        public string? ShippingAddress { get; set; }
+        public string? Note { get; set; }
 
-        private Order() { }
+        public Order() { }
         public static Order Create(Guid customerId, Guid paymentMethodId, decimal totalAmount, decimal finalAmount)
         {
             if (customerId == Guid.Empty) throw new ArgumentException("CustomerId required");
@@ -26,9 +26,9 @@ namespace NT.SHARED.Models
             return new Order { CustomerId = customerId, PaymentMethodId = paymentMethodId, TotalAmount = totalAmount, FinalAmount = finalAmount };
         }
 
-        public Customer Customer { get; private set; } = null!;
-        public Voucher? Coupon { get; private set; }
-        public PaymentMethod PaymentMethod { get; private set; } = null!;
-        public ICollection<OrderDetail> Details { get; private set; } = new List<OrderDetail>();
+        public Customer Customer { get; set; } = null!;
+        public Voucher? Coupon { get; set; }
+        public PaymentMethod PaymentMethod { get; set; } = null!;
+        public ICollection<OrderDetail> Details { get; set; } = new List<OrderDetail>();
     }
 }

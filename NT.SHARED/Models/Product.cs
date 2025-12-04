@@ -6,29 +6,29 @@ namespace NT.SHARED.Models
 {
     public class Product
     {
-        public Guid Id { get; private set; } = Guid.NewGuid();
-        public Guid BrandId { get; private set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
+        public Guid BrandId { get; set; }
         [Required, MaxLength(50)]
-        public string ProductCode { get; private set; } = null!;
+        public string ProductCode { get; set; } = null!;
         [Required, MaxLength(200)]
-        public string Name { get; private set; } = null!;
+        public string Name { get; set; } = null!;
         [MaxLength(500)]
-        public string? ShortDescription { get; private set; }
-        public string? Description { get; private set; }
+        public string? ShortDescription { get; set; }
+        public string? Description { get; set; }
         [MaxLength(300)]
-        public string? Thumbnail { get; private set; }
+        public string? Thumbnail { get; set; }
         [MaxLength(50)]
-        public string? Status { get; private set; }
+        public string? Status { get; set; }
         [MaxLength(200)]
-        public string? SeoTitle { get; private set; }
+        public string? SeoTitle { get; set; }
         [MaxLength(300)]
-        public string? SeoDescription { get; private set; }
-        public Guid? CreatedBy { get; private set; }
-        public DateTime? CreatedDate { get; private set; }
-        public Guid? UpdatedBy { get; private set; }
-        public DateTime? UpdatedDate { get; private set; }
+        public string? SeoDescription { get; set; }
+        public Guid? CreatedBy { get; set; }
+        public DateTime? CreatedDate { get; set; }
+        public Guid? UpdatedBy { get; set; }
+        public DateTime? UpdatedDate { get; set; }
 
-        private Product() { }
+        public Product() { }
         public static Product Create(Guid brandId, string productCode, string name)
         {
             if (brandId == Guid.Empty) throw new ArgumentException("BrandId required");
@@ -37,8 +37,8 @@ namespace NT.SHARED.Models
             return new Product { BrandId = brandId, ProductCode = productCode.Trim(), Name = name.Trim() };
         }
 
-        public Brand Brand { get; private set; } = null!;
-        public ICollection<ProductCategory> ProductCategories { get; private set; } = new List<ProductCategory>();
-        public ICollection<ProductDetail> ProductDetails { get; private set; } = new List<ProductDetail>();
+        public Brand Brand { get; set; } = null!;
+        public ICollection<ProductCategory> ProductCategories { get; set; } = new List<ProductCategory>();
+        public ICollection<ProductDetail> ProductDetails { get; set; } = new List<ProductDetail>();
     }
 }
