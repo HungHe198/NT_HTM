@@ -1,5 +1,6 @@
 
 using NT.BLL.Interfaces;
+using NT.BLL.Services;
 using NT.DAL.ContextFile;
 using NT.DAL.Repositories;
 using NT.WEB.Services;
@@ -15,7 +16,7 @@ builder.Services.AddControllersWithViews();
 
 // Register open-generic repository implementation for IGenericRepository<T>
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-
+builder.Services.AddScoped<IVocherService, VocherService>();
 // Register web services used by controllers
 builder.Services.AddScoped<ProductWebService>();
 builder.Services.AddScoped<ProductDetailWebService>();

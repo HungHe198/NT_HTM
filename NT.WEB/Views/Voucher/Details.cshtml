@@ -1,0 +1,37 @@
+@model NT.SHARED.Models.Voucher
+
+@{
+    ViewData["Title"] = "Voucher Details";
+}
+
+<h1>Voucher Details</h1>
+
+<div>
+    <dl class="row">
+        <dt class="col-sm-2">Code</dt>
+        <dd class="col-sm-10">@Model.Code</dd>
+
+        <dt class="col-sm-2">Discount Amount</dt>
+        <dd class="col-sm-10">@Model.DiscountAmount?.ToString("N2")</dd>
+
+        <dt class="col-sm-2">Max Discount Amount</dt>
+        <dd class="col-sm-10">@Model.MaxDiscountAmount?.ToString("N2")</dd>
+
+        <dt class="col-sm-2">Min Order Amount</dt>
+        <dd class="col-sm-10">@Model.MinOrderAmount?.ToString("N2")</dd>
+
+        <dt class="col-sm-2">Expiry Date</dt>
+        <dd class="col-sm-10">@Model.ExpiryDate?.ToString("yyyy-MM-dd HH:mm")</dd>
+
+        <dt class="col-sm-2">Usage Count</dt>
+        <dd class="col-sm-10">@Model.UsageCount</dd>
+
+        <dt class="col-sm-2">Max Usage</dt>
+        <dd class="col-sm-10">@Model.MaxUsage</dd>
+    </dl>
+</div>
+
+<p>
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-secondary">Edit</a>
+    <a asp-action="Index" class="btn btn-link">Back to list</a>
+</p>

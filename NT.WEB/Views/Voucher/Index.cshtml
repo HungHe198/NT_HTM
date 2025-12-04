@@ -1,0 +1,45 @@
+@model IEnumerable<NT.SHARED.Models.Voucher>
+
+@{
+    ViewData["Title"] = "Vouchers";
+}
+
+<h1>Vouchers</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Create New</a>
+</p>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Code</th>
+            <th>Discount</th>
+            <th>Max Discount</th>
+            <th>Min Order</th>
+            <th>Expiry</th>
+            <th>Usage</th>
+            <th>Max Usage</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model ?? Enumerable.Empty<NT.SHARED.Models.Voucher>())
+    {
+        <tr>
+            <td>@item.Code</td>
+            <td>@(item.DiscountAmount?.ToString("N2") ?? "-")</td>
+            <td>@(item.MaxDiscountAmount?.ToString("N2") ?? "-")</td>
+            <td>@(item.MinOrderAmount?.ToString("N2") ?? "-")</td>
+            <td>@(item.ExpiryDate?.ToString("yyyy-MM-dd HH:mm") ?? "-")</td>
+            <td>@(item.UsageCount?.ToString() ?? "-")</td>
+            <td>@(item.MaxUsage?.ToString() ?? "-")</td>
+            <td>
+                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
