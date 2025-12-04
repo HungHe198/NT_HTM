@@ -4,11 +4,11 @@ namespace NT.SHARED.Models
 {
     public class ProductImage
     {
-        public Guid Id { get; private set; } = Guid.NewGuid();
-        public Guid ProductDetailId { get; private set; }
-        public string ImageUrl { get; private set; } = null!;
+        public Guid Id { get; set; } = Guid.NewGuid();
+        public Guid ProductDetailId { get; set; }
+        public string ImageUrl { get; set; } = null!;
 
-        private ProductImage() { }
+        public ProductImage() { }
         public static ProductImage Create(Guid productDetailId, string imageUrl)
         {
             if (productDetailId == Guid.Empty) throw new ArgumentException("ProductDetailId required");
@@ -16,6 +16,6 @@ namespace NT.SHARED.Models
             return new ProductImage { ProductDetailId = productDetailId, ImageUrl = imageUrl.Trim() };
         }
 
-        public ProductDetail ProductDetail { get; private set; } = null!;
+        public ProductDetail ProductDetail { get; set; } = null!;
     }
 }

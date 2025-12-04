@@ -6,19 +6,19 @@ namespace NT.SHARED.Models
 {
     public class OriginCountry
     {
-        public Guid Id { get; private set; } = Guid.NewGuid();
+        public Guid Id { get; set; } = Guid.NewGuid();
         [Required, MaxLength(100)]
-        public string Name { get; private set; } = null!;
+        public string Name { get; set; } = null!;
         [MaxLength(250)]
-        public string? Description { get; private set; }
+        public string? Description { get; set; }
 
-        private OriginCountry() { }
+        public OriginCountry() { }
         public static OriginCountry Create(string name, string? description = null)
         {
             if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Name required");
             return new OriginCountry { Name = name.Trim(), Description = string.IsNullOrWhiteSpace(description) ? null : description.Trim() };
         }
 
-        public ICollection<ProductDetail> ProductDetails { get; private set; } = new List<ProductDetail>();
+        public ICollection<ProductDetail> ProductDetails { get; set; } = new List<ProductDetail>();
     }
 }

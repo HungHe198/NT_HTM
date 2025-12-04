@@ -6,22 +6,22 @@ namespace NT.SHARED.Models
 {
     public class User
     {
-        public Guid Id { get; private set; } = Guid.NewGuid();
-        public Guid RoleId { get; private set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
+        public Guid RoleId { get; set; }
         [Required, MaxLength(100)]
-        public string Username { get; private set; } = null!;
+        public string Username { get; set; } = null!;
         [Required, MaxLength(256)]
-        public string PasswordHash { get; private set; } = null!;
+        public string PasswordHash { get; set; } = null!;
         [Required, MaxLength(150)]
-        public string Fullname { get; private set; } = null!;
+        public string Fullname { get; set; } = null!;
         [MaxLength(20)]
-        public string? PhoneNumber { get; private set; }
+        public string? PhoneNumber { get; set; }
         [MaxLength(150)]
-        public string? Email { get; private set; }
+        public string? Email { get; set; }
         [MaxLength(50)]
-        public string? Status { get; private set; }
+        public string? Status { get; set; }
 
-        private User() { }
+        public User() { }
         public static User Create(Guid roleId, string username, string passwordHash, string fullname, string? phoneNumber = null, string? email = null, string? status = null)
         {
             if (roleId == Guid.Empty) throw new ArgumentException("RoleId required");
@@ -40,9 +40,9 @@ namespace NT.SHARED.Models
             };
         }
 
-        public Role Role { get; private set; } = null!;
-        public Admin? Admin { get; private set; }
-        public Employee? Employee { get; private set; }
-        public Customer? Customer { get; private set; }
+        public Role Role { get; set; } = null!;
+        public Admin? Admin { get; set; }
+        public Employee? Employee { get; set; }
+        public Customer? Customer { get; set; }
     }
 }

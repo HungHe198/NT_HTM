@@ -29,7 +29,7 @@ namespace NT.DAL.ContextFile
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseSqlServer("Data Source=LEVANHUNG\\LEVANHUNG;Initial Catalog=DATN_NT;Integrated Security=True;Trust Server Certificate=True");
+                optionsBuilder.UseSqlServer("Data Source=DESKTOP-5KG4J9F\\DINHGIAHUY;Initial Catalog=NT_HTM;Integrated Security=True;Encrypt=True;Trust Server Certificate=True");
             }
             base.OnConfiguring(optionsBuilder);
         }
