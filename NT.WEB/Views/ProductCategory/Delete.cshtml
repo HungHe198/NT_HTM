@@ -1,0 +1,18 @@
+@model NT.SHARED.Models.ProductCategory
+
+<h2>Delete ProductCategory</h2>
+<div>
+    <h4>Are you sure?</h4>
+    <dl class="row">
+        <dt class="col-sm-2">ProductId</dt>
+        <dd class="col-sm-10">@Model.ProductId</dd>
+        <dt class="col-sm-2">CategoryId</dt>
+        <dd class="col-sm-10">@Model.CategoryId</dd>
+    </dl>
+    <form asp-action="Delete" method="post">
+        <input type="hidden" name="productId" value="@Model.ProductId" />
+        <input type="hidden" name="categoryId" value="@Model.CategoryId" />
+        <button type="submit" class="btn btn-danger">Delete</button>
+        <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>

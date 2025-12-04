@@ -1,0 +1,13 @@
+@model NT.SHARED.Models.Permission
+
+<h2>Permission Details</h2>
+<dl class="row">
+    <dt class="col-sm-2">Code</dt>
+    <dd class="col-sm-10">@Model.Code</dd>
+    <dt class="col-sm-2">Description</dt>
+    <dd class="col-sm-10">@Model.Description</dd>
+</dl>
+<p>
+    <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</p>
