@@ -1,0 +1,15 @@
+@model NT.SHARED.Models.ProductCategory
+
+<h2>Edit ProductCategory</h2>
+<form asp-action="Edit" method="post">
+    <div class="form-group">
+        <label asp-for="ProductId"></label>
+        <input asp-for="ProductId" class="form-control" readonly />
+    </div>
+    <div class="form-group">
+        <label asp-for="CategoryId"></label>
+        <input asp-for="CategoryId" class="form-control" readonly />
+    </div>
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>

@@ -1,0 +1,23 @@
+@model NT.SHARED.Models.OrderDetail
+
+<h2>Create OrderDetail</h2>
+<form asp-action="Create" method="post">
+    <div class="form-group">
+        <label asp-for="OrderId"></label>
+        <input asp-for="OrderId" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="ProductDetailId"></label>
+        <input asp-for="ProductDetailId" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="Quantity"></label>
+        <input asp-for="Quantity" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="UnitPrice"></label>
+        <input asp-for="UnitPrice" class="form-control" />
+    </div>
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>

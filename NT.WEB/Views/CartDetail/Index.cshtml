@@ -1,0 +1,29 @@
+@model IEnumerable<NT.SHARED.Models.CartDetail>
+
+<h2>Cart Details</h2>
+<p><a asp-action="Create">Create New</a></p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>CartId</th>
+            <th>ProductDetailId</th>
+            <th>Quantity</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach(var item in Model)
+    {
+        <tr>
+            <td>@item.CartId</td>
+            <td>@item.ProductDetailId</td>
+            <td>@item.Quantity</td>
+            <td>
+                <a asp-action="Details" asp-route-cartId="@item.CartId" asp-route-productDetailId="@item.ProductDetailId">Details</a> |
+                <a asp-action="Edit" asp-route-cartId="@item.CartId" asp-route-productDetailId="@item.ProductDetailId">Edit</a> |
+                <a asp-action="Delete" asp-route-cartId="@item.CartId" asp-route-productDetailId="@item.ProductDetailId">Delete</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
