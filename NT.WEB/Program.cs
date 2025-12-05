@@ -30,8 +30,53 @@ builder.Services.AddScoped<OriginCountryWebService>();
 builder.Services.AddScoped<ProductImageWebService>();
 builder.Services.AddScoped<VocherWebService>();
 builder.Services.AddScoped<OrdersWebService>();
+// Password hasher for User
+builder.Services.AddScoped<Microsoft.AspNetCore.Identity.IPasswordHasher<NT.SHARED.Models.User>, Microsoft.AspNetCore.Identity.PasswordHasher<NT.SHARED.Models.User>>();
+// Simple email service
+builder.Services.AddScoped<NT.WEB.Services.IEmailService, NT.WEB.Services.SmtpEmailService>();
+
+// Authentication - cookie
+builder.Services.AddAuthentication(Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Account/Login";
+        options.LogoutPath = "/Logout/Index";
+        options.AccessDeniedPath = "/Home/AccessDenied";
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Lax;
+    }); 
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
+
+// Seed default roles at startup (runtime seeding with random GUIDs)
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var roleRepo = services.GetRequiredService<NT.BLL.Interfaces.IGenericRepository<NT.SHARED.Models.Role>>();
+        // Ensure roles: Admin, Customer, Employee
+        var seedNames = new[] { "Admin", "Customer", "Employee" };
+        foreach (var name in seedNames)
+        {
+            var found = await roleRepo.FindAsync(r => r.Name == name);
+            var exists = System.Linq.Enumerable.Any(found);
+            if (!exists)
+            {
+                var role = NT.SHARED.Models.Role.Create(name); // Role.Id generated with Guid.NewGuid()
+                await roleRepo.AddAsync(role);
+            }
+        }
+        await roleRepo.SaveChangesAsync();
+    }
+    catch (Exception ex)
+    {
+        // don't crash startup if seeding fails
+        var logger = services.GetService<Microsoft.Extensions.Logging.ILoggerFactory>()?.CreateLogger("RoleSeed");
+        logger?.LogError(ex, "Failed to seed roles");
+    }
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

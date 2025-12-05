@@ -1,0 +1,36 @@
+@model IEnumerable<NT.SHARED.Models.User>
+@{
+    ViewBag.Title = "Users";
+}
+
+<h1>Danh sách ng??i dùng</h1>
+<p>
+    <a asp-action="Create" class="btn btn-primary">??ng ký m?i</a>
+</p>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Username</th>
+            <th>Fullname</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach(var u in Model)
+    {
+        <tr>
+            <td>@u.Username</td>
+            <td>@u.Fullname</td>
+            <td>@u.Email</td>
+            <td>@u.Role?.Name</td>
+            <td>
+                <a asp-action="Details" asp-route-id="@u.Id" class="btn btn-sm btn-info">Details</a>
+                <a asp-action="Edit" asp-route-id="@u.Id" class="btn btn-sm btn-warning">Edit</a>
+                <a asp-action="Delete" asp-route-id="@u.Id" class="btn btn-sm btn-danger">Delete</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
