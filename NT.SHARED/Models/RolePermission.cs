@@ -1,16 +1,19 @@
 using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace NT.SHARED.Models
 {
     public class RolePermission
     {
+        [Display(Name = "Vai tr?")]
         public Guid RoleId { get; private set; }
+        [Display(Name = "Quy?n")]
         public Guid PermissionId { get; private set; }
 
         private RolePermission() { }
         public static RolePermission Create(Guid roleId, Guid permissionId)
         {
-            if (roleId == Guid.Empty || permissionId == Guid.Empty) throw new ArgumentException("Invalid ids");
+            if (roleId == Guid.Empty || permissionId == Guid.Empty) throw new ArgumentException("Id vai tr? ho?c quy?n không h?p l?");
             return new RolePermission { RoleId = roleId, PermissionId = permissionId };
         }
 

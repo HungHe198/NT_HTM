@@ -11,8 +11,7 @@ namespace NT.SHARED.Configurations
             builder.ToTable("Employee");
             builder.HasKey(x => x.Id);
             builder.Property(x => x.Position).HasMaxLength(100);
-            builder.HasOne(x => x.User).WithOne(u => u.Employee).HasForeignKey<Employee>(x => x.UserId);
-            builder.HasOne<Employee>().WithMany().HasForeignKey(x => x.ManagerId).OnDelete(DeleteBehavior.NoAction);
+            builder.HasOne(x => x.User).WithOne(u => u.Employee).HasForeignKey<Employee>(x => x.UserId);            
         }
     }
 }

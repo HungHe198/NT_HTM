@@ -16,20 +16,20 @@ namespace NT.WEB.Services
         private readonly GenericService<Order> _orderService;
         private readonly GenericService<OrderDetail> _orderDetailService;
         private readonly GenericService<Customer> _customerService;
-        private readonly GenericService<Voucher> _couponService; // voucher
+        private readonly GenericService<Voucher> _voucherService; // voucher
         private readonly GenericService<ProductDetail> _productDetailService;
 
         public OrdersWebService(
             IGenericRepository<Order> orderRepository,
             IGenericRepository<OrderDetail> orderDetailRepository,
             IGenericRepository<Customer> customerRepository,
-            IGenericRepository<Voucher> couponRepository,
+            IGenericRepository<Voucher> voucherRepository,
             IGenericRepository<ProductDetail> productDetailRepository)
         {
             _orderService = new GenericService<Order>(orderRepository ?? throw new ArgumentNullException(nameof(orderRepository)));
             _orderDetailService = new GenericService<OrderDetail>(orderDetailRepository ?? throw new ArgumentNullException(nameof(orderDetailRepository)));
             _customerService = new GenericService<Customer>(customerRepository ?? throw new ArgumentNullException(nameof(customerRepository)));
-            _couponService = new GenericService<Voucher>(couponRepository ?? throw new ArgumentNullException(nameof(couponRepository)));
+            _voucherService = new GenericService<Voucher>(voucherRepository ?? throw new ArgumentNullException(nameof(voucherRepository)));
             _productDetailService = new GenericService<ProductDetail>(productDetailRepository ?? throw new ArgumentNullException(nameof(productDetailRepository)));
         }
 
@@ -57,13 +57,13 @@ namespace NT.WEB.Services
         public Task<bool> DeleteCustomerAsync(Guid id) => _customerService.DeleteAsync(id);
         public Task SaveCustomerChangesAsync() => _customerService.SaveChangesAsync();
 
-        // ---------------- Coupons (vouchers) ----------------
-        public Task<IEnumerable<Voucher>> GetAllCouponsAsync() => _couponService.GetAllAsync();
-        public Task<Voucher?> GetCouponByIdAsync(Guid id) => _couponService.GetByIdAsync(id);
-        public Task<Voucher> AddCouponAsync(Voucher coupon) => _couponService.AddAsync(coupon);
-        public Task<Voucher> UpdateCouponAsync(Voucher coupon) => _couponService.UpdateAsync(coupon);
-        public Task<bool> DeleteCouponAsync(Guid id) => _couponService.DeleteAsync(id);
-        public Task SaveCouponChangesAsync() => _couponService.SaveChangesAsync();
+        // ---------------- Vouchers ----------------
+        public Task<IEnumerable<Voucher>> GetAllVouchersAsync() => _voucherService.GetAllAsync();
+        public Task<Voucher?> GetVoucherByIdAsync(Guid id) => _voucherService.GetByIdAsync(id);
+        public Task<Voucher> AddVoucherAsync(Voucher voucher) => _voucherService.AddAsync(voucher);
+        public Task<Voucher> UpdateVoucherAsync(Voucher voucher) => _voucherService.UpdateAsync(voucher);
+        public Task<bool> DeleteVoucherAsync(Guid id) => _voucherService.DeleteAsync(id);
+        public Task SaveVoucherChangesAsync() => _voucherService.SaveChangesAsync();
 
         // ---------------- ProductDetails ----------------
         public Task<IEnumerable<ProductDetail>> GetAllProductDetailsAsync() => _productDetailService.GetAllAsync();
