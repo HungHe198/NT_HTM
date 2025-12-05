@@ -179,5 +179,16 @@ namespace NT.WEB.Controllers
 
             return RedirectToAction(nameof(Details), new { id = productId });
         }
+
+        [HttpGet]
+        public async Task<IActionResult> Suggest(string q)
+        {
+            var query = q ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(query)) return Json(Array.Empty<object>());
+
+            var items = await _productService.SearchByNameAsync(query);
+            var result = items.Select(p => new { p.Id, p.Name, p.ProductCode });
+            return Json(result);
+        }
     }
 }

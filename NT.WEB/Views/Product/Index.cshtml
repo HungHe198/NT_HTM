@@ -39,9 +39,11 @@
                 <a asp-action="Create" class="btn btn-primary">Create New Product</a>
             </div>
 
-            <form method="get" asp-action="Index" class="d-flex mb-3">
-                <input type="text" name="q" value="" class="form-control me-2" placeholder="Search name..." />
+            <form method="get" asp-action="Index" class="d-flex mb-3 position-relative">
+                <input type="text" id="product-search" name="q" value="@(Context.Request.Query["q"])" class="form-control me-2" placeholder="Search name..." autocomplete="off" />
                 <button type="submit" class="btn btn-secondary">Search</button>
+
+                <div id="suggestions" class="list-group position-absolute" style="z-index:1000; width:40%; left:0; display:none;"></div>
             </form>
 
             <div class="table-responsive">
@@ -55,22 +57,62 @@
                         </tr>
                     </thead>
                     <tbody>
-                    @foreach(var p in Model ?? Enumerable.Empty<NT.SHARED.Models.Product>())
+                    @if (!(Model?.Any() ?? false))
                     {
                         <tr>
-                            <td>@p.ProductCode</td>
-                            <td>@p.Name</td>
-                            <td>@p.BrandId</td>
-                            <td>
-                                <a asp-action="Details" asp-route-id="@p.Id">Details</a> |
-                                <a asp-action="Edit" asp-route-id="@p.Id">Edit</a> |
-                                <a asp-action="Delete" asp-route-id="@p.Id">Delete</a>
-                            </td>
+                            <td colspan="4" class="text-center">Không có sản phẩm</td>
                         </tr>
+                    }
+                    else
+                    {
+                        @foreach(var p in Model)
+                        {
+                            <tr>
+                                <td>@p.ProductCode</td>
+                                <td>@p.Name</td>
+                                <td>@p.BrandId</td>
+                                <td>
+                                    <a asp-action="Details" asp-route-id="@p.Id">Details</a> |
+                                    <a asp-action="Edit" asp-route-id="@p.Id">Edit</a> |
+                                    <a asp-action="Delete" asp-route-id="@p.Id">Delete</a>
+                                </td>
+                            </tr>
+                        }
                     }
                     </tbody>
                 </table>
             </div>
+            <script>
+                (function(){
+                    const input = document.getElementById('product-search');
+                    const box = document.getElementById('suggestions');
+                    let timer = null;
+
+                    function hide() { box.style.display = 'none'; box.innerHTML = ''; }
+                    function show(items){
+                        if(!items || items.length===0){ hide(); return; }
+                        box.innerHTML = items.map(i => `<a href=\"/Product/Details/${i.id}\" class=\"list-group-item list-group-item-action\">${i.name} <small class=\"text-muted\">(${i.productCode})</small></a>`).join('');
+                        box.style.display = 'block';
+                    }
+
+                    input.addEventListener('input', function(){
+                        const q = this.value.trim();
+                        if(timer) clearTimeout(timer);
+                        if(q.length < 1){ hide(); return; }
+                        timer = setTimeout(async ()=>{
+                            try{
+                                const res = await fetch(`/Product/Suggest?q=${encodeURIComponent(q)}`);
+                                if(!res.ok) { hide(); return; }
+                                const data = await res.json();
+                                show(data);
+                            }catch(e){ hide(); }
+                        }, 250);
+                    });
+
+                    // close when clicking outside
+                    document.addEventListener('click', function(e){ if(!box.contains(e.target) && e.target !== input) hide(); });
+                })();
+            </script>
         </section>
     </div>
 </div>
