@@ -3,41 +3,41 @@
     ViewBag.Title = "Register";
 }
 
-<h1>??ng ký</h1>
+<h1>Ðãng k?</h1>
 <form asp-action="Index" asp-controller="Register" method="post">
     @Html.AntiForgeryToken()
     <div asp-validation-summary="All" class="text-danger"></div>
     <div class="mb-3">
-        <label class="form-label">Username</label>
+        <label asp-for="Username" class="form-label"></label>
         <input asp-for="Username" class="form-control" />
         <span asp-validation-for="Username" class="text-danger"></span>
     </div>
     <div class="mb-3">
-        <label class="form-label">Fullname</label>
+        <label asp-for="Fullname" class="form-label"></label>
         <input asp-for="Fullname" class="form-control" />
         <span asp-validation-for="Fullname" class="text-danger"></span>
     </div>
     <div class="mb-3">
-        <label class="form-label">Email</label>
+        <label asp-for="Email" class="form-label"></label>
         <input asp-for="Email" class="form-control" />
         <span asp-validation-for="Email" class="text-danger"></span>
     </div>
     <div class="mb-3">
-        <label class="form-label">M?t kh?u</label>
+        <label asp-for="PasswordHash" class="form-label"></label>
         <input asp-for="PasswordHash" type="password" class="form-control" />
         <span asp-validation-for="PasswordHash" class="text-danger"></span>
     </div>
     @if (!(ViewBag.IsClient ?? false))
     {
         <div class="mb-3">
-            <label class="form-label">Vai trò</label>
+            <label asp-for="RoleId" class="form-label"></label>
             <select asp-for="RoleId" class="form-select" asp-items="ViewBag.Roles">
-                <option value="">-- Ch?n vai trò --</option>
+                <option value="">-- Ch?n vai tr? --</option>
             </select>
             <span asp-validation-for="RoleId" class="text-danger"></span>
         </div>
     }
-    <button type="submit" class="btn btn-primary">??ng ký</button>
+    <button type="submit" class="btn btn-primary">Ðãng k?</button>
 </form>
 
 @section Scripts{
