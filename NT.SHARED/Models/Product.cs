@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -7,39 +7,39 @@ namespace NT.SHARED.Models
     public class Product
     {
         public Guid Id { get; set; } = Guid.NewGuid();
-        [Display(Name = "Thýõng hi?u")]
+        [Display(Name = "ThÆ°Æ¡ng hiá»‡u")]
         public Guid BrandId { get; set; }
-        [Required, MaxLength(50), Display(Name = "M? s?n ph?m")]
+        [Required, MaxLength(50), Display(Name = "MÃ£ sáº£n pháº©m")]
         public string ProductCode { get; set; } = null!;
-        [Required, MaxLength(200), Display(Name = "Tên s?n ph?m")]
+        [Required, MaxLength(200), Display(Name = "TÃªn sáº£n pháº©m")]
         public string Name { get; set; } = null!;
-        [MaxLength(500), Display(Name = "Mô t? ng?n")]
+        [MaxLength(500), Display(Name = "MÃ´ t? ng?n")]
         public string? ShortDescription { get; set; }
-        [Display(Name = "Mô t?")]
+        [Display(Name = "MÃ´ t?")]
         public string? Description { get; set; }
-        [MaxLength(300), Display(Name = "?nh ð?i di?n")]
+        [MaxLength(300), Display(Name = "?nh Ã°?i di?n")]
         public string? Thumbnail { get; set; }
-        [MaxLength(50), Display(Name = "Tr?ng thái")]
+        [MaxLength(50), Display(Name = "Tr?ng thÃ¡i")]
         public string? Status { get; set; }
-        [MaxLength(200), Display(Name = "Tiêu ð? SEO")]
+        [MaxLength(200), Display(Name = "TiÃªu Ã°? SEO")]
         public string? SeoTitle { get; set; }
-        [MaxLength(300), Display(Name = "Mô t? SEO")]
+        [MaxLength(300), Display(Name = "MÃ´ t? SEO")]
         public string? SeoDescription { get; set; }
-        [Display(Name = "Ngý?i t?o")]
+        [Display(Name = "NgÃ½?i t?o")]
         public Guid? CreatedBy { get; set; }
-        [Display(Name = "Ngày t?o")]
+        [Display(Name = "NgÃ y t?o")]
         public DateTime? CreatedDate { get; set; }
-        [Display(Name = "Ngý?i c?p nh?t")]
+        [Display(Name = "NgÃ½?i c?p nh?t")]
         public Guid? UpdatedBy { get; set; }
-        [Display(Name = "Ngày c?p nh?t")]
+        [Display(Name = "NgÃ y c?p nh?t")]
         public DateTime? UpdatedDate { get; set; }
 
         public Product() { }
         public static Product Create(Guid brandId, string productCode, string name)
         {
-            if (brandId == Guid.Empty) throw new ArgumentException("Vui l?ng ch?n thýõng hi?u");
+            if (brandId == Guid.Empty) throw new ArgumentException("Vui l?ng ch?n thÃ½Ãµng hi?u");
             if (string.IsNullOrWhiteSpace(productCode)) throw new ArgumentException("Vui l?ng nh?p m? s?n ph?m");
-            if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Vui l?ng nh?p tên s?n ph?m");
+            if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Vui l?ng nh?p tÃªn s?n ph?m");
             return new Product { BrandId = brandId, ProductCode = productCode.Trim(), Name = name.Trim() };
         }
 
