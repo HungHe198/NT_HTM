@@ -50,9 +50,9 @@
                 <table class="table table-striped align-middle">
                     <thead>
                         <tr>
-                            <th>ProductCode</th>
-                            <th>Name</th>
-                            <th>BrandId</th>
+                            <th>@Html.DisplayNameFor((NT.SHARED.Models.Product m) => m.ProductCode)</th>
+                            <th>@Html.DisplayNameFor((NT.SHARED.Models.Product m) => m.Name)</th>
+                            <th>@Html.DisplayNameFor((NT.SHARED.Models.Product m) => m.BrandId)</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -91,7 +91,7 @@
                     function hide() { box.style.display = 'none'; box.innerHTML = ''; }
                     function show(items){
                         if(!items || items.length===0){ hide(); return; }
-                        box.innerHTML = items.map(i => `<a href=\"/Product/Details/${i.id}\" class=\"list-group-item list-group-item-action\">${i.name} <small class=\"text-muted\">(${i.productCode})</small></a>`).join('');
+                        box.innerHTML = items.map(i => `<a href="/Product/Details/${i.id}" class="list-group-item list-group-item-action">${i.name} <small class="text-muted">(${i.productCode})</small></a>`).join('');
                         box.style.display = 'block';
                     }
 

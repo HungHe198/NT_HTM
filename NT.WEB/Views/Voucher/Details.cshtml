@@ -8,25 +8,25 @@
 
 <div>
     <dl class="row">
-        <dt class="col-sm-2">Code</dt>
+        <dt class="col-sm-2">@Html.DisplayNameFor(m => m.Code)</dt>
         <dd class="col-sm-10">@Model.Code</dd>
 
-        <dt class="col-sm-2">Discount Amount</dt>
+        <dt class="col-sm-2">@Html.DisplayNameFor(m => m.DiscountAmount)</dt>
         <dd class="col-sm-10">@Model.DiscountAmount?.ToString("N2")</dd>
 
-        <dt class="col-sm-2">Max Discount Amount</dt>
+        <dt class="col-sm-2">@Html.DisplayNameFor(m => m.MaxDiscountAmount)</dt>
         <dd class="col-sm-10">@Model.MaxDiscountAmount?.ToString("N2")</dd>
 
-        <dt class="col-sm-2">Min Order Amount</dt>
+        <dt class="col-sm-2">@Html.DisplayNameFor(m => m.MinOrderAmount)</dt>
         <dd class="col-sm-10">@Model.MinOrderAmount?.ToString("N2")</dd>
 
-        <dt class="col-sm-2">Expiry Date</dt>
+        <dt class="col-sm-2">@Html.DisplayNameFor(m => m.ExpiryDate)</dt>
         <dd class="col-sm-10">@Model.ExpiryDate?.ToString("yyyy-MM-dd HH:mm")</dd>
 
-        <dt class="col-sm-2">Usage Count</dt>
+        <dt class="col-sm-2">@Html.DisplayNameFor(m => m.UsageCount)</dt>
         <dd class="col-sm-10">@Model.UsageCount</dd>
 
-        <dt class="col-sm-2">Max Usage</dt>
+        <dt class="col-sm-2">@Html.DisplayNameFor(m => m.MaxUsage)</dt>
         <dd class="col-sm-10">@Model.MaxUsage</dd>
     </dl>
 </div>
