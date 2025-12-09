@@ -1,6 +1,16 @@
 ﻿@{
     Layout = null;
     var title = ViewData["Title"] ?? "NT.WEB";
+    // Query products for layout fallback grid
+    var layoutProducts = await ProductService.GetAllAsync();
+    var layoutList = new List<dynamic>();
+    foreach (var p in layoutProducts)
+    {
+        var brand = await BrandService.GetByIdAsync(p.BrandId);
+        layoutList.Add(new { p.Id, p.Name, BrandName = brand?.Name, Thumbnail = p.Thumbnail });
+        if (layoutList.Count >= 16) break;
+    }
+    ViewBag.LayoutProducts = layoutList;
 }
 @inject NT.WEB.Services.ProductWebService ProductService
 @inject NT.WEB.Services.BrandWebService BrandService
@@ -106,7 +116,7 @@
                             <option>Default sorting</option>
                             <option>Price: Low to High</option>
                         </select>
-                        <a class="btn btn-sm btn-outline-secondary" asp-controller="Product" asp-action="Create">Add Product</a>
+                        <a class="btn btn-sm btn-outline-secondary" asp-controller="Product" asp-action="Create">Thôi</a>
                     </div>
                 </div>
 

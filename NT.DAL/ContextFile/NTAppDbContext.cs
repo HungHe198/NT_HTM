@@ -77,6 +77,9 @@ namespace NT.DAL.ContextFile
             modelBuilder.ApplyConfiguration(new OrderConfiguration());
             modelBuilder.ApplyConfiguration(new OrderDetailConfiguration());
 
+            // Data seeding
+            NT.DAL.Services.DataSeeder.Apply(modelBuilder);
+
             base.OnModelCreating(modelBuilder);
         }
 

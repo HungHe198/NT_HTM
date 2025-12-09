@@ -18,17 +18,19 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
     <style>
-        body { background: #f9fafb; }
+        html, body { height: 100%; }
+        body { background: #f9fafb; display: flex; flex-direction: column; min-height: 100vh; }
         .sidebar { min-width: 220px; background: #fff; height: 100vh; }
         .sidebar .nav-link.active { background: #f4f6fb; color: #1976d2; }
         .sidebar .nav-link { color: #637381; }
         .sidebar .nav-link i { margin-right: 10px; }
         .content { padding: 2rem; }
         .topbar { background: #fff; padding: 1rem 2rem; border-bottom: 1px solid #f0f0f0; }
+        main.content { flex: 1 0 auto; }
     </style>
 </head>
 <body>
-    <div class="d-flex">
+    <div class="d-flex flex-grow-1">
         <!-- Sidebar -->
         <nav class="sidebar d-flex flex-column p-3">
             <a href="/" class="mb-4 text-decoration-none">
