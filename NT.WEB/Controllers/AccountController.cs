@@ -14,15 +14,17 @@ namespace NT.WEB.Controllers
     {
         private readonly IGenericRepository<User> _repository;
         private readonly IGenericRepository<NT.SHARED.Models.Role> _roleRepository;
+        private readonly IGenericRepository<Customer> _customerRepository;
         private readonly Microsoft.AspNetCore.Identity.IPasswordHasher<User> _passwordHasher;
         private readonly Services.IEmailService _emailService;
 
-        public AccountController(IGenericRepository<User> repository, Microsoft.AspNetCore.Identity.IPasswordHasher<User> passwordHasher, Services.IEmailService emailService, IGenericRepository<NT.SHARED.Models.Role> roleRepository)
+        public AccountController(IGenericRepository<User> repository, Microsoft.AspNetCore.Identity.IPasswordHasher<User> passwordHasher, Services.IEmailService emailService, IGenericRepository<NT.SHARED.Models.Role> roleRepository, IGenericRepository<Customer> customerRepository)
         {
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
             _passwordHasher = passwordHasher ?? throw new ArgumentNullException(nameof(passwordHasher));
             _emailService = emailService ?? throw new ArgumentNullException(nameof(emailService));
             _roleRepository = roleRepository ?? throw new ArgumentNullException(nameof(roleRepository));
+            _customerRepository = customerRepository ?? throw new ArgumentNullException(nameof(customerRepository));
         }
 
         public async Task<IActionResult> Index()
@@ -214,6 +216,16 @@ namespace NT.WEB.Controllers
                 ModelState.AddModelError(nameof(model.Fullname), "Họ và tên không được vượt quá 200 ký tự");
             }
 
+            // Phone number is required for customer registration
+            if (string.IsNullOrWhiteSpace(model.PhoneNumber))
+            {
+                ModelState.AddModelError(nameof(model.PhoneNumber), "Số điện thoại là bắt buộc");
+            }
+            else if (model.PhoneNumber.Length > 20)
+            {
+                ModelState.AddModelError(nameof(model.PhoneNumber), "Số điện thoại không được vượt quá 20 ký tự");
+            }
+
             if (!ModelState.IsValid)
             {
                 model.RoleId = _roleRepository.GetAllAsync().Result.FirstOrDefault(r => r.Name == "Customer")?.Id ?? Guid.Empty; // Ensure role is reset for re-display
@@ -226,6 +238,9 @@ namespace NT.WEB.Controllers
                 ModelState.AddModelError(nameof(model.Username), "Tên đăng nhập đã tồn tại");
                 return View(model);
             }
+
+            // Default status for new customer accounts
+            model.Status = "1";
 
             // Hash password (model.PasswordHash expected to hold plain password from form)
             var plain = model.PasswordHash ?? string.Empty;
@@ -267,7 +282,8 @@ namespace NT.WEB.Controllers
                 }
             }
 
-            return RedirectToAction(nameof(Login));
+            // After creating User, redirect to CustomerController to create Customer profile
+            return RedirectToAction("Create", "Customer", new { userId = model.Id });
         }
 
         public async Task<IActionResult> Edit(Guid id)

@@ -30,6 +30,7 @@ builder.Services.AddScoped<OriginCountryWebService>();
 builder.Services.AddScoped<ProductImageWebService>();
 builder.Services.AddScoped<VocherWebService>();
 builder.Services.AddScoped<OrdersWebService>();
+builder.Services.AddScoped<CustomerWebService>();
 // Password hasher for User
 builder.Services.AddScoped<Microsoft.AspNetCore.Identity.IPasswordHasher<NT.SHARED.Models.User>, Microsoft.AspNetCore.Identity.PasswordHasher<NT.SHARED.Models.User>>();
 // Simple email service
@@ -91,6 +92,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
