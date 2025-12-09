@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using NT.SHARED.Models;
 using NT.WEB.Services;
@@ -17,13 +15,34 @@ namespace NT.WEB.Controllers
         private readonly ProductWebService _productService;
         private readonly ProductDetailWebService _productDetailService;
         private readonly BrandWebService _brandService;
+        private readonly LengthWebService _lengthService;
+        private readonly SurfaceFinishWebService _surfaceFinishService;
+        private readonly HardnessWebService _hardnessService;
+        private readonly ElasticityWebService _elasticityService;
+        private readonly OriginCountryWebService _originCountryService;
+        private readonly ColorWebService _colorService;
         private readonly Microsoft.Extensions.Logging.ILogger<ProductController> _logger;
 
-        public ProductController(ProductWebService productService, ProductDetailWebService productDetailService, BrandWebService brandService, Microsoft.Extensions.Logging.ILogger<ProductController> logger)
+        public ProductController(ProductWebService productService,
+                                 ProductDetailWebService productDetailService,
+                                 BrandWebService brandService,
+                                 LengthWebService lengthService,
+                                 SurfaceFinishWebService surfaceFinishService,
+                                 HardnessWebService hardnessService,
+                                 ElasticityWebService elasticityService,
+                                 OriginCountryWebService originCountryService,
+                                 ColorWebService colorService,
+                                 Microsoft.Extensions.Logging.ILogger<ProductController> logger)
         {
             _productService = productService ?? throw new ArgumentNullException(nameof(productService));
             _productDetailService = productDetailService ?? throw new ArgumentNullException(nameof(productDetailService));
             _brandService = brandService ?? throw new ArgumentNullException(nameof(brandService));
+            _lengthService = lengthService ?? throw new ArgumentNullException(nameof(lengthService));
+            _surfaceFinishService = surfaceFinishService ?? throw new ArgumentNullException(nameof(surfaceFinishService));
+            _hardnessService = hardnessService ?? throw new ArgumentNullException(nameof(hardnessService));
+            _elasticityService = elasticityService ?? throw new ArgumentNullException(nameof(elasticityService));
+            _originCountryService = originCountryService ?? throw new ArgumentNullException(nameof(originCountryService));
+            _colorService = colorService ?? throw new ArgumentNullException(nameof(colorService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
@@ -190,6 +209,14 @@ namespace NT.WEB.Controllers
             if (productId == Guid.Empty) return BadRequest();
             var model = (ProductDetail?)null;
             ViewBag.ProductId = productId;
+            // populate lookup select lists
+            ViewBag.LengthSelectList = new SelectList(_lengthService.GetAllAsync().Result, "Id", "Name");
+            ViewBag.SurfaceFinishSelectList = new SelectList(_surfaceFinishService.GetAllAsync().Result, "Id", "Name");
+            ViewBag.HardnessSelectList = new SelectList(_hardnessService.GetAllAsync().Result, "Id", "Name");
+            ViewBag.ElasticitySelectList = new SelectList(_elasticityService.GetAllAsync().Result, "Id", "Name");
+            ViewBag.OriginCountrySelectList = new SelectList(_originCountryService.GetAllAsync().Result, "Id", "Name");
+            ViewBag.ColorSelectList = new SelectList(_colorService.GetAllAsync().Result, "Id", "Name");
+
             return View("ProductDetailCreate", model);
         }
 
@@ -199,10 +226,30 @@ namespace NT.WEB.Controllers
         public async Task<IActionResult> CreateDetail(Guid productId, ProductDetail model)
         {
             if (productId == Guid.Empty || model is null) return BadRequest();
-            if (!ModelState.IsValid) { ViewBag.ProductId = productId; return View("ProductDetailCreate", model); }
 
-            // ensure FK
-            var detail = ProductDetail.Create(productId, model.Length.Id, model.SurfaceFinish.Id, model.Hardness.Id, model.Elasticity.Id, model.OriginCountry.Id, model.Color.Id, model.Price, model.StockQuantity);
+            if (!ModelState.IsValid)
+            {
+                ViewBag.ProductId = productId;
+                ViewBag.LengthSelectList = new SelectList(await _lengthService.GetAllAsync(), "Id", "Name");
+                ViewBag.SurfaceFinishSelectList = new SelectList(await _surfaceFinishService.GetAllAsync(), "Id", "Name");
+                ViewBag.HardnessSelectList = new SelectList(await _hardnessService.GetAllAsync(), "Id", "Name");
+                ViewBag.ElasticitySelectList = new SelectList(await _elasticityService.GetAllAsync(), "Id", "Name");
+                ViewBag.OriginCountrySelectList = new SelectList(await _originCountryService.GetAllAsync(), "Id", "Name");
+                ViewBag.ColorSelectList = new SelectList(await _colorService.GetAllAsync(), "Id", "Name");
+                return View("ProductDetailCreate", model);
+            }
+
+            // ensure FK - use Id properties from model
+            var detail = ProductDetail.Create(productId,
+                model.LengthId,
+                model.SurfaceFinishId,
+                model.HardnessId,
+                model.ElasticityId,
+                model.OriginCountryId,
+                model.ColorId,
+                model.Price,
+                model.StockQuantity);
+
             await _productDetailService.AddAsync(detail);
             await _productDetailService.SaveChangesAsync();
 

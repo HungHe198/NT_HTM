@@ -21,9 +21,16 @@
     <thead>
         <tr>
             <th>Id</th>
-            <th>Price</th>
-            <th>Stock</th>
-            <th>IsActive</th>
+            <th>Giá</th>
+            <th>T?n</th>
+            <th>Chi?u dài</th>
+            <th>Màu</th>
+            <th>Hoàn thi?n</th>
+            <th>?? c?ng</th>
+            <th>?? ?àn h?i</th>
+            <th>Xu?t x?</th>
+            <th>Thông s?</th>
+            <th>Ho?t ??ng</th>
             <th></th>
         </tr>
     </thead>
@@ -32,13 +39,24 @@
     {
         <tr>
             <td>@d.Id</td>
-            <td>@d.Price</td>
+            <td>@(d.Price.ToString("N2"))</td>
             <td>@d.StockQuantity</td>
-            <td>@d.IsActive</td>
+            <td>@(d.Length != null ? d.Length.Name : (d.LengthId != Guid.Empty ? d.LengthId.ToString() : ""))</td>
+            <td>@(d.Color != null ? d.Color.Name : (d.ColorId != Guid.Empty ? d.ColorId.ToString() : ""))</td>
+            <td>@(d.SurfaceFinish != null ? d.SurfaceFinish.Name : (d.SurfaceFinishId != Guid.Empty ? d.SurfaceFinishId.ToString() : ""))</td>
+            <td>@(d.Hardness != null ? d.Hardness.Name : (d.HardnessId != Guid.Empty ? d.HardnessId.ToString() : ""))</td>
+            <td>@(d.Elasticity != null ? d.Elasticity.Name : (d.ElasticityId != Guid.Empty ? d.ElasticityId.ToString() : ""))</td>
+            <td>@(d.OriginCountry != null ? d.OriginCountry.Name : (d.OriginCountryId != Guid.Empty ? d.OriginCountryId.ToString() : ""))</td>
             <td>
-                <a asp-action="EditDetail" asp-route-id="@d.Id">Edit</a> |
+                @if(!string.IsNullOrWhiteSpace(d.Sections)) { <div><strong>S? lóng:</strong> @d.Sections</div> }
+                @if(!string.IsNullOrWhiteSpace(d.CollapsedLength)) { <div><strong>Chi?u dài g?p:</strong> @d.CollapsedLength</div> }
+                @if(!string.IsNullOrWhiteSpace(d.Weight)) { <div><strong>Tr?ng l??ng:</strong> @d.Weight</div> }
+            </td>
+            <td>@(d.IsActive ? "Có" : "Không")</td>
+            <td>
+                <a asp-action="EditDetail" asp-route-id="@d.Id">S?a</a> |
                 <form asp-action="DeleteDetail" asp-route-id="@d.Id" method="post" class="d-inline">
-                    <button type="submit" class="btn btn-link p-0">Delete</button>
+                    <button type="submit" class="btn btn-link p-0">Xóa</button>
                 </form>
             </td>
         </tr>

@@ -2,6 +2,8 @@
     Layout = null;
     var title = ViewData["Title"] ?? "NT.WEB";
 }
+@inject NT.WEB.Services.ProductWebService ProductService
+@inject NT.WEB.Services.BrandWebService BrandService
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -76,22 +78,9 @@
 
                 <div class="sidebar-card mb-3">
                     <h6 class="mb-3">Products</h6>
-                    <ul class="list-unstyled mb-0">
-                        <li class="d-flex align-items-center py-2 border-bottom">
-                            <img src="/images/thumb-1.jpg" alt="" style="height:36px;width:36px;object-fit:cover;border-radius:6px;margin-right:.75rem" />
-                            <div>
-                                <div class="small fw-semibold">Aliquam ear</div>
-                                <div class="small text-muted">$40.00</div>
-                            </div>
-                        </li>
-                        <li class="d-flex align-items-center py-2 border-bottom">
-                            <img src="/images/thumb-2.jpg" alt="" style="height:36px;width:36px;object-fit:cover;border-radius:6px;margin-right:.75rem" />
-                            <div>
-                                <div class="small fw-semibold">Fusce ullamcorper</div>
-                                <div class="small text-muted">$32.00</div>
-                            </div>
-                        </li>
-                    </ul>
+                    <div>
+                        @await Component.InvokeAsync("FeaturedProducts")
+                    </div>
                 </div>
 
                 <div class="sidebar-card">
@@ -126,30 +115,43 @@
                 @* Example product grid fallback when RenderBody is empty (helpful for preview) *@
                 @if (ViewBag.SkipDefaultGrid == null)
                 {
-                    <div class="row g-3">
-                        @for (int i = 0; i < 12; i++)
-                        {
-                            <div class="col-6 col-sm-4 col-md-3">
-                                <div class="product-card text-center">
-                                    <div class="position-relative mb-2">
-                                        <span class="badge-sale position-absolute" style="top:.6rem;left:.6rem">Sale</span>
-                                        <img src="/images/product-placeholder.png" alt="product" class="img-fluid" style="height:120px;object-fit:contain" />
+                    var products = ViewBag.LayoutProducts as IEnumerable<dynamic>;
+                    if (products != null && products.Any())
+                    {
+                        <div class="row g-3">
+                            @foreach (var p in products)
+                            {
+                                <div class="col-6 col-sm-4 col-md-3">
+                                    <div class="product-card text-center">
+                                        <div class="position-relative mb-2">
+                                            <span class="badge-sale position-absolute" style="top:.6rem;left:.6rem">Sale</span>
+                                            <a asp-controller="Product" asp-action="Details" asp-route-id="@p.Id">
+                                                <img src="@((p.Thumbnail ?? "/images/product-placeholder.png"))" alt="product" class="img-fluid" style="height:120px;object-fit:contain" />
+                                            </a>
+                                        </div>
+                                        <div class="small fw-semibold">
+                                            <a asp-controller="Product" asp-action="Details" asp-route-id="@p.Id" class="text-decoration-none text-dark">@p.Name</a>
+                                        </div>
+                                        <div class="small text-muted">@((p.BrandName ?? ""))</div>
                                     </div>
-                                    <div class="small fw-semibold">Product title lorem</div>
-                                    <div class="small text-muted mt-1">$45.00</div>
                                 </div>
-                            </div>
-                        }
-                    </div>
-
-                    <nav class="mt-4">
-                        <ul class="pagination page-pagination">
-                            <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
-                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                            <li class="page-item"><a class="page-link" href="#">2</a></li>
-                            <li class="page-item"><a class="page-link" href="#">Next</a></li>
-                        </ul>
-                    </nav>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="row g-3">
+                           
+                                <div class="col-6 col-sm-4 col-md-3">
+                                    <div class="product-card text-center">
+                                        <div>
+                                            @await Component.InvokeAsync("FeaturedProducts")
+                                        </div>
+                                    </div>
+                                </div>
+                            
+                        </div>
+                    }
                 }
             </section>
         </div>

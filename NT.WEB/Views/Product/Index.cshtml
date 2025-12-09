@@ -24,9 +24,10 @@
                  
                     <a asp-controller="Color" asp-action="Index" class="nav-link"><i class="fa fa-palette me-2"></i>Màu Sắc</a>
                     <a asp-controller="Length" asp-action="Index" class="nav-link"><i class="fa fa-ruler-horizontal me-2"></i>Độ Dài</a>
-                    <a asp-controller="SurfaceFinish" asp-action="Index" class="nav-link"><i class="fa fa-layer-group me-2"></i>Lớp Phủ</a>
+                    <a asp-controller="SurfaceFinish" asp-action="Index" class="nav-link"><i class="fa fa-layer-group me-2"></i>thiện bề mặt</a>
                     <a asp-controller="Hardness" asp-action="Index" class="nav-link"><i class="fa fa-gavel me-2"></i>Độ Cứng</a>
                     <a asp-controller="Elasticity" asp-action="Index" class="nav-link"><i class="fa fa-wave-square me-2"></i>Độ Đàn Hồi</a>
+                    <a asp-controller="OriginCountry" asp-action="Index" class="nav-link"><i class="fa fa-wave-square me-2"></i>Xuất xứ</a>
                  
                 </nav>
             </div>
@@ -51,6 +52,7 @@
                     <thead>
                         <tr>
                             <th>@Html.DisplayNameFor((NT.SHARED.Models.Product m) => m.ProductCode)</th>
+                            <th>Ảnh</th>
                             <th>@Html.DisplayNameFor((NT.SHARED.Models.Product m) => m.Name)</th>
                             <th>@Html.DisplayNameFor((NT.SHARED.Models.Product m) => m.BrandId)</th>
                             <th></th>
@@ -69,6 +71,12 @@
                         {
                             <tr>
                                 <td>@p.ProductCode</td>
+                                <td>
+                                    @if(!string.IsNullOrWhiteSpace(p.Thumbnail))
+                                    {
+                                        <img src="@p.Thumbnail" alt="thumb" style="height:48px; max-width:120px; object-fit:cover;" />
+                                    }
+                                </td>
                                 <td>@p.Name</td>
                                 <td>@p.BrandId</td>
                                 <td>
