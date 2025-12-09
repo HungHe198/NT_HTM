@@ -19,6 +19,6 @@ namespace NT.SHARED.Models
             return new OriginCountry { Name = name.Trim(), Description = string.IsNullOrWhiteSpace(description) ? null : description.Trim() };
         }
 
-        public ICollection<ProductDetail> ProductDetails { get; set; } = new List<ProductDetail>();
+        public ICollection<ProductDetail>? ProductDetails { get; set; } = new List<ProductDetail>();
     }
 }

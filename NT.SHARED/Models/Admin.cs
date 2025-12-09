@@ -20,6 +20,6 @@ namespace NT.SHARED.Models
             return new Admin { UserId = userId, Position = string.IsNullOrWhiteSpace(position) ? null : position.Trim(), Salary = salary };
         }
 
-        public User User { get; private set; } = null!;
+        public User? User { get; private set; } 
     }
 }

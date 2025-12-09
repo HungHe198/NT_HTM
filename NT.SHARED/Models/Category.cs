@@ -19,6 +19,6 @@ namespace NT.SHARED.Models
             return new Category { Name = name.Trim(), Description = string.IsNullOrWhiteSpace(description) ? null : description.Trim() };
         }
 
-        public ICollection<ProductCategory> ProductCategories { get; set; } = new List<ProductCategory>();
+        public ICollection<ProductCategory>? ProductCategories { get; set; } = new List<ProductCategory>();
     }
 }

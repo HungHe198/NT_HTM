@@ -195,5 +195,12 @@ namespace NT.BLL.Interfaces
         /// Lưu ý: Chỉ sử dụng các biểu thức có thể dịch sang SQL (EF Core translatable).
         /// </summary>
         Task<IEnumerable<H>> FindAsync(Expression<Func<H, bool>> predicate);
+
+        /// <summary>
+        /// Tìm kiếm theo điều kiện và eager-load các navigation properties được chỉ định.
+        /// </summary>
+        /// <param name="predicate">Điều kiện lọc.</param>
+        /// <param name="includes">Danh sách các navigation cần Include.</param>
+        Task<IEnumerable<H>> FindAsync(Expression<Func<H, bool>> predicate, params Expression<Func<H, object>>[] includes);
     }
 }

@@ -22,7 +22,7 @@ namespace NT.SHARED.Models
             return new Customer { UserId = userId, Address = address, DoB = dob, Gender = gender };
         }
 
-        public User User { get; set; } = null!;
+        public User? User { get; set; } = null!;
         public Cart? Cart { get; set; }
     }
 }

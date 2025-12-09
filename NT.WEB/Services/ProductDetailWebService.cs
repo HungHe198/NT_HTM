@@ -20,5 +20,20 @@ namespace NT.WEB.Services
             Expression<Func<ProductDetail, bool>> predicate = pd => pd.ProductId == productId;
             return _repository.FindAsync(predicate);
         }
+
+        public Task<IEnumerable<ProductDetail>> GetWithLookupsByProductIdAsync(Guid productId)
+        {
+            if (productId == Guid.Empty) return Task.FromResult<IEnumerable<ProductDetail>>(new List<ProductDetail>());
+            Expression<Func<ProductDetail, bool>> predicate = pd => pd.ProductId == productId;
+            return _repository.FindAsync(
+                predicate,
+                pd => pd.Length,
+                pd => pd.SurfaceFinish,
+                pd => pd.Hardness,
+                pd => pd.Elasticity,
+                pd => pd.OriginCountry,
+                pd => pd.Color
+            );
+        }
     }
 }

@@ -63,7 +63,7 @@ namespace NT.WEB.Controllers
             var product = await _productService.GetByIdAsync(id);
             if (product is null) return NotFound();
 
-            var details = (await _productDetailService.GetByProductIdAsync(id)).ToList();
+            var details = (await _productDetailService.GetWithLookupsByProductIdAsync(id)).ToList();
             ViewBag.ProductDetails = details;
 
             return View(product);

@@ -20,7 +20,7 @@ namespace NT.SHARED.Models
             return new CartDetail { CartId = cartId, ProductDetailId = productDetailId, Quantity = quantity };
         }
 
-        public Cart Cart { get; set; } = null!;
-        public ProductDetail ProductDetail { get; set; } = null!;
+        public Cart? Cart { get; set; } 
+        public ProductDetail? ProductDetail { get; set; } 
     }
 }

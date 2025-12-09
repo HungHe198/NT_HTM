@@ -43,8 +43,8 @@ namespace NT.SHARED.Models
             return new Product { BrandId = brandId, ProductCode = productCode.Trim(), Name = name.Trim() };
         }
 
-        public Brand Brand { get; set; } = null!;
-        public ICollection<ProductCategory> ProductCategories { get; set; } = new List<ProductCategory>();
-        public ICollection<ProductDetail> ProductDetails { get; set; } = new List<ProductDetail>();
+        public Brand? Brand { get; set; }
+        public ICollection<ProductCategory>? ProductCategories { get; set; } = new List<ProductCategory>();
+        public ICollection<ProductDetail>? ProductDetails { get; set; } = new List<ProductDetail>();
     }
 }

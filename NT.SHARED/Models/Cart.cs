@@ -19,7 +19,7 @@ namespace NT.SHARED.Models
             return new Cart { CustomerId = customerId };
         }
 
-        public Customer Customer { get; set; } = null!;
-        public ICollection<CartDetail> Items { get; set; } = new List<CartDetail>();
+        public Customer? Customer { get; set; } 
+        public ICollection<CartDetail>? Items { get; set; } = new List<CartDetail>();
     }
 }

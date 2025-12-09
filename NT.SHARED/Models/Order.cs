@@ -67,9 +67,9 @@ namespace NT.SHARED.Models
             };
         }
 
-        public Customer Customer { get; set; } = null!;
+        public Customer? Customer { get; set; } 
         public Voucher? Voucher { get; set; }
-        public PaymentMethod PaymentMethod { get; set; } = null!;
-        public ICollection<OrderDetail> Details { get; set; } = new List<OrderDetail>();
+        public PaymentMethod? PaymentMethod { get; set; } 
+        public ICollection<OrderDetail>? Details { get; set; } = new List<OrderDetail>();
     }
 }

@@ -60,7 +60,7 @@ namespace NT.SHARED.Models
         [Display(Name = "Số lượng bán")]
         public int SoldQuantity { get; set; }
         [Display(Name = "Giá vốn")]
-        public decimal? CostPrice { get; set; }  
+        public decimal? CostPrice { get; set; }
         [Display(Name = "Ngày nhập cuối")]
         public DateTime? LastImportDate { get; set; }
         [Display(Name = "Hoạt động")]
@@ -74,22 +74,22 @@ namespace NT.SHARED.Models
             return new ProductDetail { ProductId = productId, LengthId = lengthId, SurfaceFinishId = surfaceFinishId, HardnessId = hardnessId, ElasticityId = elasticityId, OriginCountryId = originCountryId, ColorId = colorId, Price = price, StockQuantity = stockQuantity, IsActive = true };
         }
 
-        [Display(Name = "Sản phẩm")]
-        public Product Product { get; set; } = null!;
-        [Display(Name = "Chiều dài")]
-        public Length Length { get; set; } = null!;
-        [Display(Name = "Hoàn thiện bề mặt")]
-        public SurfaceFinish SurfaceFinish { get; set; } = null!;
-        [Display(Name = "Độ cứng")]
-        public Hardness Hardness { get; set; } = null!;
-        [Display(Name = "Độ đàn hồi")]
-        public Elasticity Elasticity { get; set; } = null!;
-        [Display(Name = "Xuất xứ")]
-        public OriginCountry OriginCountry { get; set; } = null!;
-        [Display(Name = "Màu")]
-        public Color Color { get; set; } = null!;
-        public ICollection<ProductImage> Images { get; set; } = new List<ProductImage>();
-        public ICollection<CartDetail> CartDetails { get; set; } = new List<CartDetail>();
-        public ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
+        
+        public Product? Product { get; set; }
+        
+        public Length? Length { get; set; }
+        
+        public SurfaceFinish? SurfaceFinish { get; set; }
+        
+        public Hardness? Hardness { get; set; }
+        
+        public Elasticity? Elasticity { get; set; }
+      
+        public OriginCountry? OriginCountry { get; set; }
+    
+        public Color? Color { get; set; }
+        public ICollection<ProductImage>? Images { get; set; } = new List<ProductImage>();
+        public ICollection<CartDetail>? CartDetails { get; set; } = new List<CartDetail>();
+        public ICollection<OrderDetail>? OrderDetails { get; set; } = new List<OrderDetail>();
     }
 }
