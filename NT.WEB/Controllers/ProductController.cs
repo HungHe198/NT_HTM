@@ -81,15 +81,15 @@ namespace NT.WEB.Controllers
             {
                 ModelState.AddModelError(nameof(model.BrandId), "Vui lòng chọn Thương hiệu.");
             }
-            if (!ModelState.IsValid)
-            {
-                // Log ModelState errors to help debugging
-                var errors = string.Join(" | ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
-                _logger.LogWarning("Create Product validation failed: {Errors}", errors);
-                // repopulate brand list when redisplaying form
-                ViewBag.BrandSelectList = new SelectList(await _brandService.GetAllAsync(), "Id", "Name");
-                return View(model);
-            }
+            //if (!ModelState.IsValid)
+            //{
+            //    // Log ModelState errors to help debugging
+            //    var errors = string.Join(" | ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
+            //    _logger.LogWarning("Create Product validation failed: {Errors}", errors);
+            //    // repopulate brand list when redisplaying form
+            //    ViewBag.BrandSelectList = new SelectList(await _brandService.GetAllAsync(), "Id", "Name");
+            //    return View(model);
+            //}
 
             try
             {
