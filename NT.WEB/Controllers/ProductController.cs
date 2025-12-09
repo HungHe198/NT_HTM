@@ -10,15 +10,21 @@ using NT.WEB.Services;
 
 namespace NT.WEB.Controllers
 {
+    using Microsoft.AspNetCore.Mvc.Rendering;
+
     public class ProductController : Controller
     {
         private readonly ProductWebService _productService;
         private readonly ProductDetailWebService _productDetailService;
+        private readonly BrandWebService _brandService;
+        private readonly Microsoft.Extensions.Logging.ILogger<ProductController> _logger;
 
-        public ProductController(ProductWebService productService, ProductDetailWebService productDetailService)
+        public ProductController(ProductWebService productService, ProductDetailWebService productDetailService, BrandWebService brandService, Microsoft.Extensions.Logging.ILogger<ProductController> logger)
         {
             _productService = productService ?? throw new ArgumentNullException(nameof(productService));
             _productDetailService = productDetailService ?? throw new ArgumentNullException(nameof(productDetailService));
+            _brandService = brandService ?? throw new ArgumentNullException(nameof(brandService));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         // GET: /Product
@@ -45,8 +51,10 @@ namespace NT.WEB.Controllers
         }
 
         // GET: /Product/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
+            // prepare brand dropdown
+            ViewBag.BrandSelectList = new SelectList(await _brandService.GetAllAsync(), "Id", "Name");
             return View();
         }
 
@@ -55,10 +63,46 @@ namespace NT.WEB.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Product model)
         {
-            if (!ModelState.IsValid) return View(model);
+            _logger.LogInformation("Create POST invoked. Model values: BrandId={BrandId}, ProductCode={ProductCode}, Name={Name}", model?.BrandId, model?.ProductCode, model?.Name);
+            try
+            {
+                if (Request.HasFormContentType)
+                {
+                    var formPairs = Request.Form.Select(kvp => kvp.Key + "=" + string.Join(",", kvp.Value.ToArray()));
+                    _logger.LogDebug("Create POST form: {Form}", string.Join(";", formPairs));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "Failed to read request form");
+            }
+            // ensure Brand chosen
+            if (model.BrandId == Guid.Empty)
+            {
+                ModelState.AddModelError(nameof(model.BrandId), "Vui lòng chọn Thương hiệu.");
+            }
+            if (!ModelState.IsValid)
+            {
+                // Log ModelState errors to help debugging
+                var errors = string.Join(" | ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
+                _logger.LogWarning("Create Product validation failed: {Errors}", errors);
+                // repopulate brand list when redisplaying form
+                ViewBag.BrandSelectList = new SelectList(await _brandService.GetAllAsync(), "Id", "Name");
+                return View(model);
+            }
 
-            await _productService.AddAsync(model);
-            await _productService.SaveChangesAsync();
+            try
+            {
+                await _productService.AddAsync(model);
+                await _productService.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to create product");
+                ModelState.AddModelError(string.Empty, "Đã xảy ra lỗi khi tạo sản phẩm. Vui lòng thử lại hoặc kiểm tra log.");
+                ViewBag.BrandSelectList = new SelectList(await _brandService.GetAllAsync(), "Id", "Name", model.BrandId);
+                return View(model);
+            }
 
             return RedirectToAction(nameof(Index));
         }
@@ -71,6 +115,8 @@ namespace NT.WEB.Controllers
             var product = await _productService.GetByIdAsync(id);
             if (product is null) return NotFound();
 
+            // prepare brand dropdown with selected value
+            ViewBag.BrandSelectList = new SelectList(await _brandService.GetAllAsync(), "Id", "Name", product.BrandId);
             return View(product);
         }
 
@@ -80,10 +126,34 @@ namespace NT.WEB.Controllers
         public async Task<IActionResult> Edit(Guid id, Product model)
         {
             if (id == Guid.Empty || model is null || id != model.Id) return BadRequest();
-            if (!ModelState.IsValid) return View(model);
 
-            await _productService.UpdateAsync(model);
-            await _productService.SaveChangesAsync();
+            // ensure Brand chosen
+            if (model.BrandId == Guid.Empty)
+            {
+                ModelState.AddModelError(nameof(model.BrandId), "Vui lòng chọn Thương hiệu.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                var errors = string.Join(" | ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
+                _logger.LogWarning("Edit Product validation failed for {ProductId}: {Errors}", id, errors);
+                // repopulate brand list when returning view on validation error
+                ViewBag.BrandSelectList = new SelectList(await _brandService.GetAllAsync(), "Id", "Name", model.BrandId);
+                return View(model);
+            }
+
+            try
+            {
+                await _productService.UpdateAsync(model);
+                await _productService.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to update product {ProductId}", id);
+                ModelState.AddModelError(string.Empty, "Đã xảy ra lỗi khi cập nhật sản phẩm. Vui lòng thử lại hoặc kiểm tra log.");
+                ViewBag.BrandSelectList = new SelectList(await _brandService.GetAllAsync(), "Id", "Name", model.BrandId);
+                return View(model);
+            }
 
             return RedirectToAction(nameof(Index));
         }
