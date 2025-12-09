@@ -34,7 +34,7 @@ namespace NT.SHARED.Models
             return new OrderDetail { OrderId = orderId, ProductDetailId = productDetailId, Quantity = quantity, UnitPrice = unitPrice, TotalPrice = quantity * unitPrice };
         }
 
-        public Order Order { get; set; } = null!;
-        public ProductDetail ProductDetail { get; set; } = null!;
+        public Order? Order { get; set; }   
+        public ProductDetail? ProductDetail { get; set; }   
     }
 }

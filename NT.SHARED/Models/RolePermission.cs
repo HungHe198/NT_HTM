@@ -17,7 +17,7 @@ namespace NT.SHARED.Models
             return new RolePermission { RoleId = roleId, PermissionId = permissionId };
         }
 
-        public Role Role { get; private set; } = null!;
-        public Permission Permission { get; private set; } = null!;
+        public Role? Role { get; private set; }  
+        public Permission? Permission { get; private set; }   
     }
 }

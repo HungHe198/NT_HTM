@@ -17,7 +17,7 @@ namespace NT.SHARED.Models
             return new ProductCategory { CategoryId = categoryId, ProductId = productId };
         }
 
-        public Category Category { get; set; } = null!;
-        public Product Product { get; set; } = null!;
+        public Category? Category { get; set; }
+        public Product? Product { get; set; }
     }
 }

@@ -19,6 +19,6 @@ namespace NT.SHARED.Models
             return new ProductImage { ProductDetailId = productDetailId, ImageUrl = imageUrl.Trim() };
         }
 
-        public ProductDetail ProductDetail { get; set; } = null!;
+        public ProductDetail? ProductDetail { get; set; }   
     }
 }

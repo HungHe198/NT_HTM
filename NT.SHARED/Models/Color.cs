@@ -19,6 +19,6 @@ namespace NT.SHARED.Models
             return new Color { Name = name.Trim(), HexCode = string.IsNullOrWhiteSpace(hexCode) ? null : hexCode.Trim() };
         }
 
-        public ICollection<ProductDetail> ProductDetails { get; set; } = new List<ProductDetail>();
+        public ICollection<ProductDetail>? ProductDetails { get; set; } = new List<ProductDetail>();
     }
 }

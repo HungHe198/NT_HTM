@@ -17,7 +17,7 @@ namespace NT.SHARED.Models
             return new Role { Name = name.Trim() };
         }
 
-        public ICollection<RolePermission> RolePermissions { get; private set; } = new List<RolePermission>();
-        public ICollection<User> Users { get; private set; } = new List<User>();
+        public ICollection<RolePermission>? RolePermissions { get; private set; } = new List<RolePermission>();
+        public ICollection<User>? Users { get; private set; } = new List<User>();
     }
 }

@@ -20,6 +20,6 @@ namespace NT.SHARED.Models
             return new Brand { Name = name.Trim(), Website = string.IsNullOrWhiteSpace(website) ? null : website };
         }
 
-        public ICollection<Product> Products { get; set; } = new List<Product>();
+        public ICollection<Product>? Products { get; set; } = new List<Product>();
     }
 }

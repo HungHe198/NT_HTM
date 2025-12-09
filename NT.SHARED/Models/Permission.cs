@@ -32,6 +32,6 @@ namespace NT.SHARED.Models
             };
         }
 
-        public ICollection<RolePermission> RolePermissions { get; private set; } = new List<RolePermission>();
+        public ICollection<RolePermission>? RolePermissions { get; private set; } = new List<RolePermission>();
     }
 }

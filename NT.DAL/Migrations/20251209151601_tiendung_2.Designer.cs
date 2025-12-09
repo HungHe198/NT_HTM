@@ -12,8 +12,8 @@ using NT.DAL.ContextFile;
 namespace NT.DAL.Migrations
 {
     [DbContext(typeof(NTAppDbContext))]
-    [Migration("20251209144014_DUNGPT_1")]
-    partial class DUNGPT_1
+    [Migration("20251209151601_tiendung_2")]
+    partial class tiendung_2
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

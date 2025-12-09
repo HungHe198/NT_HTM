@@ -97,6 +97,22 @@ namespace NT.DAL.Repositories
         }
 
         /// <summary>
+        /// Tìm kiếm với Include các navigation properties.
+        /// </summary>
+        public async Task<IEnumerable<H>> FindAsync(Expression<Func<H, bool>> predicate, params Expression<Func<H, object>>[] includes)
+        {
+            IQueryable<H> query = _dbSet;
+            if (includes != null)
+            {
+                foreach (var include in includes)
+                {
+                    query = query.Include(include);
+                }
+            }
+            return await query.Where(predicate).ToListAsync();
+        }
+
+        /// <summary>
         /// Ngoại lệ tùy chỉnh khi không tìm thấy entity.
         /// </summary>
         private class NotFoundException : Exception

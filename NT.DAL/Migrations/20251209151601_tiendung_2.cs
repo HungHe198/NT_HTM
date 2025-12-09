@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace NT.DAL.Migrations
 {
     /// <inheritdoc />
-    public partial class DUNGPT_1 : Migration
+    public partial class tiendung_2 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
