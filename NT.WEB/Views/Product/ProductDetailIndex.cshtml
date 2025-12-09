@@ -158,5 +158,24 @@
         });
 
         updateAvailability();
+
+        function findSelectedDetail() {
+            if (!selectedHardnessId || !selectedLengthId) return null;
+            return details.find(d => d.hardnessId === selectedHardnessId && d.lengthId === selectedLengthId && d.stock > 0) || null;
+        }
+
+        document.getElementById('add-to-cart').addEventListener('click', () => {
+            const selected = findSelectedDetail();
+            if (!selected) { alert('Vui lòng ch?n ?? dài và ?? c?ng có hàng.'); return; }
+            const qty = Math.max(1, parseInt(document.getElementById('qty').value || '1'));
+            const form = document.createElement('form');
+            form.method = 'post';
+            form.action = '/Cart/Add';
+            const pd = document.createElement('input'); pd.type = 'hidden'; pd.name = 'productDetailId'; pd.value = selected.id;
+            const q = document.createElement('input'); q.type = 'hidden'; q.name = 'quantity'; q.value = qty;
+            form.appendChild(pd); form.appendChild(q);
+            document.body.appendChild(form);
+            form.submit();
+        });
     </script>
 }
