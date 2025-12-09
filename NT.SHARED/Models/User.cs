@@ -41,7 +41,7 @@ namespace NT.SHARED.Models
             };
         }
 
-        public Role Role { get; set; } = null!;
+        public Role? Role { get; set; }
         public Admin? Admin { get; set; }
         public Employee? Employee { get; set; }
         public Customer? Customer { get; set; }

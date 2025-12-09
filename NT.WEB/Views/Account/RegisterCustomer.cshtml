@@ -1,0 +1,53 @@
+@model NT.SHARED.Models.User
+@{
+    ViewData["Title"] = "??ng ký khách hàng";
+}
+
+<h2 class="mb-3">??ng ký khách hàng</h2>
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+@if (TempData["Warning"] != null)
+{
+    <div class="alert alert-warning">@TempData["Warning"]</div>
+}
+
+<form asp-action="RegisterCustomer" asp-controller="Account" method="post" class="row g-3">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="All" class="alert alert-danger"></div>
+
+    <div class="col-md-6">
+        <label asp-for="Username" class="form-label"></label>
+        <input asp-for="Username" class="form-control" />
+        <span asp-validation-for="Username" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-6">
+        <label asp-for="Email" class="form-label"></label>
+        <input asp-for="Email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-6">
+        <label asp-for="Fullname" class="form-label"></label>
+        <input asp-for="Fullname" class="form-control" />
+        <span asp-validation-for="Fullname" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-6">
+        <label class="form-label">M?t kh?u</label>
+        <!-- Password s? bind vào PasswordHash nh? logic hi?n t?i trong controller -->
+        <input asp-for="PasswordHash" type="password" class="form-control" />
+        <span asp-validation-for="PasswordHash" class="text-danger"></span>
+    </div>
+
+    <div class="col-12">
+        <button type="submit" class="btn btn-primary">??ng ký</button>
+        <a asp-action="Login" asp-controller="Account" class="btn btn-outline-secondary ms-2">?ã có tài kho?n? ??ng nh?p</a>
+    </div>
+</form>
+
+@section Scripts{
+    <partial name="_ValidationScriptsPartial" />
+}
