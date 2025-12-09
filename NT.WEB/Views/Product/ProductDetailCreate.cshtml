@@ -1,34 +1,212 @@
-@model NT.SHARED.Models.ProductDetail
+﻿@model NT.SHARED.Models.ProductDetail
 
 @{
-    ViewBag.Title = "Create Product Detail";
+    ViewBag.Title = "Tạo chi tiết sản phẩm";
     var productId = ViewBag.ProductId as Guid? ?? Guid.Empty;
 }
 
-<h1>Create Product Detail</h1>
+<h1>Tạo chi tiết sản phẩm</h1>
 
 <form asp-action="CreateDetail" method="post">
     <input type="hidden" name="productId" value="@productId" />
+
     <div class="form-group">
-        <label asp-for="Price"></label>
-        <input asp-for="Price" class="form-control" />
+        <label asp-for="Price">@Html.DisplayNameFor(m => m.Price)</label>
+        <input asp-for="Price" class="form-control" type="number" step="0.01" />
         <span asp-validation-for="Price" class="text-danger"></span>
     </div>
+
     <div class="form-group">
-        <label asp-for="StockQuantity"></label>
+        <label asp-for="StockQuantity">@Html.DisplayNameFor(m => m.StockQuantity)</label>
         <input asp-for="StockQuantity" class="form-control" />
         <span asp-validation-for="StockQuantity" class="text-danger"></span>
     </div>
-    <!-- For simplicity: user provides FK GUIDs for related lookups; ideally replace with dropdowns -->
-    <div class="form-group">
-        <label asp-for="LengthId">LengthId (GUID)</label>
-        <input asp-for="LengthId" class="form-control" />
+
+    <!-- Chọn giá trị từ danh mục -->
+    <input type="hidden" name="productId" value="@productId" />
+    <div class="mb-3">
+        <label class="form-label">Sản phẩm</label>
+        <input class="form-control" value="@productId" readonly />
     </div>
+
     <div class="form-group">
-        <label asp-for="ColorId">ColorId (GUID)</label>
-        <input asp-for="ColorId" class="form-control" />
+        <label asp-for="LengthId">@Html.DisplayNameFor(m => m.LengthId)</label>
+        <select asp-for="LengthId" asp-items="ViewBag.LengthSelectList" class="form-control">
+            <option value="">-- Chọn chiều dài --</option>
+        </select>
+        <span asp-validation-for="LengthId" class="text-danger"></span>
     </div>
-    <!-- add other FK inputs similarly as needed -->
-    <button type="submit" class="btn btn-primary">Save</button>
-    <a asp-action="Details" asp-route-id="@productId" class="btn btn-secondary">Cancel</a>
+
+    <div class="form-group">
+        <label asp-for="SurfaceFinishId">@Html.DisplayNameFor(m => m.SurfaceFinishId)</label>
+        <select asp-for="SurfaceFinishId" asp-items="ViewBag.SurfaceFinishSelectList" class="form-control">
+            <option value="">-- Chọn hoàn thiện bề mặt --</option>
+        </select>
+        <span asp-validation-for="SurfaceFinishId" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="HardnessId">@Html.DisplayNameFor(m => m.HardnessId)</label>
+        <select asp-for="HardnessId" asp-items="ViewBag.HardnessSelectList" class="form-control">
+            <option value="">-- Chọn độ cứng --</option>
+        </select>
+        <span asp-validation-for="HardnessId" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="ElasticityId">@Html.DisplayNameFor(m => m.ElasticityId)</label>
+        <select asp-for="ElasticityId" asp-items="ViewBag.ElasticitySelectList" class="form-control">
+            <option value="">-- Chọn độ đàn hồi --</option>
+        </select>
+        <span asp-validation-for="ElasticityId" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="OriginCountryId">@Html.DisplayNameFor(m => m.OriginCountryId)</label>
+        <select asp-for="OriginCountryId" asp-items="ViewBag.OriginCountrySelectList" class="form-control">
+            <option value="">-- Chọn xuất xứ --</option>
+        </select>
+        <span asp-validation-for="OriginCountryId" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="ColorId">@Html.DisplayNameFor(m => m.ColorId)</label>
+        <select asp-for="ColorId" asp-items="ViewBag.ColorSelectList" class="form-control">
+            <option value="">-- Chọn màu --</option>
+        </select>
+        <span asp-validation-for="ColorId" class="text-danger"></span>
+    </div>
+
+    <hr />
+    <h5>Thông số kỹ thuật</h5>
+
+    <div class="form-group">
+        <label asp-for="Sections">@Html.DisplayNameFor(m => m.Sections)</label>
+        <input asp-for="Sections" class="form-control" />
+        <span asp-validation-for="Sections" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="CollapsedLength">@Html.DisplayNameFor(m => m.CollapsedLength)</label>
+        <input asp-for="CollapsedLength" class="form-control" />
+        <span asp-validation-for="CollapsedLength" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Weight">@Html.DisplayNameFor(m => m.Weight)</label>
+        <input asp-for="Weight" class="form-control" />
+        <span asp-validation-for="Weight" class="text-danger"></span>
+    </div>
+
+    <div class="form-row">
+        <div class="form-group col-md-4">
+            <label asp-for="TipWeight">@Html.DisplayNameFor(m => m.TipWeight)</label>
+            <input asp-for="TipWeight" class="form-control" />
+            <span asp-validation-for="TipWeight" class="text-danger"></span>
+        </div>
+        <div class="form-group col-md-4">
+            <label asp-for="ButtWeight">@Html.DisplayNameFor(m => m.ButtWeight)</label>
+            <input asp-for="ButtWeight" class="form-control" />
+            <span asp-validation-for="ButtWeight" class="text-danger"></span>
+        </div>
+        <div class="form-group col-md-4">
+            <label asp-for="TipDiameter">@Html.DisplayNameFor(m => m.TipDiameter)</label>
+            <input asp-for="TipDiameter" class="form-control" />
+            <span asp-validation-for="TipDiameter" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="form-group col-md-4">
+            <label asp-for="TopDiameter">@Html.DisplayNameFor(m => m.TopDiameter)</label>
+            <input asp-for="TopDiameter" class="form-control" />
+            <span asp-validation-for="TopDiameter" class="text-danger"></span>
+        </div>
+        <div class="form-group col-md-4">
+            <label asp-for="ButtDiameter">@Html.DisplayNameFor(m => m.ButtDiameter)</label>
+            <input asp-for="ButtDiameter" class="form-control" />
+            <span asp-validation-for="ButtDiameter" class="text-danger"></span>
+        </div>
+        <div class="form-group col-md-4">
+            <label asp-for="BalancePoint">@Html.DisplayNameFor(m => m.BalancePoint)</label>
+            <input asp-for="BalancePoint" class="form-control" />
+            <span asp-validation-for="BalancePoint" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="BalanceLoadPoint">@Html.DisplayNameFor(m => m.BalanceLoadPoint)</label>
+        <input asp-for="BalanceLoadPoint" class="form-control" />
+        <span asp-validation-for="BalanceLoadPoint" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="BalanceLoadDescription">@Html.DisplayNameFor(m => m.BalanceLoadDescription)</label>
+        <textarea asp-for="BalanceLoadDescription" class="form-control"></textarea>
+        <span asp-validation-for="BalanceLoadDescription" class="text-danger"></span>
+    </div>
+
+    <hr />
+    <h5>Thông tin bổ sung</h5>
+
+    <div class="form-group">
+        <label asp-for="RecommendedLine">@Html.DisplayNameFor(m => m.RecommendedLine)</label>
+        <input asp-for="RecommendedLine" class="form-control" />
+        <span asp-validation-for="RecommendedLine" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="RecommendedFishWeight">@Html.DisplayNameFor(m => m.RecommendedFishWeight)</label>
+        <input asp-for="RecommendedFishWeight" class="form-control" />
+        <span asp-validation-for="RecommendedFishWeight" class="text-danger"></span>
+    </div>
+
+    <div class="form-row">
+        <div class="form-group col-md-6">
+            <label asp-for="HandleType">@Html.DisplayNameFor(m => m.HandleType)</label>
+            <input asp-for="HandleType" class="form-control" />
+            <span asp-validation-for="HandleType" class="text-danger"></span>
+        </div>
+        <div class="form-group col-md-6">
+            <label asp-for="JointType">@Html.DisplayNameFor(m => m.JointType)</label>
+            <input asp-for="JointType" class="form-control" />
+            <span asp-validation-for="JointType" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Warranty">@Html.DisplayNameFor(m => m.Warranty)</label>
+        <input asp-for="Warranty" class="form-control" />
+        <span asp-validation-for="Warranty" class="text-danger"></span>
+    </div>
+
+    <hr />
+    <h5>Kho và giá</h5>
+
+    <div class="form-row">
+        <div class="form-group col-md-4">
+            <label asp-for="SoldQuantity">@Html.DisplayNameFor(m => m.SoldQuantity)</label>
+            <input asp-for="SoldQuantity" class="form-control" />
+            <span asp-validation-for="SoldQuantity" class="text-danger"></span>
+        </div>
+        <div class="form-group col-md-4">
+            <label asp-for="CostPrice">@Html.DisplayNameFor(m => m.CostPrice)</label>
+            <input asp-for="CostPrice" class="form-control" type="number" step="0.01" />
+            <span asp-validation-for="CostPrice" class="text-danger"></span>
+        </div>
+        <div class="form-group col-md-4">
+            <label asp-for="LastImportDate">@Html.DisplayNameFor(m => m.LastImportDate)</label>
+            <input asp-for="LastImportDate" class="form-control" type="date" />
+            <span asp-validation-for="LastImportDate" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="form-group form-check">
+        <input asp-for="IsActive" class="form-check-input" />
+        <label asp-for="IsActive" class="form-check-label">@Html.DisplayNameFor(m => m.IsActive)</label>
+        <span asp-validation-for="IsActive" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Lưu</button>
+    <a asp-action="Details" asp-route-id="@productId" class="btn btn-secondary">Hủy</a>
 </form>

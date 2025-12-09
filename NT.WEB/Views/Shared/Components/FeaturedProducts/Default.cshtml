@@ -1,0 +1,19 @@
+@model IEnumerable<NT.WEB.ViewComponents.FeaturedProductsViewComponent.FeaturedProductItem>
+
+@if (Model != null && Model.Any())
+{
+    <ul class="list-unstyled mb-0">
+    @foreach(var p in Model)
+    {
+        <li class="d-flex align-items-center py-2 border-bottom">
+            <a asp-controller="Product" asp-action="Details" asp-route-id="@p.Id" class="d-flex align-items-center text-decoration-none w-100">
+                <img src="@(string.IsNullOrWhiteSpace(p.Thumbnail) ? "/images/thumb-1.jpg" : p.Thumbnail)" alt="" style="height:36px;width:36px;object-fit:cover;border-radius:6px;margin-right:.75rem" />
+                <div class="flex-grow-1">
+                    <div class="small fw-semibold text-dark">@p.Name</div>
+                    <div class="small text-muted">@p.BrandName</div>
+                </div>
+            </a>
+        </li>
+    }
+    </ul>
+}

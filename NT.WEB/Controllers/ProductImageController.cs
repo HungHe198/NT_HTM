@@ -1,5 +1,7 @@
 using System;
+using System.IO;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using NT.SHARED.Models;
 using NT.WEB.Services;
@@ -107,6 +109,34 @@ namespace NT.WEB.Controllers
             if (productDetailId == Guid.Empty) return BadRequest();
             var items = await _service.GetByProductDetailIdAsync(productDetailId);
             return Json(items);
+        }
+
+        // POST: /ProductImage/Upload
+        // Uploads an image file to wwwroot/uploads/products and returns the public URL.
+        [HttpPost]
+        public async Task<IActionResult> Upload(IFormFile file)
+        {
+            if (file == null || file.Length == 0) return BadRequest(new { error = "No file provided" });
+
+            var uploadsRoot = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "products");
+            if (!Directory.Exists(uploadsRoot)) Directory.CreateDirectory(uploadsRoot);
+
+            var ext = Path.GetExtension(file.FileName);
+            var fileName = $"{Guid.NewGuid()}{ext}";
+            var filePath = Path.Combine(uploadsRoot, fileName);
+
+            try
+            {
+                await using var stream = new FileStream(filePath, FileMode.Create);
+                await file.CopyToAsync(stream);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = "Failed to save file", detail = ex.Message });
+            }
+
+            var publicUrl = $"/uploads/products/{fileName}";
+            return Json(new { url = publicUrl });
         }
     }
 }
