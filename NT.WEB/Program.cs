@@ -20,6 +20,8 @@ builder.Services.AddScoped<IVocherService, VocherService>();
 // Register web services used by controllers
 builder.Services.AddScoped<ProductWebService>();
 builder.Services.AddScoped<ProductDetailWebService>();
+builder.Services.AddScoped<CartWebService>();
+builder.Services.AddScoped<CartDetailWebService>();
 builder.Services.AddScoped<BrandWebService>();
 builder.Services.AddScoped<ColorWebService>();
 builder.Services.AddScoped<LengthWebService>();
@@ -47,6 +49,13 @@ builder.Services.AddAuthentication(Microsoft.AspNetCore.Authentication.Cookies.C
         options.Cookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Lax;
     }); 
 builder.Services.AddAuthorization();
+
+// Session for cart
+builder.Services.AddSession(options =>
+{
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
 
 var app = builder.Build();
 
@@ -94,6 +103,8 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseSession();
 
 app.MapControllerRoute(
     name: "default",
