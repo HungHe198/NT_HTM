@@ -29,7 +29,15 @@ namespace NT.WEB.Controllers
             return View(item);
         }
 
-        public IActionResult Create() => View();
+        public IActionResult Create(Guid? userId = null)
+        {
+            var model = new Customer();
+            if (userId.HasValue && userId.Value != Guid.Empty)
+            {
+                model.UserId = userId.Value;
+            }
+            return View(model);
+        }
 
         [HttpPost]
         [ValidateAntiForgeryToken]

@@ -12,8 +12,8 @@ using NT.DAL.ContextFile;
 namespace NT.DAL.Migrations
 {
     [DbContext(typeof(NTAppDbContext))]
-    [Migration("20251205072613_HUY_BG_3")]
-    partial class HUY_BG_3
+    [Migration("20251209144014_DUNGPT_1")]
+    partial class DUNGPT_1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -201,12 +201,6 @@ namespace NT.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("ManagerId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("ManagerId1")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("Position")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
@@ -218,10 +212,6 @@ namespace NT.DAL.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ManagerId");
-
-                    b.HasIndex("ManagerId1");
 
                     b.HasIndex("UserId")
                         .IsUnique();
@@ -275,9 +265,6 @@ namespace NT.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("CouponId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid?>("CreatedByUserId")
                         .HasColumnType("uniqueidentifier");
 
@@ -299,7 +286,12 @@ namespace NT.DAL.Migrations
                     b.Property<Guid>("PaymentMethodId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("ShippingAddress")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Status")
@@ -308,13 +300,16 @@ namespace NT.DAL.Migrations
                     b.Property<decimal>("TotalAmount")
                         .HasColumnType("decimal(18,2)");
 
-                    b.HasKey("Id");
+                    b.Property<Guid?>("VoucherId")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.HasIndex("CouponId");
+                    b.HasKey("Id");
 
                     b.HasIndex("CustomerId");
 
                     b.HasIndex("PaymentMethodId");
+
+                    b.HasIndex("VoucherId");
 
                     b.ToTable("Order", (string)null);
                 });
@@ -327,9 +322,6 @@ namespace NT.DAL.Migrations
 
                     b.Property<string>("ColorAtOrder")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal?>("DiscountPercent")
-                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("HardnessAtOrder")
                         .HasColumnType("nvarchar(max)");
@@ -551,9 +543,6 @@ namespace NT.DAL.Migrations
                     b.Property<Guid>("HardnessId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<decimal?>("InventoryValue")
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
@@ -575,9 +564,6 @@ namespace NT.DAL.Migrations
                     b.Property<Guid>("ProductId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<decimal?>("ProfitMargin")
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<string>("RecommendedFishWeight")
                         .HasColumnType("nvarchar(max)");
 
@@ -595,6 +581,9 @@ namespace NT.DAL.Migrations
 
                     b.Property<Guid>("SurfaceFinishId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("TipDiameter")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("TipWeight")
                         .HasColumnType("nvarchar(max)");
@@ -830,33 +819,17 @@ namespace NT.DAL.Migrations
 
             modelBuilder.Entity("NT.SHARED.Models.Employee", b =>
                 {
-                    b.HasOne("NT.SHARED.Models.Employee", null)
-                        .WithMany()
-                        .HasForeignKey("ManagerId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("NT.SHARED.Models.Employee", "Manager")
-                        .WithMany()
-                        .HasForeignKey("ManagerId1");
-
                     b.HasOne("NT.SHARED.Models.User", "User")
                         .WithOne("Employee")
                         .HasForeignKey("NT.SHARED.Models.Employee", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Manager");
-
                     b.Navigation("User");
                 });
 
             modelBuilder.Entity("NT.SHARED.Models.Order", b =>
                 {
-                    b.HasOne("NT.SHARED.Models.Voucher", "Coupon")
-                        .WithMany()
-                        .HasForeignKey("CouponId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
                     b.HasOne("NT.SHARED.Models.Customer", "Customer")
                         .WithMany()
                         .HasForeignKey("CustomerId")
@@ -869,11 +842,16 @@ namespace NT.DAL.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Coupon");
+                    b.HasOne("NT.SHARED.Models.Voucher", "Voucher")
+                        .WithMany()
+                        .HasForeignKey("VoucherId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Customer");
 
                     b.Navigation("PaymentMethod");
+
+                    b.Navigation("Voucher");
                 });
 
             modelBuilder.Entity("NT.SHARED.Models.OrderDetail", b =>
