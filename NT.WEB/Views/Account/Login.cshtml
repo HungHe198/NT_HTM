@@ -1,4 +1,4 @@
-@model NT.SHARED.DTOs.LoginDto
+﻿@model NT.SHARED.DTOs.LoginDto
 @{
     ViewBag.Title = "Login";
 }
@@ -20,8 +20,8 @@
         <input asp-for="Password" type="password" class="form-control" />
         <span asp-validation-for="Password" class="text-danger"></span>
     </div>
-    <button type="submit" class="btn btn-primary">??ng nh?p</button>
-    <a asp-action="Index" asp-controller="Register" asp-route-client="true" class="btn btn-outline-secondary ms-2">??ng k�</a>
+    <button type="submit" class="btn btn-primary">Đăng nhập</button>
+    <a asp-action="RegisterCustomer" asp-controller="Account" asp-route-client="true" class="btn btn-outline-secondary ms-2">Đăng kí</a>
 </form>
 
 @section Scripts{

@@ -1,45 +1,109 @@
 ﻿@{
     Layout = null;
+    var title = ViewData["Title"] ?? "NT.WEB";
 }
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <title>Client Site</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+    <title>@title - NT.WEB</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    @RenderSection("Styles", required: false)
+
+    <style>
+        body { background: #f5f7fb; }
+        .topbar { background: #fff; border-bottom: 1px solid #e6eef9; }
+        .site-logo { color:#00bcd4; font-weight:700; display:flex; align-items:center; gap:.5rem; }
+        .site-logo img { background: none; display:block; height:48px; width:auto; }
+        .footer-cta { background:#00b8d4; color:#fff; padding:2rem 1rem; }
+    </style>
 </head>
 <body>
-    <!-- Header -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <div class="container">
-            <a class="navbar-brand" href="/">ClientSite</a>
+    <header class="topbar">
+        <nav class="navbar navbar-expand-lg container">
+            <a class="navbar-brand site-logo" asp-controller="Home" asp-action="Index">
+                <img src="~/css/Gemini_Generated_Image_7h114z7h114z7h11.png" alt="Logo" />
+                <span>Fishing Shop</span>
+            </a>
+
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
+
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="/">Trang chủ</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/About">Giới thiệu</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/Product">Sản phẩm</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/Contact">Liên hệ</a></li>
-        <div class="d-flex align-items-center">
-            <a class="me-3 text-muted" href="#"><i class="fa fa-heart"></i></a>
-            <a class="me-3 text-muted" href="#"><i class="fa fa-shopping-cart"></i> <span class="badge bg-danger">3</span></a>
-            <li class="nav-item"><a class="nav-link" asp-controller="Account" asp-action="Login" asp-route-client="true">Đăng Nhập</a></li>
-        </div>
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-controller="Product" asp-action="Index">Sản phẩm</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Privacy">Chính sách</a></li>
                 </ul>
+
+                <form class="d-flex me-3" role="search" method="get" asp-controller="Product" asp-action="Index">
+                    <input class="form-control form-control-sm me-2" type="search" name="q" placeholder="Tìm kiếm sản phẩm..." />
+                    <button class="btn btn-sm btn-outline-primary" type="submit"><i class="fa fa-search"></i></button>
+                </form>
+
+                <div class="d-flex align-items-center">
+                    <a class="me-3 text-muted" href="#"><i class="fa fa-heart"></i></a>
+                    <a class="me-3 text-muted" href="#"><i class="fa fa-shopping-cart"></i> <span class="badge bg-danger">3</span></a>
+                    <a class="nav-link" asp-controller="Account" asp-action="Login" asp-route-client="true">Đăng nhập</a>
+                </div>
             </div>
-        </div>
-    </nav>
-    <!-- Main Content -->
-    <main class="container py-4">
+        </nav>
+    </header>
+
+    <main class="container my-4">
         @RenderBody()
     </main>
-    <!-- Footer -->
-    <footer class="bg-light text-center py-3">
-        <span>&copy; 2025 ClientSite. All rights reserved.</span>
+
+    <footer>
+        <div class="footer-cta">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-4">
+                        <h5>Chào mừng</h5>
+                        <p>Mua sắm đồ câu tốt nhất. Miễn phí vận chuyển với đơn trên 2.000.000đ.</p>
+                    </div>
+                    <div class="col-md-2">
+                        <h6>Tag Clouds</h6>
+                        <ul class="list-unstyled small">
+                            <li>Rods</li>
+                            <li>Reels</li>
+                            <li>Lines</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-3">
+                        <h6>Liên kết chính</h6>
+                        <ul class="list-unstyled small">
+                            <li><a class="text-white" asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+                            <li><a class="text-white" asp-controller="Product" asp-action="Index">Sản phẩm</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-md-3">
+                        <h6>Liên kết hữu ích</h6>
+                        <ul class="list-unstyled small">
+                            <li><a class="text-white" asp-controller="Home" asp-action="Privacy">Chính sách</a></li>
+                            <li><a class="text-white" asp-controller="Home" asp-action="Contact">Liên hệ</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-dark text-light py-2">
+            <div class="container d-flex justify-content-between small">
+                <div>&copy; @DateTime.UtcNow.Year - NT.WEB</div>
+                <div>Developed by Your Team</div>
+            </div>
+        </div>
     </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.4/dist/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @RenderSection("Scripts", required: false)
 </body>
 </html>
