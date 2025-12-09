@@ -69,6 +69,26 @@ namespace NT.WEB.Controllers
             return View(product);
         }
 
+        // GET: /Product/ProductDetailIndex/{id}
+        public async Task<IActionResult> ProductDetailIndex(Guid id)
+        {
+            if (id == Guid.Empty) return BadRequest();
+
+            var product = await _productService.GetByIdAsync(id);
+            if (product is null) return NotFound();
+
+            var details = (await _productDetailService.GetWithLookupsByProductIdAsync(id)).ToList();
+            var hardnessIds = details.Select(d => d.HardnessId).Distinct().ToList();
+            var lengthIds = details.Select(d => d.LengthId).Distinct().ToList();
+
+            ViewBag.Product = product;
+            ViewBag.Details = details;
+            ViewBag.HardnessOptions = (await _hardnessService.GetAllAsync()).Where(h => hardnessIds.Contains(h.Id)).OrderBy(h => h.Name).ToList();
+            ViewBag.LengthOptions = (await _lengthService.GetAllAsync()).Where(l => lengthIds.Contains(l.Id)).OrderBy(l => l.Name).ToList();
+
+            return View("ProductDetailIndex");
+        }
+
         // GET: /Product/Create
         public async Task<IActionResult> Create()
         {

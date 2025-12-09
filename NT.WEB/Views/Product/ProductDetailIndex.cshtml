@@ -1,0 +1,162 @@
+@{
+    Layout = "~/Views/Shared/_ClientLayout.cshtml";
+    var product = ViewBag.Product as NT.SHARED.Models.Product;
+    var details = ViewBag.Details as IEnumerable<NT.SHARED.Models.ProductDetail> ?? Enumerable.Empty<NT.SHARED.Models.ProductDetail>();
+    var hardnessOptions = ViewBag.HardnessOptions as IEnumerable<NT.SHARED.Models.Hardness> ?? Enumerable.Empty<NT.SHARED.Models.Hardness>();
+    var lengthOptions = ViewBag.LengthOptions as IEnumerable<NT.SHARED.Models.Length> ?? Enumerable.Empty<NT.SHARED.Models.Length>();
+}
+
+<div class="product-detail">
+    <div class="row">
+        <div class="col-md-6">
+            <img src="@((product?.Thumbnail) ?? "/images/product-placeholder.png")" alt="@product?.Name" class="img-fluid" />
+        </div>
+        <div class="col-md-6">
+            <h3>@product?.Name</h3>
+            <div class="price-range">
+                @if (details.Any())
+                {
+                    var minPrice = details.Min(d => d.Price);
+                    var maxPrice = details.Max(d => d.Price);
+                    <span class="text-danger fw-bold">@minPrice.ToString("#,##0")? – @maxPrice.ToString("#,##0")?</span>
+                }
+            </div>
+
+            <div class="mt-3">
+                <div class="mb-2">?? c?ng c?a c?n:</div>
+                <div id="hardness-options" class="d-flex flex-wrap gap-2">
+                    @foreach (var h in hardnessOptions)
+                    {
+                        var countForH = details.Count(d => d.HardnessId == h.Id && d.StockQuantity > 0);
+                        var disabled = countForH == 0;
+                        <button type="button"
+                                class="btn btn-outline-secondary option-btn hardness-btn"
+                                data-hardness-id="@h.Id"
+                                disabled="@(disabled ? "disabled" : null)">@h.Name</button>
+                    }
+                </div>
+            </div>
+
+            <div class="mt-3">
+                <div class="mb-2">?? dài:</div>
+                <div id="length-options" class="d-flex flex-wrap gap-2">
+                    @foreach (var l in lengthOptions)
+                    {
+                        var countForL = details.Count(d => d.LengthId == l.Id && d.StockQuantity > 0);
+                        var disabled = countForL == 0;
+                        <button type="button"
+                                class="btn btn-outline-secondary option-btn length-btn"
+                                data-length-id="@l.Id"
+                                disabled="@(disabled ? "disabled" : null)">@l.Name</button>
+                    }
+                </div>
+            </div>
+
+            <div class="mt-3">
+                <div>S? l??ng:</div>
+                <div class="input-group" style="max-width:160px;">
+                    <button class="btn btn-outline-secondary" type="button" id="qty-minus">-</button>
+                    <input type="number" class="form-control" id="qty" value="1" min="1" />
+                    <button class="btn btn-outline-secondary" type="button" id="qty-plus">+</button>
+                </div>
+            </div>
+
+            <div class="mt-3 d-flex gap-2">
+                <button id="add-to-cart" class="btn btn-warning">Thêm vào gi? hàng</button>
+                <button id="buy-now" class="btn btn-danger">Mua ngay</button>
+            </div>
+
+            <div class="mt-2 text-muted" id="selection-summary"></div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const details = @Html.Raw(System.Text.Json.JsonSerializer.Serialize((details).Select(d => new {
+            id = d.Id,
+            price = d.Price,
+            stock = d.StockQuantity,
+            lengthId = d.LengthId,
+            hardnessId = d.HardnessId
+        })));
+
+        let selectedHardnessId = null;
+        let selectedLengthId = null;
+
+        const hardnessButtons = document.querySelectorAll('.hardness-btn');
+        const lengthButtons = document.querySelectorAll('.length-btn');
+        const summaryEl = document.getElementById('selection-summary');
+
+        function setActive(btns, idAttr, id) {
+            btns.forEach(b => {
+                const isActive = id && b.getAttribute(idAttr) === id;
+                b.classList.toggle('btn-secondary', isActive);
+                b.classList.toggle('btn-outline-secondary', !isActive);
+            });
+        }
+
+        function updateAvailability() {
+            let validDetails = details.filter(d => d.stock > 0);
+            if (selectedHardnessId) {
+                validDetails = validDetails.filter(d => d.hardnessId === selectedHardnessId);
+            }
+            if (selectedLengthId) {
+                validDetails = validDetails.filter(d => d.lengthId === selectedLengthId);
+            }
+
+            const validHardnessIds = new Set(validDetails.map(d => d.hardnessId));
+            const validLengthIds = new Set(validDetails.map(d => d.lengthId));
+
+            hardnessButtons.forEach(b => {
+                const id = b.getAttribute('data-hardness-id');
+                const hasStock = details.some(d => d.hardnessId === id && d.stock > 0);
+                b.disabled = !hasStock || (selectedLengthId && !validHardnessIds.has(id));
+            });
+
+            lengthButtons.forEach(b => {
+                const id = b.getAttribute('data-length-id');
+                const hasStock = details.some(d => d.lengthId === id && d.stock > 0);
+                b.disabled = !hasStock || (selectedHardnessId && !validLengthIds.has(id));
+            });
+
+            if (validDetails.length > 0) {
+                const prices = validDetails.map(d => Number(d.price));
+                const min = Math.min(...prices);
+                const max = Math.max(...prices);
+                const totalStock = validDetails.reduce((s,d)=> s + Number(d.stock), 0);
+                summaryEl.textContent = `Giá: ${min.toLocaleString()}?${min !== max ? ' – ' + max.toLocaleString() + '?' : ''} | Còn ${totalStock} hàng`;
+            } else {
+                summaryEl.textContent = 'Không có bi?n th? h?p l? ho?c h?t hàng.';
+            }
+        }
+
+        hardnessButtons.forEach(b => {
+            b.addEventListener('click', () => {
+                const id = b.getAttribute('data-hardness-id');
+                selectedHardnessId = (selectedHardnessId === id) ? null : id;
+                setActive(hardnessButtons, 'data-hardness-id', selectedHardnessId);
+                updateAvailability();
+            });
+        });
+        lengthButtons.forEach(b => {
+            b.addEventListener('click', () => {
+                const id = b.getAttribute('data-length-id');
+                selectedLengthId = (selectedLengthId === id) ? null : id;
+                setActive(lengthButtons, 'data-length-id', selectedLengthId);
+                updateAvailability();
+            });
+        });
+
+        document.getElementById('qty-minus').addEventListener('click', () => {
+            const qty = document.getElementById('qty');
+            qty.value = Math.max(1, parseInt(qty.value || '1') - 1);
+        });
+        document.getElementById('qty-plus').addEventListener('click', () => {
+            const qty = document.getElementById('qty');
+            qty.value = Math.max(1, parseInt(qty.value || '1') + 1);
+        });
+
+        updateAvailability();
+    </script>
+}

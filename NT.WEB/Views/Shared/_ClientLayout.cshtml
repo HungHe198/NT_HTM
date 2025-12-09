@@ -1,7 +1,11 @@
 ﻿@{
     Layout = null;
     var title = ViewData["Title"] ?? "NT.WEB";
+    // Product cards data is prepared in HomeController.Index and passed via ViewBag.ClientLayoutProducts.
 }
+@inject NT.WEB.Services.ProductWebService ProductService
+@inject NT.WEB.Services.ProductDetailWebService ProductDetailService
+@inject NT.WEB.Services.BrandWebService BrandService
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,11 +19,14 @@
     @RenderSection("Styles", required: false)
 
     <style>
-        body { background: #f5f7fb; }
+        html, body { height: 100%; }
+        body { background: #f5f7fb; display: flex; flex-direction: column; min-height: 100vh; }
         .topbar { background: #fff; border-bottom: 1px solid #e6eef9; }
         .site-logo { color:#00bcd4; font-weight:700; display:flex; align-items:center; gap:.5rem; }
         .site-logo img { background: none; display:block; height:48px; width:auto; }
         .footer-cta { background:#00b8d4; color:#fff; padding:2rem 1rem; }
+        main { flex: 1 0 auto; }
+        footer { margin-top: auto; }
     </style>
 </head>
 <body>
@@ -56,6 +63,31 @@
     </header>
 
     <main class="container my-4">
+        @{
+            var products = ViewBag.ClientLayoutProducts as IEnumerable<dynamic>;
+        }
+        @if (products != null && products.Any())
+        {
+            <div class="row g-3 mb-4">
+                @foreach (var p in products)
+                {
+                    <div class="col-6 col-sm-4 col-md-3">
+                        <div class="card h-100">
+                            <a asp-controller="Product" asp-action="ProductDetailIndex" asp-route-id="@p.Id" class="text-decoration-none">
+                                <img src="@((p.Thumbnail ?? "/images/product-placeholder.png"))" class="card-img-top" alt="product" style="height:140px;object-fit:contain" />
+                            </a>
+                            <div class="card-body p-2">
+                                <div class="small fw-semibold text-dark mb-1">
+                                    <a asp-controller="Product" asp-action="ProductDetailIndex" asp-route-id="@p.Id" class="text-decoration-none text-dark">@p.Name</a>
+                                </div>
+                                <div class="small text-muted">@p.BrandName</div>
+                                <div class="small fw-semibold text-primary mt-1">@((p.Price != null) ? string.Format(System.Globalization.CultureInfo.GetCultureInfo("vi-VN"), "{0:C0}", p.Price) : "Liên hệ")</div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
         @RenderBody()
     </main>
 

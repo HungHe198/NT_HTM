@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NT.DAL.ContextFile;
 
@@ -11,9 +12,11 @@ using NT.DAL.ContextFile;
 namespace NT.DAL.Migrations
 {
     [DbContext(typeof(NTAppDbContext))]
-    partial class NTAppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251209163435_dungpt9")]
+    partial class dungpt9
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

@@ -8,13 +8,41 @@ namespace NT.WEB.Controllers
     {
         private readonly ILogger<HomeController> _logger;
 
-        public HomeController(ILogger<HomeController> logger)
+        private readonly NT.WEB.Services.ProductWebService _productService;
+        private readonly NT.WEB.Services.ProductDetailWebService _productDetailService;
+        private readonly NT.WEB.Services.BrandWebService _brandService;
+
+        public HomeController(ILogger<HomeController> logger,
+                              NT.WEB.Services.ProductWebService productService,
+                              NT.WEB.Services.ProductDetailWebService productDetailService,
+                              NT.WEB.Services.BrandWebService brandService)
         {
             _logger = logger;
+            _productService = productService;
+            _productDetailService = productDetailService;
+            _brandService = brandService;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
+            var clientLayoutItems = new List<dynamic>();
+            var allProducts = await _productService.GetAllAsync();
+            foreach (var p in allProducts)
+            {
+                var brand = await _brandService.GetByIdAsync(p.BrandId);
+                var details = await _productDetailService.GetByProductIdAsync(p.Id);
+                var firstDetail = details?.FirstOrDefault();
+                clientLayoutItems.Add(new
+                {
+                    p.Id,
+                    p.Name,
+                    BrandName = brand?.Name,
+                    Thumbnail = p.Thumbnail,
+                    Price = firstDetail?.Price
+                });
+                if (clientLayoutItems.Count >= 12) break;
+            }
+            ViewBag.ClientLayoutProducts = clientLayoutItems;
             return View();
         }
 
