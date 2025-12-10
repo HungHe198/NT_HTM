@@ -30,14 +30,15 @@ namespace NT.WEB.Controllers
             foreach (var p in allProducts)
             {
                 var brand = await _brandService.GetByIdAsync(p.BrandId);
-                var details = await _productDetailService.GetByProductIdAsync(p.Id);
+                var details = await _productDetailService.GetWithLookupsByProductIdAsync(p.Id);
                 var firstDetail = details?.FirstOrDefault();
+                var firstImg = firstDetail?.Images?.FirstOrDefault();
                 clientLayoutItems.Add(new
                 {
                     p.Id,
                     p.Name,
                     BrandName = brand?.Name,
-                    Thumbnail = p.Thumbnail,
+                    Thumbnail = !string.IsNullOrWhiteSpace(p.Thumbnail) ? p.Thumbnail : (firstImg?.ImageUrl ?? p.Thumbnail),
                     Price = firstDetail?.Price
                 });
                 if (clientLayoutItems.Count >= 12) break;

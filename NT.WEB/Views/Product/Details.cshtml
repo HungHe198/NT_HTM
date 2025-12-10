@@ -5,11 +5,15 @@
     var details = ViewBag.ProductDetails as IEnumerable<NT.SHARED.Models.ProductDetail> ?? Enumerable.Empty<NT.SHARED.Models.ProductDetail>();
 }
 
-<h1>Product Details</h1>
+<h1>Chi ti?t s?n ph?m</h1>
 
 <div>
     <h4>@Model.Name (@Model.ProductCode)</h4>
     <p>@Model.ShortDescription</p>
+    @if (!string.IsNullOrWhiteSpace(Model.Thumbnail))
+    {
+        <img src="@Model.Thumbnail" alt="thumbnail" style="height:120px;object-fit:contain" />
+    }
 </div>
 
 <p>

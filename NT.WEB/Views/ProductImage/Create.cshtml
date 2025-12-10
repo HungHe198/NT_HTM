@@ -4,24 +4,65 @@
     ViewBag.Title = "Create Product Image";
 }
 
-<h1>Create Product Image</h1>
+<h1>Thêm ?nh s?n ph?m</h1>
 
-<form asp-action="Create" method="post">
+<form asp-action="Create" method="post" enctype="multipart/form-data" id="img-form">
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-    <div class="form-group">
-        <label asp-for="ProductDetailId"></label>
+    <div class="form-group mb-3">
+        <label asp-for="ProductDetailId">Bi?n th? s?n ph?m</label>
         <input asp-for="ProductDetailId" class="form-control" />
         <span asp-validation-for="ProductDetailId" class="text-danger"></span>
     </div>
 
-    <div class="form-group">
-        <label asp-for="ImageUrl"></label>
-        <input asp-for="ImageUrl" class="form-control" />
-        <span asp-validation-for="ImageUrl" class="text-danger"></span>
-        <small class="form-text text-muted">Enter a full URL or relative path to the image.</small>
+    <div class="form-group mb-3">
+        <label class="form-label">Ch?n ?nh t?i lên</label>
+        <input type="file" id="file" name="file" class="form-control" accept="image/*" />
+        <div class="mt-2">
+            <img id="preview" src="" alt="preview" style="max-height:160px; display:none; object-fit:contain;" />
+        </div>
+        <small class="form-text text-muted">?nh s? ???c t?i lên th? m?c `wwwroot/uploads/products` và h? th?ng ch? l?u ???ng d?n truy c?p web.</small>
     </div>
 
-    <button type="submit" class="btn btn-primary">Save</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+    <!-- ???ng d?n ?nh ???c ?i?n t? ??ng sau khi upload thành công -->
+    <input asp-for="ImageUrl" type="hidden" />
+    <span asp-validation-for="ImageUrl" class="text-danger"></span>
+
+    <button type="submit" class="btn btn-primary">L?u</button>
+    <a asp-action="Index" class="btn btn-secondary">H?y</a>
 </form>
+
+<script>
+    (function(){
+        const fileInput = document.getElementById('file');
+        const preview = document.getElementById('preview');
+        const form = document.getElementById('img-form');
+        const imageUrlInput = document.getElementById('ImageUrl');
+
+        fileInput.addEventListener('change', async function(){
+            const f = this.files && this.files[0];
+            if(!f) return;
+            // preview
+            const url = URL.createObjectURL(f);
+            preview.src = url; preview.style.display = 'inline-block';
+
+            const data = new FormData();
+            data.append('file', f);
+            try{
+                const res = await fetch('/ProductImage/Upload', { method:'POST', body:data });
+                if(!res.ok){ alert('T?i ?nh th?t b?i'); return; }
+                const json = await res.json();
+                imageUrlInput.value = json.url || '';
+            }catch{
+                alert('Có l?i khi t?i ?nh');
+            }
+        });
+
+        form.addEventListener('submit', function(e){
+            if(!imageUrlInput.value){
+                e.preventDefault();
+                alert('Vui lòng ch?n và t?i ?nh tr??c khi l?u');
+            }
+        });
+    })();
+</script>
