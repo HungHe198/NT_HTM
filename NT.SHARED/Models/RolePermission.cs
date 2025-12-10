@@ -5,7 +5,7 @@ namespace NT.SHARED.Models
 {
     public class RolePermission
     {
-        [Display(Name = "Vai tr?")]
+        [Display(Name = "Vai trò")]
         public Guid RoleId { get; private set; }
         [Display(Name = "Quy?n")]
         public Guid PermissionId { get; private set; }

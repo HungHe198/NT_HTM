@@ -15,7 +15,7 @@ namespace NT.SHARED.Models
         public OriginCountry() { }
         public static OriginCountry Create(string name, string? description = null)
         {
-            if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Vui l?ng nh?p tên qu?c gia xu?t x?");
+            if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Vui lòng nh?p tên qu?c gia xu?t x?");
             return new OriginCountry { Name = name.Trim(), Description = string.IsNullOrWhiteSpace(description) ? null : description.Trim() };
         }
 

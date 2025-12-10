@@ -4,12 +4,20 @@ using NT.BLL.Services;
 using NT.DAL.ContextFile;
 using NT.DAL.Repositories;
 using NT.WEB.Services;
+using System.Text;
+using Microsoft.AspNetCore.Localization;
+using System.Globalization;
 
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+// Ensure UTF-8 is used everywhere (helps avoid ? characters for Vietnamese text)
+Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+Console.OutputEncoding = Encoding.UTF8;
+Console.InputEncoding = Encoding.UTF8;
 
 // Register DbContext (NTAppDbContext has OnConfiguring with connection string fallback)
  builder.Services.AddDbContext<NTAppDbContext>(options => { });
@@ -55,6 +63,15 @@ builder.Services.AddSession(options =>
 {
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
+});
+
+// Localization: default to Vietnamese and enforce UTF-8
+var supportedCultures = new[] { new CultureInfo("vi-VN"), new CultureInfo("en-US") };
+builder.Services.Configure<RequestLocalizationOptions>(options =>
+{
+    options.DefaultRequestCulture = new RequestCulture("vi-VN");
+    options.SupportedCultures = supportedCultures;
+    options.SupportedUICultures = supportedCultures;
 });
 
 var app = builder.Build();
@@ -105,6 +122,20 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseSession();
+
+// Apply localization
+app.UseRequestLocalization();
+
+// Ensure text/html responses explicitly declare UTF-8 charset
+app.Use(async (context, next) =>
+{
+    await next();
+    var ct = context.Response.ContentType;
+    if (!string.IsNullOrEmpty(ct) && ct.StartsWith("text/html") && !ct.Contains("charset", StringComparison.OrdinalIgnoreCase))
+    {
+        context.Response.ContentType = "text/html; charset=utf-8";
+    }
+});
 
 app.MapControllerRoute(
     name: "default",

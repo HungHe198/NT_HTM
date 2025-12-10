@@ -15,7 +15,7 @@ namespace NT.SHARED.Models
         public SurfaceFinish() { }
         public static SurfaceFinish Create(string name, string? description = null)
         {
-            if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Vui l?ng nh?p tên hoàn thi?n b? m?t");
+            if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Vui lòng nh?p tên hoàn thi?n b? m?t");
             return new SurfaceFinish { Name = name.Trim(), Description = string.IsNullOrWhiteSpace(description) ? null : description.Trim() };
         }
 
