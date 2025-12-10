@@ -21,6 +21,7 @@ namespace NT.WEB.Controllers
         private readonly ElasticityWebService _elasticityService;
         private readonly OriginCountryWebService _originCountryService;
         private readonly ColorWebService _colorService;
+        private readonly ProductImageWebService _productImageService;
         private readonly Microsoft.Extensions.Logging.ILogger<ProductController> _logger;
 
         public ProductController(ProductWebService productService,
@@ -32,6 +33,7 @@ namespace NT.WEB.Controllers
                                  ElasticityWebService elasticityService,
                                  OriginCountryWebService originCountryService,
                                  ColorWebService colorService,
+                                 ProductImageWebService productImageService,
                                  Microsoft.Extensions.Logging.ILogger<ProductController> logger)
         {
             _productService = productService ?? throw new ArgumentNullException(nameof(productService));
@@ -43,6 +45,7 @@ namespace NT.WEB.Controllers
             _elasticityService = elasticityService ?? throw new ArgumentNullException(nameof(elasticityService));
             _originCountryService = originCountryService ?? throw new ArgumentNullException(nameof(originCountryService));
             _colorService = colorService ?? throw new ArgumentNullException(nameof(colorService));
+            _productImageService = productImageService ?? throw new ArgumentNullException(nameof(productImageService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
@@ -52,6 +55,23 @@ namespace NT.WEB.Controllers
             var model = string.IsNullOrWhiteSpace(q)
                 ? await _productService.GetAllAsync()
                 : await _productService.SearchByNameAsync(q);
+
+            // ensure product has a thumbnail: pick first image from first active detail
+            foreach (var p in model)
+            {
+                if (!string.IsNullOrWhiteSpace(p.Thumbnail)) continue;
+                try
+                {
+                    var details = await _productDetailService.GetWithLookupsByProductIdAsync(p.Id);
+                    var firstDetail = details.FirstOrDefault();
+                    var firstImg = firstDetail?.Images?.FirstOrDefault();
+                    if (firstImg != null && !string.IsNullOrWhiteSpace(firstImg.ImageUrl))
+                    {
+                        p.Thumbnail = firstImg.ImageUrl;
+                    }
+                }
+                catch { }
+            }
             return View(model);
         }
 
@@ -323,9 +343,27 @@ namespace NT.WEB.Controllers
             var query = q ?? string.Empty;
             if (string.IsNullOrWhiteSpace(query)) return Json(Array.Empty<object>());
 
-            var items = await _productService.SearchByNameAsync(query);
-            var result = items.Select(p => new { p.Id, p.Name, p.ProductCode });
-            return Json(result);
+            var items = (await _productService.SuggestAsync(query, 12)).ToList();
+
+            var list = new List<object>(items.Count);
+            foreach (var p in items)
+            {
+                decimal? min = null, max = null;
+                try
+                {
+                    var details = await _productDetailService.GetByProductIdAsync(p.Id);
+                    foreach (var d in details)
+                    {
+                        if (min == null || d.Price < min) min = d.Price;
+                        if (max == null || d.Price > max) max = d.Price;
+                    }
+                }
+                catch { }
+
+                list.Add(new { p.Id, p.Name, p.ProductCode, p.Thumbnail, priceMin = min, priceMax = max });
+            }
+
+            return Json(list);
         }
     }
 }

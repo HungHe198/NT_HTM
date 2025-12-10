@@ -32,7 +32,8 @@ namespace NT.WEB.Services
                 pd => pd.Hardness,
                 pd => pd.Elasticity,
                 pd => pd.OriginCountry,
-                pd => pd.Color
+                pd => pd.Color,
+                pd => pd.Images
             );
         }
     }

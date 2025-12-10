@@ -28,6 +28,7 @@
                     <a asp-controller="Hardness" asp-action="Index" class="nav-link"><i class="fa fa-gavel me-2"></i>Độ Cứng</a>
                     <a asp-controller="Elasticity" asp-action="Index" class="nav-link"><i class="fa fa-wave-square me-2"></i>Độ Đàn Hồi</a>
                     <a asp-controller="OriginCountry" asp-action="Index" class="nav-link"><i class="fa fa-wave-square me-2"></i>Xuất xứ</a>
+                    <a asp-controller="ProductImage" asp-action="Index" class="nav-link"><i class="fa fa-wave-square me-2"></i> Ảnh Sản Phẩm</a>
                  
                 </nav>
             </div>
@@ -76,6 +77,10 @@
                                     {
                                         <img src="@p.Thumbnail" alt="thumb" style="height:48px; max-width:120px; object-fit:cover;" />
                                     }
+                                    else
+                                    {
+                                        <img src="/images/product-placeholder.png" alt="thumb" style="height:48px; max-width:120px; object-fit:cover; opacity:.4" />
+                                    }
                                 </td>
                                 <td>@p.Name</td>
                                 <td>@p.BrandId</td>
@@ -97,9 +102,19 @@
                     let timer = null;
 
                     function hide() { box.style.display = 'none'; box.innerHTML = ''; }
+                    function currency(n){
+                        try{ return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(n); }catch{ return n; }
+                    }
                     function show(items){
                         if(!items || items.length===0){ hide(); return; }
-                        box.innerHTML = items.map(i => `<a href="/Product/Details/${i.id}" class="list-group-item list-group-item-action">${i.name} <small class="text-muted">(${i.productCode})</small></a>`).join('');
+                        box.innerHTML = items.map(i => `
+                            <a href="/Product/Details/${i.id}" class="list-group-item list-group-item-action d-flex align-items-center">
+                                <img src="${i.thumbnail || '/images/product-placeholder.png'}" class="me-2" style="width:36px;height:36px;object-fit:cover;border-radius:4px" alt="thumb"/>
+                                <div class="flex-grow-1">
+                                    <div class="fw-semibold">${i.name} <small class="text-muted">(${i.productCode||''})</small></div>
+                                    <div class="small text-muted">${(i.priceMin?currency(i.priceMin):'')}${(i.priceMax? (' - ' + currency(i.priceMax)) : '')}</div>
+                                </div>
+                            </a>`).join('');
                         box.style.display = 'block';
                     }
 
