@@ -146,7 +146,8 @@ namespace NT.WEB.Controllers
                 await _cartDetailService.UpdateAsync(existingDb);
             }
             await _cartDetailService.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            // Redirect to CartDetail page with current cartId
+            return Redirect($"/CartDetail?cartId={cart.Id}");
         }
 
         [HttpPost]
