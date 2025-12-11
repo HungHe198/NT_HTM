@@ -1,12 +1,14 @@
-@model NT.SHARED.Models.Customer
+﻿@model NT.SHARED.Models.Customer
 
-<h2>Create Customer</h2>
+
 <form asp-action="Create" method="post">
     <div class="form-group">
         <label asp-for="UserId"></label>
         @if (Model != null && Model.UserId != Guid.Empty)
         {
-            <input class="form-control" value="@Model.UserId" readonly />
+            <div class="alert alert-info" role="alert">
+                @(Model?.User?.Fullname ?? (ViewBag.FullName as string) ?? string.Empty) Vui lòng điền các thông tin cần thiết.
+            </div>
             <input type="hidden" asp-for="UserId" />
         }
         else

@@ -46,7 +46,7 @@ namespace NT.WEB.Controllers
             if (!ModelState.IsValid) return View(model);
             await _service.AddAsync(model);
             await _service.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("Login","Account");
         }
 
         public async Task<IActionResult> Edit(Guid id)
