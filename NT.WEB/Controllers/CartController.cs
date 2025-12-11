@@ -18,16 +18,20 @@ namespace NT.WEB.Controllers
         private readonly CartWebService _service;
         private readonly CartDetailWebService _cartDetailService;
         private readonly ProductDetailWebService _productDetailService;
+        private readonly NT.BLL.Interfaces.IGenericRepository<Voucher> _voucherRepository;
 
-        public CartController(CartWebService service, CartDetailWebService cartDetailService, ProductDetailWebService productDetailService)
+        public CartController(CartWebService service, CartDetailWebService cartDetailService, ProductDetailWebService productDetailService, NT.BLL.Interfaces.IGenericRepository<Voucher> voucherRepository)
         {
             _service = service;
             _cartDetailService = cartDetailService;
             _productDetailService = productDetailService;
+            _voucherRepository = voucherRepository;
         }
 
         // Session helpers
         private const string SessionCartKey = "SESSION_CART_ITEMS";
+        private const string SessionVoucherKey = "SESSION_VOUCHER_CODE";
+        private const string SessionVoucherDiscountKey = "SESSION_VOUCHER_DISCOUNT";
         private List<CartItemDto> GetSessionCart()
         {
             var json = HttpContext.Session.GetString(SessionCartKey);
@@ -48,7 +52,41 @@ namespace NT.WEB.Controllers
             var subtotal = items.Sum(i => i.UnitPrice * i.Quantity);
             ViewBag.Subtotal = subtotal;
             ViewBag.ShippingFee = 35000m; // simple flat fee demo
-            ViewBag.Total = subtotal + ViewBag.ShippingFee;
+
+            // Applied voucher (if any)
+            var appliedCode = HttpContext.Session.GetString(SessionVoucherKey);
+            decimal appliedDiscount = 0m;
+            if (!string.IsNullOrWhiteSpace(appliedCode))
+            {
+                // re-validate voucher with current subtotal
+                var found = await _voucherRepository.FindAsync(v => v.Code == appliedCode);
+                var voucher = found?.FirstOrDefault();
+                if (voucher != null && (!voucher.ExpiryDate.HasValue || voucher.ExpiryDate.Value >= DateTime.UtcNow))
+                {
+                    if (!voucher.MinOrderAmount.HasValue || subtotal >= voucher.MinOrderAmount.Value)
+                    {
+                        appliedDiscount = voucher.DiscountAmount.GetValueOrDefault(0m);
+                        if (voucher.MaxDiscountAmount.HasValue)
+                            appliedDiscount = Math.Min(appliedDiscount, voucher.MaxDiscountAmount.Value);
+                        appliedDiscount = Math.Min(appliedDiscount, subtotal);
+                    }
+                    else
+                    {
+                        // below minimum, ignore discount and show message
+                        TempData["Error"] = $"Giá trị đơn hàng tối thiểu để áp dụng voucher là {voucher.MinOrderAmount.Value:#,##0}";
+                        appliedDiscount = 0m;
+                    }
+                }
+                else
+                {
+                    // invalid voucher in session, clean up
+                    HttpContext.Session.Remove(SessionVoucherKey);
+                }
+            }
+            ViewBag.AppliedVoucherCode = appliedCode;
+            ViewBag.VoucherDiscount = appliedDiscount;
+
+            ViewBag.Total = subtotal + ViewBag.ShippingFee - appliedDiscount;
             return View(items);
         }
 
@@ -101,6 +139,77 @@ namespace NT.WEB.Controllers
             var items = GetSessionCart();
             items = items.Where(i => i.ProductDetailId != productDetailId).ToList();
             SaveSessionCart(items);
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ApplyVoucher(string code)
+        {
+            code = code?.Trim() ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(code))
+            {
+                TempData["Error"] = "Vui lòng nhập mã voucher";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var items = GetSessionCart();
+            var subtotal = items.Sum(i => i.UnitPrice * i.Quantity);
+
+            var found = await _voucherRepository.FindAsync(v => v.Code == code);
+            var voucher = found?.FirstOrDefault();
+            if (voucher == null)
+            {
+                TempData["Error"] = "Mã voucher không hợp lệ";
+                HttpContext.Session.Remove(SessionVoucherKey);
+                HttpContext.Session.Remove(SessionVoucherDiscountKey);
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (voucher.ExpiryDate.HasValue && voucher.ExpiryDate.Value < DateTime.UtcNow)
+            {
+                TempData["Error"] = "Voucher đã hết hạn";
+                HttpContext.Session.Remove(SessionVoucherKey);
+                HttpContext.Session.Remove(SessionVoucherDiscountKey);
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (voucher.MaxUsage.HasValue && voucher.UsageCount.HasValue && voucher.UsageCount.Value >= voucher.MaxUsage.Value)
+            {
+                TempData["Error"] = "Voucher đã sử dụng hết";
+                HttpContext.Session.Remove(SessionVoucherKey);
+                HttpContext.Session.Remove(SessionVoucherDiscountKey);
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (voucher.MinOrderAmount.HasValue && subtotal < voucher.MinOrderAmount.Value)
+            {
+                TempData["Error"] = $"Giá trị đơn hàng tối thiểu để áp dụng voucher là {voucher.MinOrderAmount.Value:#,##0}";
+                HttpContext.Session.Remove(SessionVoucherKey);
+                HttpContext.Session.Remove(SessionVoucherDiscountKey);
+                return RedirectToAction(nameof(Index));
+            }
+
+            var discount = voucher.DiscountAmount.GetValueOrDefault(0m);
+            if (voucher.MaxDiscountAmount.HasValue)
+            {
+                discount = Math.Min(discount, voucher.MaxDiscountAmount.Value);
+            }
+
+            // Prevent discount exceeding subtotal
+            discount = Math.Min(discount, subtotal);
+
+            HttpContext.Session.SetString(SessionVoucherKey, voucher.Code);
+            HttpContext.Session.SetString(SessionVoucherDiscountKey, discount.ToString());
+            TempData["Success"] = $"Áp dụng voucher '{voucher.Code}' thành công. Giảm {discount:#,##0}.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        public IActionResult RemoveVoucher()
+        {
+            HttpContext.Session.Remove(SessionVoucherKey);
+            HttpContext.Session.Remove(SessionVoucherDiscountKey);
+            TempData["Success"] = "Đã bỏ voucher";
             return RedirectToAction(nameof(Index));
         }
 

@@ -44,6 +44,20 @@ namespace NT.WEB.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Voucher voucher)
         {
+            // Server-side validation: ExpiryDate must be in the future
+            if (voucher.ExpiryDate.HasValue)
+            {
+                var expiryUtc = DateTime.SpecifyKind(voucher.ExpiryDate.Value, DateTimeKind.Utc);
+                if (expiryUtc <= DateTime.UtcNow)
+                {
+                    ModelState.AddModelError(nameof(voucher.ExpiryDate), "Hạn sử dụng phải là thời gian trong tương lai");
+                }
+                else
+                {
+                    voucher.ExpiryDate = expiryUtc; // normalize to UTC
+                }
+            }
+
             if (!ModelState.IsValid) return View(voucher);
 
             await _service.AddAsync(voucher);
@@ -67,6 +81,20 @@ namespace NT.WEB.Controllers
         public async Task<IActionResult> Edit(Guid id, Voucher voucher)
         {
             if (id == Guid.Empty || voucher is null || id != voucher.Id) return BadRequest();
+
+            // Server-side validation: ExpiryDate must be in the future
+            if (voucher.ExpiryDate.HasValue)
+            {
+                var expiryUtc = DateTime.SpecifyKind(voucher.ExpiryDate.Value, DateTimeKind.Utc);
+                if (expiryUtc <= DateTime.UtcNow)
+                {
+                    ModelState.AddModelError(nameof(voucher.ExpiryDate), "Hạn sử dụng phải là thời gian trong tương lai");
+                }
+                else
+                {
+                    voucher.ExpiryDate = expiryUtc; // normalize to UTC
+                }
+            }
 
             if (!ModelState.IsValid) return View(voucher);
 
