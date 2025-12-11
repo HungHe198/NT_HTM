@@ -30,7 +30,15 @@
         footer { margin-top: auto; }
     </style>
 </head>
-<body>
+@using System.Security.Claims
+@{
+    var isAuth = User?.Identity?.IsAuthenticated ?? false;
+    var userId = isAuth ? User?.FindFirst(ClaimTypes.NameIdentifier)?.Value : null;
+    var role = isAuth ? User?.FindFirst(ClaimTypes.Role)?.Value : null;
+    var fullName = isAuth ? User?.FindFirst("Fullname")?.Value : null;
+    var userName = isAuth ? User?.FindFirst(ClaimTypes.Name)?.Value : null;
+}
+<body data-auth="@isAuth" data-userid="@userId" data-role="@role">
     <header class="topbar">
         <nav class="navbar navbar-expand-lg container">
             <a class="navbar-brand site-logo" asp-controller="Home" asp-action="Index">
@@ -57,9 +65,42 @@
                     </form>
 
                     <div class="d-flex align-items-center ms-auto">
+                        @{
+                            var errorMsg = TempData["Error"] as string;
+                            var hasAnyMsg = !string.IsNullOrWhiteSpace(errorMsg);
+                        }
+                        <div class="dropdown me-3">
+                            <button class="btn btn-sm btn-outline-secondary position-relative" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Thông báo">
+                                <i class="fa fa-bell"></i>
+                                @if (hasAnyMsg)
+                                {
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">!</span>
+                                }
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end p-0" style="min-width: 320px;">
+                                <li class="p-2 border-bottom fw-semibold">Thông báo lỗi</li>
+                                @if (hasAnyMsg)
+                                {
+                                    <li><div class="px-3 py-2 small text-danger">@errorMsg</div></li>
+                                }
+                                else
+                                {
+                                    <li><div class="px-3 py-2 small text-muted">Không có lỗi</div></li>
+                                }
+                            </ul>
+                        </div>
                         <a class="me-3 text-muted" href="#"><i class="fa fa-heart"></i></a>
-                        <a class="me-3 text-muted" href="#"><i class="fa fa-shopping-cart"></i> <span class="badge bg-danger">3</span></a>
-                        <a class="nav-link" asp-controller="Account" asp-action="Login" asp-route-client="true">Đăng nhập</a>
+                        <a class="me-3 text-muted" asp-controller="Cart" asp-action="Index" ><i class="fa fa-shopping-cart"></i> <span class="badge bg-danger"></span></a>
+                        @if (isAuth)
+                        {
+                            <span class="nav-link text-muted small me-2">Xin chào: @(string.IsNullOrWhiteSpace(fullName) ? (string.IsNullOrWhiteSpace(userName) ? userId : userName) : fullName)</span>
+                            <a class="nav-link" asp-controller="Account" asp-action="Logout">Đăng xuất</a>
+                        }
+                        else
+                        {
+                            <a class="nav-link" asp-controller="Account" asp-action="Login" asp-route-client="true">Đăng nhập</a>
+                            <a class="nav-link" asp-controller="Account" asp-action="RegisterCustomer" asp-route-client="true">Đăng ký</a>
+                        }
                     </div>
                 </div>
             </div>
@@ -174,6 +215,46 @@
                 }, 250);
             });
             document.addEventListener('click', e => { if(!box.contains(e.target) && e.target !== input) hide(); });
+        })();
+
+        // Simple client-side 30-minute session window starting after login/register
+        (function(){
+            const body = document.body;
+            const isAuth = body.getAttribute('data-auth') === 'True' || body.getAttribute('data-auth') === 'true';
+            const userId = body.getAttribute('data-userid');
+
+            // Only track when authenticated and we have a UserId
+            if(!isAuth || !userId) {
+                // Clear any previous session tracking when not authenticated
+                sessionStorage.removeItem('clientSessionStart');
+                sessionStorage.removeItem('clientSessionExpiry');
+                return;
+            }
+
+            const DURATION_MS = 30 * 60 * 1000; // 30 minutes
+            let start = Number(sessionStorage.getItem('clientSessionStart'));
+            let expiry = Number(sessionStorage.getItem('clientSessionExpiry'));
+
+            if(!start || !expiry) {
+                start = Date.now();
+                expiry = start + DURATION_MS;
+                sessionStorage.setItem('clientSessionStart', String(start));
+                sessionStorage.setItem('clientSessionExpiry', String(expiry));
+            }
+
+            const check = () => {
+                const exp = Number(sessionStorage.getItem('clientSessionExpiry')) || 0;
+                if(Date.now() >= exp) {
+                    // Clear tracking and force re-login
+                    sessionStorage.removeItem('clientSessionStart');
+                    sessionStorage.removeItem('clientSessionExpiry');
+                    const returnUrl = encodeURIComponent(window.location.pathname + window.location.search);
+                    window.location.href = `/Account/Login?client=true&returnUrl=${returnUrl}`;
+                }
+            };
+
+            // Check every 30s
+            setInterval(check, 30 * 1000);
         })();
     </script>
     @RenderSection("Scripts", required: false)

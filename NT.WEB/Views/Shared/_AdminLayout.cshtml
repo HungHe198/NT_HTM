@@ -72,6 +72,30 @@
                     <i class="fa fa-bell"></i>
                     <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">2</span>
                 </div> *@
+                @{
+                    var errorMsg = TempData["Error"] as string;
+                    var hasAnyMsg = !string.IsNullOrWhiteSpace(errorMsg);
+                }
+                <div class="dropdown me-3">
+                    <button class="btn btn-sm btn-outline-secondary position-relative" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Thông báo">
+                        <i class="fa fa-bell"></i>
+                        @if (hasAnyMsg)
+                        {
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">!</span>
+                        }
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end p-0" style="min-width: 320px;">
+                        <li class="p-2 border-bottom fw-semibold">Thông báo lỗi</li>
+                        @if (hasAnyMsg)
+                        {
+                            <li><div class="px-3 py-2 small text-danger">@errorMsg</div></li>
+                        }
+                        else
+                        {
+                            <li><div class="px-3 py-2 small text-muted">Không có lỗi</div></li>
+                        }
+                    </ul>
+                </div>
                 <div>
                     <img src="/images/avatar.png" alt="User" class="rounded-circle" style="height:32px;">
                 </div>
