@@ -11,19 +11,41 @@ namespace NT.WEB.Controllers
     {
         private readonly NT.BLL.Interfaces.IGenericRepository<Order> _orderRepo;
         private readonly NT.BLL.Interfaces.IGenericRepository<OrderDetail> _orderDetailRepo;
+        private readonly NT.BLL.Interfaces.IGenericRepository<ProductDetail> _productDetailRepo;
+        private readonly NT.WEB.Services.CustomerWebService _customerService;
 
         public OrdersController(NT.BLL.Interfaces.IGenericRepository<Order> orderRepo,
-                                 NT.BLL.Interfaces.IGenericRepository<OrderDetail> orderDetailRepo)
+                                 NT.BLL.Interfaces.IGenericRepository<OrderDetail> orderDetailRepo,
+                                 NT.BLL.Interfaces.IGenericRepository<ProductDetail> productDetailRepo,
+                                 NT.WEB.Services.CustomerWebService customerService)
         {
             _orderRepo = orderRepo;
             _orderDetailRepo = orderDetailRepo;
+            _productDetailRepo = productDetailRepo;
+            _customerService = customerService;
         }
 
         
+        [Authorize(Roles = "Admin,Employee")]
         public async Task<IActionResult> Index()
         {
             var orders = await _orderRepo.GetAllAsync();
             return View(orders ?? Array.Empty<Order>());
+        }
+
+        // Customer: view all own orders (any status)
+        [Authorize(Roles = "Customer")]
+        [HttpGet]
+        public async Task<IActionResult> My()
+        {
+            var userIdClaim = User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrWhiteSpace(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId)) return Forbid();
+            var customers = await _customerService.FindAsync(c => c.UserId == userId);
+            var customer = customers?.FirstOrDefault();
+            if (customer == null) return Forbid();
+
+            var orders = await _orderRepo.FindAsync(o => o.CustomerId == customer.Id);
+            return View("Index", orders ?? Array.Empty<Order>());
         }
 
         // Customer/admin can review an order details
@@ -39,7 +61,11 @@ namespace NT.WEB.Controllers
             return View(order);
         }
 
-        // Admin: update status (0=pending,1=confirmed,2=shipping,3=delivered => then set -1 closed)
+        // Admin: standardized status transitions for sales project
+        // Status codes (persisted):
+        // -1 = Canceled, 0 = Pending, 1 = Confirmed, 2 = Shipping, 3 = Delivered
+        // Display mapping for users (p2): "-1" = "đã hủy", "0" = "chờ xác nhận", "1" = "đã xác nhận", "2" = "đang vận chuyển", "3" = "giao thành công"
+        // When moving from Pending (0) to Confirmed (1), decrease ProductDetail.StockQuantity and increase SoldQuantity
         [Authorize(Roles = "Admin,Employee")]
         [HttpPost]
         public async Task<IActionResult> UpdateStatus(Guid id, string status)
@@ -49,14 +75,37 @@ namespace NT.WEB.Controllers
             var order = orders?.FirstOrDefault();
             if (order == null) return NotFound();
 
-            order.Status = status;
-            // If delivered (3), set to -1 as closed per requirement
-            if (status == "3")
+            // Block any updates if already canceled
+            if (string.Equals(order.Status, "-1", StringComparison.Ordinal))
             {
-                order.Status = "-1";
+                TempData["Error"] = "Đơn đã hủy, không thể cập nhật trạng thái.";
+                return RedirectToAction(nameof(Review), new { id });
             }
+
+            var previousStatus = order.Status ?? "0";
+            order.Status = status;
+
+            // Inventory adjustment only on transition to Confirmed from non-confirmed states
+            if (previousStatus != "1" && status == "1")
+            {
+                var details = await _orderDetailRepo.FindAsync(d => d.OrderId == id);
+                foreach (var d in details ?? Array.Empty<OrderDetail>())
+                {
+                    var pd = await _productDetailRepo.GetByIdAsync(d.ProductDetailId);
+                    if (pd != null)
+                    {
+                        // Decrease stock but not below zero, increase sold
+                        var newStock = Math.Max(0, pd.StockQuantity - d.Quantity);
+                        pd.StockQuantity = newStock;
+                        pd.SoldQuantity = pd.SoldQuantity + d.Quantity;
+                        await _productDetailRepo.UpdateAsync(pd);
+                    }
+                }
+            }
+
             await _orderRepo.UpdateAsync(order);
             await _orderRepo.SaveChangesAsync();
+            await _productDetailRepo.SaveChangesAsync();
             return RedirectToAction(nameof(Review), new { id });
         }
 
@@ -76,9 +125,26 @@ namespace NT.WEB.Controllers
             var order = orders?.FirstOrDefault();
             if (order == null) return NotFound();
 
+            var previousStatus = order.Status ?? "0";
             order.Note = note; // hidden from customer during placement, only used for cancellation reason
-            order.Status = "4"; // canceled
+            order.Status = "-1"; // canceled
             await _orderRepo.UpdateAsync(order);
+            // If the order was previously in a status that deducted inventory, restore for each item
+            if (previousStatus == "1" || previousStatus == "2" || previousStatus == "3")
+            {
+                var details = await _orderDetailRepo.FindAsync(d => d.OrderId == id);
+                foreach (var d in details ?? Array.Empty<OrderDetail>())
+                {
+                    var pd = await _productDetailRepo.GetByIdAsync(d.ProductDetailId);
+                    if (pd != null)
+                    {
+                        pd.StockQuantity = pd.StockQuantity + d.Quantity;
+                        pd.SoldQuantity = Math.Max(0, pd.SoldQuantity - d.Quantity);
+                        await _productDetailRepo.UpdateAsync(pd);
+                    }
+                }
+                await _productDetailRepo.SaveChangesAsync();
+            }
             await _orderRepo.SaveChangesAsync();
             TempData["Success"] = "Đã hủy đơn hàng";
             return RedirectToAction(nameof(Review), new { id });

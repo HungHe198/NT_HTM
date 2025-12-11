@@ -3,6 +3,7 @@ using NT.SHARED.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.AspNetCore.Identity;
 
 namespace NT.DAL.Services
 {
@@ -120,6 +121,40 @@ namespace NT.DAL.Services
                 }
             }
             modelBuilder.Entity<ProductDetail>().HasData(details);
+
+            // Seed Roles
+            var roleAdminId = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
+            var roleEmployeeId = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbb0001");
+            var roleCustomerId = Guid.Parse("cccccccc-cccc-cccc-cccc-cccccccc0001");
+            modelBuilder.Entity<Role>().HasData(new { Id = roleAdminId, Name = "Admin" });
+            modelBuilder.Entity<Role>().HasData(new { Id = roleEmployeeId, Name = "Employee" });
+            modelBuilder.Entity<Role>().HasData(new { Id = roleCustomerId, Name = "Customer" });
+
+            // Seed Admin User
+            var adminUserId = Guid.Parse("11111111-2222-3333-4444-555555555555");
+            var adminUser = new User
+            {
+                Id = adminUserId,
+                RoleId = roleAdminId,
+                Username = "admin",
+                PasswordHash = string.Empty,
+                Fullname = "System Administrator",
+                Email = "admin@example.com",
+                Status = "Active"
+            };
+            // Hash default password 'admin123' so login works
+            var hasher = new PasswordHasher<User>();
+            adminUser.PasswordHash = hasher.HashPassword(adminUser, "admin123");
+            modelBuilder.Entity<User>().HasData(adminUser);
+
+            // Seed Admin profile linked to user
+            modelBuilder.Entity<Admin>().HasData(new
+            {
+                Id = Guid.Parse("22222222-3333-4444-5555-666666666666"),
+                UserId = adminUserId,
+                Position = "Administrator",
+                Salary = (decimal?)null
+            });
         }
     }
 }

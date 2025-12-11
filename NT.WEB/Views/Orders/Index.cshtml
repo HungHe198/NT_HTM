@@ -1,6 +1,7 @@
 @model IEnumerable<NT.SHARED.Models.Order>
 @{
-    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var isAdmin = User.IsInRole("Admin") || User.IsInRole("Employee");
+    Layout = isAdmin ? "~/Views/Shared/_AdminLayout.cshtml" : "~/Views/Shared/_ClientLayout.cshtml";
 }
 <h2>Danh sách ??n hàng</h2>
 <table class="table">
@@ -24,7 +25,16 @@
             <td>@o.FinalAmount.ToString("#,##0")</td>
             <td>@o.CreatedTime.ToString("yyyy-MM-dd HH:mm")</td>
             <td class="text-nowrap">
-                <a class="btn btn-sm btn-outline-primary" asp-action="Review" asp-controller="Orders" asp-route-id="@o.Id">Xem/duy?t</a>
+                <a class="btn btn-sm btn-outline-primary" asp-action="Review" asp-controller="Orders" asp-route-id="@o.Id">Xem chi ti?t</a>
+                @if (isAdmin)
+                {
+                    <form asp-action="UpdateStatus" asp-controller="Orders" method="post" class="d-inline">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@o.Id" />
+                        <input type="hidden" name="status" value="1" />
+                        <button class="btn btn-sm btn-success" type="submit">Xác nh?n</button>
+                    </form>
+                }
             </td>
         </tr>
     }

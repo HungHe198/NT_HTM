@@ -94,6 +94,7 @@
                         @if (isAuth)
                         {
                             <span class="nav-link text-muted small me-2">Xin chào: @(string.IsNullOrWhiteSpace(fullName) ? (string.IsNullOrWhiteSpace(userName) ? userId : userName) : fullName)</span>
+                            <a class="nav-link" asp-controller="Orders" asp-action="My">Đơn hàng của tôi</a>
                             <a class="nav-link" asp-controller="Account" asp-action="Logout">Đăng xuất</a>
                         }
                         else
