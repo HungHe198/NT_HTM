@@ -18,37 +18,70 @@ namespace NT.WEB.Controllers
         private readonly CartWebService _service;
         private readonly CartDetailWebService _cartDetailService;
         private readonly ProductDetailWebService _productDetailService;
+        private readonly CustomerWebService _customerService;
         private readonly NT.BLL.Interfaces.IGenericRepository<Voucher> _voucherRepository;
 
-        public CartController(CartWebService service, CartDetailWebService cartDetailService, ProductDetailWebService productDetailService, NT.BLL.Interfaces.IGenericRepository<Voucher> voucherRepository)
+        public CartController(CartWebService service, CartDetailWebService cartDetailService, ProductDetailWebService productDetailService, CustomerWebService customerService, NT.BLL.Interfaces.IGenericRepository<Voucher> voucherRepository)
         {
             _service = service;
             _cartDetailService = cartDetailService;
             _productDetailService = productDetailService;
+            _customerService = customerService;
             _voucherRepository = voucherRepository;
         }
 
-        // Session helpers
-        private const string SessionCartKey = "SESSION_CART_ITEMS";
+        // Voucher session keys (voucher code stays in session, cart is persisted)
         private const string SessionVoucherKey = "SESSION_VOUCHER_CODE";
         private const string SessionVoucherDiscountKey = "SESSION_VOUCHER_DISCOUNT";
-        private List<CartItemDto> GetSessionCart()
+
+        // Helpers: resolve current customer's cart (create if missing)
+        private async Task<Cart?> GetOrCreateCustomerCartAsync()
         {
-            var json = HttpContext.Session.GetString(SessionCartKey);
-            if (string.IsNullOrEmpty(json)) return new List<CartItemDto>();
-            try { return JsonSerializer.Deserialize<List<CartItemDto>>(json) ?? new List<CartItemDto>(); }
-            catch { return new List<CartItemDto>(); }
-        }
-        private void SaveSessionCart(List<CartItemDto> items)
-        {
-            var json = JsonSerializer.Serialize(items);
-            HttpContext.Session.SetString(SessionCartKey, json);
+            var userIdClaim = User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrWhiteSpace(userIdClaim)) return null;
+            if (!Guid.TryParse(userIdClaim, out var userId)) return null;
+
+            // Find customer by UserId
+            var customers = await _customerService.FindAsync(c => c.UserId == userId);
+            var customer = customers?.FirstOrDefault();
+            if (customer == null) return null;
+
+            // Find existing cart
+            var carts = await _service.FindAsync(ct => ct.CustomerId == customer.Id);
+            var cart = carts?.FirstOrDefault();
+            if (cart != null) return cart;
+
+            // Create new cart for customer
+            var newCart = Cart.Create(customer.Id);
+            await _service.AddAsync(newCart);
+            await _service.SaveChangesAsync();
+            return newCart;
         }
 
         public async Task<IActionResult> Index()
         {
-            // Show session cart
-            var items = GetSessionCart();
+            // Load cart items from database for current customer
+            var cart = await GetOrCreateCustomerCartAsync();
+            var items = new List<CartItemDto>();
+            if (cart != null)
+            {
+                var cartItems = await _cartDetailService.FindAsync(cd => cd.CartId == cart.Id);
+                foreach (var ci in cartItems ?? Enumerable.Empty<CartDetail>())
+                {
+                    var pd = ci.ProductDetail;
+                    if (pd == null || ci.Quantity <= 0) continue;
+                    items.Add(new CartItemDto
+                    {
+                        ProductDetailId = ci.ProductDetailId,
+                        ProductName = pd.Product?.Name ?? "Sản phẩm",
+                        Thumbnail = pd.Product?.Thumbnail,
+                        LengthName = pd.Length?.Name,
+                        HardnessName = pd.Hardness?.Name,
+                        UnitPrice = pd.Price,
+                        Quantity = ci.Quantity
+                    });
+                }
+            }
             var subtotal = items.Sum(i => i.UnitPrice * i.Quantity);
             ViewBag.Subtotal = subtotal;
             ViewBag.ShippingFee = 35000m; // simple flat fee demo
@@ -95,50 +128,55 @@ namespace NT.WEB.Controllers
         public async Task<IActionResult> Add(Guid productDetailId, int quantity)
         {
             if (productDetailId == Guid.Empty || quantity <= 0) return BadRequest();
+            var cart = await GetOrCreateCustomerCartAsync();
+            if (cart == null) return Forbid();
             var detail = await _productDetailService.GetByIdAsync(productDetailId);
             if (detail is null) return NotFound();
 
-            var items = GetSessionCart();
-            var existing = items.FirstOrDefault(i => i.ProductDetailId == productDetailId);
-            if (existing is null)
+            // Persist to CartDetail
+            var existingDb = (await _cartDetailService.FindAsync(cd => cd.CartId == cart.Id && cd.ProductDetailId == productDetailId))?.FirstOrDefault();
+            if (existingDb == null)
             {
-                items.Add(new CartItemDto
-                {
-                    ProductDetailId = productDetailId,
-                    ProductName = detail.Product?.Name ?? "Sản phẩm",
-                    Thumbnail = detail.Product?.Thumbnail,
-                    LengthName = detail.Length?.Name,
-                    HardnessName = detail.Hardness?.Name,
-                    UnitPrice = detail.Price,
-                    Quantity = quantity
-                });
+                var newItem = CartDetail.Create(cart.Id, productDetailId, quantity);
+                await _cartDetailService.AddAsync(newItem);
             }
             else
             {
-                existing.Quantity += quantity;
+                existingDb.Quantity += quantity;
+                await _cartDetailService.UpdateAsync(existingDb);
             }
-
-            SaveSessionCart(items);
+            await _cartDetailService.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         [HttpPost]
-        public IActionResult UpdateQty(Guid productDetailId, int quantity)
+        public async Task<IActionResult> UpdateQty(Guid productDetailId, int quantity)
         {
-            var items = GetSessionCart();
-            var item = items.FirstOrDefault(i => i.ProductDetailId == productDetailId);
+            var cart = await GetOrCreateCustomerCartAsync();
+            if (cart == null) return Forbid();
+            var item = (await _cartDetailService.FindAsync(cd => cd.CartId == cart.Id && cd.ProductDetailId == productDetailId))?.FirstOrDefault();
             if (item is null) return NotFound();
             item.Quantity = Math.Max(1, quantity);
-            SaveSessionCart(items);
+            await _cartDetailService.UpdateAsync(item);
+            await _cartDetailService.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         [HttpPost]
-        public IActionResult Remove(Guid productDetailId)
+        public async Task<IActionResult> Remove(Guid productDetailId)
         {
-            var items = GetSessionCart();
-            items = items.Where(i => i.ProductDetailId != productDetailId).ToList();
-            SaveSessionCart(items);
+            var cart = await GetOrCreateCustomerCartAsync();
+            if (cart == null) return Forbid();
+            var item = (await _cartDetailService.FindAsync(cd => cd.CartId == cart.Id && cd.ProductDetailId == productDetailId))?.FirstOrDefault();
+            if (item != null)
+            {
+                // Since GenericService.DeleteAsync expects Guid, and CartDetail has composite key,
+                // update quantity to 0 as a soft-remove fallback or implement repository support.
+                // Here we set quantity to 0 to exclude from totals.
+                item.Quantity = 0;
+                await _cartDetailService.UpdateAsync(item);
+                await _cartDetailService.SaveChangesAsync();
+            }
             return RedirectToAction(nameof(Index));
         }
 
@@ -151,8 +189,7 @@ namespace NT.WEB.Controllers
                 TempData["Error"] = "Vui lòng nhập mã voucher";
                 return RedirectToAction(nameof(Index));
             }
-
-            var items = GetSessionCart();
+            var items = await GetCustomerCartItemsAsync();
             var subtotal = items.Sum(i => i.UnitPrice * i.Quantity);
 
             var found = await _voucherRepository.FindAsync(v => v.Code == code);
@@ -202,6 +239,33 @@ namespace NT.WEB.Controllers
             HttpContext.Session.SetString(SessionVoucherDiscountKey, discount.ToString());
             TempData["Success"] = $"Áp dụng voucher '{voucher.Code}' thành công. Giảm {discount:#,##0}.";
             return RedirectToAction(nameof(Index));
+        }
+
+        // Helper: load current customer's cart items from database
+        private async Task<List<CartItemDto>> GetCustomerCartItemsAsync()
+        {
+            var cart = await GetOrCreateCustomerCartAsync();
+            var items = new List<CartItemDto>();
+            if (cart != null)
+            {
+                var cartItems = await _cartDetailService.FindAsync(cd => cd.CartId == cart.Id);
+                foreach (var ci in cartItems ?? Enumerable.Empty<CartDetail>())
+                {
+                    var pd = ci.ProductDetail;
+                    if (pd == null || ci.Quantity <= 0) continue;
+                    items.Add(new CartItemDto
+                    {
+                        ProductDetailId = ci.ProductDetailId,
+                        ProductName = pd.Product?.Name ?? "Sản phẩm",
+                        Thumbnail = pd.Product?.Thumbnail,
+                        LengthName = pd.Length?.Name,
+                        HardnessName = pd.Hardness?.Name,
+                        UnitPrice = pd.Price,
+                        Quantity = ci.Quantity
+                    });
+                }
+            }
+            return items;
         }
 
         [HttpPost]

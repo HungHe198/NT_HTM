@@ -89,8 +89,8 @@
                                 }
                             </ul>
                         </div>
-                        <a class="me-3 text-muted" href="#"><i class="fa fa-heart"></i></a>
-                        <a class="me-3 text-muted" asp-controller="Cart" asp-action="Index" ><i class="fa fa-shopping-cart"></i> <span class="badge bg-danger"></span></a>
+                      @*   <a class="me-3 text-muted" href="#"><i class="fa fa-heart"></i></a> *@
+                        @await Component.InvokeAsync("CartSummary")
                         @if (isAuth)
                         {
                             <span class="nav-link text-muted small me-2">Xin chào: @(string.IsNullOrWhiteSpace(fullName) ? (string.IsNullOrWhiteSpace(userName) ? userId : userName) : fullName)</span>
