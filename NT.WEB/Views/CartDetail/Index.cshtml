@@ -1,29 +1,110 @@
-@model IEnumerable<NT.SHARED.Models.CartDetail>
+@using NT.WEB.DTO
+@model IEnumerable<CartItemDto>
+@{
+    Layout = "~/Views/Shared/_ClientLayout.cshtml";
+    var subtotal = (decimal)(ViewBag.Subtotal ?? 0m);
+    var shipping = (decimal)(ViewBag.ShippingFee ?? 0m);
+    var total = (decimal)(ViewBag.Total ?? 0m);
+    var appliedCode = ViewBag.AppliedVoucherCode as string;
+    var voucherDiscount = (decimal)(ViewBag.VoucherDiscount ?? 0m);
+}
 
-<h2>Cart Details</h2>
-<p><a asp-action="Create">Create New</a></p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>CartId</th>
-            <th>ProductDetailId</th>
-            <th>Quantity</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-    @foreach(var item in Model)
-    {
-        <tr>
-            <td>@item.CartId</td>
-            <td>@item.ProductDetailId</td>
-            <td>@item.Quantity</td>
-            <td>
-                <a asp-action="Details" asp-route-cartId="@item.CartId" asp-route-productDetailId="@item.ProductDetailId">Details</a> |
-                <a asp-action="Edit" asp-route-cartId="@item.CartId" asp-route-productDetailId="@item.ProductDetailId">Edit</a> |
-                <a asp-action="Delete" asp-route-cartId="@item.CartId" asp-route-productDetailId="@item.ProductDetailId">Delete</a>
-            </td>
-        </tr>
-    }
-    </tbody>
-</table>
+<h2>Gi? hàng</h2>
+<div class="row">
+    <div class="col-md-8">
+        @if (!Model.Any())
+        {
+            <div>Gi? hàng tr?ng.</div>
+        }
+        else
+        {
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>S?n ph?m</th>
+                        <th>Giá</th>
+                        <th>S? l??ng</th>
+                        <th>T?m tính</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <img src="@(item.Thumbnail ?? "/images/product-placeholder.png")" alt="@item.ProductName" style="width:60px;height:60px;object-fit:cover" />
+                                <div>
+                                    <div>@item.ProductName</div>
+                                    <small class="text-muted">?? dài: @item.LengthName, ?? c?ng: @item.HardnessName</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="text-nowrap">@item.UnitPrice.ToString("#,##0")</td>
+                        <td>
+                            <form asp-action="UpdateQty" asp-controller="CartDetail" asp-route-cartId="@ViewBag.CartId" method="post" class="d-inline-flex align-items-center gap-1">
+                                <input type="hidden" name="productDetailId" value="@item.ProductDetailId" />
+                                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="var i=this.nextElementSibling; i.value=Math.max(1, parseInt(i.value||'1')-1); this.form.submit();">-</button>
+                                <input type="number" name="quantity" value="@item.Quantity" min="1" class="form-control form-control-sm" style="width:60px" />
+                                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="var i=this.previousElementSibling; i.value=Math.max(1, parseInt(i.value||'1')+1); this.form.submit();">+</button>
+                                <button class="btn btn-secondary btn-sm" type="submit">C?p nh?t</button>
+                            </form>
+                        </td>
+                        <td class="text-nowrap">@string.Format("{0:#,##0}", item.UnitPrice * item.Quantity)</td>
+                        <td>
+                            <form asp-action="Remove" asp-controller="CartDetail" asp-route-cartId="@ViewBag.CartId" method="post">
+                                <input type="hidden" name="productDetailId" value="@item.ProductDetailId" />
+                                <button class="btn btn-link text-danger" type="submit">Xóa</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        }
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-secondary" asp-controller="Home" asp-action="Index">Ti?p t?c xem s?n ph?m</a>
+            <button class="btn btn-secondary" disabled>C?p nh?t gi? hàng</button>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">T?ng c?ng gi? hàng</h5>
+                @if (TempData["Error"] != null)
+                {
+                    <div class="alert alert-danger py-1">@TempData["Error"]</div>
+                }
+                @if (TempData["Success"] != null)
+                {
+                    <div class="alert alert-success py-1">@TempData["Success"]</div>
+                }
+
+                <form asp-action="ApplyVoucher" asp-controller="Cart" method="post" class="input-group mb-3">
+                    <input type="text" name="code" class="form-control" placeholder="Nh?p mã voucher" value="@appliedCode" />
+                    <button class="btn btn-outline-primary" type="submit">Áp d?ng</button>
+                </form>
+                @if (!string.IsNullOrWhiteSpace(appliedCode))
+                {
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <small class="text-success">?ã áp d?ng: <strong>@appliedCode</strong></small>
+                        <form asp-action="RemoveVoucher" asp-controller="Cart" method="post" class="d-inline">
+                            <button class="btn btn-link btn-sm text-danger" type="submit">B? voucher</button>
+                        </form>
+                    </div>
+                }
+
+                <div class="d-flex justify-content-between"><span>T?m tính</span> <strong>@subtotal.ToString("#,##0")</strong></div>
+                <div class="d-flex justify-content-between"><span>V?n chuy?n</span> <strong>@shipping.ToString("#,##0")</strong></div>
+                @if (voucherDiscount > 0)
+                {
+                    <div class="d-flex justify-content-between"><span>Gi?m theo voucher</span> <strong class="text-success">-@voucherDiscount.ToString("#,##0")</strong></div>
+                }
+                <hr />
+                <div class="d-flex justify-content-between"><span>T?ng</span> <strong>@total.ToString("#,##0")</strong></div>
+                <button class="btn btn-warning w-100 mt-2" disabled>Ti?n hành thanh toán</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,41 @@
+@model IEnumerable<NT.SHARED.Models.CartDetail>
+@{
+    var count = Model?.Sum(i => i.Quantity) ?? 0;
+    var cartId = ViewData["CartId"] as Guid?;
+}
+<div class="dropdown me-3">
+    <a class="text-muted position-relative" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="Gi? hàng">
+        <i class="fa fa-shopping-cart"></i>
+        @if (count > 0)
+        {
+            <span class="badge bg-danger position-absolute" style="top:-6px;right:-10px">@count</span>
+        }
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end p-0" style="min-width: 360px;">
+        <li class="p-2 border-bottom fw-semibold">Gi? hàng c?a b?n</li>
+        @if (Model != null && Model.Any())
+        {
+            foreach (var ci in Model)
+            {
+                var pd = ci.ProductDetail;
+                <li class="p-2 d-flex align-items-center gap-2 border-bottom">
+                    <img src="@(pd?.Product?.Thumbnail ?? "/images/product-placeholder.png")" style="width:48px;height:48px;object-fit:cover;border-radius:4px" alt="thumb" />
+                    <div class="flex-grow-1 small">
+                        <div class="fw-semibold">@(pd?.Product?.Name ?? "S?n ph?m")</div>
+                        <div class="text-muted">SL: @ci.Quantity</div>
+                    </div>
+                    <div class="small text-end" style="min-width:80px">
+                        @pd?.Price.ToString("#,##0")
+                    </div>
+                </li>
+            }
+            <li class="p-2 text-end">
+                <a class="btn btn-sm btn-primary" asp-controller="CartDetail" asp-action="Index" asp-route-cartId="@cartId">Xem gi? hàng</a>
+            </li>
+        }
+        else
+        {
+            <li><div class="px-3 py-2 small text-muted">Gi? hàng tr?ng</div></li>
+        }
+    </ul>
+</div>
