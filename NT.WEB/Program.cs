@@ -7,6 +7,7 @@ using NT.WEB.Services;
 using System.Text;
 using Microsoft.AspNetCore.Localization;
 using System.Globalization;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -55,6 +56,28 @@ builder.Services.AddAuthentication(Microsoft.AspNetCore.Authentication.Cookies.C
         options.AccessDeniedPath = "/Home/AccessDenied";
         options.Cookie.HttpOnly = true;
         options.Cookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Lax;
+        // Enforce 30-minute auth cookie expiration
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+        // Enable sliding expiration if you want the 30 minutes to refresh on activity
+        options.SlidingExpiration = true;
+        // Optional: explicitly set MaxAge on cookie
+        options.Cookie.MaxAge = TimeSpan.FromMinutes(30);
+        // Redirect unauthenticated or unauthorized to client flows with messages
+        options.Events = new CookieAuthenticationEvents
+        {
+            OnRedirectToLogin = context =>
+            {
+                var returnUrl = Uri.EscapeDataString(context.Request.Path + context.Request.QueryString);
+                context.Response.Redirect($"/Account/Login?client=true&returnUrl={returnUrl}&msg=login_required");
+                return Task.CompletedTask;
+            },
+            OnRedirectToAccessDenied = context =>
+            {
+                var returnUrl = Uri.EscapeDataString(context.Request.Path + context.Request.QueryString);
+                context.Response.Redirect($"/Account/RegisterCustomer?client=true&returnUrl={returnUrl}&msg=customer_required");
+                return Task.CompletedTask;
+            }
+        };
     }); 
 builder.Services.AddAuthorization();
 
@@ -63,6 +86,8 @@ builder.Services.AddSession(options =>
 {
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
+    // Server-side session idle timeout 30 minutes
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
 });
 
 // Localization: default to Vietnamese and enforce UTF-8

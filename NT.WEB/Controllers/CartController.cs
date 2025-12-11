@@ -8,9 +8,11 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using NT.WEB.DTO;
+using Microsoft.AspNetCore.Authorization;
 
 namespace NT.WEB.Controllers
 {
+    [Authorize(Roles = "Customer")]
     public class CartController : Controller
     {
         private readonly CartWebService _service;

@@ -117,33 +117,54 @@ namespace NT.WEB.Controllers
         }
 
         // Login (GET)
-        public IActionResult Login() => View();
+        public IActionResult Login(string? msg = null)
+        {
+            if (string.Equals(msg, "login_required", StringComparison.OrdinalIgnoreCase))
+            {
+                TempData["Error"] = "Vui lòng đăng nhập để tiếp tục";
+            }
+            return View();
+        }
 
         // Login (POST)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(NT.SHARED.DTOs.LoginDto dto)
         {
-            if (ModelState.IsValid) return View(dto);
+            if (!ModelState.IsValid)
+            {
+                TempData["Error"] = "Dữ liệu đăng nhập không hợp lệ";
+                return View(dto);
+            }
 
             var users = await _repository.FindAsync(u => u.Username == dto.Username);
             var user = System.Linq.Enumerable.FirstOrDefault(users);
             if (user == null)
             {
                 ModelState.AddModelError(string.Empty, "Tên đăng nhập hoặc mật khẩu không đúng");
+                TempData["Error"] = "Tên đăng nhập hoặc mật khẩu không đúng";
                 return View(dto);
             }
 
             var verify = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, dto.Password);
             if (verify == Microsoft.AspNetCore.Identity.PasswordVerificationResult.Success)
             {
+                // Resolve role name for correct role claim
+                string roleName = string.Empty;
+                try
+                {
+                    var role = await _roleRepository.GetByIdAsync(user.RoleId);
+                    roleName = role?.Name ?? string.Empty;
+                }
+                catch { /* ignore */ }
+
                 var claims = new[]
                 {
                     new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                     new Claim(ClaimTypes.Name, user.Username ?? string.Empty),
                     new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
                     new Claim("Fullname", user.Fullname ?? string.Empty),
-                    new Claim(ClaimTypes.Role, user.RoleId.ToString())
+                    new Claim(ClaimTypes.Role, string.IsNullOrWhiteSpace(roleName) ? "User" : roleName)
                 };
                 var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                 var principal = new ClaimsPrincipal(identity);
@@ -157,12 +178,17 @@ namespace NT.WEB.Controllers
             }
 
             ModelState.AddModelError(string.Empty, "Tên đăng nhập hoặc mật khẩu không đúng");
+            TempData["Error"] = "Tên đăng nhập hoặc mật khẩu không đúng";
             return View(dto);
         }
 
         // Customer Registration (GET)
-        public async Task<IActionResult> RegisterCustomer()
+        public async Task<IActionResult> RegisterCustomer(string? msg = null)
         {
+            if (string.Equals(msg, "customer_required", StringComparison.OrdinalIgnoreCase))
+            {
+                TempData["Error"] = "Chỉ khách hàng mới được truy cập tính năng này. Vui lòng đăng nhập hoặc đăng ký tài khoản khách hàng.";
+            }
             // Ensure Customer role exists for info in view if needed
             var customerRole = await _roleRepository.FindAsync(r => r.Name == "Customer");
             ViewBag.CustomerRoleId = System.Linq.Enumerable.FirstOrDefault(customerRole)?.Id;
@@ -228,6 +254,7 @@ namespace NT.WEB.Controllers
 
             if (!ModelState.IsValid)
             {
+                TempData["Error"] = "Dữ liệu đăng ký không hợp lệ. Vui lòng kiểm tra lại.";
                 model.RoleId = _roleRepository.GetAllAsync().Result.FirstOrDefault(r => r.Name == "Customer")?.Id ?? Guid.Empty; // Ensure role is reset for re-display
                 return View(model);
             }
@@ -236,6 +263,7 @@ namespace NT.WEB.Controllers
             if (existing is not null && System.Linq.Enumerable.Any(existing))
             {
                 ModelState.AddModelError(nameof(model.Username), "Tên đăng nhập đã tồn tại");
+                TempData["Error"] = "Tên đăng nhập đã tồn tại";
                 return View(model);
             }
 
@@ -327,6 +355,29 @@ namespace NT.WEB.Controllers
             await _repository.DeleteAsync(id);
             await _repository.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
+        }
+
+        // Logout (GET) to support link-based sign out from client layout
+        [HttpGet]
+        public async Task<IActionResult> Logout()
+        {
+            // Sign out authentication cookie
+            await HttpContext.SignOutAsync(Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme);
+            // Clear server-side session
+            HttpContext.Session.Clear();
+            TempData["Success"] = "Đã đăng xuất";
+            return RedirectToAction(nameof(Login));
+        }
+
+        // Logout (POST) for form-based sign out if needed
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> LogoutPost()
+        {
+            await HttpContext.SignOutAsync(Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme);
+            HttpContext.Session.Clear();
+            TempData["Success"] = "Đã đăng xuất";
+            return RedirectToAction(nameof(Login));
         }
     }
 }
