@@ -56,10 +56,8 @@
                         </td>
                         <td class="text-nowrap">@string.Format("{0:#,##0}", item.UnitPrice * item.Quantity)</td>
                         <td>
-                            <form asp-action="Remove" asp-controller="CartDetail" asp-route-cartId="@ViewBag.CartId" method="post">
-                                <input type="hidden" name="productDetailId" value="@item.ProductDetailId" />
-                                <button class="btn btn-link text-danger" type="submit">Xóa</button>
-                            </form>
+                            <input type="hidden" name="productDetailId" value="@item.ProductDetailId" />
+                            <button class="btn btn-link text-danger" type="submit" formmethod="post" formaction="@Url.Action("Remove", "CartDetail", new { cartId = ViewBag.CartId })">Xóa</button>
                         </td>
                     </tr>
                 }

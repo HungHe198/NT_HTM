@@ -18,6 +18,7 @@ namespace NT.WEB.Controllers
         private readonly NT.BLL.Interfaces.IGenericRepository<Order> _orderRepo;
         private readonly NT.BLL.Interfaces.IGenericRepository<OrderDetail> _orderDetailRepo;
         private readonly NT.BLL.Interfaces.IGenericRepository<PaymentMethod> _paymentMethodRepo;
+        private readonly NT.BLL.Interfaces.IGenericRepository<Voucher> _voucherRepo;
 
         public CheckoutController(
             CartDetailWebService cartDetailService,
@@ -25,7 +26,8 @@ namespace NT.WEB.Controllers
             ProductDetailWebService productDetailService,
             NT.BLL.Interfaces.IGenericRepository<Order> orderRepo,
             NT.BLL.Interfaces.IGenericRepository<OrderDetail> orderDetailRepo,
-            NT.BLL.Interfaces.IGenericRepository<PaymentMethod> paymentMethodRepo)
+            NT.BLL.Interfaces.IGenericRepository<PaymentMethod> paymentMethodRepo,
+            NT.BLL.Interfaces.IGenericRepository<Voucher> voucherRepo)
         {
             _cartDetailService = cartDetailService;
             _customerService = customerService;
@@ -33,6 +35,7 @@ namespace NT.WEB.Controllers
             _orderRepo = orderRepo;
             _orderDetailRepo = orderDetailRepo;
             _paymentMethodRepo = paymentMethodRepo;
+            _voucherRepo = voucherRepo;
         }
 
         // GET: /Checkout/Start?cartId=...&selected=commaSeparatedProductDetailIds
@@ -110,8 +113,37 @@ namespace NT.WEB.Controllers
                 .ToList();
             if (!selectedItems.Any()) return BadRequest("Không có s?n ph?m h?p l?");
 
-            var total = selectedItems.Sum(ci => (ci.ProductDetail?.Price ?? 0m) * ci.Quantity);
-            var final = total;
+            // Ensure we have up-to-date ProductDetail for price calculation
+            decimal subtotal = 0m;
+            foreach (var ci in selectedItems)
+            {
+                var pd = ci.ProductDetail ?? await _productDetailService.GetByIdAsync(ci.ProductDetailId);
+                var price = pd?.Price ?? 0m;
+                subtotal += price * ci.Quantity;
+            }
+
+            // Apply shipping fee and voucher discount similar to CartDetailController.Index
+            var shippingFee = 35000m;
+            decimal discount = 0m;
+            var appliedCode = HttpContext.Session.GetString("SESSION_VOUCHER_CODE");
+            if (!string.IsNullOrWhiteSpace(appliedCode))
+            {
+                var found = await _voucherRepo.FindAsync(v => v.Code == appliedCode);
+                var voucher = found?.FirstOrDefault();
+                if (voucher != null && (!voucher.ExpiryDate.HasValue || voucher.ExpiryDate.Value >= DateTime.UtcNow))
+                {
+                    if (!voucher.MinOrderAmount.HasValue || subtotal >= voucher.MinOrderAmount.Value)
+                    {
+                        discount = voucher.DiscountAmount.GetValueOrDefault(0m);
+                        if (voucher.MaxDiscountAmount.HasValue)
+                            discount = Math.Min(discount, voucher.MaxDiscountAmount.Value);
+                        discount = Math.Min(discount, subtotal);
+                    }
+                }
+            }
+
+            var total = subtotal; // TotalAmount = subtotal without shipping
+            var final = subtotal + shippingFee - discount;
 
             Order order;
             try
@@ -125,6 +157,7 @@ namespace NT.WEB.Controllers
                 return Redirect($"/Checkout/Start?cartId={cartId}&selected={sel}");
             }
             order.Status = "0";
+            order.DiscountAmount = discount;
 
             await _orderRepo.AddAsync(order);
             await _orderRepo.SaveChangesAsync();
