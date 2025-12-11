@@ -10,7 +10,7 @@ namespace NT.SHARED.Models
         public string Code { get; set; } = null!;
         [Display(Name = "Số tiền giảm")]
         public decimal? DiscountAmount { get; set; }
-        [Display(Name = "Giảm tiền giảm")]
+        [Display(Name = "Tiền tối đa được giảm")]
         public decimal? MaxDiscountAmount { get; set; }
         [Display(Name = "đơn hàng tối thiểu")]
         public decimal? MinOrderAmount { get; set; }

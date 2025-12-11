@@ -1,0 +1,115 @@
+﻿@using NT.SHARED.Models
+@model IEnumerable<dynamic>
+@inject NT.WEB.Services.BrandWebService BrandService
+@inject NT.WEB.Services.ProductDetailWebService ProductDetailService
+@{
+    ViewData["Title"] = "Sản phẩm";
+    var qVal = Context.Request.Query["q"].ToString();
+    var brandVal = Context.Request.Query["brandId"].ToString();
+    var categoryVal = Context.Request.Query["categoryId"].ToString();
+
+    var brands = await BrandService.GetAllAsync();
+    var brandOptions = brands?.OrderBy(b => b.Name).ToList() ?? new List<Brand>();
+
+    // Build category GUID options from product details
+    var categoryIds = new HashSet<Guid>();
+    foreach (var p in Model ?? Enumerable.Empty<dynamic>())
+    {
+        try
+        {
+            var details = await ProductDetailService.GetWithLookupsByProductIdAsync((Guid)p.id);
+            foreach (var d in details ?? Enumerable.Empty<NT.SHARED.Models.ProductDetail>())
+            {
+                var catProp = d.GetType().GetProperty("CategoryId");
+                if (catProp != null)
+                {
+                    var val = catProp.GetValue(d);
+                    if (val is Guid g && g != Guid.Empty) categoryIds.Add(g);
+                }
+                else
+                {
+                    var catsProp = d.GetType().GetProperty("Categories");
+                    var cats = catsProp?.GetValue(d) as IEnumerable<Guid>;
+                    if (cats != null)
+                    {
+                        foreach (var g in cats) if (g != Guid.Empty) categoryIds.Add(g);
+                    }
+                }
+            }
+        }
+        catch { }
+    }
+    var categoryOptions = categoryIds.OrderBy(x => x).ToList();
+}
+<div class="container my-4">
+    <h2 class="mb-3">Danh sách sản phẩm</h2>
+
+    <form class="row g-2 align-items-end mb-3" method="get" asp-controller="Home" asp-action="GetAllProducts">
+        <div class="col-12 col-md-4">
+            <label for="q" class="form-label small">Từ khóa</label>
+            <input type="text" name="q" id="q" value="@qVal" class="form-control form-control-sm" placeholder="Tên hoặc mã sản phẩm" />
+        </div>
+        <div class="col-6 col-md-2">
+            <label for="brandId" class="form-label small">Thương hiệu</label>
+            <select name="brandId" id="brandId" class="form-select form-select-sm">
+                <option value="">-- Tất cả --</option>
+                @foreach (var b in brandOptions)
+                {
+                    var val = (Guid)b.Id;
+                    <option value="@val" selected="@(brandVal == val.ToString())">@b.Name</option>
+                }
+            </select>
+        </div>
+        <div class="col-6 col-md-2">
+            <label for="categoryId" class="form-label small">Danh mục</label>
+            <select name="categoryId" id="categoryId" class="form-select form-select-sm">
+                <option value="">-- Tất cả --</option>
+                @foreach (var gid in categoryOptions)
+                {
+                    <option value="@gid" selected="@(categoryVal == gid.ToString())">@gid</option>
+                }
+            </select>
+        </div>
+        <div class="col-6 col-md-2">
+            <label for="minPrice" class="form-label small">Giá từ</label>
+            <input type="number" name="minPrice" id="minPrice" value="@Context.Request.Query["minPrice"]" class="form-control form-control-sm" min="0" step="1000" />
+        </div>
+        <div class="col-6 col-md-2">
+            <label for="maxPrice" class="form-label small">Giá đến</label>
+            <input type="number" name="maxPrice" id="maxPrice" value="@Context.Request.Query["maxPrice"]" class="form-control form-control-sm" min="0" step="1000" />
+        </div>
+        <div class="col-12">
+            <button type="submit" class="btn btn-sm btn-primary">Lọc</button>
+            <a class="btn btn-sm btn-outline-secondary" asp-controller="Home" asp-action="GetAllProducts">Xóa lọc</a>
+        </div>
+    </form>
+    <div class="row g-3">
+        @foreach (var p in Model ?? Enumerable.Empty<dynamic>())
+        {
+            <div class="col-6 col-sm-4 col-md-3">
+                <div class="card h-100">
+                    <a asp-controller="Product" asp-action="ProductDetailIndex" asp-route-id="@p.id" class="text-decoration-none">
+                        <img src="@((p.thumbnail ?? "/images/product-placeholder.png"))" class="card-img-top" alt="product" style="height:160px;object-fit:contain" />
+                    </a>
+                    <div class="card-body p-2">
+                        <div class="small fw-semibold text-dark mb-1">
+                            <a asp-controller="Product" asp-action="ProductDetailIndex" asp-route-id="@p.id" class="text-decoration-none text-dark">@p.name</a>
+                        </div>
+                        <div class="small text-muted">@p.brandName <span class="text-muted">@p.productCode</span></div>
+                        <div class="small fw-semibold text-primary mt-1">
+                            @if(p.priceMin != null || p.priceMax != null)
+                            {
+                                @string.Format(System.Globalization.CultureInfo.GetCultureInfo("vi-VN"), "{0:C0}", p.priceMin ?? p.priceMax)
+                                @if(p.priceMin != null && p.priceMax != null && p.priceMin != p.priceMax){<text> - </text> @string.Format(System.Globalization.CultureInfo.GetCultureInfo("vi-VN"), "{0:C0}", p.priceMax)}
+                            }
+                            else
+                            {
+                                <text>Liên hệ</text>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
