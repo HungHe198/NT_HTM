@@ -37,7 +37,7 @@ namespace NT.WEB.Controllers
                 {
                     pd = await _productDetailService.GetByIdAsync(ci.ProductDetailId);
                 }
-                if (pd == null || ci.Quantity <= 0) continue;
+                if (pd == null) continue;
                 items.Add(new CartItemDto
                 {
                     ProductDetailId = ci.ProductDetailId,
@@ -112,6 +112,32 @@ namespace NT.WEB.Controllers
                 await _service.SaveChangesAsync();
             }
             return RedirectToAction(nameof(Index), new { cartId });
+        }
+
+        // Checkout only selected items in this cart
+        [HttpPost]
+        public async Task<IActionResult> CheckoutSelected(Guid cartId, [FromForm] Guid[] selectedIds)
+        {
+            if (cartId == Guid.Empty) return BadRequest();
+            if (selectedIds == null || selectedIds.Length == 0)
+            {
+                TempData["Error"] = "Vui lòng ch?n ít nh?t m?t s?n ph?m ?? thanh toán.";
+                return RedirectToAction(nameof(Index), new { cartId });
+            }
+
+            var cartItems = await _service.FindAsync(cd => cd.CartId == cartId);
+            var selected = (cartItems ?? Enumerable.Empty<CartDetail>())
+                .Where(ci => selectedIds.Contains(ci.ProductDetailId))
+                .ToList();
+
+            if (!selected.Any())
+            {
+                TempData["Error"] = "Không có s?n ph?m h?p l? ?? thanh toán.";
+                return RedirectToAction(nameof(Index), new { cartId });
+            }
+
+            var selectedQuery = string.Join(',', selected.Select(s => s.ProductDetailId));
+            return Redirect($"/Checkout/Start?cartId={cartId}&selected={selectedQuery}");
         }
 
         public async Task<IActionResult> Details(Guid cartId, Guid productDetailId)

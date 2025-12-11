@@ -1,0 +1,22 @@
+@model NT.SHARED.Models.PaymentMethod
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+<h2>S?a ph??ng th?c thanh toán</h2>
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">@string.Join("; ", ViewData.ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage))</div>
+}
+<form asp-action="Edit" asp-controller="PaymentMethods" method="post">
+    <input type="hidden" asp-for="Id" />
+    <div class="mb-2">
+        <label asp-for="Name" class="form-label"></label>
+        <input asp-for="Name" class="form-control" />
+    </div>
+    <div class="mb-2">
+        <label asp-for="Description" class="form-label"></label>
+        <input asp-for="Description" class="form-control" />
+    </div>
+    <button class="btn btn-primary" type="submit">L?u</button>
+    <a class="btn btn-secondary" asp-action="Index">H?y</a>
+</form>

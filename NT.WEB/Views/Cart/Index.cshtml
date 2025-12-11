@@ -9,12 +9,12 @@
     var voucherDiscount = (decimal)(ViewBag.VoucherDiscount ?? 0m);
 }
 
-<h2>Gi? hàng</h2>
+<h2>Giỏ hàng</h2>
 <div class="row">
     <div class="col-md-8">
         @if (!Model.Any())
         {
-            <div>Gi? hàng tr?ng.</div>
+            <div>Giỏ hàng trống.</div>
         }
         else
         {
@@ -37,21 +37,21 @@
                                 <img src="@(item.Thumbnail ?? "/images/product-placeholder.png")" alt="@item.ProductName" style="width:60px;height:60px;object-fit:cover" />
                                 <div>
                                     <div>@item.ProductName</div>
-                                    <small class="text-muted">?? dài: @item.LengthName, ?? c?ng: @item.HardnessName</small>
+                                    <small class="text-muted">Độ dài: @item.LengthName, Độ cứng: @item.HardnessName</small>
                                 </div>
                             </div>
                         </td>
-                        <td class="text-nowrap">@item.UnitPrice.ToString("#,##0")?</td>
+                        <td class="text-nowrap">@item.UnitPrice.ToString("#,##0")</td>
                         <td>
                             <form asp-action="UpdateQty" asp-controller="Cart" method="post" class="d-inline-flex align-items-center gap-1">
                                 <input type="hidden" name="productDetailId" value="@item.ProductDetailId" />
                                 <button type="button" class="btn btn-outline-secondary btn-sm" onclick="var i=this.nextElementSibling; i.value=Math.max(1, parseInt(i.value||'1')-1); this.form.submit();">-</button>
                                 <input type="number" name="quantity" value="@item.Quantity" min="1" class="form-control form-control-sm" style="width:60px" />
                                 <button type="button" class="btn btn-outline-secondary btn-sm" onclick="var i=this.previousElementSibling; i.value=Math.max(1, parseInt(i.value||'1')+1); this.form.submit();">+</button>
-                                <button class="btn btn-secondary btn-sm" type="submit">C?p nh?t</button>
+                                <button class="btn btn-secondary btn-sm" type="submit">Cập nhật</button>
                             </form>
                         </td>
-                        <td class="text-nowrap">@string.Format("{0:#,##0}", item.UnitPrice * item.Quantity)?</td>
+                        <td class="text-nowrap">@string.Format("{0:#,##0}", item.UnitPrice * item.Quantity)</td>
                         <td>
                             <form asp-action="Remove" asp-controller="Cart" method="post">
                                 <input type="hidden" name="productDetailId" value="@item.ProductDetailId" />

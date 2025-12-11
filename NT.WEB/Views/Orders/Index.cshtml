@@ -1,0 +1,32 @@
+@model IEnumerable<NT.SHARED.Models.Order>
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+<h2>Danh sách ??n hàng</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Mã ??n</th>
+            <th>Khách hàng</th>
+            <th>Tr?ng thái</th>
+            <th>T?ng ti?n</th>
+            <th>Th?i gian</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var o in Model ?? Enumerable.Empty<NT.SHARED.Models.Order>())
+    {
+        <tr>
+            <td>@o.Id</td>
+            <td>@o.CustomerId</td>
+            <td>@o.Status</td>
+            <td>@o.FinalAmount.ToString("#,##0")</td>
+            <td>@o.CreatedTime.ToString("yyyy-MM-dd HH:mm")</td>
+            <td class="text-nowrap">
+                <a class="btn btn-sm btn-outline-primary" asp-action="Review" asp-controller="Orders" asp-route-id="@o.Id">Xem/duy?t</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

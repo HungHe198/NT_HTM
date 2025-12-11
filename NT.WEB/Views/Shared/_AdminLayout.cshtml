@@ -1,4 +1,4 @@
-﻿@{
+@{
     Layout = null;
 }
 @* PSEUDOCODE / PLAN:
@@ -40,16 +40,16 @@
                 <div class="fw-bold">Team 1 <span class="badge bg-light text-dark">Free</span></div>
             </div>
             <ul class="nav nav-pills flex-column mb-auto">
-                <li><a asp-controller="Admin"       asp-action="Index" class="nav-link active"><i class="fa fa-chart-line"></i>Thống Kê</a></li>
-                <li><a asp-controller="Admin"       asp-action="Index" class="nav-link"><i class="fa fa-user"></i>Tài Khoản</a></li>
-                <li><a asp-controller="Admin"       asp-action="Index" class="nav-link"><i class="fa fa-user"></i>Phân Quyền</a></li>
-                <li><a asp-controller="Product"     asp-action="Index" class="nav-link"><i class="fa fa-box"></i>Sản Phẩm</a></li>
-                <li><a asp-controller="Admin"       asp-action="Index" class="nav-link"><i class="fa fa-blog"></i>Hóa Đơn</a></li>
-                <li><a asp-controller="Admin"       asp-action="Index" class="nav-link"><i class="fa fa-blog"></i>Bán Hàng Tại Quầy</a></li>
-                <li><a asp-controller="Voucher"       asp-action="Index" class="nav-link"><i class="fa fa-blog"></i>Mã Giảm Giá</a></li>
-                <li><a asp-controller="Admin"       asp-action="Index" class="nav-link"><i class="fa fa-blog"></i>Phương Thức Thanh Toán</a></li>
-                <li><a asp-controller="Brand"       asp-action="Index" class="nav-link"><i class="fa fa-blog"></i>Nhà Sản Xuất</a></li>  
-                <li><a asp-controller="OriginCountry"       asp-action="Index" class="nav-link"><i class="fa fa-blog"></i>Nơi Sản Xuất</a></li>                 
+                <li><a asp-controller="Admin"       asp-action="Index" class="nav-link active"><i class="fa fa-chart-line"></i>Th?ng K�</a></li>
+                <li><a asp-controller="Admin"       asp-action="Index" class="nav-link"><i class="fa fa-user"></i>T�i Kho?n</a></li>
+                <li><a asp-controller="Admin"       asp-action="Index" class="nav-link"><i class="fa fa-user"></i>Ph�n Quy?n</a></li>
+                <li><a asp-controller="Product"     asp-action="Index" class="nav-link"><i class="fa fa-box"></i>S?n Ph?m</a></li>
+                <li><a asp-controller="Admin"       asp-action="Index" class="nav-link"><i class="fa fa-blog"></i>H�a ??n</a></li>
+                <li><a asp-controller="Admin"       asp-action="Index" class="nav-link"><i class="fa fa-blog"></i>B�n H�ng T?i Qu?y</a></li>
+                <li><a asp-controller="Voucher"       asp-action="Index" class="nav-link"><i class="fa fa-blog"></i>M� Gi?m Gi�</a></li>
+                <li><a asp-controller="PaymentMethods" asp-action="Index" class="nav-link"><i class="fa fa-blog"></i>Ph??ng Th?c Thanh To�n</a></li>
+                <li><a asp-controller="Brand"       asp-action="Index" class="nav-link"><i class="fa fa-blog"></i>Nh� S?n Xu?t</a></li>  
+                <li><a asp-controller="OriginCountry"       asp-action="Index" class="nav-link"><i class="fa fa-blog"></i>N?i S?n Xu?t</a></li>                 
                 <li><a asp-controller="Account"     asp-action="Index" class="nav-link"><i class="fa fa-sign-in-alt"></i>Sign in</a></li>
                 <li><a asp-controller="NotFound"    asp-action="Index" class="nav-link"><i class="fa fa-ban"></i>Not found</a></li>
             </ul>
@@ -77,7 +77,7 @@
                     var hasAnyMsg = !string.IsNullOrWhiteSpace(errorMsg);
                 }
                 <div class="dropdown me-3">
-                    <button class="btn btn-sm btn-outline-secondary position-relative" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Thông báo">
+                    <button class="btn btn-sm btn-outline-secondary position-relative" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Th�ng b�o">
                         <i class="fa fa-bell"></i>
                         @if (hasAnyMsg)
                         {
@@ -85,14 +85,14 @@
                         }
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end p-0" style="min-width: 320px;">
-                        <li class="p-2 border-bottom fw-semibold">Thông báo lỗi</li>
+                        <li class="p-2 border-bottom fw-semibold">Th�ng b�o l?i</li>
                         @if (hasAnyMsg)
                         {
                             <li><div class="px-3 py-2 small text-danger">@errorMsg</div></li>
                         }
                         else
                         {
-                            <li><div class="px-3 py-2 small text-muted">Không có lỗi</div></li>
+                            <li><div class="px-3 py-2 small text-muted">Kh�ng c� l?i</div></li>
                         }
                     </ul>
                 </div>
