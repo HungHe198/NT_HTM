@@ -1,0 +1,68 @@
+@{
+    Layout = "~/Views/Shared/_ClientLayout.cshtml";
+    var paymentMethods = ViewBag.PaymentMethods as IEnumerable<NT.SHARED.Models.PaymentMethod> ?? Enumerable.Empty<NT.SHARED.Models.PaymentMethod>();
+    string selectedIds = ViewBag.SelectedIds as string ?? string.Empty;
+    var cartId = ViewBag.CartId;
+}
+
+<h2>Thanh toán</h2>
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+<div class="row">
+    <div class="col-md-7">
+        <h5>S?n ph?m ?ã ch?n</h5>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Tên</th>
+                    <th>Thu?c tính</th>
+                    <th>??n giá</th>
+                    <th>S? l??ng</th>
+                    <th>T?m tính</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var item in (IEnumerable<object>)Model)
+            {
+                dynamic it = item;
+                <tr>
+                    <td>@it.Name</td>
+                    <td><small>Chi?u dài: @it.Length, ?? c?ng: @it.Hardness</small></td>
+                    <td>@string.Format("{0:#,##0}", it.Price)</td>
+                    <td>@it.Quantity</td>
+                    <td>@string.Format("{0:#,##0}", (decimal)it.Price * (int)it.Quantity)</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+    <div class="col-md-5">
+        <h5>Thông tin ng??i nh?n</h5>
+        <form asp-action="Submit" asp-controller="Checkout" method="post">
+            <input type="hidden" name="cartId" value="@cartId" />
+            <input type="hidden" name="selectedIds" value="@selectedIds" />
+            <div class="mb-2">
+                <label class="form-label">S? ?i?n tho?i</label>
+                <input type="text" name="phoneNumber" class="form-control" required />
+            </div>
+            <div class="mb-2">
+                <label class="form-label">??a ch? giao hàng</label>
+                <input type="text" name="shippingAddress" class="form-control" required />
+            </div>
+            <div class="mb-2">
+                <label class="form-label">Ph??ng th?c thanh toán</label>
+                <select name="paymentMethodId" class="form-select" required>
+                    <option value="">-- Ch?n ph??ng th?c --</option>
+                    @foreach (var m in paymentMethods)
+                    {
+                        <option value="@m.Id">@m.Name</option>
+                    }
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">??t hàng</button>
+        </form>
+    </div>
+</div>

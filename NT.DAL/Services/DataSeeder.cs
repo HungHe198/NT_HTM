@@ -10,7 +10,7 @@ namespace NT.DAL.Services
     {
         public static void Apply(ModelBuilder modelBuilder)
         {
-            // Seed Brands (c?n câu ?ài)
+            // Seed Brands (cần câu đài)
             var brandDefault = Guid.NewGuid();
             var brands = new List<Brand>
             {
@@ -23,26 +23,26 @@ namespace NT.DAL.Services
             modelBuilder.Entity<Brand>().HasData(brands);
 
             // Seed required lookups used by ProductDetail FK
-            var colorSample = new Color { Id = Guid.Parse("66666666-6666-6666-6666-000000000001"), Name = "?en", HexCode = "#000000" };
+            var colorSample = new Color { Id = Guid.Parse("66666666-6666-6666-6666-000000000001"), Name = "Đen", HexCode = "#000000" };
             modelBuilder.Entity<Color>().HasData(colorSample);
-            var elasticitySample = new Elasticity { Id = Guid.Parse("88888888-8888-8888-8888-000000000001"), Name = "?àn h?i tiêu chu?n" };
+            var elasticitySample = new Elasticity { Id = Guid.Parse("88888888-8888-8888-8888-000000000001"), Name = "Đàn hồi tiêu chuẩn" };
             modelBuilder.Entity<Elasticity>().HasData(elasticitySample);
-            var originCountrySample = new OriginCountry { Id = Guid.Parse("77777777-7777-7777-7777-000000000001"), Name = "Vi?t Nam" };
+            var originCountrySample = new OriginCountry { Id = Guid.Parse("77777777-7777-7777-7777-000000000001"), Name = "Việt Nam" };
             modelBuilder.Entity<OriginCountry>().HasData(originCountrySample);
-            var surfaceFinishSampleConf = new SurfaceFinish { Id = Guid.Parse("99999999-9999-9999-9999-999999999999"), Name = "S?n bóng" };
+            var surfaceFinishSampleConf = new SurfaceFinish { Id = Guid.Parse("99999999-9999-9999-9999-999999999999"), Name = "Sơn bóng" };
             modelBuilder.Entity<SurfaceFinish>().HasData(surfaceFinishSampleConf);
 
             // Seed Lengths
             var lengths = new List<Length>
             {
-                new Length { Id = Guid.Parse("11111111-1111-1111-1111-111111111111"), Name = "2m7", Description = "C?n câu ?ài 2m7" },
-                new Length { Id = Guid.Parse("22222222-2222-2222-2222-222222222222"), Name = "3m9", Description = "C?n câu ?ài 3m9" },
-                new Length { Id = Guid.Parse("33333333-3333-3333-3333-333333333333"), Name = "4m5", Description = "C?n câu ?ài 4m5" },
-                new Length { Id = Guid.Parse("44444444-4444-4444-4444-444444444444"), Name = "5m4", Description = "C?n câu ?ài 5m4" },
-                new Length { Id = Guid.Parse("55555555-5555-5555-5555-555555555555"), Name = "6m3", Description = "C?n câu ?ài 6m3" },
-                new Length { Id = Guid.Parse("66666666-6666-6666-6666-666666666666"), Name = "7m2", Description = "C?n câu ?ài 7m2" },
-                new Length { Id = Guid.Parse("77777777-7777-7777-7777-777777777777"), Name = "8m1", Description = "C?n câu ?ài 8m1" },
-                new Length { Id = Guid.Parse("88888888-8888-8888-8888-888888888888"), Name = "9m", Description = "C?n câu ?ài 9m" },
+                new Length { Id = Guid.Parse("11111111-1111-1111-1111-111111111111"), Name = "2m7", Description = "Cần câu đài 2m7" },
+                new Length { Id = Guid.Parse("22222222-2222-2222-2222-222222222222"), Name = "3m9", Description = "Cần câu đài 3m9" },
+                new Length { Id = Guid.Parse("33333333-3333-3333-3333-333333333333"), Name = "4m5", Description = "Cần câu đài 4m5" },
+                new Length { Id = Guid.Parse("44444444-4444-4444-4444-444444444444"), Name = "5m4", Description = "Cần câu đài 5m4" },
+                new Length { Id = Guid.Parse("55555555-5555-5555-5555-555555555555"), Name = "6m3", Description = "Cần câu đài 6m3" },
+                new Length { Id = Guid.Parse("66666666-6666-6666-6666-666666666666"), Name = "7m2", Description = "Cần câu đài 7m2" },
+                new Length { Id = Guid.Parse("77777777-7777-7777-7777-777777777777"), Name = "8m1", Description = "Cần câu đài 8m1" },
+                new Length { Id = Guid.Parse("88888888-8888-8888-8888-888888888888"), Name = "9m", Description = "Cần câu đài 9m" },
             };
             modelBuilder.Entity<Length>().HasData(lengths);
 
@@ -54,7 +54,7 @@ namespace NT.DAL.Services
                 {
                     Id = Guid.Parse($"00000000-0000-0000-0000-0000000000{h:D2}"),
                     Name = $"{h}H",
-                    Description = $"?? c?ng {h}H cho c?n câu ?ài"
+                    Description = $"Độ cứng {h}H cho cần câu đài"
                 });
             }
             modelBuilder.Entity<Hardness>().HasData(hardnesses);
@@ -73,7 +73,7 @@ namespace NT.DAL.Services
                     BrandId = randomBrandId,
                     ProductCode = $"CD{i:000}",
                     Name = $"Cần câu đài mẫu {i}",
-                    ShortDescription = "C?n câu ?ài ch?t l??ng, phù h?p h? d?ch v? và t? nhiên",
+                    ShortDescription = "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên",
                     Thumbnail = "/images/product-placeholder.png",
                     Status = "Active",
                     CreatedDate = DateTime.UtcNow

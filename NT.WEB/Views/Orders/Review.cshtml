@@ -1,0 +1,72 @@
+@model NT.SHARED.Models.Order
+@{
+    var isAdmin = User.IsInRole("Admin") || User.IsInRole("Employee");
+    Layout = isAdmin ? "~/Views/Shared/_AdminLayout.cshtml" : "~/Views/Shared/_ClientLayout.cshtml";
+    var details = ViewBag.Details as IEnumerable<NT.SHARED.Models.OrderDetail> ?? Enumerable.Empty<NT.SHARED.Models.OrderDetail>();
+}
+
+<h2>Chi ti?t ??n hàng</h2>
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+
+<div class="mb-2">Mã ??n: @Model.Id</div>
+<div class="mb-2">Tr?ng thái: @Model.Status</div>
+<div class="mb-2">T?ng ti?n: @Model.TotalAmount.ToString("#,##0")</div>
+<div class="mb-2">S? ti?n ph?i tr?: @Model.FinalAmount.ToString("#,##0")</div>
+<div class="mb-2">S? ?i?n tho?i: @Model.PhoneNumber</div>
+<div class="mb-2">??a ch?: @Model.ShippingAddress</div>
+
+<h5>S?n ph?m</h5>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Tên</th>
+            <th>Thu?c tính</th>
+            <th>S? l??ng</th>
+            <th>??n giá</th>
+            <th>T?ng</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var d in details)
+    {
+        <tr>
+            <td>@(d.NameAtOrder ?? d.ProductDetail?.Product?.Name)</td>
+            <td><small>Chi?u dài: @(d.LengthAtOrder ?? d.ProductDetail?.Length?.Name), ?? c?ng: @(d.HardnessAtOrder ?? d.ProductDetail?.Hardness?.Name), Màu: @(d.ColorAtOrder ?? d.ProductDetail?.Color?.Name)</small></td>
+            <td>@d.Quantity</td>
+            <td>@d.UnitPrice.ToString("#,##0")</td>
+            <td>@((d.UnitPrice * d.Quantity).ToString("#,##0"))</td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+@if (User.IsInRole("Admin") || User.IsInRole("Employee"))
+{
+    <h5>C?p nh?t tr?ng thái</h5>
+    <form asp-action="UpdateStatus" asp-controller="Orders" method="post" class="d-flex gap-2">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="id" value="@Model.Id" />
+        <select name="status" class="form-select" style="max-width:200px">
+            <option value="0">Ch? xác nh?n</option>
+            <option value="1">?ã xác nh?n</option>
+            <option value="2">?ang v?n chuy?n</option>
+            <option value="3">Giao thành công</option>
+        </select>
+        <button class="btn btn-primary" type="submit">C?p nh?t</button>
+    </form>
+}
+
+<h5>H?y ??n</h5>
+<form asp-action="Cancel" asp-controller="Orders" method="post" class="d-flex gap-2">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="id" value="@Model.Id" />
+    <input type="text" name="note" class="form-control" placeholder="Lý do h?y ??n" required />
+    <button class="btn btn-danger" type="submit">H?y ??n</button>
+</form>

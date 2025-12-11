@@ -1,4 +1,4 @@
-@using NT.WEB.DTO
+﻿@using NT.WEB.DTO
 @model IEnumerable<CartItemDto>
 @{
     Layout = "~/Views/Shared/_ClientLayout.cshtml";
@@ -9,102 +9,117 @@
     var voucherDiscount = (decimal)(ViewBag.VoucherDiscount ?? 0m);
 }
 
-<h2>Gi? h�ng</h2>
+<h2>Giỏ hàng</h2>
 <div class="row">
     <div class="col-md-8">
         @if (!Model.Any())
         {
-            <div>Gi? h�ng tr?ng.</div>
+            <div>Giỏ hàng trống.</div>
         }
         else
         {
+            <form asp-action="CheckoutSelected" asp-controller="CartDetail" asp-route-cartId="@ViewBag.CartId" method="post">
             <table class="table">
                 <thead>
                     <tr>
-                        <th>S?n ph?m</th>
-                        <th>Gi�</th>
-                        <th>S? l??ng</th>
-                        <th>T?m t�nh</th>
+                        <th></th>
+                        <th>Sản phẩm</th>
+                        <th>Giá</th>
+                        <th>Số lượng</th>
+                        <th>Tạm tính</th>
                         <th></th>
                     </tr>
                 </thead>
                 <tbody>
-                @foreach (var item in Model)
+                @foreach (var item in Model.Where(i => i.Quantity > 0))
                 {
                     <tr>
+                        <td>
+                            <input type="checkbox" name="selectedIds" value="@item.ProductDetailId" />
+                        </td>
                         <td>
                             <div class="d-flex align-items-center gap-2">
                                 <img src="@(item.Thumbnail ?? "/images/product-placeholder.png")" alt="@item.ProductName" style="width:60px;height:60px;object-fit:cover" />
                                 <div>
                                     <div>@item.ProductName</div>
-                                    <small class="text-muted">?? d�i: @item.LengthName, ?? c?ng: @item.HardnessName</small>
+                                    <small class="text-muted">Độ dài: @item.LengthName, Độ cứng: @item.HardnessName</small>
                                 </div>
                             </div>
                         </td>
                         <td class="text-nowrap">@item.UnitPrice.ToString("#,##0")</td>
                         <td>
-                            <form asp-action="UpdateQty" asp-controller="CartDetail" asp-route-cartId="@ViewBag.CartId" method="post" class="d-inline-flex align-items-center gap-1">
-                                <input type="hidden" name="productDetailId" value="@item.ProductDetailId" />
-                                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="var i=this.nextElementSibling; i.value=Math.max(1, parseInt(i.value||'1')-1); this.form.submit();">-</button>
-                                <input type="number" name="quantity" value="@item.Quantity" min="1" class="form-control form-control-sm" style="width:60px" />
-                                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="var i=this.previousElementSibling; i.value=Math.max(1, parseInt(i.value||'1')+1); this.form.submit();">+</button>
-                                <button class="btn btn-secondary btn-sm" type="submit">C?p nh?t</button>
-                            </form>
+                            <div class="d-inline-flex align-items-center gap-1" data-pd-id="@item.ProductDetailId">
+                                <button type="button" class="btn btn-outline-secondary btn-sm qty-minus">-</button>
+                                <input type="number" class="form-control form-control-sm qty-input" value="@item.Quantity" min="1" style="width:60px" />
+                                <button type="button" class="btn btn-outline-secondary btn-sm qty-plus">+</button>
+                            </div>
                         </td>
                         <td class="text-nowrap">@string.Format("{0:#,##0}", item.UnitPrice * item.Quantity)</td>
                         <td>
                             <form asp-action="Remove" asp-controller="CartDetail" asp-route-cartId="@ViewBag.CartId" method="post">
                                 <input type="hidden" name="productDetailId" value="@item.ProductDetailId" />
-                                <button class="btn btn-link text-danger" type="submit">X�a</button>
+                                <button class="btn btn-link text-danger" type="submit">Xóa</button>
                             </form>
                         </td>
                     </tr>
                 }
                 </tbody>
             </table>
+            <div class="d-flex gap-2 mb-3">
+                <button type="submit" class="btn btn-primary">Thanh toán mục đã chọn</button>
+            </div>
+            </form>
         }
         <div class="d-flex gap-2">
-            <a class="btn btn-outline-secondary" asp-controller="Home" asp-action="Index">Ti?p t?c xem s?n ph?m</a>
-            <button class="btn btn-secondary" disabled>C?p nh?t gi? h�ng</button>
+            <a class="btn btn-outline-secondary" asp-controller="Home" asp-action="Index">Tiếp tục xem sản phẩm</a>
+            <button class="btn btn-secondary" disabled>Cập nhật giỏ hàng</button>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">T?ng c?ng gi? h�ng</h5>
-                @if (TempData["Error"] != null)
-                {
-                    <div class="alert alert-danger py-1">@TempData["Error"]</div>
-                }
-                @if (TempData["Success"] != null)
-                {
-                    <div class="alert alert-success py-1">@TempData["Success"]</div>
-                }
-
-                <form asp-action="ApplyVoucher" asp-controller="Cart" method="post" class="input-group mb-3">
-                    <input type="text" name="code" class="form-control" placeholder="Nh?p m� voucher" value="@appliedCode" />
-                    <button class="btn btn-outline-primary" type="submit">�p d?ng</button>
-                </form>
-                @if (!string.IsNullOrWhiteSpace(appliedCode))
-                {
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <small class="text-success">?� �p d?ng: <strong>@appliedCode</strong></small>
-                        <form asp-action="RemoveVoucher" asp-controller="Cart" method="post" class="d-inline">
-                            <button class="btn btn-link btn-sm text-danger" type="submit">B? voucher</button>
-                        </form>
-                    </div>
-                }
-
-                <div class="d-flex justify-content-between"><span>T?m t�nh</span> <strong>@subtotal.ToString("#,##0")</strong></div>
-                <div class="d-flex justify-content-between"><span>V?n chuy?n</span> <strong>@shipping.ToString("#,##0")</strong></div>
-                @if (voucherDiscount > 0)
-                {
-                    <div class="d-flex justify-content-between"><span>Gi?m theo voucher</span> <strong class="text-success">-@voucherDiscount.ToString("#,##0")</strong></div>
-                }
-                <hr />
-                <div class="d-flex justify-content-between"><span>T?ng</span> <strong>@total.ToString("#,##0")</strong></div>
-                <button class="btn btn-warning w-100 mt-2" disabled>Ti?n h�nh thanh to�n</button>
-            </div>
-        </div>
-    </div>
+    
 </div>
+
+<script>
+    (function() {
+        const cartId = '@ViewBag.CartId';
+        function postUpdate(productDetailId, quantity) {
+            const form = document.createElement('form');
+            form.method = 'post';
+            form.action = '/CartDetail/UpdateQty?cartId=' + encodeURIComponent(cartId);
+            const pd = document.createElement('input'); pd.type = 'hidden'; pd.name = 'productDetailId'; pd.value = productDetailId;
+            const q = document.createElement('input'); q.type = 'hidden'; q.name = 'quantity'; q.value = quantity;
+            form.appendChild(pd); form.appendChild(q);
+            document.body.appendChild(form);
+            form.submit();
+        }
+
+        document.querySelectorAll('.qty-minus').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const wrap = this.parentElement;
+                const input = wrap.querySelector('.qty-input');
+                const pdId = wrap.getAttribute('data-pd-id');
+                const val = Math.max(1, parseInt(input.value || '1') - 1);
+                input.value = val;
+                postUpdate(pdId, val);
+            });
+        });
+        document.querySelectorAll('.qty-plus').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const wrap = this.parentElement;
+                const input = wrap.querySelector('.qty-input');
+                const pdId = wrap.getAttribute('data-pd-id');
+                const val = Math.max(1, parseInt(input.value || '1') + 1);
+                input.value = val;
+                postUpdate(pdId, val);
+            });
+        });
+        document.querySelectorAll('.qty-input').forEach(inp => {
+            inp.addEventListener('change', function() {
+                const wrap = this.parentElement;
+                const pdId = wrap.getAttribute('data-pd-id');
+                const val = Math.max(1, parseInt(this.value || '1'));
+                this.value = val;
+                postUpdate(pdId, val);
+            });
+        });
+    })();
+</script>
