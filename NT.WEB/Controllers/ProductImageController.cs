@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -116,13 +116,13 @@ namespace NT.WEB.Controllers
         [HttpPost]
         public async Task<IActionResult> Upload(IFormFile file)
         {
-            if (file == null || file.Length == 0) return BadRequest(new { error = "No file provided" });
+            if (file == null || file.Length == 0) return BadRequest(new { error = "không có tệp nào đính kèm" });
 
             var uploadsRoot = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "products");
             if (!Directory.Exists(uploadsRoot)) Directory.CreateDirectory(uploadsRoot);
 
             var ext = Path.GetExtension(file.FileName);
-            var fileName = $"{Guid.NewGuid()}{ext}";
+            var fileName = $"{Guid.NewGuid()}{ext}";    
             var filePath = Path.Combine(uploadsRoot, fileName);
 
             try
@@ -132,7 +132,7 @@ namespace NT.WEB.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { error = "Failed to save file", detail = ex.Message });
+                return StatusCode(500, new { error = "Không thể lưu file", detail = ex.Message });
             }
 
             var publicUrl = $"/uploads/products/{fileName}";

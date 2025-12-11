@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using NT.BLL.Interfaces;
 using NT.SHARED.Models;
 using System.Threading.Tasks;
@@ -46,7 +46,7 @@ namespace NT.WEB.Controllers
             var exists = await _userRepo.FindAsync(u => u.Username == model.Username);
             if (System.Linq.Enumerable.Any(exists))
             {
-                ModelState.AddModelError(nameof(model.Username), "T�n ??ng nh?p ?� t?n t?i");
+                ModelState.AddModelError(nameof(model.Username), "Tên đăng nhập đã tồn tại");
                 ViewBag.IsClient = client;
                 if (!client) ViewBag.Roles = new Microsoft.AspNetCore.Mvc.Rendering.SelectList(await _roleRepo.GetAllAsync(), "Id", "Name");
                 return View(model);
@@ -69,12 +69,12 @@ namespace NT.WEB.Controllers
             {
                 try
                 {
-                    await _emailService.SendEmailAsync(model.Email, "??ng k� th�nh c�ng", $"<p>Ch�o {System.Net.WebUtility.HtmlEncode(model.Fullname ?? model.Username)}</p><p>B?n ?� ??ng k� th�nh c�ng.</p>");
+                    await _emailService.SendEmailAsync(model.Email, "đăng ký thành công", $"<p>Chào {System.Net.WebUtility.HtmlEncode(model.Fullname ?? model.Username)}</p><p>Bạn đã đăng ký thành công.</p>");
                 }
                 catch { }
             }
 
-            TempData["Success"] = "??ng k� th�nh c�ng.";
+            TempData["Success"] = "đăng ký thành công.";
             return RedirectToAction("Index", "Login", new { client = client });
         }
     }

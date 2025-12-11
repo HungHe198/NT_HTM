@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using NT.SHARED.Models;
 using NT.WEB.Services;
 using System;
@@ -67,7 +67,7 @@ namespace NT.WEB.Controllers
                 items.Add(new CartItemDto
                 {
                     ProductDetailId = productDetailId,
-                    ProductName = detail.Product?.Name ?? "S?n ph?m",
+                    ProductName = detail.Product?.Name ?? "Sản phẩm",
                     Thumbnail = detail.Product?.Thumbnail,
                     LengthName = detail.Length?.Name,
                     HardnessName = detail.Hardness?.Name,

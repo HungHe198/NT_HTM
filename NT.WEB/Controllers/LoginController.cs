@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using NT.BLL.Interfaces;
 using NT.SHARED.DTOs;
 using NT.SHARED.Models;
@@ -41,14 +41,14 @@ namespace NT.WEB.Controllers
             var user = System.Linq.Enumerable.FirstOrDefault(users);
             if (user == null)
             {
-                ModelState.AddModelError(string.Empty, "T�n ??ng nh?p ho?c m?t kh?u kh�ng ?�ng");
+                ModelState.AddModelError(string.Empty, "Tên đăng nhập hoặc mật khẩu không đúng");
                 return View(dto);
             }
 
             var verify = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, dto.Password);
             if (verify != PasswordVerificationResult.Success)
             {
-                ModelState.AddModelError(string.Empty, "T�n ??ng nh?p ho?c m?t kh?u kh�ng ?�ng");
+                ModelState.AddModelError(string.Empty, "Tên đăng nhập hoặc mật khẩu không đúng");
                 return View(dto);
             }
 
@@ -71,7 +71,7 @@ namespace NT.WEB.Controllers
             var principal = new ClaimsPrincipal(identity);
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
-            TempData["Success"] = "??ng nh?p th�nh c�ng.";
+            TempData["Success"] = "đăng nhập thành công.";
 
             var rn = roleName?.ToLowerInvariant();
             if (rn == "admin" || rn == "employee")
