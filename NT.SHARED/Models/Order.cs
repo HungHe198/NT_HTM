@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
@@ -8,38 +8,38 @@ namespace NT.SHARED.Models
     public class Order
     {
         public Guid Id { get; set; } = Guid.NewGuid();
-        [Display(Name = "T�n kh�ch h�ng")]
+        [Display(Name = "Tên khách hàng")]
         public Guid CustomerId { get; set; }
-        [Display(Name = "M? gi?m gi�")]
+        [Display(Name = "mã giảm giá")]
         public Guid? VoucherId { get; set; }
-        [Display(Name = "Ph��ng th?c thanh to�n")]
+        [Display(Name = "Phương thức thanh toán")]
         public Guid PaymentMethodId { get; set; }
-        [Display(Name = "Nh�n vi�n t?o h�a ��n")]
+        [Display(Name = "Nhân viên tạo hóa đơn")]
         public Guid? CreatedByUserId { get; set; }
-        [Display(Name = "Th?i gian �?t h�ng")]
+        [Display(Name = "Thời gian đơn hàng")]
         public DateTime CreatedTime { get; set; } = DateTime.UtcNow;
-        [Display(Name = "T?ng ti?n")]
+        [Display(Name = "Tổng tiền")]
         public decimal TotalAmount { get; set; }
-        [Display(Name = "Ti?n ��?c gi?m")]
+        [Display(Name = "Tiền được giảm")]
         public decimal? DiscountAmount { get; set; }
-        [Display(Name = "Ti?n kh�ch ph?i tr?")]
+        [Display(Name = "Tiền khách phải trả")]
         public decimal FinalAmount { get; set; }
-        [Display(Name = "Tr?ng th�i")]
+        [Display(Name = "Trạng thái")]
         public string? Status { get; set; }
-        [Display(Name = "S? �i?n tho?i")]
+        [Display(Name = "Số điện thoại")]
         public string PhoneNumber { get; set; }
-        [Display(Name = "�?a ch? giao h�ng")]
+        [Display(Name = "Ðịa chỉ giao hàng")]
         public string ShippingAddress { get; set; }
-        [Display(Name = "Ghi ch� cho ��n h�ng")]
+        [Display(Name = "Ghi chú cho đơn hàng")]
         public string? Note { get; set; }
 
         public Order() { }
         public static Order Create(Guid customerId, Guid paymentMethodId, decimal totalAmount, decimal finalAmount, string phoneNumber, string shippingAddress)
         {
-            if (customerId == Guid.Empty) throw new ArgumentException("Vui l?ng ��ng nh?p l?i �? th?c hi?n ch?c n�ng n�y (104)!");
-            if (paymentMethodId == Guid.Empty) throw new ArgumentException("Vui l?ng ch?n ph��ng th?c thanh to�n!");
+            if (customerId == Guid.Empty) throw new ArgumentException("Vui lòng đăng nhập lại để thực hiện chứcc nãng này (104)!");
+            if (paymentMethodId == Guid.Empty) throw new ArgumentException("Vui lòng chọn phương thức thanh toán!");
 
-            if (string.IsNullOrWhiteSpace(phoneNumber)) throw new ArgumentException("Vui l?ng nh?p s? �i?n tho?i!");
+            if (string.IsNullOrWhiteSpace(phoneNumber)) throw new ArgumentException("Vui lòng nhập số điện thoại!");
 
             // Normalize: remove non-digit chars
             var digits = Regex.Replace(phoneNumber, "\\D", "");
@@ -53,7 +53,7 @@ namespace NT.SHARED.Models
             var vnPattern = new Regex("^0(3|5|7|8|9)\\d{8}$");
             if (!vnPattern.IsMatch(digits))
             {
-                throw new ArgumentException("S? �i?n tho?i kh�ng h?p l?. Vui l?ng nh?p s? �i?n tho?i di �?ng Vi?t Nam (v� d?: 0901234567 ho?c +84901234567).");
+                throw new ArgumentException("Số điện thoại không hợp lí. Vui lòng nhập số điện thoại di động Việt Nam (ví dụ: 0901234567 ho?c +84901234567).");
             }
 
             return new Order

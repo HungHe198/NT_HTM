@@ -209,7 +209,7 @@ namespace NT.WEB.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to update product {ProductId}", id);
-                ModelState.AddModelError(string.Empty, "Đã xảy ra lỗi khi cập nhật sản phẩm. Vui lòng thử lại hoặc kiểm tra log.");
+                ModelState.AddModelError(string.Empty, "Đã xảy ra lỗi khi cập nhật sản phẩm. Vui lòng thử lại hoặc kiểm tra đăng nhập.");
                 ViewBag.BrandSelectList = new SelectList(await _brandService.GetAllAsync(), "Id", "Name", model.BrandId);
                 return View(model);
             }

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace NT.SHARED.Models
@@ -6,19 +6,19 @@ namespace NT.SHARED.Models
     public class Voucher
     {
         public Guid Id { get; set; } = Guid.NewGuid();
-        [Required, MaxLength(50), Display(Name = "M� voucher")]
+        [Required, MaxLength(50), Display(Name = "Mã voucher")]
         public string Code { get; set; } = null!;
-        [Display(Name = "S? ti?n gi?m")]
+        [Display(Name = "Số tiền giảm")]
         public decimal? DiscountAmount { get; set; }
-        [Display(Name = "Gi?m t?i ?a")]
+        [Display(Name = "Giảm tiền giảm")]
         public decimal? MaxDiscountAmount { get; set; }
-        [Display(Name = "??n h�ng t?i thi?u")]
+        [Display(Name = "đơn hàng tối thiểu")]
         public decimal? MinOrderAmount { get; set; }
-        [Display(Name = "H?n s? d?ng")]
+        [Display(Name = "Hạn sử dụng")]
         public DateTime? ExpiryDate { get; set; }
-        [Display(Name = "S? l?n ?� s? d?ng")]
+        [Display(Name = "Số lượng đã sử dụng")]
         public int? UsageCount { get; set; }
-        [Display(Name = "S? l?n t?i ?a")]
+        [Display(Name = "Số lượng tối đa")]
         public int? MaxUsage { get; set; }
 
         public Voucher() { }
@@ -34,35 +34,35 @@ namespace NT.SHARED.Models
             int? maxUsage = null)
         {
             if (string.IsNullOrWhiteSpace(code))
-                throw new ArgumentException("Vui l�ng nh?p m� voucher");
+                throw new ArgumentException("Vui lòng nhập mã voucher");
 
             var trimmedCode = code.Trim();
             if (trimmedCode.Length > 50)
-                throw new ArgumentException("M� voucher kh�ng ???c d�i qu� 50 k� t?");
+                throw new ArgumentException("Mã voucher không được dài quá 50 ký tự");
 
             if (discountAmount.HasValue && discountAmount.Value < 0)
-                throw new ArgumentException("S? ti?n gi?m ph?i l� s? kh�ng �m");
+                throw new ArgumentException("Số tiền giảm phải là số không âm");
 
             if (maxDiscountAmount.HasValue && maxDiscountAmount.Value < 0)
-                throw new ArgumentException("Gi?m t?i ?a ph?i l� s? kh�ng �m");
+                throw new ArgumentException("Giảm tối đa phải là số không âm");
 
             if (discountAmount.HasValue && maxDiscountAmount.HasValue && maxDiscountAmount.Value < discountAmount.Value)
-                throw new ArgumentException("Gi?m t?i ?a ph?i l?n h?n ho?c b?ng s? ti?n gi?m");
+                throw new ArgumentException("Giảm tối đa phải lớn hơn hoặc bằng số tiền giảm");
 
             if (minOrderAmount.HasValue && minOrderAmount.Value < 0)
-                throw new ArgumentException("??n h�ng t?i thi?u ph?i l� s? kh�ng �m");
+                throw new ArgumentException("đơn hàng tối thiểu phải là số không âm");
 
             if (expiryDate.HasValue && expiryDate.Value <= DateTime.UtcNow)
-                throw new ArgumentException("H?n s? d?ng ph?i l� th?i ?i?m trong t??ng lai");
+                throw new ArgumentException("Hạn sử dụng phải là thời gian trong tương lai");
 
             if (usageCount.HasValue && usageCount.Value < 0)
-                throw new ArgumentException("S? l?n ?� s? d?ng ph?i l� s? kh�ng �m");
+                throw new ArgumentException("Số lượng đã sử dụng phải là số không âm");
 
             if (maxUsage.HasValue && maxUsage.Value < 0)
-                throw new ArgumentException("S? l?n t?i ?a ph?i l� s? kh�ng �m");
+                throw new ArgumentException("Số lượng tối đa phải là số không âm");
 
             if (usageCount.HasValue && maxUsage.HasValue && usageCount.Value > maxUsage.Value)
-                throw new ArgumentException("S? l?n ?� s? d?ng kh�ng th? l?n h?n s? l?n t?i ?a");
+                throw new ArgumentException("Số lượng đã sử dụng không thể lớn hơn số lượng tối đa");
 
             return new Voucher
             {
