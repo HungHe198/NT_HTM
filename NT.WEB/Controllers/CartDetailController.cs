@@ -28,7 +28,15 @@ namespace NT.WEB.Controllers
             }
 
             // Build DTO items from CartDetail for provided cartId
-            var cartItems = await _service.FindAsync(cd => cd.CartId == cartId);
+            // Eager-load ProductDetail and related lookups so UI has full info
+            var cartItems = await _service.FindWithIncludesAsync(
+                cd => cd.CartId == cartId,
+                cd => cd.ProductDetail!,
+                cd => cd.ProductDetail!.Product!,
+                cd => cd.ProductDetail!.Length!,
+                cd => cd.ProductDetail!.Hardness!,
+                cd => cd.ProductDetail!.Color!
+            );
             var items = new List<CartItemDto>();
             foreach (var ci in cartItems ?? new List<CartDetail>())
             {
@@ -45,6 +53,7 @@ namespace NT.WEB.Controllers
                     Thumbnail = pd.Product?.Thumbnail,
                     LengthName = pd.Length?.Name,
                     HardnessName = pd.Hardness?.Name,
+                    ColorName = pd.Color?.Name,
                     UnitPrice = pd.Price,
                     Quantity = ci.Quantity
                 });

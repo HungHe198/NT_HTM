@@ -54,7 +54,15 @@ namespace NT.WEB.Controllers
                 return Redirect($"/CartDetail?cartId={cartId}");
             }
 
-            var cartItems = await _cartDetailService.FindAsync(cd => cd.CartId == cartId);
+            // Eager-load ProductDetail and lookups so selected items show full info
+            var cartItems = await _cartDetailService.FindWithIncludesAsync(
+                cd => cd.CartId == cartId,
+                cd => cd.ProductDetail!,
+                cd => cd.ProductDetail!.Product!,
+                cd => cd.ProductDetail!.Length!,
+                cd => cd.ProductDetail!.Hardness!,
+                cd => cd.ProductDetail!.Color!
+            );
             var selectedItems = (cartItems ?? Enumerable.Empty<CartDetail>())
                 .Where(ci => ids.Contains(ci.ProductDetailId) && ci.Quantity > 0)
                 .ToList();
@@ -107,7 +115,14 @@ namespace NT.WEB.Controllers
                 .ToArray();
             if (ids.Length == 0) return BadRequest("Không có s?n ph?m ch?n");
 
-            var cartItems = await _cartDetailService.FindAsync(cd => cd.CartId == cartId);
+            var cartItems = await _cartDetailService.FindWithIncludesAsync(
+                cd => cd.CartId == cartId,
+                cd => cd.ProductDetail!,
+                cd => cd.ProductDetail!.Product!,
+                cd => cd.ProductDetail!.Length!,
+                cd => cd.ProductDetail!.Hardness!,
+                cd => cd.ProductDetail!.Color!
+            );
             var selectedItems = (cartItems ?? Enumerable.Empty<CartDetail>())
                 .Where(ci => ids.Contains(ci.ProductDetailId) && ci.Quantity > 0)
                 .ToList();

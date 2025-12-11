@@ -41,8 +41,8 @@
                             <div class="d-flex align-items-center gap-2">
                                 <img src="@(item.Thumbnail ?? "/images/product-placeholder.png")" alt="@item.ProductName" style="width:60px;height:60px;object-fit:cover" />
                                 <div>
-                                    <div>@item.ProductName</div>
-                                    <small class="text-muted">Độ dài: @item.LengthName, Độ cứng: @item.HardnessName</small>
+                                    <div>@(string.IsNullOrWhiteSpace(item.ProductName) ? "Sản phẩm" : item.ProductName)</div>
+                                    <small class="text-muted">Độ dài: @(string.IsNullOrWhiteSpace(item.LengthName) ? "N/A" : item.LengthName), Độ cứng: @(string.IsNullOrWhiteSpace(item.HardnessName) ? "N/A" : item.HardnessName), Màu: @(string.IsNullOrWhiteSpace(item.ColorName) ? "N/A" : item.ColorName)</small>
                                 </div>
                             </div>
                         </td>
