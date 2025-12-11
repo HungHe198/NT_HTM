@@ -3,11 +3,14 @@
     ViewBag.Title = "Login";
 }
 
-<h1>??ng nh?p</h1>
+<h1>Đăng nhập</h1>
 @if(TempData["Success"] != null){
     <div class="alert alert-success">@TempData["Success"]</div>
 }
-<form asp-action="Index" asp-controller="Login" method="post">
+@if(TempData["Error"] != null){
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+<form asp-action="Login" asp-controller="Account" method="post">
     @Html.AntiForgeryToken()
     <div asp-validation-summary="All" class="text-danger"></div>
     <div class="mb-3">
@@ -19,6 +22,10 @@
         <label class="form-label">Password</label>
         <input asp-for="Password" type="password" class="form-control" />
         <span asp-validation-for="Password" class="text-danger"></span>
+    </div>
+    <div class="form-check mb-3">
+        <input class="form-check-input" asp-for="RememberMe" type="checkbox" />
+        <label class="form-check-label" for="RememberMe">Ghi nhớ đăng nhập</label>
     </div>
     <button type="submit" class="btn btn-primary">Đăng nhập</button>
     <a asp-action="RegisterCustomer" asp-controller="Account" asp-route-client="true" class="btn btn-outline-secondary ms-2">Đăng kí</a>

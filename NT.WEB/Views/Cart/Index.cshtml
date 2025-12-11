@@ -1,28 +1,30 @@
-@using NT.WEB.DTO
+﻿@using NT.WEB.DTO
 @model IEnumerable<CartItemDto>
 @{
     Layout = "~/Views/Shared/_ClientLayout.cshtml";
     var subtotal = (decimal)(ViewBag.Subtotal ?? 0m);
     var shipping = (decimal)(ViewBag.ShippingFee ?? 0m);
     var total = (decimal)(ViewBag.Total ?? 0m);
+    var appliedCode = ViewBag.AppliedVoucherCode as string;
+    var voucherDiscount = (decimal)(ViewBag.VoucherDiscount ?? 0m);
 }
 
-<h2>Gi? h�ng</h2>
+<h2>Gi? hàng</h2>
 <div class="row">
     <div class="col-md-8">
         @if (!Model.Any())
         {
-            <div>Gi? h�ng tr?ng.</div>
+            <div>Gi? hàng tr?ng.</div>
         }
         else
         {
             <table class="table">
                 <thead>
                     <tr>
-                        <th>S?n ph?m</th>
-                        <th>Gi�</th>
-                        <th>S? l??ng</th>
-                        <th>T?m t�nh</th>
+                        <th>Sản phẩm</th>
+                        <th>Giá</th>
+                        <th>Số lượng</th>
+                        <th>Tạm tính</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -35,7 +37,7 @@
                                 <img src="@(item.Thumbnail ?? "/images/product-placeholder.png")" alt="@item.ProductName" style="width:60px;height:60px;object-fit:cover" />
                                 <div>
                                     <div>@item.ProductName</div>
-                                    <small class="text-muted">?? d�i: @item.LengthName, ?? c?ng: @item.HardnessName</small>
+                                    <small class="text-muted">?? dài: @item.LengthName, ?? c?ng: @item.HardnessName</small>
                                 </div>
                             </div>
                         </td>
@@ -53,7 +55,7 @@
                         <td>
                             <form asp-action="Remove" asp-controller="Cart" method="post">
                                 <input type="hidden" name="productDetailId" value="@item.ProductDetailId" />
-                                <button class="btn btn-link text-danger" type="submit">X�a</button>
+                                <button class="btn btn-link text-danger" type="submit">Xóa</button>
                             </form>
                         </td>
                     </tr>
@@ -62,19 +64,46 @@
             </table>
         }
         <div class="d-flex gap-2">
-            <a class="btn btn-outline-secondary" href="/Product">Ti?p t?c xem s?n ph?m</a>
-            <button class="btn btn-secondary" disabled>C?p nh?t gi? h�ng</button>
+            <a class="btn btn-outline-secondary" asp-controller="Home" asp-action="Index">Tiếp tục xem sản phẩm</a>
+            <button class="btn btn-secondary" disabled>Cập nhật giỏ hàng</button>
         </div>
     </div>
     <div class="col-md-4">
         <div class="card">
             <div class="card-body">
-                <h5 class="card-title">T?ng c?ng gi? h�ng</h5>
-                <div class="d-flex justify-content-between"><span>T?m t�nh</span> <strong>@subtotal.ToString("#,##0")?</strong></div>
-                <div class="d-flex justify-content-between"><span>V?n chuy?n</span> <strong>@shipping.ToString("#,##0")?</strong></div>
+                <h5 class="card-title">Tổng cộng giỏ hàng</h5>
+                @if (TempData["Error"] != null)
+                {
+                    <div class="alert alert-danger py-1">@TempData["Error"]</div>
+                }
+                @if (TempData["Success"] != null)
+                {
+                    <div class="alert alert-success py-1">@TempData["Success"]</div>
+                }
+
+                <form asp-action="ApplyVoucher" asp-controller="Cart" method="post" class="input-group mb-3">
+                    <input type="text" name="code" class="form-control" placeholder="Nhập mã voucher" value="@appliedCode" />
+                    <button class="btn btn-outline-primary" type="submit">Áp dụng</button>
+                </form>
+                @if (!string.IsNullOrWhiteSpace(appliedCode))
+                {
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <small class="text-success">Đã áp dụng: <strong>@appliedCode</strong></small>
+                        <form asp-action="RemoveVoucher" asp-controller="Cart" method="post" class="d-inline">
+                            <button class="btn btn-link btn-sm text-danger" type="submit">Bỏ voucher</button>
+                        </form>
+                    </div>
+                }
+
+                <div class="d-flex justify-content-between"><span>Tạm tính</span> <strong>@subtotal.ToString("#,##0")</strong></div>
+                <div class="d-flex justify-content-between"><span>Vận chuyển</span> <strong>@shipping.ToString("#,##0")</strong></div>
+                @if (voucherDiscount > 0)
+                {
+                    <div class="d-flex justify-content-between"><span>Giảm theo voucher</span> <strong class="text-success">-@voucherDiscount.ToString("#,##0")</strong></div>
+                }
                 <hr />
-                <div class="d-flex justify-content-between"><span>T?ng</span> <strong>@total.ToString("#,##0")?</strong></div>
-                <button class="btn btn-warning w-100 mt-2" disabled>Ti?n h�nh thanh to�n</button>
+                <div class="d-flex justify-content-between"><span>Tổng</span> <strong>@total.ToString("#,##0")</strong></div>
+                <button class="btn btn-warning w-100 mt-2" disabled>Tiến hành thanh toán</button>
             </div>
         </div>
     </div>
