@@ -145,8 +145,46 @@ namespace NT.WEB.Controllers
                 return RedirectToAction(nameof(Index), new { cartId });
             }
 
+            // Calculate subtotal for selected items
+            decimal selectedSubtotal = 0m;
+            foreach (var s in selected)
+            {
+                var pd = s.ProductDetail ?? await _productDetailService.GetByIdAsync(s.ProductDetailId);
+                if (pd != null && s.Quantity > 0)
+                {
+                    selectedSubtotal += pd.Price * s.Quantity;
+                }
+            }
+
+            // Read voucher from session and validate against selected subtotal
+            var appliedCode = HttpContext.Session.GetString("SESSION_VOUCHER_CODE");
+            decimal appliedDiscount = 0m;
+            if (!string.IsNullOrWhiteSpace(appliedCode))
+            {
+                var found = await _voucherRepository.FindAsync(v => v.Code == appliedCode);
+                var voucher = found?.FirstOrDefault();
+                if (voucher != null && (!voucher.ExpiryDate.HasValue || voucher.ExpiryDate.Value >= DateTime.UtcNow))
+                {
+                    if (!voucher.MinOrderAmount.HasValue || selectedSubtotal >= voucher.MinOrderAmount.Value)
+                    {
+                        appliedDiscount = voucher.DiscountAmount.GetValueOrDefault(0m);
+                        if (voucher.MaxDiscountAmount.HasValue)
+                            appliedDiscount = Math.Min(appliedDiscount, voucher.MaxDiscountAmount.Value);
+                        appliedDiscount = Math.Min(appliedDiscount, selectedSubtotal);
+                    }
+                    else
+                    {
+                        // below minimum for selected items, ignore discount for checkout
+                        appliedDiscount = 0m;
+                    }
+                }
+            }
+
             var selectedQuery = string.Join(',', selected.Select(s => s.ProductDetailId));
-            return Redirect($"/Checkout/Start?cartId={cartId}&selected={selectedQuery}");
+            // pass voucher info and computed totals to checkout
+            var shipping = 35000m;
+            var totalAfterDiscount = selectedSubtotal + shipping - appliedDiscount;
+            return Redirect($"/Checkout/Start?cartId={cartId}&selected={selectedQuery}&code={appliedCode}&discount={appliedDiscount}&subtotal={selectedSubtotal}&shipping={shipping}&total={totalAfterDiscount}");
         }
 
         public async Task<IActionResult> Details(Guid cartId, Guid productDetailId)

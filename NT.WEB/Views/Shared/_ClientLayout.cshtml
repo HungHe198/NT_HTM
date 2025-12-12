@@ -55,7 +55,7 @@
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                         <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index">Trang chủ</a></li>
                         <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="GetAllProducts">Sản phẩm</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Privacy">Chính sách</a></li>
+                       @*  <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Privacy">Chính sách</a></li> *@
                     </ul>
 
                     <form class="d-flex position-relative mx-auto flex-grow-1" role="search" method="get" asp-controller="Product" asp-action="Index" autocomplete="off" style="max-width: 680px;">
@@ -90,17 +90,33 @@
                             </ul>
                         </div>
                       @*   <a class="me-3 text-muted" href="#"><i class="fa fa-heart"></i></a> *@
-                        @await Component.InvokeAsync("CartSummary")
+                        @{ var isAdminOrEmpTop = string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase) || string.Equals(role, "Employee", StringComparison.OrdinalIgnoreCase); }
+                        @if (!isAdminOrEmpTop)
+                        {
+                            @await Component.InvokeAsync("CartSummary")
+                        }
                         @if (isAuth)
                         {
+                            var isAdminOrEmp = string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase) || string.Equals(role, "Employee", StringComparison.OrdinalIgnoreCase);
                             <span class="nav-link text-muted small me-2">Xin chào: @(string.IsNullOrWhiteSpace(fullName) ? (string.IsNullOrWhiteSpace(userName) ? userId : userName) : fullName)</span>
-                            <a class="nav-link" asp-controller="Orders" asp-action="My">Đơn hàng của tôi</a>
+                            @if (isAdminOrEmp)
+                            {
+                                <a class="nav-link position-relative" asp-controller="Orders" asp-action="Index">Xác nhận đơn hàng @await Component.InvokeAsync("OrdersPendingCount")</a>
+                                <span class="mx-2 text-muted">|</span>
+                                <a class="nav-link" asp-controller="Home" asp-action="IndexAdmin"> Quản lý</a>
+                            }
+                            else
+                            {
+                                <a class="nav-link" asp-controller="Orders" asp-action="My">Đơn hàng của tôi</a>
+                            }
+                            <span class="mx-2 text-muted">|</span>
                             <a class="nav-link" asp-controller="Account" asp-action="Logout">Đăng xuất</a>
                         }
                         else
                         {
-                            <a class="nav-link" asp-controller="Account" asp-action="Login" asp-route-client="true">Đăng nhập</a>
                             <a class="nav-link" asp-controller="Account" asp-action="RegisterCustomer" asp-route-client="true">Đăng ký</a>
+                            <span class="mx-2 text-muted">|</span>
+                            <a class="nav-link" asp-controller="Account" asp-action="Login" asp-route-client="true">Đăng nhập</a>
                         }
                     </div>
                 </div>

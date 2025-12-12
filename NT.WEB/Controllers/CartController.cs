@@ -188,7 +188,8 @@ namespace NT.WEB.Controllers
             if (string.IsNullOrWhiteSpace(code))
             {
                 TempData["Error"] = "Vui lòng nhập mã voucher";
-                return RedirectToAction(nameof(Index));
+                var cart = await GetOrCreateCustomerCartAsync();
+                return Redirect($"/CartDetail?cartId={cart?.Id}");
             }
             var items = await GetCustomerCartItemsAsync();
             var subtotal = items.Sum(i => i.UnitPrice * i.Quantity);
@@ -200,7 +201,8 @@ namespace NT.WEB.Controllers
                 TempData["Error"] = "Mã voucher không hợp lệ";
                 HttpContext.Session.Remove(SessionVoucherKey);
                 HttpContext.Session.Remove(SessionVoucherDiscountKey);
-                return RedirectToAction(nameof(Index));
+                var cart = await GetOrCreateCustomerCartAsync();
+                return Redirect($"/CartDetail?cartId={cart?.Id}");
             }
 
             if (voucher.ExpiryDate.HasValue && voucher.ExpiryDate.Value < DateTime.UtcNow)
@@ -208,7 +210,8 @@ namespace NT.WEB.Controllers
                 TempData["Error"] = "Voucher đã hết hạn";
                 HttpContext.Session.Remove(SessionVoucherKey);
                 HttpContext.Session.Remove(SessionVoucherDiscountKey);
-                return RedirectToAction(nameof(Index));
+                var cart = await GetOrCreateCustomerCartAsync();
+                return Redirect($"/CartDetail?cartId={cart?.Id}");
             }
 
             if (voucher.MaxUsage.HasValue && voucher.UsageCount.HasValue && voucher.UsageCount.Value >= voucher.MaxUsage.Value)
@@ -216,7 +219,8 @@ namespace NT.WEB.Controllers
                 TempData["Error"] = "Voucher đã sử dụng hết";
                 HttpContext.Session.Remove(SessionVoucherKey);
                 HttpContext.Session.Remove(SessionVoucherDiscountKey);
-                return RedirectToAction(nameof(Index));
+                var cart = await GetOrCreateCustomerCartAsync();
+                return Redirect($"/CartDetail?cartId={cart?.Id}");
             }
 
             if (voucher.MinOrderAmount.HasValue && subtotal < voucher.MinOrderAmount.Value)
@@ -224,7 +228,8 @@ namespace NT.WEB.Controllers
                 TempData["Error"] = $"Giá trị đơn hàng tối thiểu để áp dụng voucher là {voucher.MinOrderAmount.Value:#,##0}";
                 HttpContext.Session.Remove(SessionVoucherKey);
                 HttpContext.Session.Remove(SessionVoucherDiscountKey);
-                return RedirectToAction(nameof(Index));
+                var cart = await GetOrCreateCustomerCartAsync();
+                return Redirect($"/CartDetail?cartId={cart?.Id}");
             }
 
             var discount = voucher.DiscountAmount.GetValueOrDefault(0m);
@@ -239,7 +244,8 @@ namespace NT.WEB.Controllers
             HttpContext.Session.SetString(SessionVoucherKey, voucher.Code);
             HttpContext.Session.SetString(SessionVoucherDiscountKey, discount.ToString());
             TempData["Success"] = $"Áp dụng voucher '{voucher.Code}' thành công. Giảm {discount:#,##0}.";
-            return RedirectToAction(nameof(Index));
+            var cartAfter = await GetOrCreateCustomerCartAsync();
+            return Redirect($"/CartDetail?cartId={cartAfter?.Id}");
         }
 
         // Helper: load current customer's cart items from database
@@ -253,6 +259,11 @@ namespace NT.WEB.Controllers
                 foreach (var ci in cartItems ?? Enumerable.Empty<CartDetail>())
                 {
                     var pd = ci.ProductDetail;
+                    if (pd == null)
+                    {
+                        // Ensure we have ProductDetail loaded to get price when navigation is not populated
+                        pd = await _productDetailService.GetByIdAsync(ci.ProductDetailId);
+                    }
                     if (pd == null || ci.Quantity <= 0) continue;
                     items.Add(new CartItemDto
                     {
@@ -275,7 +286,7 @@ namespace NT.WEB.Controllers
             HttpContext.Session.Remove(SessionVoucherKey);
             HttpContext.Session.Remove(SessionVoucherDiscountKey);
             TempData["Success"] = "Đã bỏ voucher";
-            return RedirectToAction(nameof(Index));
+            return Redirect("/CartDetail");
         }
 
         public async Task<IActionResult> Details(Guid id)
