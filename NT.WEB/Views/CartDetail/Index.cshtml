@@ -2,11 +2,17 @@
 @model IEnumerable<CartItemDto>
 @{
     Layout = "~/Views/Shared/_ClientLayout.cshtml";
-    var subtotal = (decimal)(ViewBag.Subtotal ?? 0m);
-    var shipping = (decimal)(ViewBag.ShippingFee ?? 0m);
-    var total = (decimal)(ViewBag.Total ?? 0m);
-    var appliedCode = ViewBag.AppliedVoucherCode as string;
-    var voucherDiscount = (decimal)(ViewBag.VoucherDiscount ?? 0m);
+    var calcSubtotal = Model.Where(i => i.Quantity > 0).Sum(i => i.UnitPrice * i.Quantity);
+    var shipping = 35000m; // flat demo fee
+    // Read voucher from session (shared with CartController)
+    var appliedCode = ViewContext?.HttpContext?.Session?.GetString("SESSION_VOUCHER_CODE");
+    decimal voucherDiscount = 0m;
+    var discountStr = ViewContext?.HttpContext?.Session?.GetString("SESSION_VOUCHER_DISCOUNT");
+    if (!string.IsNullOrWhiteSpace(discountStr) && decimal.TryParse(discountStr, out var d))
+    {
+        voucherDiscount = d;
+    }
+    var total = calcSubtotal + shipping - voucherDiscount;
 }
 
 <h2>Giỏ hàng</h2>
@@ -63,7 +69,7 @@
                 </tbody>
             </table>
             <div class="d-flex gap-2 mb-3">
-                <button type="submit" class="btn btn-primary">Thanh toán mục đã chọn</button>
+                <button type="submit" class="btn btn-warning">Thanh toán mục đã chọn</button>
             </div>
             </form>
         }
@@ -71,8 +77,39 @@
             <a class="btn btn-outline-secondary" asp-controller="Home" asp-action="Index">Tiếp tục xem sản phẩm</a>
             <button class="btn btn-secondary" disabled>Cập nhật giỏ hàng</button>
         </div>
-    </div>
     
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Tổng cộng giỏ hàng</h5>
+                <form asp-action="ApplyVoucher" asp-controller="Cart" method="post" class="input-group mb-3">
+                    <input type="text" name="code" class="form-control" placeholder="Nhập mã giảm giá" value="@appliedCode" />
+                    <button class="btn btn-outline-primary" type="submit">Áp dụng</button>
+                </form>
+                @if (!string.IsNullOrWhiteSpace(appliedCode))
+                {
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <small class="text-success">Đã áp dụng: <strong>@appliedCode</strong></small>
+                        <form asp-action="RemoveVoucher" asp-controller="Cart" method="post" class="d-inline">
+                            <button class="btn btn-link btn-sm text-danger" type="submit">Bỏ mã</button>
+                        </form>
+                    </div>
+                }
+                <div class="d-flex justify-content-between"><span>Tạm tính</span> <strong>@calcSubtotal.ToString("#,##0")</strong></div>
+                <div class="d-flex justify-content-between"><span>Vận chuyển</span> <strong>@shipping.ToString("#,##0")</strong></div>
+                @if (voucherDiscount > 0)
+                {
+                    <div class="d-flex justify-content-between"><span>Giảm theo voucher</span> <strong class="text-success">-@voucherDiscount.ToString("#,##0")</strong></div>
+                }
+                <hr />
+                <div class="d-flex justify-content-between"><span>Tổng</span> <strong>@total.ToString("#,##0")</strong></div>
+                <div class="d-flex gap-2 mb-3">
+              
+            </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>

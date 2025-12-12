@@ -11,13 +11,24 @@
 {
     <div class="alert alert-danger">@TempData["Error"]</div>
 }
+@* Show cancel reason only for Admin/Employee when the order is canceled *@
+@if (isAdmin && status == "-1")
+{
+    <div class="alert alert-danger">
+       
+        @if (!string.IsNullOrWhiteSpace(Model?.Note))
+        {
+            <div class="mt-2"><strong>Lý do hủy:</strong> @Model.Note</div>
+        }
+    </div>
+}
 @if (TempData["Success"] != null)
 {
     <div class="alert alert-success">@TempData["Success"]</div>
 }
 
 <div class="mb-2">Mã đơn: @Model.Id</div>
-<div class="mb-2">Trạng thái: @Model.Status</div>
+<div class="mb-2">Trạng thái: @(ViewBag.StatusText as string ?? Model.Status)</div>
 <div class="mb-2">Tổng tiền: @Model.TotalAmount.ToString("#,##0")</div>
 <div class="mb-2">Số tiền phải trả: @Model.FinalAmount.ToString("#,##0")</div>
 <div class="mb-2">Số điện thoại: @Model.PhoneNumber</div>
