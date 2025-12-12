@@ -6,7 +6,7 @@
     var status = Model.Status ?? "0";       
 }
 
-<h2>Chi ti?t ??n hàng</h2>
+<h2>Chi tiết đơn hàng</h2>
 @if (TempData["Error"] != null)
 {
     <div class="alert alert-danger">@TempData["Error"]</div>
@@ -16,22 +16,22 @@
     <div class="alert alert-success">@TempData["Success"]</div>
 }
 
-<div class="mb-2">Mã ??n: @Model.Id</div>
+<div class="mb-2">Mã đơn: @Model.Id</div>
 <div class="mb-2">Trạng thái: @Model.Status</div>
-<div class="mb-2">T?ng ti?n: @Model.TotalAmount.ToString("#,##0")</div>
-<div class="mb-2">S? ti?n ph?i tr?: @Model.FinalAmount.ToString("#,##0")</div>
-<div class="mb-2">S? ?i?n tho?i: @Model.PhoneNumber</div>
-<div class="mb-2">??a ch?: @Model.ShippingAddress</div>
+<div class="mb-2">Tổng tiền: @Model.TotalAmount.ToString("#,##0")</div>
+<div class="mb-2">Số tiền phải trả: @Model.FinalAmount.ToString("#,##0")</div>
+<div class="mb-2">Số điện thoại: @Model.PhoneNumber</div>
+<div class="mb-2">Địa chỉ: @Model.ShippingAddress</div>
 
-<h5>S?n ph?m</h5>
+<h5>Sản phẩm</h5>
 <table class="table">
     <thead>
         <tr>
             <th>Tên</th>
-            <th>Thu?c tính</th>
-            <th>S? l??ng</th>
-            <th>??n giá</th>
-            <th>T?ng</th>
+            <th>Thuộc tính</th>
+            <th>Số lượng</th>
+            <th>Đơn giá</th>
+            <th>Tổng</th>
         </tr>
     </thead>
     <tbody>
@@ -39,7 +39,7 @@
     {
         <tr>
             <td>@(d.NameAtOrder ?? d.ProductDetail?.Product?.Name)</td>
-            <td><small>Chi?u dài: @(d.LengthAtOrder ?? d.ProductDetail?.Length?.Name), ?? c?ng: @(d.HardnessAtOrder ?? d.ProductDetail?.Hardness?.Name), Màu: @(d.ColorAtOrder ?? d.ProductDetail?.Color?.Name)</small></td>
+            <td><small>Chiều dài: @(d.LengthAtOrder ?? d.ProductDetail?.Length?.Name), Độ cứng: @(d.HardnessAtOrder ?? d.ProductDetail?.Hardness?.Name),/*  Màu: @(d.ColorAtOrder ?? d.ProductDetail?.Color?.Name) */</small></td>
             <td>@d.Quantity</td>
             <td>@d.UnitPrice.ToString("#,##0")</td>
             <td>@((d.UnitPrice * d.Quantity).ToString("#,##0"))</td>
@@ -50,7 +50,7 @@
 
 @if (User.IsInRole("Admin") || User.IsInRole("Employee"))
 {
-    <h5>C?p nh?t tr?ng thái</h5>
+    <h5>Cập nhật trạng thái</h5>
     <div class="mt-2 d-flex flex-wrap gap-2">
         @* Adjacent transitions for admin/employee *@
         @if (status == "0")
@@ -65,7 +65,7 @@
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="id" value="@Model.Id" />
                 <input type="text" name="note" class="form-control" placeholder="Lý do hủy đơn" required />
-                <button class="btn btn-danger" type="submit">Hủy đơn (về -1)</button>
+                <button class="btn btn-danger" type="submit">Hủy đơn </button>
             </form>
         }
         else if (status == "1")
@@ -74,13 +74,13 @@
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="id" value="@Model.Id" />
                 <input type="hidden" name="status" value="2" />
-                <button class="btn btn-warning" type="submit">Đưa vào vận chuyển (lên 2)</button>
+                <button class="btn btn-warning" type="submit">Đưa vào vận chuyển </button>
             </form>
             <form asp-action="Cancel" asp-controller="Orders" method="post">
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="id" value="@Model.Id" />
                 <input type="text" name="note" class="form-control" placeholder="Lý do hủy đơn" required />
-                <button class="btn btn-danger" type="submit">Hủy đơn (về -1)</button>
+                <button class="btn btn-danger" type="submit">Hủy đơn </button>
             </form>
         }
         else if (status == "2")
@@ -89,13 +89,13 @@
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="id" value="@Model.Id" />
                 <input type="hidden" name="status" value="3" />
-                <button class="btn btn-info" type="submit">Đánh dấu giao thành công (lên 3)</button>
+                <button class="btn btn-info" type="submit">Đánh dấu giao thành công </button>
             </form>
             <form asp-action="Cancel" asp-controller="Orders" method="post">
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="id" value="@Model.Id" />
                 <input type="text" name="note" class="form-control" placeholder="Lý do hủy đơn" required />
-                <button class="btn btn-outline-danger" type="submit">Hủy đơn (về -1)</button>
+                <button class="btn btn-outline-danger" type="submit">Hủy đơn </button>
             </form>
         }
         else if (status == "3")

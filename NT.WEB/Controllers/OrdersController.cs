@@ -27,16 +27,22 @@ namespace NT.WEB.Controllers
 
         
         [Authorize(Roles = "Admin,Employee")]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? status)
         {
             var orders = await _orderRepo.GetAllAsync();
-            return View(orders ?? Array.Empty<Order>());
+            var list = orders ?? Array.Empty<Order>();
+            if (!string.IsNullOrWhiteSpace(status))
+            {
+                list = list.Where(o => string.Equals(o.Status, status, StringComparison.Ordinal)).ToList();
+            }
+            ViewBag.FilterStatus = status;
+            return View(list);
         }
 
         // Customer: view all own orders (any status)
         [Authorize(Roles = "Customer")]
         [HttpGet]
-        public async Task<IActionResult> My()
+        public async Task<IActionResult> My(string? status)
         {
             var userIdClaim = User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrWhiteSpace(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId)) return Forbid();
@@ -45,7 +51,13 @@ namespace NT.WEB.Controllers
             if (customer == null) return Forbid();
 
             var orders = await _orderRepo.FindAsync(o => o.CustomerId == customer.Id);
-            return View("Index", orders ?? Array.Empty<Order>());
+            var list = (orders ?? Array.Empty<Order>()).ToList();
+            if (!string.IsNullOrWhiteSpace(status))
+            {
+                list = list.Where(o => string.Equals(o.Status, status, StringComparison.Ordinal)).ToList();
+            }
+            ViewBag.FilterStatus = status;
+            return View("Index", list);
         }
 
         // Customer/admin can review an order details
@@ -58,6 +70,18 @@ namespace NT.WEB.Controllers
             if (order == null) return NotFound();
             var details = await _orderDetailRepo.FindAsync(d => d.OrderId == id);
             ViewBag.Details = details ?? Array.Empty<OrderDetail>();
+            // Map status code to localized display text for the Review page
+            var st = order.Status ?? "0";
+            string statusText = st switch
+            {
+                "-1" => "Đã hủy",
+                "0" => "Chờ xác nhận",
+                "1" => "Đã xác nhận",
+                "2" => "Đang giao hàng",
+                "3" => "Giao thành công",
+                _ => "Không rõ"
+            };
+            ViewBag.StatusText = statusText;
             return View(order);
         }
 
