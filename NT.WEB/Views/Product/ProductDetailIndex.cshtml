@@ -1,4 +1,4 @@
-@{
+﻿@{
     Layout = "~/Views/Shared/_ClientLayout.cshtml";
     var product = ViewBag.Product as NT.SHARED.Models.Product;
     var details = ViewBag.Details as IEnumerable<NT.SHARED.Models.ProductDetail> ?? Enumerable.Empty<NT.SHARED.Models.ProductDetail>();
@@ -18,12 +18,12 @@
                 {
                     var minPrice = details.Min(d => d.Price);
                     var maxPrice = details.Max(d => d.Price);
-                    <span class="text-danger fw-bold">@minPrice.ToString("#,##0")? � @maxPrice.ToString("#,##0")?</span>
+                    <span class="text-danger fw-bold">@minPrice.ToString("#,##0")? – @maxPrice.ToString("#,##0")?</span>
                 }
             </div>
 
             <div class="mt-3">
-                <div class="mb-2">?? c?ng c?a c?n:</div>
+                <div class="mb-2">Độ cứng:</div>
                 <div id="hardness-options" class="d-flex flex-wrap gap-2">
                     @foreach (var h in hardnessOptions)
                     {
@@ -38,7 +38,7 @@
             </div>
 
             <div class="mt-3">
-                <div class="mb-2">?? d�i:</div>
+                <div class="mb-2">Độ dài:</div>
                 <div id="length-options" class="d-flex flex-wrap gap-2">
                     @foreach (var l in lengthOptions)
                     {
@@ -53,7 +53,7 @@
             </div>
 
             <div class="mt-3">
-                <div>S? l??ng:</div>
+                <div>Số lượng</div>
                 <div class="input-group" style="max-width:160px;">
                     <button class="btn btn-outline-secondary" type="button" id="qty-minus">-</button>
                     <input type="number" class="form-control" id="qty" value="1" min="1" />
@@ -62,7 +62,7 @@
             </div>
 
             <div class="mt-3 d-flex gap-2">
-                <button id="add-to-cart" class="btn btn-warning">Th�m v�o gi? h�ng</button>
+                <button id="add-to-cart" class="btn btn-warning">Thêm vào giỏ hàng</button>
                 <button id="buy-now" class="btn btn-danger">Mua ngay</button>
             </div>
 
@@ -125,9 +125,9 @@
                 const min = Math.min(...prices);
                 const max = Math.max(...prices);
                 const totalStock = validDetails.reduce((s,d)=> s + Number(d.stock), 0);
-                summaryEl.textContent = `Gi�: ${min.toLocaleString()}?${min !== max ? ' � ' + max.toLocaleString() + '?' : ''} | C�n ${totalStock} h�ng`;
+                summaryEl.textContent = `Giá: ${min.toLocaleString()}?${min !== max ? ' – ' + max.toLocaleString() + '?' : ''} | Còn ${totalStock} hàng`;
             } else {
-                summaryEl.textContent = 'Kh�ng c� bi?n th? h?p l? ho?c h?t h�ng.';
+                summaryEl.textContent = 'Không có sản phẩm phù hợp';
             }
         }
 
@@ -164,18 +164,29 @@
             return details.find(d => d.hardnessId === selectedHardnessId && d.lengthId === selectedLengthId && d.stock > 0) || null;
         }
 
-        document.getElementById('add-to-cart').addEventListener('click', () => {
+        document.getElementById('add-to-cart').addEventListener('click', async () => {
             const selected = findSelectedDetail();
-            if (!selected) { alert('Vui l�ng ch?n ?? d�i v� ?? c?ng c� h�ng.'); return; }
+            if (!selected) { alert('Vui lòng chọn độ dài và độ cứng có hàng.'); return; }
             const qty = Math.max(1, parseInt(document.getElementById('qty').value || '1'));
-            const form = document.createElement('form');
-            form.method = 'post';
-            form.action = '/Cart/Add';
-            const pd = document.createElement('input'); pd.type = 'hidden'; pd.name = 'productDetailId'; pd.value = selected.id;
-            const q = document.createElement('input'); q.type = 'hidden'; q.name = 'quantity'; q.value = qty;
-            form.appendChild(pd); form.appendChild(q);
-            document.body.appendChild(form);
-            form.submit();
+            const data = new URLSearchParams();
+            data.append('productDetailId', selected.id);
+            data.append('quantity', qty);
+            try {
+                const res = await fetch('/Cart/Add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: data.toString(),
+                    credentials: 'same-origin'
+                });
+                if (res.ok) {
+                    // stay on this page and refresh to reflect any UI changes if needed
+                    location.reload();
+                } else {
+                    alert('Không thể thêm vào giỏ hàng. Vui lòng thử lại.');
+                }
+            } catch (e) {
+                alert('Có lỗi xảy ra khi thêm vào giỏ hàng.');
+            }
         });
     </script>
 }

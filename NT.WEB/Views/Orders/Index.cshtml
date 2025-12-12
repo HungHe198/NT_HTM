@@ -1,17 +1,38 @@
-@model IEnumerable<NT.SHARED.Models.Order>
+﻿@model IEnumerable<NT.SHARED.Models.Order>
 @{
     var isAdmin = User.IsInRole("Admin") || User.IsInRole("Employee");
     Layout = isAdmin ? "~/Views/Shared/_AdminLayout.cshtml" : "~/Views/Shared/_ClientLayout.cshtml";
 }
-<h2>Danh s�ch ??n h�ng</h2>
+<h2>Danh sách đơn hàng</h2>
+<form method="get" class="mb-3 d-flex align-items-center gap-2">
+    <label for="status" class="form-label mb-0">Lọc theo trạng thái:</label>
+    <select id="status" name="status" class="form-select" style="max-width:220px" onchange="this.form.submit()">
+        <option value="" selected="@(string.IsNullOrWhiteSpace(ViewBag.FilterStatus as string) ? "selected" : null)">Tất cả</option>
+        <option value="-1" selected="@(ViewBag.FilterStatus as string == "-1" ? "selected" : null)">Đã hủy</option>
+        <option value="0" selected="@(ViewBag.FilterStatus as string == "0" ? "selected" : null)">Chờ xác nhận</option>
+        <option value="1" selected="@(ViewBag.FilterStatus as string == "1" ? "selected" : null)">Đã xác nhận</option>
+        <option value="2" selected="@(ViewBag.FilterStatus as string == "2" ? "selected" : null)">Đang giao hàng</option>
+        <option value="3" selected="@(ViewBag.FilterStatus as string == "3" ? "selected" : null)">Giao thành công</option>
+    </select>
+    <noscript><button class="btn btn-primary" type="submit">Lọc</button></noscript>
+    @if (!string.IsNullOrWhiteSpace(ViewBag.FilterStatus as string))
+    {
+        <a class="btn btn-link" href="@Url.Action("Index", "Orders")">Bỏ lọc</a>
+    }
+    else
+    {
+        <span class="text-muted">Hiển thị tất cả</span>
+    }
+    <span class="ms-auto text-muted small">Thời gian hiển thị theo GMT+7</span>
+</form>
 <table class="table">
     <thead>
         <tr>
-            <th>M� ??n</th>
-            <th>Kh�ch h�ng</th>
-            <th>Tr?ng th�i</th>
-            <th>T?ng ti?n</th>
-            <th>Th?i gian</th>
+            <th>Mã đơn</th>
+            <th>Khách hàng</th>
+            <th>Trạng thái</th>
+            <th>Tổng tiền</th>
+            <th>Thời gian đặt đơn</th>
             <th></th>
         </tr>
     </thead>
@@ -21,18 +42,36 @@
         <tr>
             <td>@o.Id</td>
             <td>@o.CustomerId</td>
-            <td>@o.Status</td>
+            <td>
+                @{ string st = o.Status ?? "0"; }
+                @{
+                    string statusText;
+                    switch (st)
+                    {
+                        case "-1": statusText = "Đã hủy"; break;
+                        case "0": statusText = "Chờ xác nhận"; break;
+                        case "1": statusText = "Đã xác nhận"; break;
+                        case "2": statusText = "Đang giao hàng"; break;
+                        case "3": statusText = "Giao thành công"; break;
+                        default: statusText = "Không rõ"; break;
+                    }
+                }
+                @statusText
+            </td>
             <td>@o.FinalAmount.ToString("#,##0")</td>
-            <td>@o.CreatedTime.ToString("yyyy-MM-dd HH:mm")</td>
+            <td>
+                @{ var utc = DateTime.SpecifyKind(o.CreatedTime, DateTimeKind.Utc); var gmt7 = TimeZoneInfo.ConvertTimeFromUtc(utc, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time")); }
+                @gmt7.ToString("yyyy-MM-dd HH:mm")
+            </td>
             <td class="text-nowrap">
-                <a class="btn btn-sm btn-outline-primary" asp-action="Review" asp-controller="Orders" asp-route-id="@o.Id">Xem chi ti?t</a>
+                <a class="btn btn-sm btn-outline-primary" asp-action="Review" asp-controller="Orders" asp-route-id="@o.Id">Xem chi tiết</a>
                 @if (isAdmin)
                 {
                     <form asp-action="UpdateStatus" asp-controller="Orders" method="post" class="d-inline">
                         @Html.AntiForgeryToken()
                         <input type="hidden" name="id" value="@o.Id" />
                         <input type="hidden" name="status" value="1" />
-                        <button class="btn btn-sm btn-success" type="submit">X�c nh?n</button>
+                        <button class="btn btn-sm btn-success" type="submit">Xác nhận</button>
                     </form>
                 }
             </td>
