@@ -1,6 +1,6 @@
 @model IEnumerable<NT.SHARED.Models.User>
 @{
-    ViewBag.Title = "Danh sách ng??i dùng";
+    ViewBag.Title = "Users";
 }
 
 <h1>Danh sách ng??i dùng</h1>
@@ -10,10 +10,10 @@
 <table class="table table-striped">
     <thead>
         <tr>
-            <th>Tên ??ng nh?p</th>
-            <th>H? và tên</th>
+            <th>Username</th>
+            <th>Fullname</th>
             <th>Email</th>
-            <th>Vai trò</th>
+            <th>Role</th>
             <th></th>
         </tr>
     </thead>
@@ -26,9 +26,9 @@
             <td>@u.Email</td>
             <td>@u.Role?.Name</td>
             <td>
-                <a asp-action="Details" asp-route-id="@u.Id" class="btn btn-sm btn-info">Chi ti?t</a>
-                <a asp-action="Edit" asp-route-id="@u.Id" class="btn btn-sm btn-warning">S?a</a>
-                <a asp-action="Delete" asp-route-id="@u.Id" class="btn btn-sm btn-danger">Xóa</a>
+                <a asp-action="Details" asp-route-id="@u.Id" class="btn btn-sm btn-info">Details</a>
+                <a asp-action="Edit" asp-route-id="@u.Id" class="btn btn-sm btn-warning">Edit</a>
+                <a asp-action="Delete" asp-route-id="@u.Id" class="btn btn-sm btn-danger">Delete</a>
             </td>
         </tr>
     }

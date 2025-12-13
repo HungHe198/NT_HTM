@@ -69,11 +69,11 @@ namespace NT.WEB.Controllers
             {
                 var found = await _voucherRepository.FindAsync(v => v.Code == appliedCode);
                 var voucher = found?.FirstOrDefault();
-                if (voucher != null && (!voucher.StartDate.HasValue || voucher.StartDate.Value <= DateTime.UtcNow) && (!voucher.EndDate.HasValue || voucher.EndDate.Value >= DateTime.UtcNow))
+                if (voucher != null && (!voucher.ExpiryDate.HasValue || voucher.ExpiryDate.Value >= DateTime.UtcNow))
                 {
                     if (!voucher.MinOrderAmount.HasValue || subtotal >= voucher.MinOrderAmount.Value)
                     {
-                        appliedDiscount = voucher.DiscountPercentage.GetValueOrDefault(0m);
+                        appliedDiscount = voucher.DiscountAmount.GetValueOrDefault(0m);
                         if (voucher.MaxDiscountAmount.HasValue)
                             appliedDiscount = Math.Min(appliedDiscount, voucher.MaxDiscountAmount.Value);
                         appliedDiscount = Math.Min(appliedDiscount, subtotal);
@@ -163,11 +163,11 @@ namespace NT.WEB.Controllers
             {
                 var found = await _voucherRepository.FindAsync(v => v.Code == appliedCode);
                 var voucher = found?.FirstOrDefault();
-                if (voucher != null && (!voucher.StartDate.HasValue || voucher.StartDate.Value <= DateTime.UtcNow) && (!voucher.EndDate.HasValue || voucher.EndDate.Value >= DateTime.UtcNow))
+                if (voucher != null && (!voucher.ExpiryDate.HasValue || voucher.ExpiryDate.Value >= DateTime.UtcNow))
                 {
                     if (!voucher.MinOrderAmount.HasValue || selectedSubtotal >= voucher.MinOrderAmount.Value)
                     {
-                        appliedDiscount = voucher.DiscountPercentage.GetValueOrDefault(0m);
+                        appliedDiscount = voucher.DiscountAmount.GetValueOrDefault(0m);
                         if (voucher.MaxDiscountAmount.HasValue)
                             appliedDiscount = Math.Min(appliedDiscount, voucher.MaxDiscountAmount.Value);
                         appliedDiscount = Math.Min(appliedDiscount, selectedSubtotal);

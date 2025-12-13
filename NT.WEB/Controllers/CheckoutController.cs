@@ -145,11 +145,11 @@ namespace NT.WEB.Controllers
             {
                 var found = await _voucherRepo.FindAsync(v => v.Code == appliedCode);
                 var voucher = found?.FirstOrDefault();
-                if (voucher != null && (!voucher.StartDate.HasValue || voucher.StartDate.Value <= DateTime.UtcNow) && (!voucher.EndDate.HasValue || voucher.EndDate.Value >= DateTime.UtcNow))
+                if (voucher != null && (!voucher.ExpiryDate.HasValue || voucher.ExpiryDate.Value >= DateTime.UtcNow))
                 {
                     if (!voucher.MinOrderAmount.HasValue || subtotal >= voucher.MinOrderAmount.Value)
                     {
-                        discount = voucher.DiscountPercentage.GetValueOrDefault(0m);
+                        discount = voucher.DiscountAmount.GetValueOrDefault(0m);
                         if (voucher.MaxDiscountAmount.HasValue)
                             discount = Math.Min(discount, voucher.MaxDiscountAmount.Value);
                         discount = Math.Min(discount, subtotal);

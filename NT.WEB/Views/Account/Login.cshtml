@@ -1,7 +1,6 @@
 ﻿@model NT.SHARED.DTOs.LoginDto
 @{
-    ViewBag.Title = "Đăng nhập";
-    var returnUrl = ViewBag.ReturnUrl as string;
+    ViewBag.Title = "Login";
 }
 
 <h1>Đăng nhập</h1>
@@ -11,16 +10,16 @@
 @if(TempData["Error"] != null){
     <div class="alert alert-danger">@TempData["Error"]</div>
 }
-<form asp-action="Login" asp-controller="Account" asp-route-returnUrl="@returnUrl" method="post">
+<form asp-action="Login" asp-controller="Account" method="post">
     @Html.AntiForgeryToken()
     <div asp-validation-summary="All" class="text-danger"></div>
     <div class="mb-3">
-        <label class="form-label">Tên đăng nhập</label>
+        <label class="form-label">Username</label>
         <input asp-for="Username" class="form-control" />
         <span asp-validation-for="Username" class="text-danger"></span>
     </div>
     <div class="mb-3">
-        <label class="form-label">Mật khẩu</label>
+        <label class="form-label">Password</label>
         <input asp-for="Password" type="password" class="form-control" />
         <span asp-validation-for="Password" class="text-danger"></span>
     </div>

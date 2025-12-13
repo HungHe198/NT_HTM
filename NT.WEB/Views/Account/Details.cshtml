@@ -1,20 +1,16 @@
 @model NT.SHARED.Models.User
 @{
-    ViewBag.Title = "Chi ti?t ng??i dùng";
+    ViewBag.Title = "User Details";
 }
 
-<h1>Chi ti?t ng??i dùng</h1>
+<h1>Chi ti?t ngý?i dùng</h1>
 <dl class="row">
-    <dt class="col-sm-2">@Html.DisplayNameFor(m => m.Username)</dt>
-    <dd class="col-sm-10">@Model.Username</dd>
-    <dt class="col-sm-2">@Html.DisplayNameFor(m => m.Fullname)</dt>
-    <dd class="col-sm-10">@Model.Fullname</dd>
-    <dt class="col-sm-2">@Html.DisplayNameFor(m => m.Email)</dt>
-    <dd class="col-sm-10">@Model.Email</dd>
-    <dt class="col-sm-2">@Html.DisplayNameFor(m => m.RoleId)</dt>
-    <dd class="col-sm-10">@Model.Role?.Name</dd>
+    <dt class="col-sm-2">@Html.DisplayNameFor(m => m.Username)</dt><dd class="col-sm-10">@Model.Username</dd>
+    <dt class="col-sm-2">@Html.DisplayNameFor(m => m.Fullname)</dt><dd class="col-sm-10">@Model.Fullname</dd>
+    <dt class="col-sm-2">@Html.DisplayNameFor(m => m.Email)</dt><dd class="col-sm-10">@Model.Email</dd>
+    <dt class="col-sm-2">@Html.DisplayNameFor(m => m.RoleId)</dt><dd class="col-sm-10">@Model.Role?.Name</dd>
 </dl>
 <p>
-    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">S?a</a>
-    <a asp-action="Index" class="btn btn-secondary">Quay l?i danh sách</a>
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>
+    <a asp-action="Index" class="btn btn-secondary">Back to list</a>
 </p>

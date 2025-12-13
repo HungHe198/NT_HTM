@@ -1,10 +1,10 @@
 @model NT.SHARED.Models.Voucher
 
 @{
-    ViewData["Title"] = "T?o Voucher";
+    ViewData["Title"] = "Create Voucher";
 }
 
-<h1>T?o Voucher</h1>
+<h1>Create Voucher</h1>
 
 <form asp-action="Create" method="post" class="form-horizontal">
     @Html.AntiForgeryToken()
@@ -15,9 +15,9 @@
     </div>
 
     <div class="form-group">
-        <label asp-for="DiscountPercentage" class="control-label"></label>
-        <input asp-for="DiscountPercentage" class="form-control" />
-        <span asp-validation-for="DiscountPercentage" class="text-danger"></span>
+        <label asp-for="DiscountAmount" class="control-label"></label>
+        <input asp-for="DiscountAmount" class="form-control" />
+        <span asp-validation-for="DiscountAmount" class="text-danger"></span>
     </div>
 
     <div class="form-group">
@@ -33,14 +33,9 @@
     </div>
 
     <div class="form-group">
-        <label asp-for="StartDate" class="control-label"></label>
-        <input asp-for="StartDate" type="datetime-local" class="form-control" min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
-        <span asp-validation-for="StartDate" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="EndDate" class="control-label"></label>
-        <input asp-for="EndDate" type="datetime-local" class="form-control" min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
-        <span asp-validation-for="EndDate" class="text-danger"></span>
+        <label asp-for="ExpiryDate" class="control-label"></label>
+        <input asp-for="ExpiryDate" type="datetime-local" class="form-control" min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
+        <span asp-validation-for="ExpiryDate" class="text-danger"></span>
     </div>
 
     <div class="form-group">
@@ -50,8 +45,8 @@
     </div>
 
     <div class="form-group">
-        <input type="submit" value="T?o" class="btn btn-primary" />
-        <a asp-action="Index" class="btn btn-link">H?y</a>
+        <input type="submit" value="Create" class="btn btn-primary" />
+        <a asp-action="Index" class="btn btn-link">Cancel</a>
     </div>
 </form>
 

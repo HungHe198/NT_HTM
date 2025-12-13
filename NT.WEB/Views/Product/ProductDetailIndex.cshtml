@@ -18,7 +18,7 @@
                 {
                     var minPrice = details.Min(d => d.Price);
                     var maxPrice = details.Max(d => d.Price);
-                    <span class="text-danger fw-bold">@minPrice.ToString("#,##0")đ – @maxPrice.ToString("#,##0")đ</span>
+                    <span class="text-danger fw-bold">@minPrice.ToString("#,##0")? – @maxPrice.ToString("#,##0")?</span>
                 }
             </div>
 
@@ -125,7 +125,7 @@
                 const min = Math.min(...prices);
                 const max = Math.max(...prices);
                 const totalStock = validDetails.reduce((s,d)=> s + Number(d.stock), 0);
-                summaryEl.textContent = `Giá: ${min.toLocaleString()}đ${min !== max ? ' – ' + max.toLocaleString() + 'đ' : ''} | Còn ${totalStock} hàng`;
+                summaryEl.textContent = `Giá: ${min.toLocaleString()}?${min !== max ? ' – ' + max.toLocaleString() + '?' : ''} | Còn ${totalStock} hàng`;
             } else {
                 summaryEl.textContent = 'Không có sản phẩm phù hợp';
             }
@@ -168,22 +168,18 @@
             const selected = findSelectedDetail();
             if (!selected) { alert('Vui lòng chọn độ dài và độ cứng có hàng.'); return; }
             const qty = Math.max(1, parseInt(document.getElementById('qty').value || '1'));
-            const productId = '@product?.Id';
             const data = new URLSearchParams();
             data.append('productDetailId', selected.id);
             data.append('quantity', qty);
-            data.append('productId', productId);
             try {
                 const res = await fetch('/Cart/Add', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: data.toString(),
-                    credentials: 'same-origin',
-                    redirect: 'follow'
+                    credentials: 'same-origin'
                 });
-                if (res.redirected) {
-                    window.location.href = res.url;
-                } else if (res.ok) {
+                if (res.ok) {
+                    // stay on this page and refresh to reflect any UI changes if needed
                     location.reload();
                 } else {
                     alert('Không thể thêm vào giỏ hàng. Vui lòng thử lại.');

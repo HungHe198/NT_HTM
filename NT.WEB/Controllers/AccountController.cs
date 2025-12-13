@@ -117,22 +117,20 @@ namespace NT.WEB.Controllers
         }
 
         // Login (GET)
-        public IActionResult Login(string? msg = null, string? returnUrl = null)
+        public IActionResult Login(string? msg = null)
         {
             if (string.Equals(msg, "login_required", StringComparison.OrdinalIgnoreCase))
             {
                 TempData["Error"] = "Vui lòng đăng nhập để tiếp tục";
             }
-            ViewBag.ReturnUrl = returnUrl;
             return View();
         }
 
         // Login (POST)
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(NT.SHARED.DTOs.LoginDto dto, string? returnUrl = null)
+        public async Task<IActionResult> Login(NT.SHARED.DTOs.LoginDto dto)
         {
-            ViewBag.ReturnUrl = returnUrl;
             if (!ModelState.IsValid)
             {
                 TempData["Error"] = "Dữ liệu đăng nhập không hợp lệ";
@@ -176,12 +174,6 @@ namespace NT.WEB.Controllers
                     AllowRefresh = true
                 });
                 TempData["Success"] = "Đăng nhập thành công.";
-
-                // Redirect to returnUrl if provided and is local
-                if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
-                {
-                    return Redirect(returnUrl);
-                }
                 return RedirectToAction("Index", "Home");
             }
 
