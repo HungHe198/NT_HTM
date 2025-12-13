@@ -1,79 +1,1 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
-
-namespace NT.SHARED.Models
-{
-    public class Voucher
-    {
-        public Guid Id { get; set; } = Guid.NewGuid();
-        [Required, MaxLength(50), Display(Name = "Mã voucher")]
-        public string Code { get; set; } = null!;
-        [Display(Name = "Số tiền giảm")]
-        public decimal? DiscountAmount { get; set; }
-        [Display(Name = "Tiền tối đa được giảm")]
-        public decimal? MaxDiscountAmount { get; set; }
-        [Display(Name = "đơn hàng tối thiểu")]
-        public decimal? MinOrderAmount { get; set; }
-        [Display(Name = "Hạn sử dụng")]
-        public DateTime? ExpiryDate { get; set; }
-        [Display(Name = "Số lượng đã sử dụng")]
-        public int? UsageCount { get; set; }
-        [Display(Name = "Số lượng tối đa")]
-        public int? MaxUsage { get; set; }
-
-        public Voucher() { }
-
-        // Validate all relevant properties when creating a Voucher
-        public static Voucher Create(
-            string code,
-            decimal? discountAmount = null,
-            decimal? maxDiscountAmount = null,
-            decimal? minOrderAmount = null,
-            DateTime? expiryDate = null,
-            int? usageCount = null,
-            int? maxUsage = null)
-        {
-            if (string.IsNullOrWhiteSpace(code))
-                throw new ArgumentException("Vui lòng nhập mã voucher");
-
-            var trimmedCode = code.Trim();
-            if (trimmedCode.Length > 50)
-                throw new ArgumentException("Mã voucher không được dài quá 50 ký tự");
-
-            if (discountAmount.HasValue && discountAmount.Value < 0)
-                throw new ArgumentException("Số tiền giảm phải là số không âm");
-
-            if (maxDiscountAmount.HasValue && maxDiscountAmount.Value < 0)
-                throw new ArgumentException("Giảm tối đa phải là số không âm");
-
-            if (discountAmount.HasValue && maxDiscountAmount.HasValue && maxDiscountAmount.Value < discountAmount.Value)
-                throw new ArgumentException("Giảm tối đa phải lớn hơn hoặc bằng số tiền giảm");
-
-            if (minOrderAmount.HasValue && minOrderAmount.Value < 0)
-                throw new ArgumentException("đơn hàng tối thiểu phải là số không âm");
-
-            if (expiryDate.HasValue && expiryDate.Value <= DateTime.UtcNow)
-                throw new ArgumentException("Hạn sử dụng phải là thời gian trong tương lai");
-
-            if (usageCount.HasValue && usageCount.Value < 0)
-                throw new ArgumentException("Số lượng đã sử dụng phải là số không âm");
-
-            if (maxUsage.HasValue && maxUsage.Value < 0)
-                throw new ArgumentException("Số lượng tối đa phải là số không âm");
-
-            if (usageCount.HasValue && maxUsage.HasValue && usageCount.Value > maxUsage.Value)
-                throw new ArgumentException("Số lượng đã sử dụng không thể lớn hơn số lượng tối đa");
-
-            return new Voucher
-            {
-                Code = trimmedCode,
-                DiscountAmount = discountAmount,
-                MaxDiscountAmount = maxDiscountAmount,
-                MinOrderAmount = minOrderAmount,
-                ExpiryDate = expiryDate,
-                UsageCount = usageCount,
-                MaxUsage = maxUsage
-            };
-        }
-    }
-}
+﻿using System; using System.ComponentModel.DataAnnotations;  namespace NT.SHARED.Models {     public class Voucher     {         public Guid Id { get; set; } = Guid.NewGuid();          [Required, MaxLength(50), Display(Name = "Mã voucher")]         public string Code { get; set; } = null!;          [Display(Name = "Phần trăm giảm giá (%)")]         [Range(0, 100, ErrorMessage = "Phần trăm giảm giá phải từ 0 đến 100")]         public decimal? DiscountPercentage { get; set; }          [Display(Name = "Tiền tối đa được giảm")]         public decimal? MaxDiscountAmount { get; set; }          [Display(Name = "Đơn hàng tối thiểu")]         public decimal? MinOrderAmount { get; set; }          [Display(Name = "Ngày bắt đầu")]         public DateTime? StartDate { get; set; }          [Display(Name = "Ngày kết thúc")]         public DateTime? EndDate { get; set; }          [Display(Name = "Số lượng đã sử dụng")]         public int UsageCount { get; set; } = 0;          [Display(Name = "Số lượng tối đa")]         public int? MaxUsage { get; set; }          public Voucher() { }          /// <summary>         /// Kiểm tra voucher có còn hiệu lực không         /// </summary>         public bool IsValid()         {             var now = DateTime.UtcNow;              // Kiểm tra thời gian hiệu lực             if (StartDate.HasValue && now < StartDate.Value)                 return false;              if (EndDate.HasValue && now > EndDate.Value)                 return false;              // Kiểm tra số lượng sử dụng             if (MaxUsage.HasValue && UsageCount >= MaxUsage.Value)                 return false;              return true;         }          /// <summary>         /// Tính số tiền được giảm dựa trên tổng hóa đơn         /// </summary>         public decimal CalculateDiscount(decimal orderTotal)         {             if (!DiscountPercentage.HasValue || DiscountPercentage.Value <= 0)                 return 0;              // Kiểm tra đơn hàng tối thiểu             if (MinOrderAmount.HasValue && orderTotal < MinOrderAmount.Value)                 return 0;              // Tính số tiền giảm theo %             var discount = orderTotal * (DiscountPercentage.Value / 100);              // Giới hạn số tiền giảm tối đa             if (MaxDiscountAmount.HasValue && discount > MaxDiscountAmount.Value)                 discount = MaxDiscountAmount.Value;              return discount;         }          /// <summary>         /// Tạo voucher với validation đầy đủ         /// </summary>         public static Voucher Create(             string code,             decimal? discountPercentage = null,             decimal? maxDiscountAmount = null,             decimal? minOrderAmount = null,             DateTime? startDate = null,             DateTime? endDate = null,             int? maxUsage = null)         {             // Validate mã voucher             if (string.IsNullOrWhiteSpace(code))                 throw new ArgumentException("Vui lòng nhập mã voucher");              var trimmedCode = code.Trim().ToUpperInvariant();             if (trimmedCode.Length > 50)                 throw new ArgumentException("Mã voucher không được dài quá 50 ký tự");              // Validate phần trăm giảm giá (0-100%)             if (discountPercentage.HasValue)             {                 if (discountPercentage.Value < 0 || discountPercentage.Value > 100)                     throw new ArgumentException("Phần trăm giảm giá phải từ 0 đến 100");             }              // Validate tiền giảm tối đa             if (maxDiscountAmount.HasValue && maxDiscountAmount.Value < 0)                 throw new ArgumentException("Tiền giảm tối đa phải là số không âm");              // Validate đơn hàng tối thiểu             if (minOrderAmount.HasValue && minOrderAmount.Value < 0)                 throw new ArgumentException("Đơn hàng tối thiểu phải là số không âm");              // Validate ngày bắt đầu và kết thúc             if (startDate.HasValue && endDate.HasValue && startDate.Value >= endDate.Value)                 throw new ArgumentException("Ngày bắt đầu phải trước ngày kết thúc");              if (endDate.HasValue && endDate.Value <= DateTime.UtcNow)                 throw new ArgumentException("Ngày kết thúc phải là thời gian trong tương lai");              // Validate số lượng tối đa             if (maxUsage.HasValue && maxUsage.Value <= 0)                 throw new ArgumentException("Số lượng tối đa phải lớn hơn 0");              return new Voucher             {                 Code = trimmedCode,                 DiscountPercentage = discountPercentage,                 MaxDiscountAmount = maxDiscountAmount,                 MinOrderAmount = minOrderAmount,                 StartDate = startDate,                 EndDate = endDate,                 UsageCount = 0,                 MaxUsage = maxUsage             };         }          /// <summary>         /// Cập nhật voucher với validation         /// </summary>         public void Update(             string? code = null,             decimal? discountPercentage = null,             decimal? maxDiscountAmount = null,             decimal? minOrderAmount = null,             DateTime? startDate = null,             DateTime? endDate = null,             int? maxUsage = null)         {             if (code != null)             {                 if (string.IsNullOrWhiteSpace(code))                     throw new ArgumentException("Vui lòng nhập mã voucher");                  var trimmedCode = code.Trim().ToUpperInvariant();                 if (trimmedCode.Length > 50)                     throw new ArgumentException("Mã voucher không được dài quá 50 ký tự");                  Code = trimmedCode;             }              if (discountPercentage.HasValue)             {                 if (discountPercentage.Value < 0 || discountPercentage.Value > 100)                     throw new ArgumentException("Phần trăm giảm giá phải từ 0 đến 100");                  DiscountPercentage = discountPercentage;             }              if (maxDiscountAmount.HasValue)             {                 if (maxDiscountAmount.Value < 0)                     throw new ArgumentException("Tiền giảm tối đa phải là số không âm");                  MaxDiscountAmount = maxDiscountAmount;             }              if (minOrderAmount.HasValue)             {                 if (minOrderAmount.Value < 0)                     throw new ArgumentException("Đơn hàng tối thiểu phải là số không âm");                  MinOrderAmount = minOrderAmount;             }              var newStartDate = startDate ?? StartDate;             var newEndDate = endDate ?? EndDate;              if (newStartDate.HasValue && newEndDate.HasValue && newStartDate.Value >= newEndDate.Value)                 throw new ArgumentException("Ngày bắt đầu phải trước ngày kết thúc");              if (startDate.HasValue)                 StartDate = startDate;              if (endDate.HasValue)                 EndDate = endDate;              if (maxUsage.HasValue)             {                 if (maxUsage.Value <= 0)                     throw new ArgumentException("Số lượng tối đa phải lớn hơn 0");                  if (maxUsage.Value < UsageCount)                     throw new ArgumentException("Số lượng tối đa không thể nhỏ hơn số lượng đã sử dụng");                  MaxUsage = maxUsage;             }         }          /// <summary>         /// Tăng số lượng đã sử dụng khi áp dụng voucher         /// </summary>         public void IncrementUsage()         {             if (MaxUsage.HasValue && UsageCount >= MaxUsage.Value)                 throw new InvalidOperationException("Voucher đã hết lượt sử dụng");              UsageCount++;         }     } } 
