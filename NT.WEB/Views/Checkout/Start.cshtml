@@ -27,7 +27,7 @@
                 <tr>
                     <th>Tên</th>
                     <th>Thuộc tính</th>
-                    <th>??n giá</th>
+                    <th>Đơn giá</th>
                     <th>Số lượng</th>
                     <th>Tạm tính</th>
                 </tr>
@@ -48,7 +48,7 @@
         </table>
     </div>
     <div class="col-md-5">
-        <h5>Thông tin ng??i nh?n</h5>
+        <h5>Thông tin người nhận</h5>
         <form asp-action="Submit" asp-controller="Checkout" method="post">
             <input type="hidden" name="cartId" value="@cartId" />
             <input type="hidden" name="selectedIds" value="@selectedIds" />
@@ -58,7 +58,7 @@
             <input type="hidden" name="shipping" value="@shipping" />
             <input type="hidden" name="total" value="@total" />
             <div class="mb-2">
-                <label class="form-label">S? ?i?n tho?i</label>
+                <label class="form-label">Số điện thoại</label>
                 <input type="text" name="phoneNumber" class="form-control" required />
             </div>
             <div class="mb-2">
@@ -68,14 +68,14 @@
             <div class="mb-2">
                 <label class="form-label">Phương thức thanh toán</label>
                 <select name="paymentMethodId" class="form-select" required>
-                    <option value="">-- Ch?n ph??ng th?c --</option>
+                    <option value="">-- Chọn phương thức --</option>
                     @foreach (var m in paymentMethods)
                     {
                         <option value="@m.Id">@m.Name</option>
                     }
                 </select>
             </div>
-            <button type="submit" class="btn btn-primary">??t hàng</button>
+            <button type="submit" class="btn btn-primary">Đặt hàng</button>
         </form>
         <div class="card mt-3">
             <div class="card-body">

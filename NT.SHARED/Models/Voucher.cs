@@ -8,14 +8,16 @@ namespace NT.SHARED.Models
         public Guid Id { get; set; } = Guid.NewGuid();
         [Required, MaxLength(50), Display(Name = "Mã voucher")]
         public string Code { get; set; } = null!;
-        [Display(Name = "Số tiền giảm")]
-        public decimal? DiscountAmount { get; set; }
+        [Display(Name = "Phần trăm giảm")]
+        public decimal? DiscountPercentage { get; set; }
         [Display(Name = "Tiền tối đa được giảm")]
         public decimal? MaxDiscountAmount { get; set; }
-        [Display(Name = "đơn hàng tối thiểu")]
+        [Display(Name = "Đơn hàng tối thiểu")]
         public decimal? MinOrderAmount { get; set; }
-        [Display(Name = "Hạn sử dụng")]
-        public DateTime? ExpiryDate { get; set; }
+        [Display(Name = "Bắt đầu hiệu lực")]
+        public DateTime? StartDate { get; set; }
+        [Display(Name = "Kết thúc hiệu lực")]
+        public DateTime? EndDate { get; set; }
         [Display(Name = "Số lượng đã sử dụng")]
         public int? UsageCount { get; set; }
         [Display(Name = "Số lượng tối đa")]
@@ -26,10 +28,11 @@ namespace NT.SHARED.Models
         // Validate all relevant properties when creating a Voucher
         public static Voucher Create(
             string code,
-            decimal? discountAmount = null,
+            decimal? discountPercentage = null,
             decimal? maxDiscountAmount = null,
             decimal? minOrderAmount = null,
-            DateTime? expiryDate = null,
+            DateTime? startDate = null,
+            DateTime? endDate = null,
             int? usageCount = null,
             int? maxUsage = null)
         {
@@ -40,20 +43,24 @@ namespace NT.SHARED.Models
             if (trimmedCode.Length > 50)
                 throw new ArgumentException("Mã voucher không được dài quá 50 ký tự");
 
-            if (discountAmount.HasValue && discountAmount.Value < 0)
-                throw new ArgumentException("Số tiền giảm phải là số không âm");
+            if (discountPercentage.HasValue && discountPercentage.Value < 0)
+                throw new ArgumentException("Phần trăm giảm phải là số không âm");
 
             if (maxDiscountAmount.HasValue && maxDiscountAmount.Value < 0)
                 throw new ArgumentException("Giảm tối đa phải là số không âm");
 
-            if (discountAmount.HasValue && maxDiscountAmount.HasValue && maxDiscountAmount.Value < discountAmount.Value)
-                throw new ArgumentException("Giảm tối đa phải lớn hơn hoặc bằng số tiền giảm");
+            if (discountPercentage.HasValue && maxDiscountAmount.HasValue && maxDiscountAmount.Value < discountPercentage.Value)
+                throw new ArgumentException("Giảm tối đa phải lớn hơn hoặc bằng phần trăm giảm");
 
             if (minOrderAmount.HasValue && minOrderAmount.Value < 0)
                 throw new ArgumentException("đơn hàng tối thiểu phải là số không âm");
 
-            if (expiryDate.HasValue && expiryDate.Value <= DateTime.UtcNow)
-                throw new ArgumentException("Hạn sử dụng phải là thời gian trong tương lai");
+            if (startDate.HasValue && endDate.HasValue && startDate.Value >= endDate.Value)
+                throw new ArgumentException("Ngày bắt đầu phải trước ngày kết thúc");
+            if (startDate.HasValue && startDate.Value <= DateTime.UtcNow)
+                throw new ArgumentException("Ngày bắt đầu phải trong tương lai");
+            if (endDate.HasValue && endDate.Value <= DateTime.UtcNow)
+                throw new ArgumentException("Ngày kết thúc phải trong tương lai");
 
             if (usageCount.HasValue && usageCount.Value < 0)
                 throw new ArgumentException("Số lượng đã sử dụng phải là số không âm");
@@ -67,10 +74,11 @@ namespace NT.SHARED.Models
             return new Voucher
             {
                 Code = trimmedCode,
-                DiscountAmount = discountAmount,
+                DiscountPercentage = discountPercentage,
                 MaxDiscountAmount = maxDiscountAmount,
                 MinOrderAmount = minOrderAmount,
-                ExpiryDate = expiryDate,
+                StartDate = startDate,
+                EndDate = endDate,
                 UsageCount = usageCount,
                 MaxUsage = maxUsage
             };

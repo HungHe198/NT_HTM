@@ -4,45 +4,48 @@
 }
 
 <h2 class="mb-3">??ng ký khách hàng</h2>
-@* @if (TempData["Success"] != null)
+@if (TempData["Success"] != null)
 {
     <div class="alert alert-success">@TempData["Success"]</div>
 }
 @if (TempData["Warning"] != null)
 {
     <div class="alert alert-warning">@TempData["Warning"]</div>
-} *@
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
 
 <form asp-action="RegisterCustomer" asp-controller="Account" method="post" class="row g-3">
     @Html.AntiForgeryToken()
 
     <div class="col-md-6">
-        <label asp-for="Username" class="form-label"></label>
+        <label asp-for="Username" class="form-label">Tên ??ng nh?p</label>
         <input asp-for="Username" class="form-control" />
         <span asp-validation-for="Username" class="text-danger"></span>
     </div>
 
     <div class="col-md-6">
-        <label asp-for="Email" class="form-label"></label>
+        <label asp-for="Email" class="form-label">Email</label>
         <input asp-for="Email" class="form-control" />
         <span asp-validation-for="Email" class="text-danger"></span>
     </div>
 
     <div class="col-md-6">
-        <label asp-for="PhoneNumber" class="form-label"></label>
+        <label asp-for="PhoneNumber" class="form-label">S? ?i?n tho?i</label>
         <input asp-for="PhoneNumber" class="form-control" />
         <span asp-validation-for="PhoneNumber" class="text-danger"></span>
     </div>
 
     <div class="col-md-6">
-        <label asp-for="Fullname" class="form-label"></label>
+        <label asp-for="Fullname" class="form-label">H? và tên</label>
         <input asp-for="Fullname" class="form-control" />
         <span asp-validation-for="Fullname" class="text-danger"></span>
     </div>
 
     <div class="col-md-6">
         <label class="form-label">M?t kh?u</label>
-        <!-- Password s? bind vào PasswordHash nh? logic hi?n t?i trong controller -->
         <input asp-for="PasswordHash" type="password" class="form-control" />
         <span asp-validation-for="PasswordHash" class="text-danger"></span>
     </div>

@@ -44,18 +44,22 @@ namespace NT.WEB.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Voucher voucher)
         {
-            // Server-side validation: ExpiryDate must be in the future
-            if (voucher.ExpiryDate.HasValue)
+            // Server-side validation: StartDate < EndDate and both in the future
+            if (voucher.StartDate.HasValue)
             {
-                var expiryUtc = DateTime.SpecifyKind(voucher.ExpiryDate.Value, DateTimeKind.Utc);
-                if (expiryUtc <= DateTime.UtcNow)
-                {
-                    ModelState.AddModelError(nameof(voucher.ExpiryDate), "Hạn sử dụng phải là thời gian trong tương lai");
-                }
-                else
-                {
-                    voucher.ExpiryDate = expiryUtc; // normalize to UTC
-                }
+                voucher.StartDate = DateTime.SpecifyKind(voucher.StartDate.Value, DateTimeKind.Utc);
+                if (voucher.StartDate.Value <= DateTime.UtcNow)
+                    ModelState.AddModelError(nameof(voucher.StartDate), "Ngày bắt đầu phải trong tương lai");
+            }
+            if (voucher.EndDate.HasValue)
+            {
+                voucher.EndDate = DateTime.SpecifyKind(voucher.EndDate.Value, DateTimeKind.Utc);
+                if (voucher.EndDate.Value <= DateTime.UtcNow)
+                    ModelState.AddModelError(nameof(voucher.EndDate), "Ngày kết thúc phải trong tương lai");
+            }
+            if (voucher.StartDate.HasValue && voucher.EndDate.HasValue && voucher.StartDate.Value >= voucher.EndDate.Value)
+            {
+                ModelState.AddModelError(nameof(voucher.EndDate), "Ngày bắt đầu phải trước ngày kết thúc");
             }
 
             if (!ModelState.IsValid) return View(voucher);
@@ -82,18 +86,22 @@ namespace NT.WEB.Controllers
         {
             if (id == Guid.Empty || voucher is null || id != voucher.Id) return BadRequest();
 
-            // Server-side validation: ExpiryDate must be in the future
-            if (voucher.ExpiryDate.HasValue)
+            // Server-side validation: StartDate < EndDate and both in the future
+            if (voucher.StartDate.HasValue)
             {
-                var expiryUtc = DateTime.SpecifyKind(voucher.ExpiryDate.Value, DateTimeKind.Utc);
-                if (expiryUtc <= DateTime.UtcNow)
-                {
-                    ModelState.AddModelError(nameof(voucher.ExpiryDate), "Hạn sử dụng phải là thời gian trong tương lai");
-                }
-                else
-                {
-                    voucher.ExpiryDate = expiryUtc; // normalize to UTC
-                }
+                voucher.StartDate = DateTime.SpecifyKind(voucher.StartDate.Value, DateTimeKind.Utc);
+                if (voucher.StartDate.Value <= DateTime.UtcNow)
+                    ModelState.AddModelError(nameof(voucher.StartDate), "Ngày bắt đầu phải trong tương lai");
+            }
+            if (voucher.EndDate.HasValue)
+            {
+                voucher.EndDate = DateTime.SpecifyKind(voucher.EndDate.Value, DateTimeKind.Utc);
+                if (voucher.EndDate.Value <= DateTime.UtcNow)
+                    ModelState.AddModelError(nameof(voucher.EndDate), "Ngày kết thúc phải trong tương lai");
+            }
+            if (voucher.StartDate.HasValue && voucher.EndDate.HasValue && voucher.StartDate.Value >= voucher.EndDate.Value)
+            {
+                ModelState.AddModelError(nameof(voucher.EndDate), "Ngày bắt đầu phải trước ngày kết thúc");
             }
 
             if (!ModelState.IsValid) return View(voucher);

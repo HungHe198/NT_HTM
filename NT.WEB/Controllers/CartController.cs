@@ -85,51 +85,36 @@ namespace NT.WEB.Controllers
             var subtotal = items.Sum(i => i.UnitPrice * i.Quantity);
             ViewBag.Subtotal = subtotal;
             ViewBag.ShippingFee = 35000m; // simple flat fee demo
-
-            // Applied voucher (if any)
-            var appliedCode = HttpContext.Session.GetString(SessionVoucherKey);
-            decimal appliedDiscount = 0m;
-            if (!string.IsNullOrWhiteSpace(appliedCode))
-            {
-                // re-validate voucher with current subtotal
-                var found = await _voucherRepository.FindAsync(v => v.Code == appliedCode);
-                var voucher = found?.FirstOrDefault();
-                if (voucher != null && (!voucher.ExpiryDate.HasValue || voucher.ExpiryDate.Value >= DateTime.UtcNow))
-                {
-                    if (!voucher.MinOrderAmount.HasValue || subtotal >= voucher.MinOrderAmount.Value)
-                    {
-                        appliedDiscount = voucher.DiscountAmount.GetValueOrDefault(0m);
-                        if (voucher.MaxDiscountAmount.HasValue)
-                            appliedDiscount = Math.Min(appliedDiscount, voucher.MaxDiscountAmount.Value);
-                        appliedDiscount = Math.Min(appliedDiscount, subtotal);
-                    }
-                    else
-                    {
-                        // below minimum, ignore discount and show message
-                        TempData["Error"] = $"Giá trị đơn hàng tối thiểu để áp dụng voucher là {voucher.MinOrderAmount.Value:#,##0}";
-                        appliedDiscount = 0m;
-                    }
-                }
-                else
-                {
-                    // invalid voucher in session, clean up
-                    HttpContext.Session.Remove(SessionVoucherKey);
-                }
-            }
-            ViewBag.AppliedVoucherCode = appliedCode;
-            ViewBag.VoucherDiscount = appliedDiscount;
-
-            ViewBag.Total = subtotal + ViewBag.ShippingFee - appliedDiscount;
+            ViewBag.Total = subtotal + ViewBag.ShippingFee;
             return View(items);
         }
 
         // Add item from product detail selection
         [HttpPost]
-        public async Task<IActionResult> Add(Guid productDetailId, int quantity)
+        [AllowAnonymous]
+        public async Task<IActionResult> Add(Guid productDetailId, int quantity, Guid? productId = null)
         {
             if (productDetailId == Guid.Empty || quantity <= 0) return BadRequest();
+
+            // Check if user is authenticated
+            if (User?.Identity?.IsAuthenticated != true)
+            {
+                // Build return URL to product page
+                var returnUrl = productId.HasValue && productId.Value != Guid.Empty
+                    ? $"/Product/ProductDetailIndex/{productId.Value}"
+                    : "/";
+                TempData["Error"] = "Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng";
+                return RedirectToAction("Login", "Account", new { returnUrl, msg = "login_required" });
+            }
+
             var cart = await GetOrCreateCustomerCartAsync();
-            if (cart == null) return Forbid();
+            if (cart == null)
+            {
+                // User is authenticated but not a Customer
+                TempData["Error"] = "Chỉ khách hàng mới có thể thêm sản phẩm vào giỏ hàng";
+                return RedirectToAction("RegisterCustomer", "Account", new { msg = "customer_required" });
+            }
+
             var detail = await _productDetailService.GetByIdAsync(productDetailId);
             if (detail is null) return NotFound();
 
@@ -205,7 +190,7 @@ namespace NT.WEB.Controllers
                 return Redirect($"/CartDetail?cartId={cart?.Id}");
             }
 
-            if (voucher.ExpiryDate.HasValue && voucher.ExpiryDate.Value < DateTime.UtcNow)
+            if (voucher.EndDate.HasValue && voucher.EndDate.Value < DateTime.UtcNow)
             {
                 TempData["Error"] = "Voucher đã hết hạn";
                 HttpContext.Session.Remove(SessionVoucherKey);
@@ -232,7 +217,7 @@ namespace NT.WEB.Controllers
                 return Redirect($"/CartDetail?cartId={cart?.Id}");
             }
 
-            var discount = voucher.DiscountAmount.GetValueOrDefault(0m);
+            var discount = voucher.DiscountPercentage.GetValueOrDefault(0m);
             if (voucher.MaxDiscountAmount.HasValue)
             {
                 discount = Math.Min(discount, voucher.MaxDiscountAmount.Value);

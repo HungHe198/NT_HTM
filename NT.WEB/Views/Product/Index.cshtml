@@ -2,7 +2,7 @@
 
 @{
     // Layout = "~/Views/Shared/_AdminLayout.cshtml";
-    ViewBag.Title = "Products";
+    ViewBag.Title = "Sản phẩm";
 }
 
 <div class="container-fluid">
@@ -37,13 +37,13 @@
         <!-- Main content column -->
         <section class="col-md-9 col-lg-10 py-3">
             <div class="mb-4 d-flex justify-content-between align-items-center">
-                <h1 class="h4 mb-0">Products</h1>
-                <a asp-action="Create" class="btn btn-primary">Create New Product</a>
+                <h1 class="h4 mb-0">Sản phẩm</h1>
+                <a asp-action="Create" class="btn btn-primary">Tạo sản phẩm mới</a>
             </div>
 
             <form method="get" asp-action="Index" class="d-flex mb-3 position-relative">
-                <input type="text" id="product-search" name="q" value="@(Context.Request.Query["q"])" class="form-control me-2" placeholder="Search name..." autocomplete="off" />
-                <button type="submit" class="btn btn-secondary">Search</button>
+                <input type="text" id="product-search" name="q" value="@(Context.Request.Query["q"])" class="form-control me-2" placeholder="Tìm kiếm theo tên..." autocomplete="off" />
+                <button type="submit" class="btn btn-secondary">Tìm kiếm</button>
 
                 <div id="suggestions" class="list-group position-absolute" style="z-index:1000; width:40%; left:0; display:none;"></div>
             </form>
@@ -85,9 +85,9 @@
                                 <td>@p.Name</td>
                                 <td>@p.BrandId</td>
                                 <td>
-                                    <a asp-action="Details" asp-route-id="@p.Id">Details</a> |
-                                    <a asp-action="Edit" asp-route-id="@p.Id">Edit</a> |
-                                    <a asp-action="Delete" asp-route-id="@p.Id">Delete</a>
+                                    <a asp-action="Details" asp-route-id="@p.Id">Chi tiết</a> |
+                                    <a asp-action="Edit" asp-route-id="@p.Id">Sửa</a> |
+                                    <a asp-action="Delete" asp-route-id="@p.Id">Xóa</a>
                                 </td>
                             </tr>
                         }
