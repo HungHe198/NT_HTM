@@ -1,14 +1,14 @@
-@model NT.SHARED.Models.User
+Ôªø@model NT.SHARED.Models.User
 @{
     ViewBag.Title = "Delete User";
 }
 
-<h1>X·c nh?n xÛa</h1>
+<h1>X√°c nh?n x√≥a</h1>
 <div class="alert alert-warning">
-    B?n cÛ ch?c mu?n xÛa ng??i d˘ng <strong>@Model.Username</strong> khÙng?
+    B·∫°n c√≥ ch·∫Øc mu·ªën x√≥a ng∆∞·ªùi d√πng <strong>@Model.Username</strong> kh√¥ng?
 </div>
 <form asp-action="Delete" method="post">
     <input type="hidden" asp-for="Id" />
-    <button type="submit" class="btn btn-danger">XÛa</button>
+    <button type="submit" class="btn btn-danger">X√≥a</button>
     <a asp-action="Index" class="btn btn-secondary">H?y</a>
 </form>

@@ -1,9 +1,9 @@
-@model NT.SHARED.Models.User
+﻿@model NT.SHARED.Models.User
 @{
     ViewBag.Title = "Register";
 }
 
-<h1>��ng k?</h1>
+<h1>Đăng ký</h1>
 <form asp-action="Index" asp-controller="Register" method="post">
     @Html.AntiForgeryToken()
     <div asp-validation-summary="All" class="text-danger"></div>
@@ -32,12 +32,12 @@
         <div class="mb-3">
             <label asp-for="RoleId" class="form-label"></label>
             <select asp-for="RoleId" class="form-select" asp-items="ViewBag.Roles">
-                <option value="">-- Ch?n vai tr? --</option>
+                <option value="">-- Chọn vai trò --</option>
             </select>
             <span asp-validation-for="RoleId" class="text-danger"></span>
         </div>
     }
-    <button type="submit" class="btn btn-primary">��ng k?</button>
+    <button type="submit" class="btn btn-primary">Đăng ký</button>
 </form>
 
 @section Scripts{

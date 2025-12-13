@@ -1,4 +1,5 @@
 
+
 using NT.BLL.Interfaces;
 using NT.BLL.Services;
 using NT.DAL.ContextFile;
@@ -8,6 +9,7 @@ using System.Text;
 using Microsoft.AspNetCore.Localization;
 using System.Globalization;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.EntityFrameworkCore;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,8 +22,9 @@ Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 Console.OutputEncoding = Encoding.UTF8;
 Console.InputEncoding = Encoding.UTF8;
 
-// Register DbContext (NTAppDbContext has OnConfiguring with connection string fallback)
- builder.Services.AddDbContext<NTAppDbContext>(options => { });
+// Register DbContext using connection string from configuration
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddDbContext<NTAppDbContext>(options => options.UseSqlServer(connectionString));
 
 // Register open-generic repository implementation for IGenericRepository<T>
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));

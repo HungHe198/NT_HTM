@@ -1,9 +1,9 @@
-@model NT.SHARED.Models.User
+﻿@model NT.SHARED.Models.User
 @{
-    ViewData["Title"] = "??ng k� kh�ch h�ng";
+    ViewData["Title"] = "Đăng ký khách hàng";
 }
 
-<h2 class="mb-3">??ng k� kh�ch h�ng</h2>
+<h2 class="mb-3">Đăng ký khách hàng</h2>
 @* @if (TempData["Success"] != null)
 {
     <div class="alert alert-success">@TempData["Success"]</div>
@@ -41,15 +41,15 @@
     </div>
 
     <div class="col-md-6">
-        <label class="form-label">M?t kh?u</label>
-        <!-- Password s? bind v�o PasswordHash nh? logic hi?n t?i trong controller -->
+        <label class="form-label">Mật khẩu</label>
+        <!-- Password s? bind vào PasswordHash nh? logic hi?n t?i trong controller -->
         <input asp-for="PasswordHash" type="password" class="form-control" />
         <span asp-validation-for="PasswordHash" class="text-danger"></span>
     </div>
 
     <div class="col-12">
-        <button type="submit" class="btn btn-primary">??ng k�</button>
-        <a asp-action="Login" asp-controller="Account" class="btn btn-outline-secondary ms-2">?� c� t�i kho?n? ??ng nh?p</a>
+        <button type="submit" class="btn btn-primary">Đăng ký</button>
+        <a asp-action="Login" asp-controller="Account" class="btn btn-outline-secondary ms-2">Đã có tài khoản đăng nhập</a>
     </div>
 </form>
 

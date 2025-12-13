@@ -1,35 +1,35 @@
-@model NT.SHARED.Models.ProductImage
+﻿@model NT.SHARED.Models.ProductImage
 
 @{
     ViewBag.Title = "Create Product Image";
 }
 
-<h1>Th�m ?nh s?n ph?m</h1>
+<h1>Thêm ảnh sản phẩm</h1>
 
 <form asp-action="Create" method="post" enctype="multipart/form-data" id="img-form">
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
     <div class="form-group mb-3">
-        <label asp-for="ProductDetailId">Bi?n th? s?n ph?m</label>
+        <label asp-for="ProductDetailId">Biến thể sản phẩm</label>
         <input asp-for="ProductDetailId" class="form-control" />
         <span asp-validation-for="ProductDetailId" class="text-danger"></span>
     </div>
 
     <div class="form-group mb-3">
-        <label class="form-label">Ch?n ?nh t?i l�n</label>
+        <label class="form-label">Chọn ảnh tải lên</label>
         <input type="file" id="file" name="file" class="form-control" accept="image/*" />
         <div class="mt-2">
             <img id="preview" src="" alt="preview" style="max-height:160px; display:none; object-fit:contain;" />
         </div>
-        <small class="form-text text-muted">?nh s? ???c t?i l�n th? m?c `wwwroot/uploads/products` v� h? th?ng ch? l?u ???ng d?n truy c?p web.</small>
+        <small class="form-text text-muted">ảnh sẽ đượcc tải lên thư mục `wwwroot/uploads/products` và hệ thống cho lưu đường dẫn truy cập web.</small>
     </div>
 
-    <!-- ???ng d?n ?nh ???c ?i?n t? ??ng sau khi upload th�nh c�ng -->
+    <!-- ???ng d?n ?nh ???c ?i?n t? ??ng sau khi upload thành công -->
     <input asp-for="ImageUrl" type="hidden" />
     <span asp-validation-for="ImageUrl" class="text-danger"></span>
 
-    <button type="submit" class="btn btn-primary">L?u</button>
-    <a asp-action="Index" class="btn btn-secondary">H?y</a>
+    <button type="submit" class="btn btn-primary">Lưu</button>
+    <a asp-action="Index" class="btn btn-secondary">Hủy</a>
 </form>
 
 <script>
@@ -50,18 +50,18 @@
             data.append('file', f);
             try{
                 const res = await fetch('/ProductImage/Upload', { method:'POST', body:data });
-                if(!res.ok){ alert('T?i ?nh th?t b?i'); return; }
+                if(!res.ok){ alert('Tải ảnh thất bại'); return; }
                 const json = await res.json();
                 imageUrlInput.value = json.url || '';
             }catch{
-                alert('C� l?i khi t?i ?nh');
+                alert('Có lỗi khi tải ảnh');
             }
         });
 
         form.addEventListener('submit', function(e){
             if(!imageUrlInput.value){
                 e.preventDefault();
-                alert('Vui l�ng ch?n v� t?i ?nh tr??c khi l?u');
+                alert('Vui lòng chọn và tải ảnh trước khi lưu');
             }
         });
     })();
