@@ -3,14 +3,12 @@
     var paymentMethods = ViewBag.PaymentMethods as IEnumerable<NT.SHARED.Models.PaymentMethod> ?? Enumerable.Empty<NT.SHARED.Models.PaymentMethod>();
     string selectedIds = ViewBag.SelectedIds as string ?? string.Empty;
     var cartId = ViewBag.CartId;
-    // Read voucher/totals from query string
-    var q = Context?.Request?.Query;
-    string? code = q?["code"].ToString();
-    decimal subtotal = 0m; decimal shipping = 0m; decimal discount = 0m; decimal total = 0m;
-    decimal.TryParse(q?["subtotal"], out subtotal);
-    decimal.TryParse(q?["shipping"], out shipping);
-    decimal.TryParse(q?["discount"], out discount);
-    decimal.TryParse(q?["total"], out total);
+    // Read voucher/totals from ViewBag (set by CheckoutController)
+    string? code = ViewBag.Code as string;
+    decimal subtotal = (decimal)(ViewBag.Subtotal ?? 0m);
+    decimal shipping = (decimal)(ViewBag.Shipping ?? 0m);
+    decimal discount = (decimal)(ViewBag.Discount ?? 0m);
+    decimal total = (decimal)(ViewBag.Total ?? 0m);
 }
 
 <h2>Thanh toán</h2>
@@ -27,7 +25,7 @@
                 <tr>
                     <th>Tên</th>
                     <th>Thuộc tính</th>
-                    <th>??n giá</th>
+                    <th>đơnn giá</th>
                     <th>Số lượng</th>
                     <th>Tạm tính</th>
                 </tr>
@@ -48,7 +46,7 @@
         </table>
     </div>
     <div class="col-md-5">
-        <h5>Thông tin ng??i nh?n</h5>
+        <h5>Thông tin người nhận</h5>
         <form asp-action="Submit" asp-controller="Checkout" method="post">
             <input type="hidden" name="cartId" value="@cartId" />
             <input type="hidden" name="selectedIds" value="@selectedIds" />
@@ -58,28 +56,42 @@
             <input type="hidden" name="shipping" value="@shipping" />
             <input type="hidden" name="total" value="@total" />
             <div class="mb-2">
-                <label class="form-label">S? ?i?n tho?i</label>
+                <label class="form-label">Số điện thoại</label>
                 <input type="text" name="phoneNumber" class="form-control" required />
             </div>
             <div class="mb-2">
-                <label class="form-label">đia chỉ giao hàng</label>
+                <label class="form-label">Địa chỉ giao hàng</label>
                 <input type="text" name="shippingAddress" class="form-control" required />
             </div>
             <div class="mb-2">
                 <label class="form-label">Phương thức thanh toán</label>
                 <select name="paymentMethodId" class="form-select" required>
-                    <option value="">-- Ch?n ph??ng th?c --</option>
+                    <option value="">-- Chọn phương thức --</option>
                     @foreach (var m in paymentMethods)
                     {
                         <option value="@m.Id">@m.Name</option>
                     }
                 </select>
             </div>
-            <button type="submit" class="btn btn-primary">??t hàng</button>
+            <button type="submit" class="btn btn-primary">Đặt hàng</button>
         </form>
         <div class="card mt-3">
             <div class="card-body">
                 <h6 class="card-title">Tổng cộng</h6>
+                <form asp-action="ApplyVoucher" asp-controller="Checkout" method="post" class="input-group mb-2">
+                    <input type="hidden" name="cartId" value="@cartId" />
+                    <input type="hidden" name="selectedIds" value="@selectedIds" />
+                    <input type="text" name="code" class="form-control" placeholder="Nhập mã giảm giá" value="@code" />
+                    <button class="btn btn-outline-primary" type="submit">Áp dụng</button>
+                </form>
+                @if (!string.IsNullOrWhiteSpace(code))
+                {
+                    <form asp-action="RemoveVoucher" asp-controller="Checkout" method="post" class="mb-2">
+                        <input type="hidden" name="cartId" value="@cartId" />
+                        <input type="hidden" name="selectedIds" value="@selectedIds" />
+                        <button class="btn btn-link btn-sm text-danger" type="submit">Bỏ voucher</button>
+                    </form>
+                }
                 @if (!string.IsNullOrWhiteSpace(code))
                 {
                     <div class="small text-success mb-1">Áp mã: <strong>@code</strong></div>

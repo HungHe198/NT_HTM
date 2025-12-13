@@ -78,6 +78,7 @@ namespace NT.WEB.Controllers
             ViewBag.SelectedIds = string.Join(',', selectedItems.Select(s => s.ProductDetailId));
 
             var vm = new List<object>();
+            decimal subtotal = 0m;
             foreach (var ci in selectedItems)
             {
                 var pd = ci.ProductDetail ?? await _productDetailService.GetByIdAsync(ci.ProductDetailId);
@@ -91,7 +92,24 @@ namespace NT.WEB.Controllers
                     Length = pd.Length?.Name,
                     Hardness = pd.Hardness?.Name
                 });
+                subtotal += pd.Price * ci.Quantity;
             }
+
+            var shipping = 35000m;
+            decimal discount = 0m;
+            var appliedCode = HttpContext.Session.GetString("SESSION_VOUCHER_CODE");
+            var discountStr = HttpContext.Session.GetString("SESSION_VOUCHER_DISCOUNT");
+            if (!string.IsNullOrWhiteSpace(discountStr) && decimal.TryParse(discountStr, out var d))
+            {
+                discount = Math.Min(d, subtotal);
+            }
+            var total = subtotal + shipping - discount;
+
+            ViewBag.Code = appliedCode;
+            ViewBag.Subtotal = subtotal;
+            ViewBag.Shipping = shipping;
+            ViewBag.Discount = discount;
+            ViewBag.Total = total;
             return View(vm);
         }
 
@@ -198,6 +216,95 @@ namespace NT.WEB.Controllers
             await _cartDetailService.SaveChangesAsync();
 
             return RedirectToAction("Review", "Orders", new { id = order.Id });
+        }
+
+        // POST: /Checkout/ApplyVoucher
+        [HttpPost]
+        public async Task<IActionResult> ApplyVoucher(Guid cartId, string selectedIds, string code)
+        {
+            code = code?.Trim() ?? string.Empty;
+            if (cartId == Guid.Empty)
+            {
+                TempData["Error"] = "Thi?u gi? hàng";
+                return Redirect("/CartDetail");
+            }
+            if (string.IsNullOrWhiteSpace(selectedIds))
+            {
+                TempData["Error"] = "Vui lòng ch?n s?n ph?m";
+                return Redirect($"/CartDetail?cartId={cartId}");
+            }
+            if (string.IsNullOrWhiteSpace(code))
+            {
+                TempData["Error"] = "Vui lòng nh?p mã voucher";
+                return RedirectToAction(nameof(Start), new { cartId, selected = selectedIds });
+            }
+
+            // compute subtotal for selected items
+            var ids = (selectedIds ?? string.Empty)
+                .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(s => Guid.TryParse(s, out var g) ? g : Guid.Empty)
+                .Where(g => g != Guid.Empty)
+                .ToArray();
+            decimal subtotal = 0m;
+            var cartItems = await _cartDetailService.FindAsync(cd => cd.CartId == cartId);
+            foreach (var ci in cartItems ?? Enumerable.Empty<CartDetail>())
+            {
+                if (ci.Quantity <= 0) continue;
+                if (!ids.Contains(ci.ProductDetailId)) continue;
+                var pd = ci.ProductDetail ?? await _productDetailService.GetByIdAsync(ci.ProductDetailId);
+                if (pd == null) continue;
+                subtotal += pd.Price * ci.Quantity;
+            }
+
+            var found = await _voucherRepo.FindAsync(v => v.Code == code);
+            var voucher = found?.FirstOrDefault();
+            if (voucher == null)
+            {
+                TempData["Error"] = "Mã voucher không h?p l?";
+                HttpContext.Session.Remove("SESSION_VOUCHER_CODE");
+                HttpContext.Session.Remove("SESSION_VOUCHER_DISCOUNT");
+                return RedirectToAction(nameof(Start), new { cartId, selected = selectedIds });
+            }
+            if (voucher.ExpiryDate.HasValue && voucher.ExpiryDate.Value < DateTime.UtcNow)
+            {
+                TempData["Error"] = "Voucher ?ã h?t h?n";
+                HttpContext.Session.Remove("SESSION_VOUCHER_CODE");
+                HttpContext.Session.Remove("SESSION_VOUCHER_DISCOUNT");
+                return RedirectToAction(nameof(Start), new { cartId, selected = selectedIds });
+            }
+            if (voucher.MaxUsage.HasValue && voucher.UsageCount.HasValue && voucher.UsageCount.Value >= voucher.MaxUsage.Value)
+            {
+                TempData["Error"] = "Voucher ?ã s? d?ng h?t";
+                HttpContext.Session.Remove("SESSION_VOUCHER_CODE");
+                HttpContext.Session.Remove("SESSION_VOUCHER_DISCOUNT");
+                return RedirectToAction(nameof(Start), new { cartId, selected = selectedIds });
+            }
+            if (voucher.MinOrderAmount.HasValue && subtotal < voucher.MinOrderAmount.Value)
+            {
+                TempData["Error"] = $"Giá tr? ??n hàng t?i thi?u ?? áp d?ng voucher là {voucher.MinOrderAmount.Value:#,##0}";
+                HttpContext.Session.Remove("SESSION_VOUCHER_CODE");
+                HttpContext.Session.Remove("SESSION_VOUCHER_DISCOUNT");
+                return RedirectToAction(nameof(Start), new { cartId, selected = selectedIds });
+            }
+
+            var discount = voucher.DiscountAmount.GetValueOrDefault(0m);
+            if (voucher.MaxDiscountAmount.HasValue) discount = Math.Min(discount, voucher.MaxDiscountAmount.Value);
+            discount = Math.Min(discount, subtotal);
+
+            HttpContext.Session.SetString("SESSION_VOUCHER_CODE", voucher.Code);
+            HttpContext.Session.SetString("SESSION_VOUCHER_DISCOUNT", discount.ToString());
+            TempData["Success"] = $"Áp d?ng voucher '{voucher.Code}' thành công. Gi?m {discount:#,##0}.";
+            return RedirectToAction(nameof(Start), new { cartId, selected = selectedIds });
+        }
+
+        // POST: /Checkout/RemoveVoucher
+        [HttpPost]
+        public IActionResult RemoveVoucher(Guid cartId, string selectedIds)
+        {
+            HttpContext.Session.Remove("SESSION_VOUCHER_CODE");
+            HttpContext.Session.Remove("SESSION_VOUCHER_DISCOUNT");
+            TempData["Success"] = "?ã b? voucher";
+            return RedirectToAction(nameof(Start), new { cartId, selected = selectedIds });
         }
     }
 }
