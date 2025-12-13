@@ -1,4 +1,4 @@
-@model NT.SHARED.Models.User
+﻿@model NT.SHARED.Models.User
 @{
     ViewBag.Title = "Edit User";
 }
@@ -22,13 +22,13 @@
         <span asp-validation-for="Email" class="text-danger"></span>
     </div>
     <div class="mb-3">
-        <label class="form-label">Vai tr�</label>
+        <label class="form-label">Vai tṛ</label>
         <select asp-for="RoleId" class="form-select" asp-items="ViewBag.Roles">
-            <option value="">-- Ch?n vai tr� --</option>
+            <option value="">-- Chọn vai trò --</option>
         </select>
     </div>
-    <button type="submit" class="btn btn-primary">L?u</button>
-    <a asp-action="Index" class="btn btn-secondary">H?y</a>
+    <button type="submit" class="btn btn-primary">Lưu</button>
+    <a asp-action="Index" class="btn btn-secondary">Hủy</a>
 </form>
 
 @section Scripts{

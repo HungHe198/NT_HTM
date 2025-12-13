@@ -1,20 +1,20 @@
-@{
+﻿@{
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
-<h2>T?o ph??ng th?c thanh to�n</h2>
+<h2>Tạo phương thức thanh toán</h2>
 @if (!ViewData.ModelState.IsValid)
 {
     <div class="alert alert-danger">@string.Join("; ", ViewData.ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage))</div>
 }
 <form asp-action="Create" asp-controller="PaymentMethods" method="post">
     <div class="mb-2">
-        <label class="form-label">T�n</label>
+        <label class="form-label">Tên</label>
         <input type="text" name="name" class="form-control" required />
     </div>
     <div class="mb-2">
-        <label class="form-label">M� t?</label>
+        <label class="form-label">Mô tả</label>
         <input type="text" name="description" class="form-control" />
     </div>
-    <button class="btn btn-primary" type="submit">L?u</button>
-    <a class="btn btn-secondary" asp-action="Index">H?y</a>
+    <button class="btn btn-primary" type="submit">Lưu</button>
+    <a class="btn btn-secondary" asp-action="Index">Hủy</a>
 </form>

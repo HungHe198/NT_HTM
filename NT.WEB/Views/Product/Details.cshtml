@@ -1,11 +1,11 @@
-@model NT.SHARED.Models.Product
+﻿@model NT.SHARED.Models.Product
 
 @{
     ViewBag.Title = "Product Details";
     var details = ViewBag.ProductDetails as IEnumerable<NT.SHARED.Models.ProductDetail> ?? Enumerable.Empty<NT.SHARED.Models.ProductDetail>();
 }
 
-<h1>Chi ti?t s?n ph?m</h1>
+<h1>Chi tiết sản phẩm</h1>
 
 <div>
     <h4>@Model.Name (@Model.ProductCode)</h4>
@@ -25,16 +25,16 @@
     <thead>
         <tr>
             <th>Id</th>
-            <th>Gi�</th>
-            <th>T?n</th>
-            <th>Chi?u d�i</th>
-            <th>M�u</th>
-            <th>Ho�n thi?n</th>
-            <th>?? c?ng</th>
-            <th>?? ?�n h?i</th>
-            <th>Xu?t x?</th>
-            <th>Th�ng s?</th>
-            <th>Ho?t ??ng</th>
+            <th>Giá</th>
+            <th>Tên</th>
+            <th>Chiều dài</th>
+            <th>Màu</th>
+            <th>Hoàn thiện</th>
+            <th>Độ cứng</th>
+            <th>Độ đàn hồi</th>
+            <th>Xuất xứ/th>
+            <th>Thông số</th>
+            <th>Hoạt động</th>
             <th></th>
         </tr>
     </thead>
@@ -52,15 +52,15 @@
             <td>@(d.Elasticity != null ? d.Elasticity.Name : (d.ElasticityId != Guid.Empty ? d.ElasticityId.ToString() : ""))</td>
             <td>@(d.OriginCountry != null ? d.OriginCountry.Name : (d.OriginCountryId != Guid.Empty ? d.OriginCountryId.ToString() : ""))</td>
             <td>
-                @if(!string.IsNullOrWhiteSpace(d.Sections)) { <div><strong>S? l�ng:</strong> @d.Sections</div> }
-                @if(!string.IsNullOrWhiteSpace(d.CollapsedLength)) { <div><strong>Chi?u d�i g?p:</strong> @d.CollapsedLength</div> }
-                @if(!string.IsNullOrWhiteSpace(d.Weight)) { <div><strong>Tr?ng l??ng:</strong> @d.Weight</div> }
+                @if(!string.IsNullOrWhiteSpace(d.Sections)) { <div><strong>Sóo lượng:</strong> @d.Sections</div> }
+                @if(!string.IsNullOrWhiteSpace(d.CollapsedLength)) { <div><strong>Chiều dài thu cần:</strong> @d.CollapsedLength</div> }
+                @if(!string.IsNullOrWhiteSpace(d.Weight)) { <div><strong>Trọng lượng:</strong> @d.Weight</div> }
             </td>
-            <td>@(d.IsActive ? "C�" : "Kh�ng")</td>
+            <td>@(d.IsActive ? "Có" : "Không")</td>
             <td>
-                <a asp-action="EditDetail" asp-route-id="@d.Id">S?a</a> |
+                <a asp-action="EditDetail" asp-route-id="@d.Id">Sửa</a> |
                 <form asp-action="DeleteDetail" asp-route-id="@d.Id" method="post" class="d-inline">
-                    <button type="submit" class="btn btn-link p-0">X�a</button>
+                    <button type="submit" class="btn btn-link p-0">Xóa</button>
                 </form>
             </td>
         </tr>
