@@ -44,22 +44,39 @@ namespace NT.WEB.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Voucher voucher)
         {
-            // Server-side validation: ExpiryDate must be in the future
-            if (voucher.ExpiryDate.HasValue)
+            // Validate StartDate và EndDate
+            if (voucher.StartDate.HasValue)
             {
-                var expiryUtc = DateTime.SpecifyKind(voucher.ExpiryDate.Value, DateTimeKind.Utc);
-                if (expiryUtc <= DateTime.UtcNow)
+                voucher.StartDate = DateTime.SpecifyKind(voucher.StartDate.Value, DateTimeKind.Utc);
+            }
+
+            if (voucher.EndDate.HasValue)
+            {
+                var endDateUtc = DateTime.SpecifyKind(voucher.EndDate.Value, DateTimeKind.Utc);
+                if (endDateUtc <= DateTime.UtcNow)
                 {
-                    ModelState.AddModelError(nameof(voucher.ExpiryDate), "Hạn sử dụng phải là thời gian trong tương lai");
+                    ModelState.AddModelError(nameof(voucher.EndDate), "Ngày kết thúc phải là thời gian trong tương lai");
                 }
                 else
                 {
-                    voucher.ExpiryDate = expiryUtc; // normalize to UTC
+                    voucher.EndDate = endDateUtc;
                 }
+            }
+
+            if (voucher.StartDate.HasValue && voucher.EndDate.HasValue && voucher.StartDate.Value >= voucher.EndDate.Value)
+            {
+                ModelState.AddModelError(nameof(voucher.StartDate), "Ngày bắt đầu phải trước ngày kết thúc");
+            }
+
+            // Validate DiscountPercentage
+            if (voucher.DiscountPercentage.HasValue && (voucher.DiscountPercentage.Value < 0 || voucher.DiscountPercentage.Value > 100))
+            {
+                ModelState.AddModelError(nameof(voucher.DiscountPercentage), "Phần trăm giảm giá phải từ 0 đến 100");
             }
 
             if (!ModelState.IsValid) return View(voucher);
 
+            voucher.UsageCount = 0;
             await _service.AddAsync(voucher);
             return RedirectToAction(nameof(Index));
         }
@@ -82,18 +99,26 @@ namespace NT.WEB.Controllers
         {
             if (id == Guid.Empty || voucher is null || id != voucher.Id) return BadRequest();
 
-            // Server-side validation: ExpiryDate must be in the future
-            if (voucher.ExpiryDate.HasValue)
+            // Validate StartDate và EndDate
+            if (voucher.StartDate.HasValue)
             {
-                var expiryUtc = DateTime.SpecifyKind(voucher.ExpiryDate.Value, DateTimeKind.Utc);
-                if (expiryUtc <= DateTime.UtcNow)
-                {
-                    ModelState.AddModelError(nameof(voucher.ExpiryDate), "Hạn sử dụng phải là thời gian trong tương lai");
-                }
-                else
-                {
-                    voucher.ExpiryDate = expiryUtc; // normalize to UTC
-                }
+                voucher.StartDate = DateTime.SpecifyKind(voucher.StartDate.Value, DateTimeKind.Utc);
+            }
+
+            if (voucher.EndDate.HasValue)
+            {
+                voucher.EndDate = DateTime.SpecifyKind(voucher.EndDate.Value, DateTimeKind.Utc);
+            }
+
+            if (voucher.StartDate.HasValue && voucher.EndDate.HasValue && voucher.StartDate.Value >= voucher.EndDate.Value)
+            {
+                ModelState.AddModelError(nameof(voucher.StartDate), "Ngày bắt đầu phải trước ngày kết thúc");
+            }
+
+            // Validate DiscountPercentage
+            if (voucher.DiscountPercentage.HasValue && (voucher.DiscountPercentage.Value < 0 || voucher.DiscountPercentage.Value > 100))
+            {
+                ModelState.AddModelError(nameof(voucher.DiscountPercentage), "Phần trăm giảm giá phải từ 0 đến 100");
             }
 
             if (!ModelState.IsValid) return View(voucher);
@@ -104,8 +129,7 @@ namespace NT.WEB.Controllers
             }
             catch (Exception)
             {
-                // Optionally log exception
-                ModelState.AddModelError(string.Empty, "không thể lưu, hãy thử lại");
+                ModelState.AddModelError(string.Empty, "Không thể lưu, hãy thử lại");
                 return View(voucher);
             }
 

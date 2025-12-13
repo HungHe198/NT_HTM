@@ -94,20 +94,12 @@ namespace NT.WEB.Controllers
                 // re-validate voucher with current subtotal
                 var found = await _voucherRepository.FindAsync(v => v.Code == appliedCode);
                 var voucher = found?.FirstOrDefault();
-                if (voucher != null && (!voucher.ExpiryDate.HasValue || voucher.ExpiryDate.Value >= DateTime.UtcNow))
+                if (voucher != null && voucher.IsValid())
                 {
-                    if (!voucher.MinOrderAmount.HasValue || subtotal >= voucher.MinOrderAmount.Value)
+                    appliedDiscount = voucher.CalculateDiscount(subtotal);
+                    if (appliedDiscount == 0 && voucher.MinOrderAmount.HasValue && subtotal < voucher.MinOrderAmount.Value)
                     {
-                        appliedDiscount = voucher.DiscountAmount.GetValueOrDefault(0m);
-                        if (voucher.MaxDiscountAmount.HasValue)
-                            appliedDiscount = Math.Min(appliedDiscount, voucher.MaxDiscountAmount.Value);
-                        appliedDiscount = Math.Min(appliedDiscount, subtotal);
-                    }
-                    else
-                    {
-                        // below minimum, ignore discount and show message
                         TempData["Error"] = $"Giá trị đơn hàng tối thiểu để áp dụng voucher là {voucher.MinOrderAmount.Value:#,##0}";
-                        appliedDiscount = 0m;
                     }
                 }
                 else
@@ -205,18 +197,24 @@ namespace NT.WEB.Controllers
                 return Redirect($"/CartDetail?cartId={cart?.Id}");
             }
 
-            if (voucher.ExpiryDate.HasValue && voucher.ExpiryDate.Value < DateTime.UtcNow)
+            if (!voucher.IsValid())
             {
-                TempData["Error"] = "Voucher đã hết hạn";
-                HttpContext.Session.Remove(SessionVoucherKey);
-                HttpContext.Session.Remove(SessionVoucherDiscountKey);
-                var cart = await GetOrCreateCustomerCartAsync();
-                return Redirect($"/CartDetail?cartId={cart?.Id}");
-            }
-
-            if (voucher.MaxUsage.HasValue && voucher.UsageCount.HasValue && voucher.UsageCount.Value >= voucher.MaxUsage.Value)
-            {
-                TempData["Error"] = "Voucher đã sử dụng hết";
+                if (voucher.EndDate.HasValue && voucher.EndDate.Value < DateTime.UtcNow)
+                {
+                    TempData["Error"] = "Voucher đã hết hạn";
+                }
+                else if (voucher.StartDate.HasValue && voucher.StartDate.Value > DateTime.UtcNow)
+                {
+                    TempData["Error"] = "Voucher chưa bắt đầu";
+                }
+                else if (voucher.MaxUsage.HasValue && voucher.UsageCount >= voucher.MaxUsage.Value)
+                {
+                    TempData["Error"] = "Voucher đã sử dụng hết";
+                }
+                else
+                {
+                    TempData["Error"] = "Voucher không hợp lệ";
+                }
                 HttpContext.Session.Remove(SessionVoucherKey);
                 HttpContext.Session.Remove(SessionVoucherDiscountKey);
                 var cart = await GetOrCreateCustomerCartAsync();
@@ -232,14 +230,7 @@ namespace NT.WEB.Controllers
                 return Redirect($"/CartDetail?cartId={cart?.Id}");
             }
 
-            var discount = voucher.DiscountAmount.GetValueOrDefault(0m);
-            if (voucher.MaxDiscountAmount.HasValue)
-            {
-                discount = Math.Min(discount, voucher.MaxDiscountAmount.Value);
-            }
-
-            // Prevent discount exceeding subtotal
-            discount = Math.Min(discount, subtotal);
+            var discount = voucher.CalculateDiscount(subtotal);
 
             HttpContext.Session.SetString(SessionVoucherKey, voucher.Code);
             HttpContext.Session.SetString(SessionVoucherDiscountKey, discount.ToString());

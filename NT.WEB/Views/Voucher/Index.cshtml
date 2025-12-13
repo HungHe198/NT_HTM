@@ -1,43 +1,57 @@
 @model IEnumerable<NT.SHARED.Models.Voucher>
 
 @{
-    ViewData["Title"] = "Vouchers";
+    ViewData["Title"] = "Qu?n lý Voucher";
 }
 
-<h1>Vouchers</h1>
+<h1>Qu?n lý Voucher</h1>
 
 <p>
-    <a asp-action="Create" class="btn btn-primary">Create New</a>
+    <a asp-action="Create" class="btn btn-primary">T?o m?i</a>
 </p>
 
 <table class="table table-striped">
     <thead>
         <tr>
             <th>@Html.DisplayNameFor((NT.SHARED.Models.Voucher m) => m.Code)</th>
-            <th>@Html.DisplayNameFor((NT.SHARED.Models.Voucher m) => m.DiscountAmount)</th>
+            <th>@Html.DisplayNameFor((NT.SHARED.Models.Voucher m) => m.DiscountPercentage)</th>
             <th>@Html.DisplayNameFor((NT.SHARED.Models.Voucher m) => m.MaxDiscountAmount)</th>
             <th>@Html.DisplayNameFor((NT.SHARED.Models.Voucher m) => m.MinOrderAmount)</th>
-            <th>@Html.DisplayNameFor((NT.SHARED.Models.Voucher m) => m.ExpiryDate)</th>
+            <th>@Html.DisplayNameFor((NT.SHARED.Models.Voucher m) => m.StartDate)</th>
+            <th>@Html.DisplayNameFor((NT.SHARED.Models.Voucher m) => m.EndDate)</th>
             <th>@Html.DisplayNameFor((NT.SHARED.Models.Voucher m) => m.UsageCount)</th>
             <th>@Html.DisplayNameFor((NT.SHARED.Models.Voucher m) => m.MaxUsage)</th>
+            <th>Tr?ng thái</th>
             <th></th>
         </tr>
     </thead>
     <tbody>
     @foreach (var item in Model ?? Enumerable.Empty<NT.SHARED.Models.Voucher>())
     {
-        <tr>
+        var isValid = item.IsValid();
+        <tr class="@(isValid ? "" : "table-secondary")">
             <td>@item.Code</td>
-            <td>@(item.DiscountAmount?.ToString("N2") ?? "-")</td>
-            <td>@(item.MaxDiscountAmount?.ToString("N2") ?? "-")</td>
-            <td>@(item.MinOrderAmount?.ToString("N2") ?? "-")</td>
-            <td>@(item.ExpiryDate?.ToString("yyyy-MM-dd HH:mm") ?? "-")</td>
-            <td>@(item.UsageCount?.ToString() ?? "-")</td>
-            <td>@(item.MaxUsage?.ToString() ?? "-")</td>
+            <td>@(item.DiscountPercentage?.ToString("N0") ?? "-")%</td>
+            <td>@(item.MaxDiscountAmount?.ToString("N0") ?? "-") ?</td>
+            <td>@(item.MinOrderAmount?.ToString("N0") ?? "-") ?</td>
+            <td>@(item.StartDate?.ToString("dd/MM/yyyy HH:mm") ?? "-")</td>
+            <td>@(item.EndDate?.ToString("dd/MM/yyyy HH:mm") ?? "-")</td>
+            <td>@item.UsageCount</td>
+            <td>@(item.MaxUsage?.ToString() ?? "Không gi?i h?n")</td>
             <td>
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                @if (isValid)
+                {
+                    <span class="badge bg-success">Còn hi?u l?c</span>
+                }
+                else
+                {
+                    <span class="badge bg-secondary">H?t hi?u l?c</span>
+                }
+            </td>
+            <td>
+                <a asp-action="Details" asp-route-id="@item.Id">Chi ti?t</a> |
+                <a asp-action="Edit" asp-route-id="@item.Id">S?a</a> |
+                <a asp-action="Delete" asp-route-id="@item.Id">Xóa</a>
             </td>
         </tr>
     }
