@@ -1,6 +1,6 @@
 @model NT.SHARED.Models.CartDetail
 
-<h2>Create CartDetail</h2>
+<h2>Giỏ hàng của bạn</h2>
 <form asp-action="Create" method="post">
     <div class="form-group">
         <label asp-for="CartId"></label>
@@ -14,6 +14,6 @@
         <label asp-for="Quantity"></label>
         <input asp-for="Quantity" class="form-control" />
     </div>
-    <button type="submit" class="btn btn-primary">Save</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+    <button type="submit" class="btn btn-primary">Lưu</button>
+    <a asp-action="Index" class="btn btn-secondary">Hủy</a>
 </form>

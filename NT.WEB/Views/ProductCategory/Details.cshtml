@@ -1,14 +1,14 @@
 @model NT.SHARED.Models.ProductCategory
 
-<h2>Chi ti?t danh m?c s?n ph?m</h2>
+<h2>Chi tiết danh mục sản phẩm</h2>
 <dl class="row">
-    <dt class="col-sm-2">M� s?n ph?m</dt>
+    <dt class="col-sm-2">Mã sản phẩm</dt>
     <dd class="col-sm-10">@Model.ProductId</dd>
-    <dt class="col-sm-2">M� danh m?c</dt>
+    <dt class="col-sm-2">Mã danh mục</dt>
     <dd class="col-sm-10">@Model.CategoryId</dd>
 </dl>
 <p>
-    <a asp-action="Edit" asp-route-productId="@Model.ProductId" asp-route-categoryId="@Model.CategoryId" class="btn btn-primary">S?a</a> |
-    <a asp-action="Index" class="btn btn-secondary">Quay l?i danh s�ch</a>
+    <a asp-action="Edit" asp-route-productId="@Model.ProductId" asp-route-categoryId="@Model.CategoryId" class="btn btn-primary">Sửa</a> |
+    <a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>
 </p>
 

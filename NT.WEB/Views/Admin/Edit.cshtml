@@ -1,20 +1,20 @@
 @model NT.SHARED.Models.Admin
 
-<h2>Ch?nh s?a qu?n tr? vi�n</h2>
+<h2>Chỉnh sửa quản trị viên</h2>
 <form asp-action="Edit" method="post">
     <input type="hidden" asp-for="Id" />
     <div class="form-group">
-        <label asp-for="UserId">M� ng??i d�ng</label>
+        <label asp-for="UserId">Mã người dùng</label>
         <input asp-for="UserId" class="form-control" />
     </div>
     <div class="form-group">
-        <label asp-for="Position">Ch?c v?</label>
+        <label asp-for="Position">Chức vụ</label>
         <input asp-for="Position" class="form-control" />
     </div>
     <div class="form-group">
-        <label asp-for="Salary">L??ng</label>
+        <label asp-for="Salary">Lương</label>
         <input asp-for="Salary" class="form-control" />
     </div>
-    <button type="submit" class="btn btn-primary">L?u</button>
-    <a asp-action="Index" class="btn btn-secondary">H?y</a>
+    <button type="submit" class="btn btn-primary">Lưu</button>
+    <a asp-action="Index" class="btn btn-secondary">Hủy</a>
 </form>

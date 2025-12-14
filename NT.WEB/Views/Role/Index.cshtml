@@ -1,11 +1,11 @@
 @model IEnumerable<NT.SHARED.Models.Role>
 
-<h2>Qu?n l� vai tr�</h2>
-<p><a asp-action="Create" class="btn btn-primary">T?o m?i</a></p>
+<h2>Quản lý vai trò</h2>
+<p><a asp-action="Create" class="btn btn-primary">Tạo mới</a></p>
 <table class="table">
     <thead>
         <tr>
-            <th>T�n vai tr�</th>
+            <th>Tên vai trò</th>
             <th></th>
         </tr>
     </thead>
@@ -15,9 +15,9 @@
         <tr>
             <td>@item.Name</td>
             <td>
-                <a asp-action="Details" asp-route-id="@item.Id">Chi ti?t</a> |
-                <a asp-action="Edit" asp-route-id="@item.Id">S?a</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">X�a</a>
+                <a asp-action="Details" asp-route-id="@item.Id">Chi tiết</a> |
+                <a asp-action="Edit" asp-route-id="@item.Id">Sửa</a> |
+                <a asp-action="Delete" asp-route-id="@item.Id">Xóa</a>
             </td>
         </tr>
     }

@@ -1,25 +1,25 @@
 @model NT.SHARED.Models.Hardness
 
 @{
-    ViewBag.Title = "T?o ?? c?ng m?i";
+    ViewBag.Title = "Tạo độ cứng mới";
 }
 
-<h1>T?o ?? c?ng m?i</h1>
+<h1>Tạo độ cứng mới</h1>
 
 <form asp-action="Create" method="post">
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
     <div class="form-group">
-        <label asp-for="Name">T�n</label>
+        <label asp-for="Name">Tên</label>
         <input asp-for="Name" class="form-control" />
         <span asp-validation-for="Name" class="text-danger"></span>
     </div>
 
     <div class="form-group">
-        <label asp-for="Description">M� t?</label>
+        <label asp-for="Description">Mô tả</label>
         <textarea asp-for="Description" class="form-control"></textarea>
     </div>
 
-    <button class="btn btn-primary" type="submit">L?u</button>
-    <a asp-action="Index" class="btn btn-secondary">H?y</a>
+    <button class="btn btn-primary" type="submit">Lưu</button>
+    <a asp-action="Index" class="btn btn-secondary">Hủy</a>
 </form>

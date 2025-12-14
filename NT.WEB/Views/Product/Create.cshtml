@@ -1,43 +1,43 @@
 @model NT.SHARED.Models.Product
 
 @{
-    ViewBag.Title = "T?o s?n ph?m m?i";
+    ViewBag.Title = "Tạo sản phẩm mới";
 }
 
-<h1>T?o s?n ph?m m?i</h1>
+<h1>Tạo sản phẩm mới</h1>
 
 <form asp-action="Create" method="post">
     @Html.AntiForgeryToken()
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
     <div class="form-group">
-        <label asp-for="BrandId">Th??ng hi?u</label>
+        <label asp-for="BrandId">Thương hiệu</label>
         <select asp-for="BrandId" class="form-control" asp-items="ViewBag.BrandSelectList">
-            <option value="">-- Ch?n th??ng hi?u --</option>
+            <option value="">-- Chọn thương hiệu --</option>
         </select>
         <span asp-validation-for="BrandId" class="text-danger"></span>
     </div>
     <div class="form-group">
-        <label asp-for="ProductCode">M� s?n ph?m</label>
+        <label asp-for="ProductCode">Mã sản phẩm</label>
         <input asp-for="ProductCode" class="form-control" />
         <span asp-validation-for="ProductCode" class="text-danger"></span>
     </div>
     <div class="form-group">
-        <label asp-for="Name">T�n s?n ph?m</label>
+        <label asp-for="Name">Tên sản phẩm</label>
         <input asp-for="Name" class="form-control" />
         <span asp-validation-for="Name" class="text-danger"></span>
     </div>
     <div class="form-group">
-        <label asp-for="ShortDescription">M� t? ng?n</label>
+        <label asp-for="ShortDescription">Mô tả ngắn</label>
         <textarea asp-for="ShortDescription" class="form-control"></textarea>
         <span asp-validation-for="ShortDescription" class="text-danger"></span>
     </div>
     <div class="form-group">
-        <label asp-for="Description">M� t? chi ti?t</label>
+        <label asp-for="Description">Mô tả chi tiết</label>
         <textarea asp-for="Description" class="form-control"></textarea>
         <span asp-validation-for="Description" class="text-danger"></span>
     </div>
     <div class="form-group">
-        <label asp-for="Thumbnail">?nh ??i di?n</label>
+        <label asp-for="Thumbnail">Ảnh đại diện</label>
         <div class="mb-2">
             <input type="file" id="thumbnail-file" accept="image/*" class="form-control" />
         </div>
@@ -45,7 +45,7 @@
         <span asp-validation-for="Thumbnail" class="text-danger"></span>
     </div>
     <div class="form-group">
-        <label asp-for="Status">Tr?ng th�i</label>
+        <label asp-for="Status">Trạng thái</label>
         <input asp-for="Status" class="form-control" />
         <span asp-validation-for="Status" class="text-danger"></span>
     </div>
@@ -89,6 +89,6 @@
             </div>
         </div>
     </fieldset> *@
-    <button type="submit" class="btn btn-primary">L?u</button>
-    <a asp-action="Index" class="btn btn-secondary">H?y</a>
+    <button type="submit" class="btn btn-primary">Lưu</button>
+    <a asp-action="Index" class="btn btn-secondary">Hủy</a>
 </form>

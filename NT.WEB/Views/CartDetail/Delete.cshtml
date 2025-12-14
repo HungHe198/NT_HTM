@@ -1,6 +1,6 @@
 @model NT.SHARED.Models.CartDetail
 
-<h2>Delete CartDetail</h2>
+<h2>Xóa khỏi giỏ</h2>
 <div>
     <h4>Are you sure?</h4>
     <dl class="row">
@@ -12,7 +12,7 @@
     <form asp-action="Delete" method="post">
         <input type="hidden" name="cartId" value="@Model.CartId" />
         <input type="hidden" name="productDetailId" value="@Model.ProductDetailId" />
-        <button type="submit" class="btn btn-danger">Delete</button>
-        <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+        <button type="submit" class="btn btn-danger">Xác nhận xóa</button>
+        <a asp-action="Index" class="btn btn-secondary">Hủy</a>
     </form>
 </div>

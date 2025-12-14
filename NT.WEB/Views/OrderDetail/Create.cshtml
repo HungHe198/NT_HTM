@@ -1,24 +1,24 @@
 @model NT.SHARED.Models.OrderDetail
 
-<h2>T?o chi ti?t ??n h�ng</h2>
+<h2>Tạo chi tiết đơn hàng</h2>
 <form asp-action="Create" method="post">
     <div class="form-group">
-        <label asp-for="OrderId">M� ??n h�ng</label>
+        <label asp-for="OrderId">Mã đơn hàng</label>
         <input asp-for="OrderId" class="form-control" />
     </div>
     <div class="form-group">
-        <label asp-for="ProductDetailId">M� bi?n th? SP</label>
+        <label asp-for="ProductDetailId">Mã biến thể SP</label>
         <input asp-for="ProductDetailId" class="form-control" />
     </div>
     <div class="form-group">
-        <label asp-for="Quantity">S? l??ng</label>
+        <label asp-for="Quantity">Số lượng</label>
         <input asp-for="Quantity" class="form-control" />
     </div>
     <div class="form-group">
-        <label asp-for="UnitPrice">??n gi�</label>
+        <label asp-for="UnitPrice">Đơn giá</label>
         <input asp-for="UnitPrice" class="form-control" />
     </div>
-    <button type="submit" class="btn btn-primary">L?u</button>
-    <a asp-action="Index" class="btn btn-secondary">H?y</a>
+    <button type="submit" class="btn btn-primary">Lưu</button>
+    <a asp-action="Index" class="btn btn-secondary">Hủy</a>
 </form>
 

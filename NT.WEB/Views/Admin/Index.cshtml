@@ -1,13 +1,13 @@
 @model IEnumerable<NT.SHARED.Models.Admin>
 
-<h2>Qu?n tr? vi�n</h2>
-<p><a asp-action="Create" class="btn btn-primary">T?o m?i</a></p>
+<h2>Quản trị viên</h2>
+<p><a asp-action="Create" class="btn btn-primary">Tạo mới</a></p>
 <table class="table">
     <thead>
         <tr>
-            <th>M� ng??i d�ng</th>
-            <th>Ch?c v?</th>
-            <th>L??ng</th>
+            <th>Mã người dùng</th>
+            <th>Chức vụ</th>
+            <th>Lương</th>
             <th></th>
         </tr>
     </thead>
@@ -19,9 +19,9 @@
             <td>@item.Position</td>
             <td>@item.Salary?.ToString("N0")</td>
             <td>
-                <a asp-action="Details" asp-route-id="@item.Id">Chi ti?t</a> |
-                <a asp-action="Edit" asp-route-id="@item.Id">S?a</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">X�a</a>
+                <a asp-action="Details" asp-route-id="@item.Id">Chi tiết</a> |
+                <a asp-action="Edit" asp-route-id="@item.Id">Sửa</a> |
+                <a asp-action="Delete" asp-route-id="@item.Id">Xóa</a>
             </td>
         </tr>
     }

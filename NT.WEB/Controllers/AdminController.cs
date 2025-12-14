@@ -12,17 +12,20 @@ namespace NT.WEB.Controllers
         private readonly NT.BLL.Interfaces.IGenericRepository<Order> _orderRepo;
         private readonly NT.BLL.Interfaces.IGenericRepository<OrderDetail> _orderDetailRepo;
         private readonly NT.BLL.Interfaces.IGenericRepository<ProductDetail> _productDetailRepo;
+        private readonly NT.BLL.Interfaces.IGenericRepository<User> _userRepo;
 
         public AdminController(
             AdminWebService service,
             NT.BLL.Interfaces.IGenericRepository<Order> orderRepo,
             NT.BLL.Interfaces.IGenericRepository<OrderDetail> orderDetailRepo,
-            NT.BLL.Interfaces.IGenericRepository<ProductDetail> productDetailRepo)
+            NT.BLL.Interfaces.IGenericRepository<ProductDetail> productDetailRepo,
+            NT.BLL.Interfaces.IGenericRepository<User> userRepo)
         {
             _service = service;
             _orderRepo = orderRepo;
             _orderDetailRepo = orderDetailRepo;
             _productDetailRepo = productDetailRepo;
+            _userRepo = userRepo;
         }
 
         public async Task<IActionResult> Index()
@@ -78,13 +81,23 @@ namespace NT.WEB.Controllers
             return View(item);
         }
 
-        public IActionResult Create() => View();
+        public async Task<IActionResult> Create()
+        {
+            var users = await _userRepo.GetAllAsync();
+            ViewBag.Users = users;
+            return View();
+        }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Admin model)
         {
-            if (!ModelState.IsValid) return View(model);
+            if (!ModelState.IsValid)
+            {
+                var users = await _userRepo.GetAllAsync();
+                ViewBag.Users = users;
+                return View(model);
+            }
             await _service.AddAsync(model);
             await _service.SaveChangesAsync();
             return RedirectToAction(nameof(Index));

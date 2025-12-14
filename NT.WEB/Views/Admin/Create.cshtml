@@ -1,10 +1,19 @@
 @model NT.SHARED.Models.Admin
+@{
+    var users = ViewBag.Users as IEnumerable<NT.SHARED.Models.User> ?? Enumerable.Empty<NT.SHARED.Models.User>();
+}
 
 <h2>T?o qu?n tr? viên</h2>
 <form asp-action="Create" method="post">
     <div class="form-group">
-        <label asp-for="UserId">Mã ng??i dùng</label>
-        <input asp-for="UserId" class="form-control" />
+        <label asp-for="UserId">Tên ??ng nh?p</label>
+        <select asp-for="UserId" class="form-control">
+            <option value="">-- Ch?n tài kho?n --</option>
+            @foreach (var user in users)
+            {
+                <option value="@user.Id">@user.Username - @user.Fullname</option>
+            }
+        </select>
     </div>
     <div class="form-group">
         <label asp-for="Position">Ch?c v?</label>

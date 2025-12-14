@@ -1,12 +1,12 @@
 @model NT.SHARED.Models.Product
 
 @{
-    ViewBag.Title = "X�a s?n ph?m";
+    ViewBag.Title = "Xóa sản phẩm";
 }
 
-<h1>X�a s?n ph?m</h1>
+<h1>Xóa sản phẩm</h1>
 
-<h3 class="text-danger">B?n c� ch?c ch?n mu?n x�a s?n ph?m n�y?</h3>
+<h3 class="text-danger">Bạn có chắc chắn muốn xóa sản phẩm này?</h3>
 
 <div>
     <h4>@Model.Name</h4>
@@ -15,6 +15,6 @@
 
 <form asp-action="Delete" method="post">
     <input type="hidden" asp-for="Id" />
-    <button type="submit" class="btn btn-danger">X�a</button>
-    <a asp-action="Index" class="btn btn-secondary">H?y</a>
+    <button type="submit" class="btn btn-danger">Xóa</button>
+    <a asp-action="Index" class="btn btn-secondary">Hủy</a>
 </form>

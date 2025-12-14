@@ -1,15 +1,15 @@
 @model NT.SHARED.Models.Cart
 
-<h2>XÛa gi? h‡ng</h2>
+<h2>X√≥a gi·ªè h√†ng</h2>
 <div>
-    <h4>B?n cÛ ch?c ch?n mu?n xÛa?</h4>
+    <h4>B·∫°n c√≥ ch·∫Øc ch·∫Øn mu·ªën x√≥a?</h4>
     <dl class="row">
-        <dt class="col-sm-2">M„ kh·ch h‡ng</dt>
+        <dt class="col-sm-2">M√£ kh√°ch h√†ng</dt>
         <dd class="col-sm-10">@Model.CustomerId</dd>
     </dl>
     <form asp-action="Delete" method="post">
         <input type="hidden" asp-for="Id" />
-        <button type="submit" class="btn btn-danger">XÛa</button>
-        <a asp-action="Index" class="btn btn-secondary">H?y</a>
+        <button type="submit" class="btn btn-danger">X√≥a</button>
+        <a asp-action="Index" class="btn btn-secondary">H·ªßy</a>
     </form>
 </div>

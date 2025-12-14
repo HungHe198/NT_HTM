@@ -1,22 +1,22 @@
 @model NT.SHARED.Models.Brand
 
 @{
-    ViewBag.Title = "Chi ti?t nh� s?n xu?t";
+    ViewBag.Title = "Chi tiết nhà sản xuất";
 }
 
-<h1>Chi ti?t nh� s?n xu?t</h1>
+<h1>Chi tiết nhà sản xuất</h1>
 
 <div>
     <h4>@Model.Name</h4>
     <dl class="row">
         <dt class="col-sm-2">Website</dt>
         <dd class="col-sm-10">@Model.Website</dd>
-        <dt class="col-sm-2">M�</dt>
+        <dt class="col-sm-2">Mã</dt>
         <dd class="col-sm-10">@Model.Id</dd>
     </dl>
 </div>
 
 <p>
-    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">S?a</a>
-    <a asp-action="Index" class="btn btn-secondary">Quay l?i danh s�ch</a>
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Sửa</a>
+    <a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>
 </p>

@@ -1,14 +1,14 @@
 @model IEnumerable<NT.SHARED.Models.Employee>
 
-<h2>Danh s�ch nh�n vi�n</h2>
-<p><a asp-action="Create" class="btn btn-primary">Th�m m?i</a></p>
+<h2>Danh sách nhân viên</h2>
+<p><a asp-action="Create" class="btn btn-primary">Thêm mới</a></p>
 <table class="table">
     <thead>
         <tr>
-            <th>M� ng??i d�ng</th>
-            <th>Ch?c v?</th>
-            <th>L??ng</th>
-            <th>Thao t�c</th>
+            <th>Mã người dùng</th>
+            <th>Chức vụ</th>
+            <th>Lương</th>
+            <th>Thao tác</th>
         </tr>
     </thead>
     <tbody>
@@ -19,9 +19,9 @@
             <td>@item.Position</td>
             <td>@item.Salary</td>
             <td>
-                <a asp-action="Details" asp-route-id="@item.Id">Chi ti?t</a> |
-                <a asp-action="Edit" asp-route-id="@item.Id">S?a</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">X�a</a>
+                <a asp-action="Details" asp-route-id="@item.Id">Chi tiết</a> |
+                <a asp-action="Edit" asp-route-id="@item.Id">Sửa</a> |
+                <a asp-action="Delete" asp-route-id="@item.Id">Xóa</a>
             </td>
         </tr>
     }

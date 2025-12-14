@@ -4,7 +4,7 @@
     var cartId = ViewData["CartId"] as Guid?;
 }
 <div class="dropdown me-3">
-    <a class="text-muted position-relative" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="Gi? h�ng">
+    <a class="text-muted position-relative" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="Giỏ hàng">
         <i class="fa fa-shopping-cart"></i>
         @if (count > 0)
         {
@@ -12,7 +12,7 @@
         }
     </a>
     <ul class="dropdown-menu dropdown-menu-end p-0" style="min-width: 360px;">
-        <li class="p-2 border-bottom fw-semibold">Gi? h�ng c?a b?n</li>
+        <li class="p-2 border-bottom fw-semibold">Giỏ hàng</li>
         @if (Model != null && Model.Any())
         {
             foreach (var ci in Model)
@@ -21,7 +21,7 @@
                 <li class="p-2 d-flex align-items-center gap-2 border-bottom">
                     <img src="@(pd?.Product?.Thumbnail ?? "/images/product-placeholder.png")" style="width:48px;height:48px;object-fit:cover;border-radius:4px" alt="thumb" />
                     <div class="flex-grow-1 small">
-                        <div class="fw-semibold">@(pd?.Product?.Name ?? "S?n ph?m")</div>
+                        <div class="fw-semibold">@(pd?.Product?.Name ?? "Sản phẩm")</div>
                         <div class="text-muted">SL: @ci.Quantity</div>
                     </div>
                     <div class="small text-end" style="min-width:80px">
@@ -30,12 +30,12 @@
                 </li>
             }
             <li class="p-2 text-end">
-                <a class="btn btn-sm btn-primary" asp-controller="CartDetail" asp-action="Index" asp-route-cartId="@cartId">Xem gi? h�ng</a>
+                <a class="btn btn-sm btn-primary" asp-controller="CartDetail" asp-action="Index" asp-route-cartId="@cartId">Xem giỏ hàng</a>
             </li>
         }
         else
         {
-            <li><div class="px-3 py-2 small text-muted">Gi? h�ng tr?ng</div></li>
+            <li><div class="px-3 py-2 small text-muted">Giỏ hàng trống</div></li>
         }
     </ul>
 </div>

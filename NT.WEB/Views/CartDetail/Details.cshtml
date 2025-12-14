@@ -1,6 +1,6 @@
 @model NT.SHARED.Models.CartDetail
 
-<h2>CartDetail Details</h2>
+<h2>Giỏ hàng của bạn</h2>
 <dl class="row">
     <dt class="col-sm-2">CartId</dt>
     <dd class="col-sm-10">@Model.CartId</dd>
@@ -10,6 +10,6 @@
     <dd class="col-sm-10">@Model.Quantity</dd>
 </dl>
 <p>
-    <a asp-action="Edit" asp-route-cartId="@Model.CartId" asp-route-productDetailId="@Model.ProductDetailId">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Edit" asp-route-cartId="@Model.CartId" asp-route-productDetailId="@Model.ProductDetailId">Sửa</a> |
+    <a asp-action="Index">Quay lại danh sách</a>
 </p>
