@@ -1,19 +1,19 @@
 ﻿@model IEnumerable<NT.SHARED.Models.User>
 @{
-    ViewBag.Title = "Users";
+    ViewBag.Title = "Danh sách người dùng";
 }
 
 <h1>Danh sách người dùng</h1>
 <p>
-    <a asp-action="Create" class="btn btn-primary">Đăng ký mới</a>
+    <a asp-action="Create" class="btn btn-primary">Tạo tài khoản đăng nhập mới</a>
 </p>
 <table class="table table-striped">
     <thead>
         <tr>
-            <th>Username</th>
-            <th>Fullname</th>
+            <th>Tên đăng nhập</th>
+            <th>Họ và tên</th>
             <th>Email</th>
-            <th>Role</th>
+            <th>Vai trò</th>
             <th></th>
         </tr>
     </thead>

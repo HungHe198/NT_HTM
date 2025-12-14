@@ -1,15 +1,15 @@
 @model IEnumerable<NT.SHARED.Models.Color>
 
 @{
-    ViewBag.Title = "M�u s?c";
+    ViewBag.Title = "Màu sắc";
 }
 
-<h1>M�u s?c</h1>
+<h1>Màu sắc</h1>
 
-<p><a asp-action="Create" class="btn btn-primary">T?o m?i</a></p>
+<p><a asp-action="Create" class="btn btn-primary">Tạo mới</a></p>
 
 <table class="table">
-    <thead><tr><th>T�n</th><th>M� m�u</th><th></th></tr></thead>
+    <thead><tr><th>Tên</th><th>Mã màu</th><th></th></tr></thead>
     <tbody>
     @foreach(var c in Model)
     {
@@ -17,9 +17,9 @@
             <td>@c.Name</td>
             <td>@c.HexCode</td>
             <td>
-                <a asp-action="Details" asp-route-id="@c.Id">Chi ti?t</a> |
-                <a asp-action="Edit" asp-route-id="@c.Id">S?a</a> |
-                <a asp-action="Delete" asp-route-id="@c.Id">X�a</a>
+                <a asp-action="Details" asp-route-id="@c.Id">Chi tiết</a> |
+                <a asp-action="Edit" asp-route-id="@c.Id">Sửa</a> |
+                <a asp-action="Delete" asp-route-id="@c.Id">Xóa</a>
             </td>
         </tr>
     }

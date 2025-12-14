@@ -1,12 +1,12 @@
 @model IEnumerable<NT.SHARED.Models.ProductCategory>
 
-<h2>Danh m?c s?n ph?m</h2>
-<p><a asp-action="Create" class="btn btn-primary">T?o m?i</a></p>
+<h2>Danh mục sản phẩm</h2>
+<p><a asp-action="Create" class="btn btn-primary">Tạo mới</a></p>
 <table class="table">
     <thead>
         <tr>
-            <th>S?n ph?m</th>
-            <th>Danh m?c</th>
+            <th>Sản phẩm</th>
+            <th>Danh mục</th>
             <th></th>
         </tr>
     </thead>
@@ -17,9 +17,9 @@
             <td>@item.ProductId</td>
             <td>@item.CategoryId</td>
             <td>
-                <a asp-action="Details" asp-route-productId="@item.ProductId" asp-route-categoryId="@item.CategoryId">Chi ti?t</a> |
-                <a asp-action="Edit" asp-route-productId="@item.ProductId" asp-route-categoryId="@item.CategoryId">S?a</a> |
-                <a asp-action="Delete" asp-route-productId="@item.ProductId" asp-route-categoryId="@item.CategoryId">X�a</a>
+                <a asp-action="Details" asp-route-productId="@item.ProductId" asp-route-categoryId="@item.CategoryId">Chi tiết</a> |
+                <a asp-action="Edit" asp-route-productId="@item.ProductId" asp-route-categoryId="@item.CategoryId">Sửa</a> |
+                <a asp-action="Delete" asp-route-productId="@item.ProductId" asp-route-categoryId="@item.CategoryId">Xóa</a>
             </td>
         </tr>
     }

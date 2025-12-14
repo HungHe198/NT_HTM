@@ -1,26 +1,26 @@
 @model IEnumerable<NT.SHARED.Models.ProductImage>
 
 @{
-    ViewBag.Title = "Qu?n l� ?nh s?n ph?m";
+    ViewBag.Title = "Quản lý hình sản phẩm";
 }
 
-<h1>Qu?n l� ?nh s?n ph?m</h1>
+<h1>Quản lý hình sản phẩm</h1>
 
 <p>
-    <a asp-action="Create" class="btn btn-primary">T?o m?i</a>
+    <a asp-action="Create" class="btn btn-primary">Tạo mới</a>
 </p>
 
 <form method="get" asp-action="Index" class="form-inline mb-3">
-    <input type="text" name="q" value="" class="form-control mr-2" placeholder="T�m ki?m theo ???ng d?n..." />
-    <button type="submit" class="btn btn-secondary">T�m ki?m</button>
+    <input type="text" name="q" value="" class="form-control mr-2" placeholder="Tìm kiếm theo đường dẫn..." />
+    <button type="submit" class="btn btn-secondary">Tìm kiếm</button>
 </form>
 
 <table class="table table-striped">
     <thead>
         <tr>
-            <th>Xem tr??c</th>
-            <th>???ng d?n ?nh</th>
-            <th>M� bi?n th? SP</th>
+            <th>Xem trước</th>
+            <th>Đường dẫn hình</th>
+            <th>Mã biến thể SP</th>
             <th></th>
         </tr>
     </thead>
@@ -37,9 +37,9 @@
             <td>@pi.ImageUrl</td>
             <td>@pi.ProductDetailId</td>
             <td>
-                <a asp-action="Details" asp-route-id="@pi.Id">Chi ti?t</a> |
-                <a asp-action="Edit" asp-route-id="@pi.Id">S?a</a> |
-                <a asp-action="Delete" asp-route-id="@pi.Id">X�a</a>
+                <a asp-action="Details" asp-route-id="@pi.Id">Chi tiết</a> |
+                <a asp-action="Edit" asp-route-id="@pi.Id">Sửa</a> |
+                <a asp-action="Delete" asp-route-id="@pi.Id">Xóa</a>
             </td>
         </tr>
     }

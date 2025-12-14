@@ -1,19 +1,19 @@
 @model NT.SHARED.Models.ProductCategory
 
-<h2>X�a danh m?c s?n ph?m</h2>
+<h2>Xóa danh mục sản phẩm</h2>
 <div>
-    <h4 class="text-danger">B?n c� ch?c ch?n mu?n x�a?</h4>
+    <h4 class="text-danger">Bạn có chắc chắn muốn xóa?</h4>
     <dl class="row">
-        <dt class="col-sm-2">M� s?n ph?m</dt>
+        <dt class="col-sm-2">Mã sản phẩm</dt>
         <dd class="col-sm-10">@Model.ProductId</dd>
-        <dt class="col-sm-2">M� danh m?c</dt>
+        <dt class="col-sm-2">Mã danh mục</dt>
         <dd class="col-sm-10">@Model.CategoryId</dd>
     </dl>
     <form asp-action="Delete" method="post">
         <input type="hidden" name="productId" value="@Model.ProductId" />
         <input type="hidden" name="categoryId" value="@Model.CategoryId" />
-        <button type="submit" class="btn btn-danger">X�a</button>
-        <a asp-action="Index" class="btn btn-secondary">H?y</a>
+        <button type="submit" class="btn btn-danger">Xóa</button>
+        <a asp-action="Index" class="btn btn-secondary">Hủy</a>
     </form>
 </div>
 

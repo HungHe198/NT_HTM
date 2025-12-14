@@ -1,12 +1,12 @@
 @model NT.SHARED.Models.ProductImage
 
 @{
-    ViewBag.Title = "X�a ?nh s?n ph?m";
+    ViewBag.Title = "Xóa hình sản phẩm";
 }
 
-<h1>X�a ?nh s?n ph?m</h1>
+<h1>Xóa hình sản phẩm</h1>
 
-<h4 class="text-danger">B?n c� ch?c ch?n mu?n x�a ?nh n�y?</h4>
+<h4 class="text-danger">Bạn có chắc chắn muốn xóa hình này?</h4>
 
 <div>
     @if (!string.IsNullOrWhiteSpace(Model.ImageUrl))
@@ -14,11 +14,11 @@
         <img src="@Model.ImageUrl" alt="image" style="max-width:360px; max-height:240px;" />
     }
     <p class="mt-2">@Model.ImageUrl</p>
-    <p>M� bi?n th? SP: @Model.ProductDetailId</p>
+    <p>Mã bi?n th? SP: @Model.ProductDetailId</p>
 </div>
 
 <form asp-action="Delete" method="post">
     <input type="hidden" asp-for="Id" />
-    <button type="submit" class="btn btn-danger">X�a</button>
-    <a asp-action="Index" class="btn btn-secondary">H?y</a>
+    <button type="submit" class="btn btn-danger">Xóa</button>
+    <a asp-action="Index" class="btn btn-secondary">Hủy</a>
 </form>

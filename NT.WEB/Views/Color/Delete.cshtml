@@ -1,16 +1,16 @@
 @model NT.SHARED.Models.Color
 
 @{
-    ViewBag.Title = "XÛa m‡u s?c";
+    ViewBag.Title = "X√≥a m√†u s·∫Øc";
 }
 
-<h1>XÛa m‡u s?c</h1>
+<h1>X√≥a m√†u s·∫Øc</h1>
 
 <h4>@Model.Name</h4>
 <p>@Model.HexCode</p>
 
 <form asp-action="Delete" method="post">
     <input type="hidden" asp-for="Id" />
-    <button class="btn btn-danger" type="submit">XÛa</button>
-    <a asp-action="Index" class="btn btn-secondary">H?y</a>
+    <button class="btn btn-danger" type="submit">X√≥a</button>
+    <a asp-action="Index" class="btn btn-secondary">H·ªßy</a>
 </form>

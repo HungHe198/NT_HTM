@@ -1,48 +1,48 @@
 @model NT.SHARED.Models.Voucher
 
 @{
-    ViewData["Title"] = "Chi ti?t Voucher";
+    ViewData["Title"] = "Chi tiết Voucher";
     var isValid = Model.IsValid();
 }
 
-<h1>Chi ti?t Voucher</h1>
+<h1>Chi tiết Voucher</h1>
 
 <div class="card">
     <div class="card-body">
         <dl class="row">
-            <dt class="col-sm-3">M� voucher</dt>
+            <dt class="col-sm-3">Mã voucher</dt>
             <dd class="col-sm-9"><strong>@Model.Code</strong></dd>
 
-            <dt class="col-sm-3">Ph?n tr?m gi?m gi�</dt>
+            <dt class="col-sm-3">Phần trăm giảm giá</dt>
             <dd class="col-sm-9">@(Model.DiscountPercentage?.ToString("N0") ?? "-")%</dd>
 
-            <dt class="col-sm-3">S? ti?n gi?m t?i ?a</dt>
-            <dd class="col-sm-9">@(Model.MaxDiscountAmount?.ToString("N0") ?? "Kh�ng gi?i h?n") ?</dd>
+            <dt class="col-sm-3">Số tiền giảm tối đa</dt>
+            <dd class="col-sm-9">@(Model.MaxDiscountAmount?.ToString("N0") ?? "Không giới hạn")</dd>
 
-            <dt class="col-sm-3">Gi� tr? ??n t?i thi?u</dt>
-            <dd class="col-sm-9">@(Model.MinOrderAmount?.ToString("N0") ?? "Kh�ng y�u c?u") ?</dd>
+            <dt class="col-sm-3">Giá trị đơn hàng tối thiểu</dt>
+            <dd class="col-sm-9">@(Model.MinOrderAmount?.ToString("N0") ?? "Không yêu cầu")</dd>
 
-            <dt class="col-sm-3">Ng�y b?t ??u</dt>
-            <dd class="col-sm-9">@(Model.StartDate?.ToString("dd/MM/yyyy HH:mm") ?? "Kh�ng gi?i h?n")</dd>
+            <dt class="col-sm-3">Ngày bắt đầu</dt>
+            <dd class="col-sm-9">@(Model.StartDate?.ToString("dd/MM/yyyy HH:mm") ?? "Không giới hạn")</dd>
 
-            <dt class="col-sm-3">Ng�y k?t th�c</dt>
-            <dd class="col-sm-9">@(Model.EndDate?.ToString("dd/MM/yyyy HH:mm") ?? "Kh�ng gi?i h?n")</dd>
+            <dt class="col-sm-3">Ngày kết thúc</dt>
+            <dd class="col-sm-9">@(Model.EndDate?.ToString("dd/MM/yyyy HH:mm") ?? "Không giới hạn")</dd>
 
-            <dt class="col-sm-3">S? l?n ?� s? d?ng</dt>
+            <dt class="col-sm-3">Số lần đã sử dụng</dt>
             <dd class="col-sm-9">@Model.UsageCount</dd>
 
-            <dt class="col-sm-3">Gi?i h?n s? d?ng</dt>
-            <dd class="col-sm-9">@(Model.MaxUsage?.ToString() ?? "Kh�ng gi?i h?n")</dd>
+            <dt class="col-sm-3">Giới hạn số sử dụng</dt>
+            <dd class="col-sm-9">@(Model.MaxUsage?.ToString() ?? "Không giới hạn")</dd>
 
-            <dt class="col-sm-3">Tr?ng th�i</dt>
+            <dt class="col-sm-3">Trạng thái</dt>
             <dd class="col-sm-9">
                 @if (isValid)
                 {
-                    <span class="badge bg-success">C�n hi?u l?c</span>
+                    <span class="badge bg-success">Còn hiệu lực</span>
                 }
                 else
                 {
-                    <span class="badge bg-secondary">H?t hi?u l?c</span>
+                    <span class="badge bg-secondary">Hết hiệu lực</span>
                 }
             </dd>
         </dl>
@@ -51,5 +51,5 @@
 
 <p class="mt-3">
     <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-secondary">S?a</a>
-    <a asp-action="Index" class="btn btn-link">Quay l?i danh s�ch</a>
+    <a asp-action="Index" class="btn btn-link">Quay l?i danh sách</a>
 </p>

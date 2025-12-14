@@ -1,18 +1,18 @@
 @model NT.SHARED.Models.Permission
 
-<h2>S?a quy?n</h2>
+<h2>Sửa quyền</h2>
 <form asp-action="Edit" method="post">
     <input type="hidden" asp-for="Id" />
     <div class="form-group">
-        <label asp-for="Code">M� quy?n</label>
+        <label asp-for="Code">Mã quyền</label>
         <input asp-for="Code" class="form-control" />
         <span asp-validation-for="Code" class="text-danger"></span>
     </div>
     <div class="form-group">
-        <label asp-for="Description">M� t?</label>
+        <label asp-for="Description">Mô tả</label>
         <input asp-for="Description" class="form-control" />
     </div>
-    <button type="submit" class="btn btn-primary">L?u</button>
-    <a asp-action="Index" class="btn btn-secondary">H?y</a>
+    <button type="submit" class="btn btn-primary">Lưu</button>
+    <a asp-action="Index" class="btn btn-secondary">Hủy</a>
 </form>
 

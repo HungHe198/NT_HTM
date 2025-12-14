@@ -1,16 +1,16 @@
 @model NT.SHARED.Models.Elasticity
 
 @{
-    ViewBag.Title = "X�a ?? co gi�n";
+    ViewBag.Title = "Xóa độ đàn hồi";
 }
 
-<h1>X�a ?? co gi�n</h1>
+<h1>Xóa độ đàn hồi</h1>
 
 <h4>@Model.Name</h4>
 <p>@Model.Description</p>
 
 <form asp-action="Delete" method="post">
     <input type="hidden" asp-for="Id" />
-    <button class="btn btn-danger" type="submit">X�a</button>
-    <a asp-action="Index" class="btn btn-secondary">H?y</a>
+    <button class="btn btn-danger" type="submit">Xóa</button>
+    <a asp-action="Index" class="btn btn-secondary">Hủy</a>
 </form>

@@ -1,30 +1,30 @@
 @model NT.SHARED.Models.ProductImage
 
 @{
-    ViewBag.Title = "Chi ti?t ?nh s?n ph?m";
+    ViewBag.Title = "Chi tiết hình sản phẩm";
 }
 
-<h1>Chi ti?t ?nh s?n ph?m</h1>
+<h1>Chi tiết hình sản phẩm</h1>
 
 <div>
-    <h4>?nh</h4>
+    <h4>Hình</h4>
     @if (!string.IsNullOrWhiteSpace(Model.ImageUrl))
     {
         <img src="@Model.ImageUrl" alt="image" style="max-width:360px; max-height:240px;" />
     }
     <dl class="row mt-3">
-        <dt class="col-sm-2">???ng d?n ?nh</dt>
+        <dt class="col-sm-2">Đường dẫn hình</dt>
         <dd class="col-sm-10">@Model.ImageUrl</dd>
 
-        <dt class="col-sm-2">M� bi?n th? SP</dt>
+        <dt class="col-sm-2">Mã biến thể SP</dt>
         <dd class="col-sm-10">@Model.ProductDetailId</dd>
 
-        <dt class="col-sm-2">M�</dt>
+        <dt class="col-sm-2">Mã</dt>
         <dd class="col-sm-10">@Model.Id</dd>
     </dl>
 </div>
 
 <p>
-    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">S?a</a>
-    <a asp-action="Index" class="btn btn-secondary">Quay l?i danh s�ch</a>
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Sửa</a>
+    <a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>
 </p>

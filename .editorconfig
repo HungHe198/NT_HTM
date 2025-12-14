@@ -1,0 +1,63 @@
+# EditorConfig - https://editorconfig.org
+# UTF-8 encoding for all files in this solution
+
+root = true
+
+# All files
+[*]
+charset = utf-8
+end_of_line = crlf
+indent_style = space
+indent_size = 4
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# C# files
+[*.cs]
+charset = utf-8
+indent_size = 4
+
+# Razor files
+[*.cshtml]
+charset = utf-8
+indent_size = 4
+
+# JSON files
+[*.json]
+charset = utf-8
+indent_size = 2
+
+# XML files
+[*.{xml,csproj,props,targets}]
+charset = utf-8
+indent_size = 2
+
+# YAML files
+[*.{yml,yaml}]
+charset = utf-8
+indent_size = 2
+
+# JavaScript/TypeScript files
+[*.{js,ts,jsx,tsx}]
+charset = utf-8
+indent_size = 2
+
+# CSS/SCSS files
+[*.{css,scss,less}]
+charset = utf-8
+indent_size = 2
+
+# HTML files
+[*.html]
+charset = utf-8
+indent_size = 2
+
+# Markdown files
+[*.md]
+charset = utf-8
+trim_trailing_whitespace = false
+
+# Config files
+[*.config]
+charset = utf-8
+indent_size = 2

@@ -1,27 +1,27 @@
 @model IEnumerable<NT.SHARED.Models.Voucher>
 
 @{
-    ViewData["Title"] = "Qu?n l� Voucher";
+    ViewData["Title"] = "Quản lý Voucher";
 }
 
-<h1>Qu?n l� Voucher</h1>
+<h1>Quản lý Voucher</h1>
 
 <p>
-    <a asp-action="Create" class="btn btn-primary">T?o m?i</a>
+    <a asp-action="Create" class="btn btn-primary">Tạo mới</a>
 </p>
 
 <table class="table table-striped">
     <thead>
         <tr>
-            <th>M� voucher</th>
-            <th>Ph?n tr?m gi?m</th>
-            <th>Gi?m t?i ?a</th>
-            <th>??n t?i thi?u</th>
-            <th>Ng�y b?t ??u</th>
-            <th>Ng�y k?t th�c</th>
-            <th>?� d�ng</th>
-            <th>Gi?i h?n</th>
-            <th>Tr?ng th�i</th>
+            <th>Mã voucher</th>
+            <th>Phần trăm giảm</th>
+            <th>Giảm tối đa</th>
+            <th>Giá trị đơn hàng tối thiểu</th>
+            <th>Ngày bắt đầu</th>
+            <th>Ngày kết thúc</th>
+            <th>Số đã dùng</th>
+            <th>Giới hạn</th>
+            <th>Trạng thái</th>
             <th></th>
         </tr>
     </thead>
@@ -42,25 +42,25 @@
             <td>@(item.StartDate?.ToString("dd/MM/yyyy HH:mm") ?? "-")</td>
             <td>@(item.EndDate?.ToString("dd/MM/yyyy HH:mm") ?? "-")</td>
             <td>@item.UsageCount</td>
-            <td>@(item.MaxUsage?.ToString() ?? "Kh�ng gi?i h?n")</td>
+            <td>@(item.MaxUsage?.ToString() ?? "Không giới hạn")</td>
             <td>
                 @if (isNotStarted)
                 {
-                    <span class="badge bg-warning">Ch?a b?t ??u</span>
+                    <span class="badge bg-warning">Chưa bắt đầu</span>
                 }
                 else if (isActive)
                 {
-                    <span class="badge bg-success">C�n hi?u l?c</span>
+                    <span class="badge bg-success">Còn hiệu lực</span>
                 }
                 else
                 {
-                    <span class="badge bg-secondary">H?t hi?u l?c</span>
+                    <span class="badge bg-secondary">Hết hiệu lực</span>
                 }
             </td>
             <td>
-                <a asp-action="Details" asp-route-id="@item.Id">Chi ti?t</a> |
-                <a asp-action="Edit" asp-route-id="@item.Id">S?a</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">X�a</a>
+                <a asp-action="Details" asp-route-id="@item.Id">Chi tiết</a> |
+                <a asp-action="Edit" asp-route-id="@item.Id">Sửa</a> |
+                <a asp-action="Delete" asp-route-id="@item.Id">Xóa</a>
             </td>
         </tr>
     }

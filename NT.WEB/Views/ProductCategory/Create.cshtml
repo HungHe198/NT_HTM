@@ -1,16 +1,16 @@
 @model NT.SHARED.Models.ProductCategory
 
-<h2>T?o danh m?c s?n ph?m</h2>
+<h2>Tạo danh mục sản phẩm</h2>
 <form asp-action="Create" method="post">
     <div class="form-group">
-        <label asp-for="ProductId">M� s?n ph?m</label>
+        <label asp-for="ProductId">Mã sản phẩm</label>
         <input asp-for="ProductId" class="form-control" />
     </div>
     <div class="form-group">
-        <label asp-for="CategoryId">M� danh m?c</label>
+        <label asp-for="CategoryId">Mã danh mục</label>
         <input asp-for="CategoryId" class="form-control" />
     </div>
-    <button type="submit" class="btn btn-primary">L?u</button>
-    <a asp-action="Index" class="btn btn-secondary">H?y</a>
+    <button type="submit" class="btn btn-primary">Lưu</button>
+    <a asp-action="Index" class="btn btn-secondary">Hủy</a>
 </form>
 

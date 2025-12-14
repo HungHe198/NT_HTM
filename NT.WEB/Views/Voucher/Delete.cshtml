@@ -1,36 +1,36 @@
 @model NT.SHARED.Models.Voucher
 
 @{
-    ViewData["Title"] = "X�a Voucher";
+    ViewData["Title"] = "Xóa Voucher";
 }
 
-<h1>X�a Voucher</h1>
+<h1>Xóa Voucher</h1>
 
-<h3 class="text-danger">B?n c� ch?c ch?n mu?n x�a voucher n�y?</h3>
+<h3 class="text-danger">Bạn chắc chắn muốn xóa voucher này?</h3>
 
 <div class="card">
     <div class="card-body">
         <dl class="row">
-            <dt class="col-sm-3">M� voucher</dt>
+            <dt class="col-sm-3">Mã voucher</dt>
             <dd class="col-sm-9"><strong>@Model.Code</strong></dd>
 
-            <dt class="col-sm-3">Ph?n tr?m gi?m gi�</dt>
+            <dt class="col-sm-3">Phần trăm giảm giá</dt>
             <dd class="col-sm-9">@(Model.DiscountPercentage?.ToString("N0") ?? "-")%</dd>
 
-            <dt class="col-sm-3">Ng�y b?t ??u</dt>
-            <dd class="col-sm-9">@(Model.StartDate?.ToString("dd/MM/yyyy HH:mm") ?? "Kh�ng gi?i h?n")</dd>
+            <dt class="col-sm-3">Ngày bắt đầu</dt>
+            <dd class="col-sm-9">@(Model.StartDate?.ToString("dd/MM/yyyy HH:mm") ?? "Không giới hạn")</dd>
 
-            <dt class="col-sm-3">Ng�y k?t th�c</dt>
-            <dd class="col-sm-9">@(Model.EndDate?.ToString("dd/MM/yyyy HH:mm") ?? "Kh�ng gi?i h?n")</dd>
+            <dt class="col-sm-3">Ngày kết thúc</dt>
+            <dd class="col-sm-9">@(Model.EndDate?.ToString("dd/MM/yyyy HH:mm") ?? "Không giới hạn")</dd>
 
-            <dt class="col-sm-3">?� s? d?ng</dt>
-            <dd class="col-sm-9">@Model.UsageCount l?n</dd>
+            <dt class="col-sm-3">Số lần sử dụng</dt>
+            <dd class="col-sm-9">@Model.UsageCount lần</dd>
         </dl>
     </div>
 </div>
 
 <form asp-action="Delete" asp-route-id="@Model.Id" method="post" class="mt-3">
     @Html.AntiForgeryToken()
-    <input type="submit" value="X�c nh?n x�a" class="btn btn-danger" />
-    <a asp-action="Index" class="btn btn-link">H?y</a>
+    <input type="submit" value="Xác nhận xóa" class="btn btn-danger" />
+    <a asp-action="Index" class="btn btn-link">Hủy</a>
 </form>

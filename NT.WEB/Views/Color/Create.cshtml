@@ -1,26 +1,26 @@
 @model NT.SHARED.Models.Color
 
 @{
-    ViewBag.Title = "T?o m�u s?c";
+    ViewBag.Title = "Tạo màu sắc";
 }
 
-<h1>T?o m�u s?c</h1>
+<h1>Tạo màu sắc</h1>
 
 <form asp-action="Create" method="post">
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
     <div class="form-group">
-        <label asp-for="Name">T�n</label>
+        <label asp-for="Name">Tên</label>
         <input asp-for="Name" class="form-control" />
         <span asp-validation-for="Name" class="text-danger"></span>
     </div>
 
     <div class="form-group">
-        <label asp-for="HexCode">M� m�u</label>
+        <label asp-for="HexCode">Mã màu</label>
         <input asp-for="HexCode" class="form-control" placeholder="#FFFFFF" />
         <span asp-validation-for="HexCode" class="text-danger"></span>
     </div>
 
-    <button class="btn btn-primary" type="submit">L?u</button>
-    <a asp-action="Index" class="btn btn-secondary">H?y</a>
+    <button class="btn btn-primary" type="submit">Lưu</button>
+    <a asp-action="Index" class="btn btn-secondary">Hủy</a>
 </form>

@@ -1,20 +1,20 @@
 @model IEnumerable<NT.SHARED.Models.Length>
 
 @{
-    ViewBag.Title = "Qu?n l� chi?u d�i";
+    ViewBag.Title = "Quản lý chiều dài";
 }
 
-<h1>Qu?n l� chi?u d�i</h1>
+<h1>Quản lý chiều dài</h1>
 
 <p>
-    <a asp-action="Create" class="btn btn-primary">T?o m?i</a>
+    <a asp-action="Create" class="btn btn-primary">Tạo mới</a>
 </p>
 
 <table class="table table-striped">
     <thead>
         <tr>
-            <th>T�n</th>
-            <th>M� t?</th>
+            <th>Tên</th>
+            <th>Mô tả</th>
             <th></th>
         </tr>
     </thead>
@@ -25,9 +25,9 @@
             <td>@item.Name</td>
             <td>@item.Description</td>
             <td>
-                <a asp-action="Details" asp-route-id="@item.Id">Chi ti?t</a> |
-                <a asp-action="Edit" asp-route-id="@item.Id">S?a</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">X�a</a>
+                <a asp-action="Details" asp-route-id="@item.Id">Chi tiết</a> |
+                <a asp-action="Edit" asp-route-id="@item.Id">Sửa</a> |
+                <a asp-action="Delete" asp-route-id="@item.Id">Xóa</a>
             </td>
         </tr>
     }

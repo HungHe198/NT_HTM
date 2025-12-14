@@ -1,18 +1,18 @@
 @model NT.SHARED.Models.OriginCountry
 
 @{
-    ViewBag.Title = "Chi ti?t xu?t x?";
+    ViewBag.Title = "Chi tiết xuất xứ";
 }
 
-<h1>Chi ti?t xu?t x?</h1>
+<h1>Chi tiết xuất xứ</h1>
 
 <dl class="row">
-    <dt class="col-sm-2">T�n</dt><dd class="col-sm-10">@Model.Name</dd>
-    <dt class="col-sm-2">M� t?</dt><dd class="col-sm-10">@Model.Description</dd>
-    <dt class="col-sm-2">M�</dt><dd class="col-sm-10">@Model.Id</dd>
+    <dt class="col-sm-2">Tên</dt><dd class="col-sm-10">@Model.Name</dd>
+    <dt class="col-sm-2">Mô t?</dt><dd class="col-sm-10">@Model.Description</dd>
+    <dt class="col-sm-2">Mã</dt><dd class="col-sm-10">@Model.Id</dd>
 </dl>
 
 <p>
-    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">S?a</a>
-    <a asp-action="Index" class="btn btn-secondary">Quay l?i danh s�ch</a>
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Sửa</a>
+    <a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>
 </p>

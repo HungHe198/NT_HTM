@@ -1,14 +1,14 @@
 @model NT.SHARED.Models.Permission
 
-<h2>Chi ti?t quy?n</h2>
+<h2>Chi tiết quyền</h2>
 <dl class="row">
-    <dt class="col-sm-2">M� quy?n</dt>
+    <dt class="col-sm-2">Mã quyền</dt>
     <dd class="col-sm-10">@Model.Code</dd>
-    <dt class="col-sm-2">M� t?</dt>
+    <dt class="col-sm-2">Mô tả</dt>
     <dd class="col-sm-10">@Model.Description</dd>
 </dl>
 <p>
-    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">S?a</a> |
-    <a asp-action="Index" class="btn btn-secondary">Quay l?i danh s�ch</a>
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Sửa</a> |
+    <a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>
 </p>
 

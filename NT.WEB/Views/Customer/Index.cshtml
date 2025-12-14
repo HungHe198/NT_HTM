@@ -1,15 +1,15 @@
 @model IEnumerable<NT.SHARED.Models.Customer>
 
-<h2>Danh s·ch kh·ch h‡ng</h2>
-<p><a asp-action="Create">ThÍm m?i</a></p>
+<h2>Danh s√°ch kh√°ch h√†ng</h2>
+<p><a asp-action="Create">Th√™m m·ªõi</a></p>
 <table class="table">
     <thead>
         <tr>
-            <th>M„ ng??i d˘ng</th>
-            <th>??a ch?</th>
-            <th>Ng‡y sinh</th>
-            <th>Gi?i tÌnh</th>
-            <th>Thao t·c</th>
+            <th>M√£ ng∆∞·ªùi d√πng</th>
+            <th>ƒê·ªãa ch·ªâ</th>
+            <th>Ng√†y sinh</th>
+            <th>Gi·ªõi t√≠nh</th>
+            <th>Thao t√°c</th>
         </tr>
     </thead>
     <tbody>
@@ -21,9 +21,9 @@
             <td>@item.DoB</td>
             <td>@item.Gender</td>
             <td>
-                <a asp-action="Details" asp-route-id="@item.Id">Chi ti?t</a> |
-                <a asp-action="Edit" asp-route-id="@item.Id">S?a</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">XÛa</a>
+                <a asp-action="Details" asp-route-id="@item.Id">Chi ti·∫øt</a> |
+                <a asp-action="Edit" asp-route-id="@item.Id">S·ª≠a</a> |
+                <a asp-action="Delete" asp-route-id="@item.Id">X√≥a</a>
             </td>
         </tr>
     }

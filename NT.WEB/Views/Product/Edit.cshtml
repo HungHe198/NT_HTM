@@ -1,32 +1,32 @@
 @model NT.SHARED.Models.Product
 
 @{
-    ViewBag.Title = "S?a s?n ph?m";
+    ViewBag.Title = "Sửa sản phẩm";
 }
 
-<h1>S?a s?n ph?m</h1>
+<h1>Sửa sản phẩm</h1>
 
 <form asp-action="Edit" method="post">
     <input type="hidden" asp-for="Id" />
     @Html.AntiForgeryToken()
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
     <div class="form-group">
-        <label asp-for="BrandId">Th??ng hi?u</label>
+        <label asp-for="BrandId">Thương hiệu</label>
         <select asp-for="BrandId" class="form-control" asp-items="ViewBag.BrandSelectList">
-            <option value="">-- Ch?n th??ng hi?u --</option>
+            <option value="">-- Chọn thương hiệu --</option>
         </select>
         <span asp-validation-for="BrandId" class="text-danger"></span>
     </div>
     <div class="form-group">
-        <label asp-for="ProductCode">M� s?n ph?m</label>
+        <label asp-for="ProductCode">Mã sản phẩm</label>
         <input asp-for="ProductCode" class="form-control" />
         <span asp-validation-for="ProductCode" class="text-danger"></span>
     </div>
     <div class="form-group">
-        <label asp-for="Name">T�n s?n ph?m</label>
+        <label asp-for="Name">Tên sản phẩm</label>
         <input asp-for="Name" class="form-control" />
         <span asp-validation-for="Name" class="text-danger"></span>
     </div>
-    <button type="submit" class="btn btn-primary">L?u</button>
-    <a asp-action="Index" class="btn btn-secondary">H?y</a>
+    <button type="submit" class="btn btn-primary">Lưu</button>
+    <a asp-action="Index" class="btn btn-secondary">Hủy</a>
 </form>

@@ -1,16 +1,16 @@
 @model NT.SHARED.Models.Permission
 
-<h2>X�a quy?n</h2>
+<h2>Xóa quyền</h2>
 <div>
-    <h4 class="text-danger">B?n c� ch?c ch?n mu?n x�a?</h4>
+    <h4 class="text-danger">Bạn có chắc chắn muốn xóa?</h4>
     <dl class="row">
-        <dt class="col-sm-2">M� quy?n</dt>
+        <dt class="col-sm-2">Mã quyền</dt>
         <dd class="col-sm-10">@Model.Code</dd>
     </dl>
     <form asp-action="Delete" method="post">
         <input type="hidden" asp-for="Id" />
-        <button type="submit" class="btn btn-danger">X�a</button>
-        <a asp-action="Index" class="btn btn-secondary">H?y</a>
+        <button type="submit" class="btn btn-danger">Xóa</button>
+        <a asp-action="Index" class="btn btn-secondary">Hủy</a>
     </form>
 </div>
 
