@@ -1,25 +1,25 @@
 @model NT.SHARED.Models.OriginCountry
 
 @{
-    ViewBag.Title = "Edit Origin Country";
+    ViewBag.Title = "S?a xu?t x?";
 }
 
-<h1>Edit Origin Country</h1>
+<h1>S?a xu?t x?</h1>
 
 <form asp-action="Edit" method="post">
     <input type="hidden" asp-for="Id" />
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
     <div class="form-group">
-        <label asp-for="Name"></label>
+        <label asp-for="Name">Tên</label>
         <input asp-for="Name" class="form-control" />
     </div>
 
     <div class="form-group">
-        <label asp-for="Description"></label>
+        <label asp-for="Description">Mô t?</label>
         <textarea asp-for="Description" class="form-control"></textarea>
     </div>
 
-    <button class="btn btn-primary" type="submit">Save</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+    <button class="btn btn-primary" type="submit">L?u</button>
+    <a asp-action="Index" class="btn btn-secondary">H?y</a>
 </form>

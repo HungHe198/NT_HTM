@@ -1,15 +1,15 @@
 @model IEnumerable<NT.SHARED.Models.SurfaceFinish>
 
 @{
-    ViewBag.Title = "Surface Finishes";
+    ViewBag.Title = "Qu?n lý hoàn thi?n b? m?t";
 }
 
-<h1>Surface Finishes</h1>
+<h1>Qu?n lý hoàn thi?n b? m?t</h1>
 
-<p><a asp-action="Create" class="btn btn-primary">Create New</a></p>
+<p><a asp-action="Create" class="btn btn-primary">T?o m?i</a></p>
 
 <table class="table">
-    <thead><tr><th>Name</th><th>Description</th><th></th></tr></thead>
+    <thead><tr><th>Tên</th><th>Mô t?</th><th></th></tr></thead>
     <tbody>
     @foreach(var s in Model)
     {
@@ -17,9 +17,9 @@
             <td>@s.Name</td>
             <td>@s.Description</td>
             <td>
-                <a asp-action="Details" asp-route-id="@s.Id">Details</a> |
-                <a asp-action="Edit" asp-route-id="@s.Id">Edit</a> |
-                <a asp-action="Delete" asp-route-id="@s.Id">Delete</a>
+                <a asp-action="Details" asp-route-id="@s.Id">Chi ti?t</a> |
+                <a asp-action="Edit" asp-route-id="@s.Id">S?a</a> |
+                <a asp-action="Delete" asp-route-id="@s.Id">Xóa</a>
             </td>
         </tr>
     }

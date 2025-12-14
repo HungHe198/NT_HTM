@@ -74,6 +74,13 @@ namespace NT.WEB.Controllers
                 ModelState.AddModelError(nameof(voucher.DiscountPercentage), "Phần trăm giảm giá phải từ 0 đến 100");
             }
 
+            // Validate MaxDiscountAmount phải nhỏ hơn MinOrderAmount
+            if (voucher.MaxDiscountAmount.HasValue && voucher.MinOrderAmount.HasValue 
+                && voucher.MaxDiscountAmount.Value >= voucher.MinOrderAmount.Value)
+            {
+                ModelState.AddModelError(nameof(voucher.MaxDiscountAmount), "Tiền giảm tối đa phải nhỏ hơn đơn hàng tối thiểu");
+            }
+
             if (!ModelState.IsValid) return View(voucher);
 
             voucher.UsageCount = 0;
@@ -119,6 +126,13 @@ namespace NT.WEB.Controllers
             if (voucher.DiscountPercentage.HasValue && (voucher.DiscountPercentage.Value < 0 || voucher.DiscountPercentage.Value > 100))
             {
                 ModelState.AddModelError(nameof(voucher.DiscountPercentage), "Phần trăm giảm giá phải từ 0 đến 100");
+            }
+
+            // Validate MaxDiscountAmount phải nhỏ hơn MinOrderAmount
+            if (voucher.MaxDiscountAmount.HasValue && voucher.MinOrderAmount.HasValue 
+                && voucher.MaxDiscountAmount.Value >= voucher.MinOrderAmount.Value)
+            {
+                ModelState.AddModelError(nameof(voucher.MaxDiscountAmount), "Tiền giảm tối đa phải nhỏ hơn đơn hàng tối thiểu");
             }
 
             if (!ModelState.IsValid) return View(voucher);

@@ -1,12 +1,12 @@
 @model IEnumerable<NT.SHARED.Models.Permission>
 
-<h2>Permissions</h2>
-<p><a asp-action="Create">Create New</a></p>
+<h2>Qu?n lý quy?n</h2>
+<p><a asp-action="Create" class="btn btn-primary">T?o m?i</a></p>
 <table class="table">
     <thead>
         <tr>
-            <th>Code</th>
-            <th>Description</th>
+            <th>Mã quy?n</th>
+            <th>Mô t?</th>
             <th></th>
         </tr>
     </thead>
@@ -17,11 +17,12 @@
             <td>@item.Code</td>
             <td>@item.Description</td>
             <td>
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                <a asp-action="Details" asp-route-id="@item.Id">Chi ti?t</a> |
+                <a asp-action="Edit" asp-route-id="@item.Id">S?a</a> |
+                <a asp-action="Delete" asp-route-id="@item.Id">Xóa</a>
             </td>
         </tr>
     }
     </tbody>
 </table>
+

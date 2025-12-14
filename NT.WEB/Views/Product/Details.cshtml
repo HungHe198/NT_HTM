@@ -1,7 +1,7 @@
 ﻿@model NT.SHARED.Models.Product
 
 @{
-    ViewBag.Title = "Product Details";
+    ViewBag.Title = "Chi tiết sản phẩm";
     var details = ViewBag.ProductDetails as IEnumerable<NT.SHARED.Models.ProductDetail> ?? Enumerable.Empty<NT.SHARED.Models.ProductDetail>();
 }
 
@@ -17,22 +17,22 @@
 </div>
 
 <p>
-    <a asp-action="CreateDetail" asp-route-productId="@Model.Id" class="btn btn-sm btn-primary">Add Product Detail</a>
-    <a asp-action="Index" class="btn btn-sm btn-secondary">Back to list</a>
+    <a asp-action="CreateDetail" asp-route-productId="@Model.Id" class="btn btn-sm btn-primary">Thêm biến thể</a>
+    <a asp-action="Index" class="btn btn-sm btn-secondary">Quay lại danh sách</a>
 </p>
 
 <table class="table table-bordered">
     <thead>
         <tr>
-            <th>Id</th>
+            <th>Mã</th>
             <th>Giá</th>
-            <th>Tên</th>
+            <th>Tồn kho</th>
             <th>Chiều dài</th>
             <th>Màu</th>
             <th>Hoàn thiện</th>
             <th>Độ cứng</th>
             <th>Độ đàn hồi</th>
-            <th>Xuất xứ/th>
+            <th>Xuất xứ</th>
             <th>Thông số</th>
             <th>Hoạt động</th>
             <th></th>
@@ -52,7 +52,7 @@
             <td>@(d.Elasticity != null ? d.Elasticity.Name : (d.ElasticityId != Guid.Empty ? d.ElasticityId.ToString() : ""))</td>
             <td>@(d.OriginCountry != null ? d.OriginCountry.Name : (d.OriginCountryId != Guid.Empty ? d.OriginCountryId.ToString() : ""))</td>
             <td>
-                @if(!string.IsNullOrWhiteSpace(d.Sections)) { <div><strong>Sóo lượng:</strong> @d.Sections</div> }
+                @if(!string.IsNullOrWhiteSpace(d.Sections)) { <div><strong>Số lượng:</strong> @d.Sections</div> }
                 @if(!string.IsNullOrWhiteSpace(d.CollapsedLength)) { <div><strong>Chiều dài thu cần:</strong> @d.CollapsedLength</div> }
                 @if(!string.IsNullOrWhiteSpace(d.Weight)) { <div><strong>Trọng lượng:</strong> @d.Weight</div> }
             </td>

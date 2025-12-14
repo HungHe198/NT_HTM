@@ -1,25 +1,25 @@
 @model NT.SHARED.Models.Color
 
 @{
-    ViewBag.Title = "Edit Color";
+    ViewBag.Title = "Ch?nh s?a màu s?c";
 }
 
-<h1>Edit Color</h1>
+<h1>Ch?nh s?a màu s?c</h1>
 
 <form asp-action="Edit" method="post">
     <input type="hidden" asp-for="Id" />
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
     <div class="form-group">
-        <label asp-for="Name"></label>
+        <label asp-for="Name">Tên</label>
         <input asp-for="Name" class="form-control" />
     </div>
 
     <div class="form-group">
-        <label asp-for="HexCode"></label>
+        <label asp-for="HexCode">Mã màu</label>
         <input asp-for="HexCode" class="form-control" />
     </div>
 
-    <button class="btn btn-primary" type="submit">Save</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+    <button class="btn btn-primary" type="submit">L?u</button>
+    <a asp-action="Index" class="btn btn-secondary">H?y</a>
 </form>

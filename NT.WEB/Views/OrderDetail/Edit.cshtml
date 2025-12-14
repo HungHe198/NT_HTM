@@ -1,24 +1,25 @@
 @model NT.SHARED.Models.OrderDetail
 
-<h2>Edit OrderDetail</h2>
+<h2>S?a chi ti?t ??n hàng</h2>
 <form asp-action="Edit" method="post">
     <input type="hidden" asp-for="Id" />
     <div class="form-group">
-        <label asp-for="OrderId"></label>
+        <label asp-for="OrderId">Mã ??n hàng</label>
         <input asp-for="OrderId" class="form-control" />
     </div>
     <div class="form-group">
-        <label asp-for="ProductDetailId"></label>
+        <label asp-for="ProductDetailId">Mã bi?n th? SP</label>
         <input asp-for="ProductDetailId" class="form-control" />
     </div>
     <div class="form-group">
-        <label asp-for="Quantity"></label>
+        <label asp-for="Quantity">S? l??ng</label>
         <input asp-for="Quantity" class="form-control" />
     </div>
     <div class="form-group">
-        <label asp-for="UnitPrice"></label>
+        <label asp-for="UnitPrice">??n giá</label>
         <input asp-for="UnitPrice" class="form-control" />
     </div>
-    <button type="submit" class="btn btn-primary">Save</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+    <button type="submit" class="btn btn-primary">L?u</button>
+    <a asp-action="Index" class="btn btn-secondary">H?y</a>
 </form>
+

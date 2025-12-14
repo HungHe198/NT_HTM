@@ -2,7 +2,7 @@
 
 @{
     // Layout = "~/Views/Shared/_AdminLayout.cshtml";
-    ViewBag.Title = "Products";
+    ViewBag.Title = "Quản lý sản phẩm";
 }
 
 <div class="container-fluid">
@@ -15,7 +15,7 @@
                 </a>
 
                 <div class="mb-3">
-                    <div class="fw-bold">quản lí sản phẩm <span class="badge bg-light text-dark">Free</span></div>
+                    <div class="fw-bold">Quản lý sản phẩm <span class="badge bg-light text-dark">Free</span></div>
                 </div>
 
                 <nav class="nav nav-pills flex-column">
@@ -23,12 +23,12 @@
                     <a asp-controller="Admin" asp-action="Index" class="nav-link"><i class="fa fa-list me-2"></i>Danh Mục</a>
                  
                     <a asp-controller="Color" asp-action="Index" class="nav-link"><i class="fa fa-palette me-2"></i>Màu Sắc</a>
-                    <a asp-controller="Length" asp-action="Index" class="nav-link"><i class="fa fa-ruler-horizontal me-2"></i>Độ Dài</a>
-                    <a asp-controller="SurfaceFinish" asp-action="Index" class="nav-link"><i class="fa fa-layer-group me-2"></i>thiện bề mặt</a>
+                    <a asp-controller="Length" asp-action="Index" class="nav-link"><i class="fa fa-ruler-horizontal me-2"></i>Chiều Dài</a>
+                    <a asp-controller="SurfaceFinish" asp-action="Index" class="nav-link"><i class="fa fa-layer-group me-2"></i>Hoàn Thiện Bề Mặt</a>
                     <a asp-controller="Hardness" asp-action="Index" class="nav-link"><i class="fa fa-gavel me-2"></i>Độ Cứng</a>
                     <a asp-controller="Elasticity" asp-action="Index" class="nav-link"><i class="fa fa-wave-square me-2"></i>Độ Đàn Hồi</a>
-                    <a asp-controller="OriginCountry" asp-action="Index" class="nav-link"><i class="fa fa-wave-square me-2"></i>Xuất xứ</a>
-                    <a asp-controller="ProductImage" asp-action="Index" class="nav-link"><i class="fa fa-wave-square me-2"></i> Ảnh Sản Phẩm</a>
+                    <a asp-controller="OriginCountry" asp-action="Index" class="nav-link"><i class="fa fa-wave-square me-2"></i>Xuất Xứ</a>
+                    <a asp-controller="ProductImage" asp-action="Index" class="nav-link"><i class="fa fa-wave-square me-2"></i>Ảnh Sản Phẩm</a>
                  
                 </nav>
             </div>
@@ -37,13 +37,13 @@
         <!-- Main content column -->
         <section class="col-md-9 col-lg-10 py-3">
             <div class="mb-4 d-flex justify-content-between align-items-center">
-                <h1 class="h4 mb-0">Products</h1>
-                <a asp-action="Create" class="btn btn-primary">Create New Product</a>
+                <h1 class="h4 mb-0">Sản phẩm</h1>
+                <a asp-action="Create" class="btn btn-primary">Tạo sản phẩm mới</a>
             </div>
 
             <form method="get" asp-action="Index" class="d-flex mb-3 position-relative">
-                <input type="text" id="product-search" name="q" value="@(Context.Request.Query["q"])" class="form-control me-2" placeholder="Search name..." autocomplete="off" />
-                <button type="submit" class="btn btn-secondary">Search</button>
+                <input type="text" id="product-search" name="q" value="@(Context.Request.Query["q"])" class="form-control me-2" placeholder="Tìm kiếm theo tên..." autocomplete="off" />
+                <button type="submit" class="btn btn-secondary">Tìm kiếm</button>
 
                 <div id="suggestions" class="list-group position-absolute" style="z-index:1000; width:40%; left:0; display:none;"></div>
             </form>
@@ -52,10 +52,10 @@
                 <table class="table table-striped align-middle">
                     <thead>
                         <tr>
-                            <th>@Html.DisplayNameFor((NT.SHARED.Models.Product m) => m.ProductCode)</th>
+                            <th>Mã SP</th>
                             <th>Ảnh</th>
-                            <th>@Html.DisplayNameFor((NT.SHARED.Models.Product m) => m.Name)</th>
-                            <th>@Html.DisplayNameFor((NT.SHARED.Models.Product m) => m.BrandId)</th>
+                            <th>Tên</th>
+                            <th>Thương hiệu</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -85,9 +85,9 @@
                                 <td>@p.Name</td>
                                 <td>@p.BrandId</td>
                                 <td>
-                                    <a asp-action="Details" asp-route-id="@p.Id">Details</a> |
-                                    <a asp-action="Edit" asp-route-id="@p.Id">Edit</a> |
-                                    <a asp-action="Delete" asp-route-id="@p.Id">Delete</a>
+                                    <a asp-action="Details" asp-route-id="@p.Id">Chi tiết</a> |
+                                    <a asp-action="Edit" asp-route-id="@p.Id">Sửa</a> |
+                                    <a asp-action="Delete" asp-route-id="@p.Id">Xóa</a>
                                 </td>
                             </tr>
                         }

@@ -1,15 +1,15 @@
 @model IEnumerable<NT.SHARED.Models.Customer>
 
-<h2>Customers</h2>
-<p><a asp-action="Create">Create New</a></p>
+<h2>Danh sách khách hàng</h2>
+<p><a asp-action="Create">Thêm m?i</a></p>
 <table class="table">
     <thead>
         <tr>
-            <th>@Html.DisplayNameFor((NT.SHARED.Models.Customer m) => m.UserId)</th>
-            <th>@Html.DisplayNameFor((NT.SHARED.Models.Customer m) => m.Address)</th>
-            <th>@Html.DisplayNameFor((NT.SHARED.Models.Customer m) => m.DoB)</th>
-            <th>@Html.DisplayNameFor((NT.SHARED.Models.Customer m) => m.Gender)</th>
-            <th></th>
+            <th>Mã ng??i dùng</th>
+            <th>??a ch?</th>
+            <th>Ngày sinh</th>
+            <th>Gi?i tính</th>
+            <th>Thao tác</th>
         </tr>
     </thead>
     <tbody>
@@ -21,9 +21,9 @@
             <td>@item.DoB</td>
             <td>@item.Gender</td>
             <td>
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                <a asp-action="Details" asp-route-id="@item.Id">Chi ti?t</a> |
+                <a asp-action="Edit" asp-route-id="@item.Id">S?a</a> |
+                <a asp-action="Delete" asp-route-id="@item.Id">Xóa</a>
             </td>
         </tr>
     }

@@ -1,27 +1,27 @@
 @model NT.SHARED.Models.ProductImage
 
 @{
-    ViewBag.Title = "Edit Product Image";
+    ViewBag.Title = "S?a ?nh s?n ph?m";
 }
 
-<h1>Edit Product Image</h1>
+<h1>S?a ?nh s?n ph?m</h1>
 
 <form asp-action="Edit" method="post">
     <input type="hidden" asp-for="Id" />
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
     <div class="form-group">
-        <label asp-for="ProductDetailId"></label>
+        <label asp-for="ProductDetailId">Mã bi?n th? SP</label>
         <input asp-for="ProductDetailId" class="form-control" />
         <span asp-validation-for="ProductDetailId" class="text-danger"></span>
     </div>
 
     <div class="form-group">
-        <label asp-for="ImageUrl"></label>
+        <label asp-for="ImageUrl">???ng d?n ?nh</label>
         <input asp-for="ImageUrl" class="form-control" />
         <span asp-validation-for="ImageUrl" class="text-danger"></span>
     </div>
 
-    <button type="submit" class="btn btn-primary">Save</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+    <button type="submit" class="btn btn-primary">L?u</button>
+    <a asp-action="Index" class="btn btn-secondary">H?y</a>
 </form>

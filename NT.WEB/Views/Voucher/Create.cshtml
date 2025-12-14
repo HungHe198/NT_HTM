@@ -12,13 +12,13 @@
     <div class="row">
         <div class="col-md-6">
             <div class="form-group mb-3">
-                <label asp-for="Code" class="control-label"></label>
+                <label asp-for="Code" class="control-label">Mã voucher</label>
                 <input asp-for="Code" class="form-control" placeholder="VD: GIAM10, SALE20..." />
                 <span asp-validation-for="Code" class="text-danger"></span>
             </div>
 
             <div class="form-group mb-3">
-                <label asp-for="DiscountPercentage" class="control-label"></label>
+                <label asp-for="DiscountPercentage" class="control-label">Ph?n tr?m gi?m giá</label>
                 <div class="input-group">
                     <input asp-for="DiscountPercentage" class="form-control" type="number" min="0" max="100" step="1" placeholder="VD: 10, 20, 50..." />
                     <span class="input-group-text">%</span>
@@ -27,7 +27,7 @@
             </div>
 
             <div class="form-group mb-3">
-                <label asp-for="MaxDiscountAmount" class="control-label"></label>
+                <label asp-for="MaxDiscountAmount" class="control-label">S? ti?n gi?m t?i ?a</label>
                 <div class="input-group">
                     <input asp-for="MaxDiscountAmount" class="form-control" type="number" min="0" placeholder="VD: 100000" />
                     <span class="input-group-text">?</span>
@@ -37,7 +37,7 @@
             </div>
 
             <div class="form-group mb-3">
-                <label asp-for="MinOrderAmount" class="control-label"></label>
+                <label asp-for="MinOrderAmount" class="control-label">Giá tr? ??n hàng t?i thi?u</label>
                 <div class="input-group">
                     <input asp-for="MinOrderAmount" class="form-control" type="number" min="0" placeholder="VD: 500000" />
                     <span class="input-group-text">?</span>
@@ -49,21 +49,21 @@
 
         <div class="col-md-6">
             <div class="form-group mb-3">
-                <label asp-for="StartDate" class="control-label"></label>
+                <label asp-for="StartDate" class="control-label">Ngày b?t ??u</label>
                 <input asp-for="StartDate" type="datetime-local" class="form-control" />
                 <small class="text-muted">?? tr?ng n?u có hi?u l?c ngay</small>
                 <span asp-validation-for="StartDate" class="text-danger"></span>
             </div>
 
             <div class="form-group mb-3">
-                <label asp-for="EndDate" class="control-label"></label>
+                <label asp-for="EndDate" class="control-label">Ngày k?t thúc</label>
                 <input asp-for="EndDate" type="datetime-local" class="form-control" min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
                 <small class="text-muted">?? tr?ng n?u không gi?i h?n th?i gian</small>
                 <span asp-validation-for="EndDate" class="text-danger"></span>
             </div>
 
             <div class="form-group mb-3">
-                <label asp-for="MaxUsage" class="control-label"></label>
+                <label asp-for="MaxUsage" class="control-label">S? l?n s? d?ng t?i ?a</label>
                 <input asp-for="MaxUsage" class="form-control" type="number" min="1" placeholder="VD: 100" />
                 <small class="text-muted">?? tr?ng n?u không gi?i h?n s? l?n s? d?ng</small>
                 <span asp-validation-for="MaxUsage" class="text-danger"></span>
