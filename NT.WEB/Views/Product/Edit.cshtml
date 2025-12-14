@@ -27,6 +27,66 @@
         <input asp-for="Name" class="form-control" />
         <span asp-validation-for="Name" class="text-danger"></span>
     </div>
+    <div class="form-group">
+        <label asp-for="ShortDescription">Mô tả ngắn</label>
+        <textarea asp-for="ShortDescription" class="form-control"></textarea>
+        <span asp-validation-for="ShortDescription" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Description">Mô tả chi tiết</label>
+        <textarea asp-for="Description" class="form-control"></textarea>
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Thumbnail">Ảnh đại diện</label>
+        <div class="mb-2">
+            <input type="file" id="thumbnail-file" accept="image/*" class="form-control" />
+        </div>
+        <div class="mb-2">
+            <img id="thumbnail-preview" src="@(Model.Thumbnail ?? "")" alt="preview" style="max-height:160px; @(string.IsNullOrWhiteSpace(Model.Thumbnail) ? "display:none;" : "") object-fit:contain;" />
+        </div>
+        <input asp-for="Thumbnail" id="Thumbnail" class="form-control" readonly />
+        <span asp-validation-for="Thumbnail" class="text-danger"></span>
+        <small class="form-text text-muted">Chọn ảnh mới để thay đổi ảnh đại diện.</small>
+    </div>
+    <div class="form-group">
+        <label asp-for="Status">Trạng thái</label>
+        <input asp-for="Status" class="form-control" />
+        <span asp-validation-for="Status" class="text-danger"></span>
+    </div>
     <button type="submit" class="btn btn-primary">Lưu</button>
     <a asp-action="Index" class="btn btn-secondary">Hủy</a>
 </form>
+
+<script>
+    (function(){
+        const fileInput = document.getElementById('thumbnail-file');
+        const preview = document.getElementById('thumbnail-preview');
+        const thumbnailInput = document.getElementById('Thumbnail');
+
+        fileInput.addEventListener('change', async function(){
+            const f = this.files && this.files[0];
+            if(!f) return;
+
+            // Preview ảnh
+            const url = URL.createObjectURL(f);
+            preview.src = url;
+            preview.style.display = 'inline-block';
+
+            // Upload ảnh lên server
+            const data = new FormData();
+            data.append('file', f);
+            try {
+                const res = await fetch('/ProductImage/Upload', { method: 'POST', body: data });
+                if(!res.ok) {
+                    alert('Tải ảnh thất bại');
+                    return;
+                }
+                const json = await res.json();
+                thumbnailInput.value = json.url || '';
+            } catch(e) {
+                alert('Có lỗi khi tải ảnh: ' + e.message);
+            }
+        });
+    })();
+</script>

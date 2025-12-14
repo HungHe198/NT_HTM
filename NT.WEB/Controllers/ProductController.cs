@@ -1,8 +1,10 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.IO;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 using NT.SHARED.Models;
 using NT.WEB.Services;
 
@@ -23,6 +25,7 @@ namespace NT.WEB.Controllers
         private readonly ColorWebService _colorService;
         private readonly ProductImageWebService _productImageService;
         private readonly Microsoft.Extensions.Logging.ILogger<ProductController> _logger;
+        private readonly Microsoft.AspNetCore.Hosting.IWebHostEnvironment _webHostEnvironment;
 
         public ProductController(ProductWebService productService,
                                  ProductDetailWebService productDetailService,
@@ -34,7 +37,8 @@ namespace NT.WEB.Controllers
                                  OriginCountryWebService originCountryService,
                                  ColorWebService colorService,
                                  ProductImageWebService productImageService,
-                                 Microsoft.Extensions.Logging.ILogger<ProductController> logger)
+                                 Microsoft.Extensions.Logging.ILogger<ProductController> logger,
+                                 Microsoft.AspNetCore.Hosting.IWebHostEnvironment webHostEnvironment)
         {
             _productService = productService ?? throw new ArgumentNullException(nameof(productService));
             _productDetailService = productDetailService ?? throw new ArgumentNullException(nameof(productDetailService));
@@ -47,6 +51,7 @@ namespace NT.WEB.Controllers
             _colorService = colorService ?? throw new ArgumentNullException(nameof(colorService));
             _productImageService = productImageService ?? throw new ArgumentNullException(nameof(productImageService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _webHostEnvironment = webHostEnvironment ?? throw new ArgumentNullException(nameof(webHostEnvironment));
         }
 
         // GET: /Product
@@ -97,12 +102,27 @@ namespace NT.WEB.Controllers
             var product = await _productService.GetByIdAsync(id);
             if (product is null) return NotFound();
 
+            // Load Brand for the product
+            if (product.BrandId != Guid.Empty)
+            {
+                product.Brand = await _brandService.GetByIdAsync(product.BrandId);
+            }
+
             var details = (await _productDetailService.GetWithLookupsByProductIdAsync(id)).ToList();
             var hardnessIds = details.Select(d => d.HardnessId).Distinct().ToList();
             var lengthIds = details.Select(d => d.LengthId).Distinct().ToList();
 
+            // Build dictionary: ProductDetailId -> list of image URLs
+            var detailImages = new Dictionary<Guid, List<string>>();
+            foreach (var detail in details)
+            {
+                var images = detail.Images?.Select(img => img.ImageUrl).ToList() ?? new List<string>();
+                detailImages[detail.Id] = images;
+            }
+
             ViewBag.Product = product;
             ViewBag.Details = details;
+            ViewBag.DetailImages = detailImages;
             ViewBag.HardnessOptions = (await _hardnessService.GetAllAsync()).Where(h => hardnessIds.Contains(h.Id)).OrderBy(h => h.Name).ToList();
             ViewBag.LengthOptions = (await _lengthService.GetAllAsync()).Where(l => lengthIds.Contains(l.Id)).OrderBy(l => l.Name).ToList();
 
@@ -263,7 +283,9 @@ namespace NT.WEB.Controllers
         // POST: /Product/CreateDetail/{productId}
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateDetail(Guid productId, ProductDetail model)
+        [RequestSizeLimit(2L * 1024 * 1024 * 1024)] // 2GB
+        [RequestFormLimits(MultipartBodyLengthLimit = 2L * 1024 * 1024 * 1024)]
+        public async Task<IActionResult> CreateDetail(Guid productId, ProductDetail model, List<IFormFile>? images)
         {
             if (productId == Guid.Empty || model is null) return BadRequest();
 
@@ -290,8 +312,58 @@ namespace NT.WEB.Controllers
                 model.Price,
                 model.StockQuantity);
 
+            // Copy additional properties
+            detail.Sections = model.Sections;
+            detail.CollapsedLength = model.CollapsedLength;
+            detail.Weight = model.Weight;
+            detail.TipWeight = model.TipWeight;
+            detail.ButtWeight = model.ButtWeight;
+            detail.TipDiameter = model.TipDiameter;
+            detail.TopDiameter = model.TopDiameter;
+            detail.ButtDiameter = model.ButtDiameter;
+            detail.BalancePoint = model.BalancePoint;
+            detail.BalanceLoadPoint = model.BalanceLoadPoint;
+            detail.BalanceLoadDescription = model.BalanceLoadDescription;
+            detail.RecommendedLine = model.RecommendedLine;
+            detail.RecommendedFishWeight = model.RecommendedFishWeight;
+            detail.HandleType = model.HandleType;
+            detail.JointType = model.JointType;
+            detail.Warranty = model.Warranty;
+            detail.SoldQuantity = model.SoldQuantity;
+            detail.CostPrice = model.CostPrice;
+            detail.LastImportDate = model.LastImportDate;
+
             await _productDetailService.AddAsync(detail);
             await _productDetailService.SaveChangesAsync();
+
+            // Handle image uploads
+            if (images != null && images.Count > 0)
+            {
+                var uploadPath = Path.Combine(_webHostEnvironment.WebRootPath, "uploads", "product-details", detail.Id.ToString());
+                if (!Directory.Exists(uploadPath))
+                {
+                    Directory.CreateDirectory(uploadPath);
+                }
+
+                foreach (var file in images)
+                {
+                    if (file.Length > 0)
+                    {
+                        var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
+                        var filePath = Path.Combine(uploadPath, fileName);
+
+                        using (var stream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await file.CopyToAsync(stream);
+                        }
+
+                        var imageUrl = $"/uploads/product-details/{detail.Id}/{fileName}";
+                        var productImage = ProductImage.Create(detail.Id, imageUrl);
+                        await _productImageService.AddAsync(productImage);
+                    }
+                }
+                await _productImageService.SaveChangesAsync();
+            }
 
             return RedirectToAction(nameof(Details), new { id = productId });
         }
@@ -303,16 +375,92 @@ namespace NT.WEB.Controllers
 
             var detail = await _productDetailService.GetByIdAsync(id);
             if (detail is null) return NotFound();
+
+            // Get existing images for this detail
+            var existingImages = await _productImageService.GetByProductDetailIdAsync(id);
+            ViewBag.ExistingImages = existingImages.ToList();
+
+            // Populate lookup select lists
+            ViewBag.LengthSelectList = new SelectList(await _lengthService.GetAllAsync(), "Id", "Name", detail.LengthId);
+            ViewBag.SurfaceFinishSelectList = new SelectList(await _surfaceFinishService.GetAllAsync(), "Id", "Name", detail.SurfaceFinishId);
+            ViewBag.HardnessSelectList = new SelectList(await _hardnessService.GetAllAsync(), "Id", "Name", detail.HardnessId);
+            ViewBag.ElasticitySelectList = new SelectList(await _elasticityService.GetAllAsync(), "Id", "Name", detail.ElasticityId);
+            ViewBag.OriginCountrySelectList = new SelectList(await _originCountryService.GetAllAsync(), "Id", "Name", detail.OriginCountryId);
+            ViewBag.ColorSelectList = new SelectList(await _colorService.GetAllAsync(), "Id", "Name", detail.ColorId);
+
             return View("ProductDetailEdit", detail);
         }
 
         // POST: /Product/EditDetail/{id}
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditDetail(Guid id, ProductDetail model)
+        [RequestSizeLimit(2L * 1024 * 1024 * 1024)] // 2GB
+        [RequestFormLimits(MultipartBodyLengthLimit = 2L * 1024 * 1024 * 1024)]
+        public async Task<IActionResult> EditDetail(Guid id, ProductDetail model, List<IFormFile>? images, List<Guid>? deleteImageIds)
         {
             if (id == Guid.Empty || model is null || id != model.Id) return BadRequest();
-            if (!ModelState.IsValid) return View("ProductDetailEdit", model);
+
+            if (!ModelState.IsValid)
+            {
+                var existingImages = await _productImageService.GetByProductDetailIdAsync(id);
+                ViewBag.ExistingImages = existingImages.ToList();
+                ViewBag.LengthSelectList = new SelectList(await _lengthService.GetAllAsync(), "Id", "Name", model.LengthId);
+                ViewBag.SurfaceFinishSelectList = new SelectList(await _surfaceFinishService.GetAllAsync(), "Id", "Name", model.SurfaceFinishId);
+                ViewBag.HardnessSelectList = new SelectList(await _hardnessService.GetAllAsync(), "Id", "Name", model.HardnessId);
+                ViewBag.ElasticitySelectList = new SelectList(await _elasticityService.GetAllAsync(), "Id", "Name", model.ElasticityId);
+                ViewBag.OriginCountrySelectList = new SelectList(await _originCountryService.GetAllAsync(), "Id", "Name", model.OriginCountryId);
+                ViewBag.ColorSelectList = new SelectList(await _colorService.GetAllAsync(), "Id", "Name", model.ColorId);
+                return View("ProductDetailEdit", model);
+            }
+
+            // Delete selected images
+            if (deleteImageIds != null && deleteImageIds.Count > 0)
+            {
+                foreach (var imageId in deleteImageIds)
+                {
+                    var image = await _productImageService.GetByIdAsync(imageId);
+                    if (image != null)
+                    {
+                        // Delete physical file
+                        var physicalPath = Path.Combine(_webHostEnvironment.WebRootPath, image.ImageUrl.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
+                        if (System.IO.File.Exists(physicalPath))
+                        {
+                            System.IO.File.Delete(physicalPath);
+                        }
+                        await _productImageService.DeleteAsync(imageId);
+                    }
+                }
+                await _productImageService.SaveChangesAsync();
+            }
+
+            // Handle new image uploads
+            if (images != null && images.Count > 0)
+            {
+                var uploadPath = Path.Combine(_webHostEnvironment.WebRootPath, "uploads", "product-details", id.ToString());
+                if (!Directory.Exists(uploadPath))
+                {
+                    Directory.CreateDirectory(uploadPath);
+                }
+
+                foreach (var file in images)
+                {
+                    if (file.Length > 0)
+                    {
+                        var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
+                        var filePath = Path.Combine(uploadPath, fileName);
+
+                        using (var stream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await file.CopyToAsync(stream);
+                        }
+
+                        var imageUrl = $"/uploads/product-details/{id}/{fileName}";
+                        var productImage = ProductImage.Create(id, imageUrl);
+                        await _productImageService.AddAsync(productImage);
+                    }
+                }
+                await _productImageService.SaveChangesAsync();
+            }
 
             await _productDetailService.UpdateAsync(model);
             await _productDetailService.SaveChangesAsync();

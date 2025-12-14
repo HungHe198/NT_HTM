@@ -1,32 +1,259 @@
 @model NT.SHARED.Models.ProductDetail
 
 @{
-    ViewBag.Title = "Edit Product Detail";
+    ViewBag.Title = "Chỉnh sửa chi tiết sản phẩm";
+    var existingImages = ViewBag.ExistingImages as List<NT.SHARED.Models.ProductImage> ?? new List<NT.SHARED.Models.ProductImage>();
 }
 
-<h1>Edit Product Detail</h1>
+<h1>Chỉnh sửa chi tiết sản phẩm</h1>
 
-<form asp-action="EditDetail" method="post">
+<form asp-action="EditDetail" method="post" enctype="multipart/form-data">
     <input type="hidden" asp-for="Id" />
-    <div class="form-group">
-        <label asp-for="Price"></label>
-        <input asp-for="Price" class="form-control" />
-        <span asp-validation-for="Price" class="text-danger"></span>
+    <input type="hidden" asp-for="ProductId" />
+
+    <div class="row">
+        <div class="col-md-6">
+            <h5>Thông tin cơ bản</h5>
+            
+            <div class="form-group">
+                <label asp-for="Price">@Html.DisplayNameFor(m => m.Price)</label>
+                <input asp-for="Price" class="form-control" type="number" step="0.01" />
+                <span asp-validation-for="Price" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="StockQuantity">@Html.DisplayNameFor(m => m.StockQuantity)</label>
+                <input asp-for="StockQuantity" class="form-control" />
+                <span asp-validation-for="StockQuantity" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="LengthId">@Html.DisplayNameFor(m => m.LengthId)</label>
+                <select asp-for="LengthId" asp-items="ViewBag.LengthSelectList" class="form-control">
+                    <option value="">-- Chọn chiều dài --</option>
+                </select>
+                <span asp-validation-for="LengthId" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="SurfaceFinishId">@Html.DisplayNameFor(m => m.SurfaceFinishId)</label>
+                <select asp-for="SurfaceFinishId" asp-items="ViewBag.SurfaceFinishSelectList" class="form-control">
+                    <option value="">-- Chọn hoàn thiện bề mặt --</option>
+                </select>
+                <span asp-validation-for="SurfaceFinishId" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="HardnessId">@Html.DisplayNameFor(m => m.HardnessId)</label>
+                <select asp-for="HardnessId" asp-items="ViewBag.HardnessSelectList" class="form-control">
+                    <option value="">-- Chọn độ cứng --</option>
+                </select>
+                <span asp-validation-for="HardnessId" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="ElasticityId">@Html.DisplayNameFor(m => m.ElasticityId)</label>
+                <select asp-for="ElasticityId" asp-items="ViewBag.ElasticitySelectList" class="form-control">
+                    <option value="">-- Chọn độ đàn hồi --</option>
+                </select>
+                <span asp-validation-for="ElasticityId" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="OriginCountryId">@Html.DisplayNameFor(m => m.OriginCountryId)</label>
+                <select asp-for="OriginCountryId" asp-items="ViewBag.OriginCountrySelectList" class="form-control">
+                    <option value="">-- Chọn xuất xứ --</option>
+                </select>
+                <span asp-validation-for="OriginCountryId" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="ColorId">@Html.DisplayNameFor(m => m.ColorId)</label>
+                <select asp-for="ColorId" asp-items="ViewBag.ColorSelectList" class="form-control">
+                    <option value="">-- Chọn màu --</option>
+                </select>
+                <span asp-validation-for="ColorId" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <h5>Thông số kỹ thuật</h5>
+
+            <div class="form-group">
+                <label asp-for="Sections">@Html.DisplayNameFor(m => m.Sections)</label>
+                <input asp-for="Sections" class="form-control" />
+            </div>
+
+            <div class="form-group">
+                <label asp-for="CollapsedLength">@Html.DisplayNameFor(m => m.CollapsedLength)</label>
+                <input asp-for="CollapsedLength" class="form-control" />
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Weight">@Html.DisplayNameFor(m => m.Weight)</label>
+                <input asp-for="Weight" class="form-control" />
+            </div>
+
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label asp-for="TipWeight">@Html.DisplayNameFor(m => m.TipWeight)</label>
+                    <input asp-for="TipWeight" class="form-control" />
+                </div>
+                <div class="form-group col-md-6">
+                    <label asp-for="ButtWeight">@Html.DisplayNameFor(m => m.ButtWeight)</label>
+                    <input asp-for="ButtWeight" class="form-control" />
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group col-md-4">
+                    <label asp-for="TipDiameter">@Html.DisplayNameFor(m => m.TipDiameter)</label>
+                    <input asp-for="TipDiameter" class="form-control" />
+                </div>
+                <div class="form-group col-md-4">
+                    <label asp-for="TopDiameter">@Html.DisplayNameFor(m => m.TopDiameter)</label>
+                    <input asp-for="TopDiameter" class="form-control" />
+                </div>
+                <div class="form-group col-md-4">
+                    <label asp-for="ButtDiameter">@Html.DisplayNameFor(m => m.ButtDiameter)</label>
+                    <input asp-for="ButtDiameter" class="form-control" />
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="BalancePoint">@Html.DisplayNameFor(m => m.BalancePoint)</label>
+                <input asp-for="BalancePoint" class="form-control" />
+            </div>
+
+            <div class="form-group">
+                <label asp-for="BalanceLoadPoint">@Html.DisplayNameFor(m => m.BalanceLoadPoint)</label>
+                <input asp-for="BalanceLoadPoint" class="form-control" />
+            </div>
+
+            <div class="form-group">
+                <label asp-for="BalanceLoadDescription">@Html.DisplayNameFor(m => m.BalanceLoadDescription)</label>
+                <textarea asp-for="BalanceLoadDescription" class="form-control"></textarea>
+            </div>
+        </div>
     </div>
-    <div class="form-group">
-        <label asp-for="StockQuantity"></label>
-        <input asp-for="StockQuantity" class="form-control" />
-        <span asp-validation-for="StockQuantity" class="text-danger"></span>
+
+    <hr />
+    <h5>Thông tin bổ sung</h5>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label asp-for="RecommendedLine">@Html.DisplayNameFor(m => m.RecommendedLine)</label>
+                <input asp-for="RecommendedLine" class="form-control" />
+            </div>
+
+            <div class="form-group">
+                <label asp-for="RecommendedFishWeight">@Html.DisplayNameFor(m => m.RecommendedFishWeight)</label>
+                <input asp-for="RecommendedFishWeight" class="form-control" />
+            </div>
+
+            <div class="form-group">
+                <label asp-for="HandleType">@Html.DisplayNameFor(m => m.HandleType)</label>
+                <input asp-for="HandleType" class="form-control" />
+            </div>
+
+            <div class="form-group">
+                <label asp-for="JointType">@Html.DisplayNameFor(m => m.JointType)</label>
+                <input asp-for="JointType" class="form-control" />
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Warranty">@Html.DisplayNameFor(m => m.Warranty)</label>
+                <input asp-for="Warranty" class="form-control" />
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="form-group">
+                <label asp-for="SoldQuantity">@Html.DisplayNameFor(m => m.SoldQuantity)</label>
+                <input asp-for="SoldQuantity" class="form-control" />
+            </div>
+
+            <div class="form-group">
+                <label asp-for="CostPrice">@Html.DisplayNameFor(m => m.CostPrice)</label>
+                <input asp-for="CostPrice" class="form-control" type="number" step="0.01" />
+            </div>
+
+            <div class="form-group">
+                <label asp-for="LastImportDate">@Html.DisplayNameFor(m => m.LastImportDate)</label>
+                <input asp-for="LastImportDate" class="form-control" type="date" />
+            </div>
+
+            <div class="form-group form-check">
+                <input asp-for="IsActive" class="form-check-input" />
+                <label asp-for="IsActive" class="form-check-label">@Html.DisplayNameFor(m => m.IsActive)</label>
+            </div>
+        </div>
     </div>
-    <!-- FK inputs -->
+
+    <hr />
+    <h5>Quản lý ảnh</h5>
+    <p class="text-muted">Tick chọn ảnh muốn xóa. Có thể thêm ảnh mới bên dưới. Hỗ trợ upload tối đa 2GB.</p>
+
+    @if (existingImages.Any())
+    {
+        <div class="mb-3">
+            <label class="form-label">Ảnh hiện có:</label>
+            <div class="d-flex flex-wrap gap-3">
+                @foreach (var img in existingImages)
+                {
+                    <div class="text-center" style="position:relative;">
+                        <img src="@img.ImageUrl" alt="Product Image" 
+                             style="width:120px; height:120px; object-fit:cover; border:1px solid #ddd; border-radius:4px;" />
+                        <div class="mt-1">
+                            <input type="checkbox" name="deleteImageIds" value="@img.Id" id="del-@img.Id" class="form-check-input" />
+                            <label for="del-@img.Id" class="form-check-label text-danger small">Xóa</label>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    else
+    {
+        <p class="text-muted">Chưa có ảnh nào.</p>
+    }
+
     <div class="form-group">
-        <label asp-for="LengthId">LengthId (GUID)</label>
-        <input asp-for="LengthId" class="form-control" />
+        <label>Thêm ảnh mới:</label>
+        <input type="file" name="images" class="form-control" multiple accept="image/*" id="imageInput" />
     </div>
-    <div class="form-group">
-        <label asp-for="ColorId">ColorId (GUID)</label>
-        <input asp-for="ColorId" class="form-control" />
-    </div>
-    <button type="submit" class="btn btn-primary">Save</button>
-    <a asp-action="Details" asp-route-id="@Model.ProductId" class="btn btn-secondary">Cancel</a>
+
+    <div id="imagePreviewContainer" class="d-flex flex-wrap gap-2 mb-3"></div>
+
+    <hr />
+    <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+    <a asp-action="Details" asp-route-id="@Model.ProductId" class="btn btn-secondary">Hủy</a>
 </form>
+
+@section Scripts {
+    <script>
+        document.getElementById('imageInput').addEventListener('change', function(e) {
+            const container = document.getElementById('imagePreviewContainer');
+            container.innerHTML = '';
+            const files = e.target.files;
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        const div = document.createElement('div');
+                        div.style.position = 'relative';
+                        div.innerHTML = `
+                            <img src="${event.target.result}" 
+                                 style="width:100px; height:100px; object-fit:cover; border:1px solid #ddd; border-radius:4px;" />
+                            <small class="d-block text-center text-truncate" style="max-width:100px;">${file.name}</small>
+                        `;
+                        container.appendChild(div);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+        });
+    </script>
+}

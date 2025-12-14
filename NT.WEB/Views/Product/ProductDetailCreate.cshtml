@@ -1,4 +1,4 @@
-﻿@model NT.SHARED.Models.ProductDetail
+@model NT.SHARED.Models.ProductDetail
 
 @{
     ViewBag.Title = "Tạo chi tiết sản phẩm";
@@ -7,7 +7,7 @@
 
 <h1>Tạo chi tiết sản phẩm</h1>
 
-<form asp-action="CreateDetail" method="post">
+<form asp-action="CreateDetail" method="post" enctype="multipart/form-data">
     <input type="hidden" name="productId" value="@productId" />
 
     <div class="form-group">
@@ -207,6 +207,44 @@
         <span asp-validation-for="IsActive" class="text-danger"></span>
     </div>
 
+    <hr />
+    <h5>Ảnh sản phẩm</h5>
+    <p class="text-muted">Có thể chọn nhiều ảnh cùng lúc. Hỗ trợ upload tối đa 2GB.</p>
+
+    <div class="form-group">
+        <label>Chọn ảnh</label>
+        <input type="file" name="images" class="form-control" multiple accept="image/*" id="imageInput" />
+    </div>
+
+    <div id="imagePreviewContainer" class="d-flex flex-wrap gap-2 mb-3"></div>
+
     <button type="submit" class="btn btn-primary">Lưu</button>
     <a asp-action="Details" asp-route-id="@productId" class="btn btn-secondary">Hủy</a>
 </form>
+
+@section Scripts {
+    <script>
+        document.getElementById('imageInput').addEventListener('change', function(e) {
+            const container = document.getElementById('imagePreviewContainer');
+            container.innerHTML = '';
+            const files = e.target.files;
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        const div = document.createElement('div');
+                        div.style.position = 'relative';
+                        div.innerHTML = `
+                            <img src="${event.target.result}" 
+                                 style="width:100px; height:100px; object-fit:cover; border:1px solid #ddd; border-radius:4px;" />
+                            <small class="d-block text-center text-truncate" style="max-width:100px;">${file.name}</small>
+                        `;
+                        container.appendChild(div);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+        });
+    </script>
+}

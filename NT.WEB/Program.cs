@@ -1,5 +1,3 @@
-
-
 using NT.BLL.Interfaces;
 using NT.BLL.Services;
 using NT.DAL.ContextFile;
@@ -14,8 +12,28 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configure Kestrel to allow large file uploads (up to 2GB)
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Limits.MaxRequestBodySize = 2L * 1024 * 1024 * 1024; // 2GB
+});
+
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(options =>
+{
+    // Allow large form values
+}).AddMvcOptions(options =>
+{
+    options.MaxModelBindingCollectionSize = int.MaxValue;
+});
+
+// Configure form options for large file uploads
+builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 2L * 1024 * 1024 * 1024; // 2GB
+    options.ValueLengthLimit = int.MaxValue;
+    options.MultipartHeadersLengthLimit = int.MaxValue;
+});
 
 // Ensure UTF-8 is used everywhere (helps avoid ? characters for Vietnamese text)
 Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
