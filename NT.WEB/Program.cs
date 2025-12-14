@@ -24,7 +24,7 @@ Console.InputEncoding = Encoding.UTF8;
 
 // Register DbContext using connection string from configuration
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<NTAppDbContext>(options => options.UseSqlServer(connectionString));
+builder.Services.AddDbContext<NTAppDbContext>(options => { });
 
 // Register open-generic repository implementation for IGenericRepository<T>
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));

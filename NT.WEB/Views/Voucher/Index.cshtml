@@ -28,7 +28,7 @@
     <tbody>
     @foreach (var item in Model ?? Enumerable.Empty<NT.SHARED.Models.Voucher>())
     {
-        var now = DateTime.UtcNow;
+        var now = DateTime.Now;
         var isNotStarted = item.StartDate.HasValue && now < item.StartDate.Value;
         var isExpiredByDate = item.EndDate.HasValue && now > item.EndDate.Value;
         var isExpiredByUsage = item.MaxUsage.HasValue && item.UsageCount >= item.MaxUsage.Value;

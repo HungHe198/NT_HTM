@@ -2,17 +2,7 @@
 @model IEnumerable<CartItemDto>
 @{
     Layout = "~/Views/Shared/_ClientLayout.cshtml";
-    var calcSubtotal = Model.Where(i => i.Quantity > 0).Sum(i => i.UnitPrice * i.Quantity);
     var shipping = 35000m; // flat demo fee
-    // Read voucher from session (shared with CartController)
-    var appliedCode = ViewContext?.HttpContext?.Session?.GetString("SESSION_VOUCHER_CODE");
-    decimal voucherDiscount = 0m;
-    var discountStr = ViewContext?.HttpContext?.Session?.GetString("SESSION_VOUCHER_DISCOUNT");
-    if (!string.IsNullOrWhiteSpace(discountStr) && decimal.TryParse(discountStr, out var d))
-    {
-        voucherDiscount = d;
-    }
-    var total = calcSubtotal + shipping - voucherDiscount;
 }
 
 <h2>Giỏ hàng của bạn</h2>
@@ -28,7 +18,9 @@
             <table class="table">
                 <thead>
                     <tr>
-                        <th></th>
+                        <th>
+                            <input type="checkbox" id="selectAll" title="Chọn tất cả" />
+                        </th>
                         <th>Sản phẩm</th>
                         <th>Giá</th>
                         <th>Số lượng</th>
@@ -41,14 +33,17 @@
                 {
                     <tr>
                         <td>
-                            <input type="checkbox" name="selectedIds" value="@item.ProductDetailId" />
+                            <input type="checkbox" name="selectedIds" value="@item.ProductDetailId" 
+                                   class="item-checkbox"
+                                   data-price="@item.UnitPrice" 
+                                   data-quantity="@item.Quantity" />
                         </td>
                         <td>
                             <div class="d-flex align-items-center gap-2">
                                 <img src="@(item.Thumbnail ?? "/images/product-placeholder.png")" alt="@item.ProductName" style="width:60px;height:60px;object-fit:cover" />
                                 <div>
                                     <div>@(string.IsNullOrWhiteSpace(item.ProductName) ? "Sản phẩm" : item.ProductName)</div>
-                                    <small class="text-muted">Độ dài: @(string.IsNullOrWhiteSpace(item.LengthName) ? "N/A" : item.LengthName), Độ cứng: @(string.IsNullOrWhiteSpace(item.HardnessName) ? "N/A" : item.HardnessName),@*  Màu: @(string.IsNullOrWhiteSpace(item.ColorName) ? "N/A" : item.ColorName *@)</small>
+                                    <small class="text-muted">Độ dài: @(string.IsNullOrWhiteSpace(item.LengthName) ? "N/A" : item.LengthName), Độ cứng: @(string.IsNullOrWhiteSpace(item.HardnessName) ? "N/A" : item.HardnessName)</small>
                                 </div>
                             </div>
                         </td>
@@ -60,7 +55,7 @@
                                 <button type="button" class="btn btn-outline-secondary btn-sm qty-plus">+</button>
                             </div>
                         </td>
-                        <td class="text-nowrap">@string.Format("{0:#,##0}", item.UnitPrice * item.Quantity)</td>
+                        <td class="text-nowrap item-subtotal">@string.Format("{0:#,##0}", item.UnitPrice * item.Quantity)</td>
                         <td>
                             <button class="btn btn-link text-danger" type="submit" formmethod="post" formaction="@Url.Action("Remove", "CartDetail", new { cartId = ViewBag.CartId, productDetailId = item.ProductDetailId })">Xóa</button>
                         </td>
@@ -69,44 +64,26 @@
                 </tbody>
             </table>
             <div class="d-flex gap-2 mb-3">
-                <button type="submit" class="btn btn-warning">Thanh toán mục đã chọn</button>
+                <button type="submit" class="btn btn-warning" id="btnCheckout" disabled>Thanh toán mục đã chọn</button>
+                <span class="text-muted align-self-center" id="selectedCount">(Chưa chọn sản phẩm nào)</span>
             </div>
             </form>
         }
         <div class="d-flex gap-2">
             <a class="btn btn-outline-secondary" asp-controller="Home" asp-action="Index">Tiếp tục xem sản phẩm</a>
-            <button class="btn btn-secondary" disabled>Cập nhật giỏ hàng</button>
         </div>
     
     </div>
     <div class="col-md-4">
         <div class="card">
             <div class="card-body">
-                <h5 class="card-title">Tổng cộng giỏ hàng</h5>
-                <form asp-action="ApplyVoucher" asp-controller="Cart" method="post" class="input-group mb-3">
-                    <input type="text" name="code" class="form-control" placeholder="Nhập mã giảm giá" value="@appliedCode" />
-                    <button class="btn btn-outline-primary" type="submit">Áp dụng</button>
-                </form>
-                @if (!string.IsNullOrWhiteSpace(appliedCode))
-                {
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <small class="text-success">Đã áp dụng: <strong>@appliedCode</strong></small>
-                        <form asp-action="RemoveVoucher" asp-controller="Cart" method="post" class="d-inline">
-                            <button class="btn btn-link btn-sm text-danger" type="submit">Bỏ mã</button>
-                        </form>
-                    </div>
-                }
-                <div class="d-flex justify-content-between"><span>Tạm tính</span> <strong>@calcSubtotal.ToString("#,##0")</strong></div>
-                <div class="d-flex justify-content-between"><span>Vận chuyển</span> <strong>@shipping.ToString("#,##0")</strong></div>
-                @if (voucherDiscount > 0)
-                {
-                    <div class="d-flex justify-content-between"><span>Giảm theo voucher</span> <strong class="text-success">-@voucherDiscount.ToString("#,##0")</strong></div>
-                }
+                <h5 class="card-title">Tổng cộng đã chọn</h5>
+                <div class="d-flex justify-content-between"><span>Tạm tính (<span id="itemCount">0</span> sản phẩm)</span> <strong id="subtotalDisplay">0</strong></div>
+                <div class="d-flex justify-content-between"><span>Vận chuyển</span> <strong id="shippingDisplay">@shipping.ToString("#,##0")</strong></div>
                 <hr />
-                <div class="d-flex justify-content-between"><span>Tổng</span> <strong>@total.ToString("#,##0")</strong></div>
-                <div class="d-flex gap-2 mb-3">
-              
-            </div>
+                <div class="d-flex justify-content-between"><span>Tổng</span> <strong class="fs-5" id="totalDisplay">0</strong></div>
+                <p class="text-muted small mt-2">Mã giảm giá sẽ được áp dụng tại bước thanh toán</p>
+                <div id="noSelectionMsg" class="text-warning small">Vui lòng chọn sản phẩm để xem tổng tiền</div>
             </div>
         </div>
     </div>
@@ -115,6 +92,75 @@
 <script>
     (function() {
         const cartId = '@ViewBag.CartId';
+        const shippingFee = @((int)shipping);
+        
+        // Format number with thousand separators
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+        
+        // Calculate and update totals based on selected checkboxes
+        function updateTotals() {
+            const checkboxes = document.querySelectorAll('.item-checkbox:checked');
+            let subtotal = 0;
+            let itemCount = 0;
+            
+            checkboxes.forEach(cb => {
+                const price = parseFloat(cb.getAttribute('data-price')) || 0;
+                const qty = parseInt(cb.getAttribute('data-quantity')) || 0;
+                subtotal += price * qty;
+                itemCount++;
+            });
+            
+            const total = itemCount > 0 ? subtotal + shippingFee : 0;
+            
+            document.getElementById('subtotalDisplay').textContent = formatNumber(subtotal);
+            document.getElementById('totalDisplay').textContent = formatNumber(total);
+            document.getElementById('itemCount').textContent = itemCount;
+            document.getElementById('shippingDisplay').textContent = itemCount > 0 ? formatNumber(shippingFee) : '0';
+            
+            // Update button state and message
+            const btnCheckout = document.getElementById('btnCheckout');
+            const selectedCount = document.getElementById('selectedCount');
+            const noSelectionMsg = document.getElementById('noSelectionMsg');
+            
+            if (itemCount > 0) {
+                btnCheckout.disabled = false;
+                selectedCount.textContent = `(Đã chọn ${itemCount} sản phẩm)`;
+                noSelectionMsg.style.display = 'none';
+            } else {
+                btnCheckout.disabled = true;
+                selectedCount.textContent = '(Chưa chọn sản phẩm nào)';
+                noSelectionMsg.style.display = 'block';
+            }
+            
+            // Update "Select All" checkbox state
+            const allCheckboxes = document.querySelectorAll('.item-checkbox');
+            const selectAllCb = document.getElementById('selectAll');
+            if (selectAllCb) {
+                selectAllCb.checked = allCheckboxes.length > 0 && checkboxes.length === allCheckboxes.length;
+                selectAllCb.indeterminate = checkboxes.length > 0 && checkboxes.length < allCheckboxes.length;
+            }
+        }
+        
+        // Add event listeners to checkboxes
+        document.querySelectorAll('.item-checkbox').forEach(cb => {
+            cb.addEventListener('change', updateTotals);
+        });
+        
+        // Select All functionality
+        const selectAllCb = document.getElementById('selectAll');
+        if (selectAllCb) {
+            selectAllCb.addEventListener('change', function() {
+                const checkboxes = document.querySelectorAll('.item-checkbox');
+                checkboxes.forEach(cb => cb.checked = this.checked);
+                updateTotals();
+            });
+        }
+        
+        // Initial calculation
+        updateTotals();
+        
         function postUpdate(productDetailId, quantity) {
             const form = document.createElement('form');
             form.method = 'post';

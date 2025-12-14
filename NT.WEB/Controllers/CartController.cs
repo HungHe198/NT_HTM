@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using NT.SHARED.Models;
 using NT.WEB.Services;
 using System;
@@ -199,11 +199,11 @@ namespace NT.WEB.Controllers
 
             if (!voucher.IsValid())
             {
-                if (voucher.EndDate.HasValue && voucher.EndDate.Value < DateTime.UtcNow)
+                if (voucher.EndDate.HasValue && voucher.EndDate.Value < DateTime.Now)
                 {
                     TempData["Error"] = "Voucher đã hết hạn";
                 }
-                else if (voucher.StartDate.HasValue && voucher.StartDate.Value > DateTime.UtcNow)
+                else if (voucher.StartDate.HasValue && voucher.StartDate.Value > DateTime.Now)
                 {
                     TempData["Error"] = "Voucher chưa bắt đầu";
                 }

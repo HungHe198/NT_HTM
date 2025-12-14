@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using NT.BLL.Interfaces;
 using NT.SHARED.Models;
 using System;
@@ -44,23 +44,10 @@ namespace NT.WEB.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Voucher voucher)
         {
-            // Validate StartDate và EndDate
-            if (voucher.StartDate.HasValue)
+            // Validate EndDate phải là tương lai (sử dụng local time)
+            if (voucher.EndDate.HasValue && voucher.EndDate.Value <= DateTime.Now)
             {
-                voucher.StartDate = DateTime.SpecifyKind(voucher.StartDate.Value, DateTimeKind.Utc);
-            }
-
-            if (voucher.EndDate.HasValue)
-            {
-                var endDateUtc = DateTime.SpecifyKind(voucher.EndDate.Value, DateTimeKind.Utc);
-                if (endDateUtc <= DateTime.UtcNow)
-                {
-                    ModelState.AddModelError(nameof(voucher.EndDate), "Ngày kết thúc phải là thời gian trong tương lai");
-                }
-                else
-                {
-                    voucher.EndDate = endDateUtc;
-                }
+                ModelState.AddModelError(nameof(voucher.EndDate), "Ngày kết thúc phải là thời gian trong tương lai");
             }
 
             if (voucher.StartDate.HasValue && voucher.EndDate.HasValue && voucher.StartDate.Value >= voucher.EndDate.Value)
@@ -106,17 +93,7 @@ namespace NT.WEB.Controllers
         {
             if (id == Guid.Empty || voucher is null || id != voucher.Id) return BadRequest();
 
-            // Validate StartDate và EndDate
-            if (voucher.StartDate.HasValue)
-            {
-                voucher.StartDate = DateTime.SpecifyKind(voucher.StartDate.Value, DateTimeKind.Utc);
-            }
-
-            if (voucher.EndDate.HasValue)
-            {
-                voucher.EndDate = DateTime.SpecifyKind(voucher.EndDate.Value, DateTimeKind.Utc);
-            }
-
+            // Validate StartDate và EndDate (giữ nguyên local time)
             if (voucher.StartDate.HasValue && voucher.EndDate.HasValue && voucher.StartDate.Value >= voucher.EndDate.Value)
             {
                 ModelState.AddModelError(nameof(voucher.StartDate), "Ngày bắt đầu phải trước ngày kết thúc");

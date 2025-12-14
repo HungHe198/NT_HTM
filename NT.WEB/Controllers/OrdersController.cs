@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NT.SHARED.Models;
 using System;
@@ -12,16 +12,19 @@ namespace NT.WEB.Controllers
         private readonly NT.BLL.Interfaces.IGenericRepository<Order> _orderRepo;
         private readonly NT.BLL.Interfaces.IGenericRepository<OrderDetail> _orderDetailRepo;
         private readonly NT.BLL.Interfaces.IGenericRepository<ProductDetail> _productDetailRepo;
+        private readonly NT.BLL.Interfaces.IGenericRepository<Voucher> _voucherRepo;
         private readonly NT.WEB.Services.CustomerWebService _customerService;
 
         public OrdersController(NT.BLL.Interfaces.IGenericRepository<Order> orderRepo,
                                  NT.BLL.Interfaces.IGenericRepository<OrderDetail> orderDetailRepo,
                                  NT.BLL.Interfaces.IGenericRepository<ProductDetail> productDetailRepo,
+                                 NT.BLL.Interfaces.IGenericRepository<Voucher> voucherRepo,
                                  NT.WEB.Services.CustomerWebService customerService)
         {
             _orderRepo = orderRepo;
             _orderDetailRepo = orderDetailRepo;
             _productDetailRepo = productDetailRepo;
+            _voucherRepo = voucherRepo;
             _customerService = customerService;
         }
 
@@ -153,6 +156,19 @@ namespace NT.WEB.Controllers
             order.Note = note; // hidden from customer during placement, only used for cancellation reason
             order.Status = "-1"; // canceled
             await _orderRepo.UpdateAsync(order);
+
+            // Hoàn trả UsageCount của voucher nếu đơn hàng có sử dụng voucher
+            if (order.VoucherId.HasValue)
+            {
+                var voucher = await _voucherRepo.GetByIdAsync(order.VoucherId.Value);
+                if (voucher != null && voucher.UsageCount > 0)
+                {
+                    voucher.UsageCount--;
+                    await _voucherRepo.UpdateAsync(voucher);
+                    await _voucherRepo.SaveChangesAsync();
+                }
+            }
+
             // If the order was previously in a status that deducted inventory, restore for each item
             if (previousStatus == "1" || previousStatus == "2" || previousStatus == "3")
             {

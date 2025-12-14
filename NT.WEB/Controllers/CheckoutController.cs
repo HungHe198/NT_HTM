@@ -50,7 +50,7 @@ namespace NT.WEB.Controllers
                 .ToArray();
             if (ids.Length == 0)
             {
-                TempData["Error"] = "Vui l�ng ch?n s?n ph?m ?? thanh to�n";
+                TempData["Error"] = "Vui lòng chọn sản phẩm để thanh toán";
                 return Redirect($"/CartDetail?cartId={cartId}");
             }
 
@@ -68,7 +68,7 @@ namespace NT.WEB.Controllers
                 .ToList();
             if (!selectedItems.Any())
             {
-                TempData["Error"] = "S?n ph?m ch?n kh�ng h?p l?";
+                TempData["Error"] = "Sản phẩm chọn không hợp lí";
                 return Redirect($"/CartDetail?cartId={cartId}");
             }
 
@@ -77,22 +77,151 @@ namespace NT.WEB.Controllers
             ViewBag.CartId = cartId;
             ViewBag.SelectedIds = string.Join(',', selectedItems.Select(s => s.ProductDetailId));
 
+            // Tính toán subtotal
+            decimal subtotal = 0m;
             var vm = new List<object>();
             foreach (var ci in selectedItems)
             {
                 var pd = ci.ProductDetail ?? await _productDetailService.GetByIdAsync(ci.ProductDetailId);
                 if (pd == null) continue;
+                subtotal += pd.Price * ci.Quantity;
                 vm.Add(new
                 {
                     ProductDetailId = ci.ProductDetailId,
-                    Name = pd.Product?.Name ?? "S?n ph?m",
+                    Name = pd.Product?.Name ?? "Sản phẩm",
                     Price = pd.Price,
                     Quantity = ci.Quantity,
                     Length = pd.Length?.Name,
                     Hardness = pd.Hardness?.Name
                 });
             }
+
+            // Tính toán voucher discount từ session
+            decimal voucherDiscount = 0m;
+            var appliedCode = HttpContext.Session.GetString("SESSION_VOUCHER_CODE");
+            if (!string.IsNullOrWhiteSpace(appliedCode))
+            {
+                var found = await _voucherRepo.FindAsync(v => v.Code == appliedCode);
+                var voucher = found?.FirstOrDefault();
+                if (voucher != null && voucher.IsValid())
+                {
+                    voucherDiscount = voucher.CalculateDiscount(subtotal);
+                }
+                else
+                {
+                    // Voucher không hợp lệ, xóa khỏi session
+                    HttpContext.Session.Remove("SESSION_VOUCHER_CODE");
+                    HttpContext.Session.Remove("SESSION_VOUCHER_DISCOUNT");
+                    appliedCode = null;
+                }
+            }
+
+            var shippingFee = 35000m;
+            ViewBag.Subtotal = subtotal;
+            ViewBag.ShippingFee = shippingFee;
+            ViewBag.VoucherDiscount = voucherDiscount;
+            ViewBag.Total = subtotal + shippingFee - voucherDiscount;
+            ViewBag.AppliedVoucherCode = appliedCode;
+
             return View(vm);
+        }
+
+        // POST: /Checkout/ApplyVoucher - Áp dụng mã giảm giá tại trang thanh toán
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ApplyVoucher(Guid cartId, string selectedIds, string code)
+        {
+            code = code?.Trim().ToUpperInvariant() ?? string.Empty;
+            
+            if (string.IsNullOrWhiteSpace(code))
+            {
+                TempData["Error"] = "Vui lòng nhập mã voucher";
+                return Redirect($"/Checkout/Start?cartId={cartId}&selected={selectedIds}");
+            }
+
+            // Tính subtotal để validate voucher
+            var ids = (selectedIds ?? string.Empty)
+                .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(s => Guid.TryParse(s, out var g) ? g : Guid.Empty)
+                .Where(g => g != Guid.Empty)
+                .ToArray();
+
+            var cartItems = await _cartDetailService.FindWithIncludesAsync(
+                cd => cd.CartId == cartId,
+                cd => cd.ProductDetail!
+            );
+            var selectedItems = (cartItems ?? Enumerable.Empty<CartDetail>())
+                .Where(ci => ids.Contains(ci.ProductDetailId) && ci.Quantity > 0)
+                .ToList();
+
+            decimal subtotal = 0m;
+            foreach (var ci in selectedItems)
+            {
+                var pd = ci.ProductDetail ?? await _productDetailService.GetByIdAsync(ci.ProductDetailId);
+                var price = pd?.Price ?? 0m;
+                subtotal += price * ci.Quantity;
+            }
+
+            // Tìm voucher
+            var found = await _voucherRepo.FindAsync(v => v.Code == code);
+            var voucher = found?.FirstOrDefault();
+            
+            if (voucher == null)
+            {
+                TempData["Error"] = "Mã voucher không tồn tại";
+                HttpContext.Session.Remove("SESSION_VOUCHER_CODE");
+                HttpContext.Session.Remove("SESSION_VOUCHER_DISCOUNT");
+                return Redirect($"/Checkout/Start?cartId={cartId}&selected={selectedIds}");
+            }
+
+            if (!voucher.IsValid())
+            {
+                if (voucher.EndDate.HasValue && voucher.EndDate.Value < DateTime.Now)
+                {
+                    TempData["Error"] = "Voucher đã hết hạn";
+                }
+                else if (voucher.StartDate.HasValue && voucher.StartDate.Value > DateTime.Now)
+                {
+                    TempData["Error"] = "Voucher chưa bắt đầu";
+                }
+                else if (voucher.MaxUsage.HasValue && voucher.UsageCount >= voucher.MaxUsage.Value)
+                {
+                    TempData["Error"] = "Voucher đã hết lượt sử dụng";
+                }
+                else
+                {
+                    TempData["Error"] = "Voucher không hợp lệ";
+                }
+                HttpContext.Session.Remove("SESSION_VOUCHER_CODE");
+                HttpContext.Session.Remove("SESSION_VOUCHER_DISCOUNT");
+                return Redirect($"/Checkout/Start?cartId={cartId}&selected={selectedIds}");
+            }
+
+            if (voucher.MinOrderAmount.HasValue && subtotal < voucher.MinOrderAmount.Value)
+            {
+                TempData["Error"] = $"Giá trị đơn hàng tối thiểu để áp dụng voucher là {voucher.MinOrderAmount.Value:#,##0}";
+                HttpContext.Session.Remove("SESSION_VOUCHER_CODE");
+                HttpContext.Session.Remove("SESSION_VOUCHER_DISCOUNT");
+                return Redirect($"/Checkout/Start?cartId={cartId}&selected={selectedIds}");
+            }
+
+            var discount = voucher.CalculateDiscount(subtotal);
+            HttpContext.Session.SetString("SESSION_VOUCHER_CODE", voucher.Code);
+            HttpContext.Session.SetString("SESSION_VOUCHER_DISCOUNT", discount.ToString());
+            TempData["Success"] = $"Áp dụng voucher '{voucher.Code}' thành công. Giảm {discount:#,##0}.";
+
+            return Redirect($"/Checkout/Start?cartId={cartId}&selected={selectedIds}");
+        }
+
+        // POST: /Checkout/RemoveVoucher - Bỏ mã giảm giá
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult RemoveVoucher(Guid cartId, string selectedIds)
+        {
+            HttpContext.Session.Remove("SESSION_VOUCHER_CODE");
+            HttpContext.Session.Remove("SESSION_VOUCHER_DISCOUNT");
+            TempData["Success"] = "Đã bỏ voucher";
+            return Redirect($"/Checkout/Start?cartId={cartId}&selected={selectedIds}");
         }
 
         // POST: /Checkout/Submit
@@ -113,7 +242,7 @@ namespace NT.WEB.Controllers
                 .Select(s => Guid.TryParse(s, out var g) ? g : Guid.Empty)
                 .Where(g => g != Guid.Empty)
                 .ToArray();
-            if (ids.Length == 0) return BadRequest("Kh�ng c� s?n ph?m ch?n");
+            if (ids.Length == 0) return BadRequest("Không có sản phẩm chọn");
 
             var cartItems = await _cartDetailService.FindWithIncludesAsync(
                 cd => cd.CartId == cartId,
@@ -126,7 +255,7 @@ namespace NT.WEB.Controllers
             var selectedItems = (cartItems ?? Enumerable.Empty<CartDetail>())
                 .Where(ci => ids.Contains(ci.ProductDetailId) && ci.Quantity > 0)
                 .ToList();
-            if (!selectedItems.Any()) return BadRequest("Kh�ng c� s?n ph?m h?p l?");
+            if (!selectedItems.Any()) return BadRequest("Không có sản phẩm hợp lí");
 
             // Ensure we have up-to-date ProductDetail for price calculation
             decimal subtotal = 0m;
@@ -140,6 +269,7 @@ namespace NT.WEB.Controllers
             // Apply shipping fee and voucher discount similar to CartDetailController.Index
             var shippingFee = 35000m;
             decimal discount = 0m;
+            Voucher? appliedVoucher = null;
             var appliedCode = HttpContext.Session.GetString("SESSION_VOUCHER_CODE");
             if (!string.IsNullOrWhiteSpace(appliedCode))
             {
@@ -148,6 +278,10 @@ namespace NT.WEB.Controllers
                 if (voucher != null && voucher.IsValid())
                 {
                     discount = voucher.CalculateDiscount(subtotal);
+                    if (discount > 0)
+                    {
+                        appliedVoucher = voucher;
+                    }
                 }
             }
 
@@ -167,6 +301,19 @@ namespace NT.WEB.Controllers
             }
             order.Status = "0";
             order.DiscountAmount = discount;
+
+            // Nếu có voucher được áp dụng, tăng UsageCount và lưu VoucherId
+            if (appliedVoucher != null)
+            {
+                order.VoucherId = appliedVoucher.Id;
+                appliedVoucher.IncrementUsage();
+                await _voucherRepo.UpdateAsync(appliedVoucher);
+                await _voucherRepo.SaveChangesAsync();
+                
+                // Xóa voucher khỏi session sau khi đã sử dụng
+                HttpContext.Session.Remove("SESSION_VOUCHER_CODE");
+                HttpContext.Session.Remove("SESSION_VOUCHER_DISCOUNT");
+            }
 
             await _orderRepo.AddAsync(order);
             await _orderRepo.SaveChangesAsync();
