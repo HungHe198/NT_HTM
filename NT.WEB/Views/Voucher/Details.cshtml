@@ -10,28 +10,28 @@
 <div class="card">
     <div class="card-body">
         <dl class="row">
-            <dt class="col-sm-3">@Html.DisplayNameFor(m => m.Code)</dt>
+            <dt class="col-sm-3">Mã voucher</dt>
             <dd class="col-sm-9"><strong>@Model.Code</strong></dd>
 
-            <dt class="col-sm-3">@Html.DisplayNameFor(m => m.DiscountPercentage)</dt>
+            <dt class="col-sm-3">Ph?n tr?m gi?m giá</dt>
             <dd class="col-sm-9">@(Model.DiscountPercentage?.ToString("N0") ?? "-")%</dd>
 
-            <dt class="col-sm-3">@Html.DisplayNameFor(m => m.MaxDiscountAmount)</dt>
+            <dt class="col-sm-3">S? ti?n gi?m t?i ?a</dt>
             <dd class="col-sm-9">@(Model.MaxDiscountAmount?.ToString("N0") ?? "Không gi?i h?n") ?</dd>
 
-            <dt class="col-sm-3">@Html.DisplayNameFor(m => m.MinOrderAmount)</dt>
+            <dt class="col-sm-3">Giá tr? ??n t?i thi?u</dt>
             <dd class="col-sm-9">@(Model.MinOrderAmount?.ToString("N0") ?? "Không yêu c?u") ?</dd>
 
-            <dt class="col-sm-3">@Html.DisplayNameFor(m => m.StartDate)</dt>
+            <dt class="col-sm-3">Ngày b?t ??u</dt>
             <dd class="col-sm-9">@(Model.StartDate?.ToString("dd/MM/yyyy HH:mm") ?? "Không gi?i h?n")</dd>
 
-            <dt class="col-sm-3">@Html.DisplayNameFor(m => m.EndDate)</dt>
+            <dt class="col-sm-3">Ngày k?t thúc</dt>
             <dd class="col-sm-9">@(Model.EndDate?.ToString("dd/MM/yyyy HH:mm") ?? "Không gi?i h?n")</dd>
 
-            <dt class="col-sm-3">@Html.DisplayNameFor(m => m.UsageCount)</dt>
+            <dt class="col-sm-3">S? l?n ?ã s? d?ng</dt>
             <dd class="col-sm-9">@Model.UsageCount</dd>
 
-            <dt class="col-sm-3">@Html.DisplayNameFor(m => m.MaxUsage)</dt>
+            <dt class="col-sm-3">Gi?i h?n s? d?ng</dt>
             <dd class="col-sm-9">@(Model.MaxUsage?.ToString() ?? "Không gi?i h?n")</dd>
 
             <dt class="col-sm-3">Tr?ng thái</dt>

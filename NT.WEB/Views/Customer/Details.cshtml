@@ -1,17 +1,17 @@
 @model NT.SHARED.Models.Customer
 
-<h2>Customer Details</h2>
+<h2>Chi ti?t khách hàng</h2>
 <dl class="row">
-    <dt class="col-sm-2">@Html.DisplayNameFor(m => m.UserId)</dt>
+    <dt class="col-sm-2">Mã ng??i dùng</dt>
     <dd class="col-sm-10">@Model.UserId</dd>
-    <dt class="col-sm-2">@Html.DisplayNameFor(m => m.Address)</dt>
+    <dt class="col-sm-2">??a ch?</dt>
     <dd class="col-sm-10">@Model.Address</dd>
-    <dt class="col-sm-2">@Html.DisplayNameFor(m => m.DoB)</dt>
+    <dt class="col-sm-2">Ngày sinh</dt>
     <dd class="col-sm-10">@Model.DoB</dd>
-    <dt class="col-sm-2">@Html.DisplayNameFor(m => m.Gender)</dt>
+    <dt class="col-sm-2">Gi?i tính</dt>
     <dd class="col-sm-10">@Model.Gender</dd>
 </dl>
 <p>
-    <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Edit" asp-route-id="@Model.Id">S?a</a> |
+    <a asp-action="Index">Quay l?i danh sách</a>
 </p>

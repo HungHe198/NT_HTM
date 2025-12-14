@@ -1,15 +1,15 @@
 @model IEnumerable<NT.SHARED.Models.OrderDetail>
 
-<h2>Order Details</h2>
-<p><a asp-action="Create">Create New</a></p>
+<h2>Chi ti?t ??n hàng</h2>
+<p><a asp-action="Create" class="btn btn-primary">T?o m?i</a></p>
 <table class="table">
     <thead>
         <tr>
-            <th>OrderId</th>
-            <th>ProductDetailId</th>
-            <th>Quantity</th>
-            <th>UnitPrice</th>
-            <th>TotalPrice</th>
+            <th>Mã ??n hàng</th>
+            <th>Mã bi?n th? SP</th>
+            <th>S? l??ng</th>
+            <th>??n giá</th>
+            <th>T?ng ti?n</th>
             <th></th>
         </tr>
     </thead>
@@ -23,11 +23,12 @@
             <td>@item.UnitPrice</td>
             <td>@item.TotalPrice</td>
             <td>
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                <a asp-action="Details" asp-route-id="@item.Id">Chi ti?t</a> |
+                <a asp-action="Edit" asp-route-id="@item.Id">S?a</a> |
+                <a asp-action="Delete" asp-route-id="@item.Id">Xóa</a>
             </td>
         </tr>
     }
     </tbody>
 </table>
+

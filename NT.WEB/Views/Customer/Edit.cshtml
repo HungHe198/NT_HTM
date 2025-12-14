@@ -1,24 +1,24 @@
 @model NT.SHARED.Models.Customer
 
-<h2>Edit Customer</h2>
+<h2>Ch?nh s?a khách hàng</h2>
 <form asp-action="Edit" method="post">
     <input type="hidden" asp-for="Id" />
     <div class="form-group">
-        <label asp-for="UserId"></label>
+        <label asp-for="UserId">Mã ng??i dùng</label>
         <input asp-for="UserId" class="form-control" />
     </div>
     <div class="form-group">
-        <label asp-for="Address"></label>
+        <label asp-for="Address">??a ch?</label>
         <input asp-for="Address" class="form-control" />
     </div>
     <div class="form-group">
-        <label asp-for="DoB"></label>
+        <label asp-for="DoB">Ngày sinh</label>
         <input asp-for="DoB" class="form-control" />
     </div>
     <div class="form-group">
-        <label asp-for="Gender"></label>
+        <label asp-for="Gender">Gi?i tính</label>
         <input asp-for="Gender" class="form-control" />
     </div>
-    <button type="submit" class="btn btn-primary">Save</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+    <button type="submit" class="btn btn-primary">L?u</button>
+    <a asp-action="Index" class="btn btn-secondary">H?y</a>
 </form>

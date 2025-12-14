@@ -1,15 +1,16 @@
 @model NT.SHARED.Models.ProductCategory
 
-<h2>Edit ProductCategory</h2>
+<h2>S?a danh m?c s?n ph?m</h2>
 <form asp-action="Edit" method="post">
     <div class="form-group">
-        <label asp-for="ProductId"></label>
+        <label asp-for="ProductId">Mã s?n ph?m</label>
         <input asp-for="ProductId" class="form-control" readonly />
     </div>
     <div class="form-group">
-        <label asp-for="CategoryId"></label>
+        <label asp-for="CategoryId">Mã danh m?c</label>
         <input asp-for="CategoryId" class="form-control" readonly />
     </div>
-    <button type="submit" class="btn btn-primary">Save</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+    <button type="submit" class="btn btn-primary">L?u</button>
+    <a asp-action="Index" class="btn btn-secondary">H?y</a>
 </form>
+

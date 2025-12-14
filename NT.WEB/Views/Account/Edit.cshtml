@@ -1,18 +1,18 @@
-Ôªø@model NT.SHARED.Models.User
+@model NT.SHARED.Models.User
 @{
-    ViewBag.Title = "Edit User";
+    ViewBag.Title = "Ch?nh s?a ng??i d˘ng";
 }
 
-<h1>Edit</h1>
+<h1>Ch?nh s?a ng??i d˘ng</h1>
 <form asp-action="Edit" method="post">
     <input type="hidden" asp-for="Id" />
     <div class="mb-3">
-        <label class="form-label">Username</label>
+        <label class="form-label">TÍn ??ng nh?p</label>
         <input asp-for="Username" class="form-control" />
         <span asp-validation-for="Username" class="text-danger"></span>
     </div>
     <div class="mb-3">
-        <label class="form-label">Fullname</label>
+        <label class="form-label">H? v‡ tÍn</label>
         <input asp-for="Fullname" class="form-control" />
         <span asp-validation-for="Fullname" class="text-danger"></span>
     </div>
@@ -22,13 +22,13 @@
         <span asp-validation-for="Email" class="text-danger"></span>
     </div>
     <div class="mb-3">
-        <label class="form-label">Vai trÃ£</label>
+        <label class="form-label">Vai trÚ</label>
         <select asp-for="RoleId" class="form-select" asp-items="ViewBag.Roles">
-            <option value="">-- Ch·ªçn vai tr√≤ --</option>
+            <option value="">-- Ch?n vai trÚ --</option>
         </select>
     </div>
-    <button type="submit" class="btn btn-primary">L∆∞u</button>
-    <a asp-action="Index" class="btn btn-secondary">H·ªßy</a>
+    <button type="submit" class="btn btn-primary">L?u</button>
+    <a asp-action="Index" class="btn btn-secondary">H?y</a>
 </form>
 
 @section Scripts{

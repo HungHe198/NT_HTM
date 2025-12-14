@@ -1,7 +1,7 @@
 ﻿@model NT.SHARED.Models.ProductImage
 
 @{
-    ViewBag.Title = "Create Product Image";
+    ViewBag.Title = "Thêm ảnh sản phẩm";
 }
 
 <h1>Thêm ảnh sản phẩm</h1>
@@ -21,10 +21,10 @@
         <div class="mt-2">
             <img id="preview" src="" alt="preview" style="max-height:160px; display:none; object-fit:contain;" />
         </div>
-        <small class="form-text text-muted">ảnh sẽ đượcc tải lên thư mục `wwwroot/uploads/products` và hệ thống cho lưu đường dẫn truy cập web.</small>
+        <small class="form-text text-muted">Ảnh sẽ được tải lên thư mục wwwroot/uploads/products và hệ thống sẽ lưu đường dẫn truy cập web.</small>
     </div>
 
-    <!-- ???ng d?n ?nh ???c ?i?n t? ??ng sau khi upload thành công -->
+    <!-- Đường dẫn ảnh được điền tự động sau khi upload thành công -->
     <input asp-for="ImageUrl" type="hidden" />
     <span asp-validation-for="ImageUrl" class="text-danger"></span>
 
@@ -66,3 +66,4 @@
         });
     })();
 </script>
+

@@ -1,15 +1,15 @@
 @model IEnumerable<NT.SHARED.Models.Elasticity>
 
 @{
-    ViewBag.Title = "Elasticities";
+    ViewBag.Title = "Danh sách ?? co giãn";
 }
 
-<h1>Elasticities</h1>
+<h1>Danh sách ?? co giãn</h1>
 
-<p><a asp-action="Create" class="btn btn-primary">Create New</a></p>
+<p><a asp-action="Create" class="btn btn-primary">Thêm m?i</a></p>
 
 <table class="table">
-    <thead><tr><th>Name</th><th>Description</th><th></th></tr></thead>
+    <thead><tr><th>Tên</th><th>Mô t?</th><th>Thao tác</th></tr></thead>
     <tbody>
     @foreach(var item in Model)
     {
@@ -17,9 +17,9 @@
             <td>@item.Name</td>
             <td>@item.Description</td>
             <td>
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                <a asp-action="Details" asp-route-id="@item.Id">Chi ti?t</a> |
+                <a asp-action="Edit" asp-route-id="@item.Id">S?a</a> |
+                <a asp-action="Delete" asp-route-id="@item.Id">Xóa</a>
             </td>
         </tr>
     }

@@ -1,12 +1,12 @@
 @model IEnumerable<NT.SHARED.Models.ProductCategory>
 
-<h2>Product Categories</h2>
-<p><a asp-action="Create">Create New</a></p>
+<h2>Danh m?c s?n ph?m</h2>
+<p><a asp-action="Create" class="btn btn-primary">T?o m?i</a></p>
 <table class="table">
     <thead>
         <tr>
-            <th>Product</th>
-            <th>Category</th>
+            <th>S?n ph?m</th>
+            <th>Danh m?c</th>
             <th></th>
         </tr>
     </thead>
@@ -17,11 +17,12 @@
             <td>@item.ProductId</td>
             <td>@item.CategoryId</td>
             <td>
-                <a asp-action="Details" asp-route-productId="@item.ProductId" asp-route-categoryId="@item.CategoryId">Details</a> |
-                <a asp-action="Edit" asp-route-productId="@item.ProductId" asp-route-categoryId="@item.CategoryId">Edit</a> |
-                <a asp-action="Delete" asp-route-productId="@item.ProductId" asp-route-categoryId="@item.CategoryId">Delete</a>
+                <a asp-action="Details" asp-route-productId="@item.ProductId" asp-route-categoryId="@item.CategoryId">Chi ti?t</a> |
+                <a asp-action="Edit" asp-route-productId="@item.ProductId" asp-route-categoryId="@item.CategoryId">S?a</a> |
+                <a asp-action="Delete" asp-route-productId="@item.ProductId" asp-route-categoryId="@item.CategoryId">Xóa</a>
             </td>
         </tr>
     }
     </tbody>
 </table>
+

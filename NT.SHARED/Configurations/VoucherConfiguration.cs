@@ -16,7 +16,7 @@ namespace NT.SHARED.Configurations
             builder.Property(x => x.MinOrderAmount).HasColumnType("decimal(18,2)");
             builder.Property(x => x.StartDate);
             builder.Property(x => x.EndDate);
-            builder.Property(x => x.UsageCount).HasDefaultValue(0);
+            builder.Property(x => x.UsageCount).IsRequired().HasDefaultValue(0);
             builder.Property(x => x.MaxUsage);
         }
     }

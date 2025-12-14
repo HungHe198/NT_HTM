@@ -1,26 +1,26 @@
 @model NT.SHARED.Models.Brand
 
 @{
-    ViewBag.Title = "Create Brand";
+    ViewBag.Title = "T?o nhà s?n xu?t";
 }
 
-<h1>Create Brand</h1>
+<h1>T?o nhà s?n xu?t</h1>
 
 <form asp-action="Create" method="post">
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
     <div class="form-group">
-        <label asp-for="Name"></label>
+        <label asp-for="Name">Tên</label>
         <input asp-for="Name" class="form-control" />
         <span asp-validation-for="Name" class="text-danger"></span>
     </div>
 
     <div class="form-group">
-        <label asp-for="Website"></label>
+        <label asp-for="Website">Website</label>
         <input asp-for="Website" class="form-control" />
         <span asp-validation-for="Website" class="text-danger"></span>
     </div>
 
-    <button type="submit" class="btn btn-primary">Save</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+    <button type="submit" class="btn btn-primary">L?u</button>
+    <a asp-action="Index" class="btn btn-secondary">H?y</a>
 </form>

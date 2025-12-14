@@ -1,25 +1,25 @@
 @model NT.SHARED.Models.SurfaceFinish
 
 @{
-    ViewBag.Title = "Create Surface Finish";
+    ViewBag.Title = "T?o hoàn thi?n b? m?t m?i";
 }
 
-<h1>Create Surface Finish</h1>
+<h1>T?o hoàn thi?n b? m?t m?i</h1>
 
 <form asp-action="Create" method="post">
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
     <div class="form-group">
-        <label asp-for="Name"></label>
+        <label asp-for="Name">Tên</label>
         <input asp-for="Name" class="form-control"/>
         <span asp-validation-for="Name" class="text-danger"></span>
     </div>
 
     <div class="form-group">
-        <label asp-for="Description"></label>
+        <label asp-for="Description">Mô t?</label>
         <textarea asp-for="Description" class="form-control"></textarea>
     </div>
 
-    <button class="btn btn-primary" type="submit">Save</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+    <button class="btn btn-primary" type="submit">L?u</button>
+    <a asp-action="Index" class="btn btn-secondary">H?y</a>
 </form>

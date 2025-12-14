@@ -3,12 +3,12 @@
     ViewBag.Title = "Delete User";
 }
 
-<h1>Xác nh?n xóa</h1>
+<h1>Xác nhận xóa</h1>
 <div class="alert alert-warning">
     Bạn có chắc muốn xóa người dùng <strong>@Model.Username</strong> không?
 </div>
 <form asp-action="Delete" method="post">
     <input type="hidden" asp-for="Id" />
     <button type="submit" class="btn btn-danger">Xóa</button>
-    <a asp-action="Index" class="btn btn-secondary">H?y</a>
+    <a asp-action="Index" class="btn btn-secondary">Hủy</a>
 </form>

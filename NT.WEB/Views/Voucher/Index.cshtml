@@ -13,14 +13,14 @@
 <table class="table table-striped">
     <thead>
         <tr>
-            <th>@Html.DisplayNameFor((NT.SHARED.Models.Voucher m) => m.Code)</th>
-            <th>@Html.DisplayNameFor((NT.SHARED.Models.Voucher m) => m.DiscountPercentage)</th>
-            <th>@Html.DisplayNameFor((NT.SHARED.Models.Voucher m) => m.MaxDiscountAmount)</th>
-            <th>@Html.DisplayNameFor((NT.SHARED.Models.Voucher m) => m.MinOrderAmount)</th>
-            <th>@Html.DisplayNameFor((NT.SHARED.Models.Voucher m) => m.StartDate)</th>
-            <th>@Html.DisplayNameFor((NT.SHARED.Models.Voucher m) => m.EndDate)</th>
-            <th>@Html.DisplayNameFor((NT.SHARED.Models.Voucher m) => m.UsageCount)</th>
-            <th>@Html.DisplayNameFor((NT.SHARED.Models.Voucher m) => m.MaxUsage)</th>
+            <th>Mã voucher</th>
+            <th>Ph?n tr?m gi?m</th>
+            <th>Gi?m t?i ?a</th>
+            <th>??n t?i thi?u</th>
+            <th>Ngày b?t ??u</th>
+            <th>Ngày k?t thúc</th>
+            <th>?ã dùng</th>
+            <th>Gi?i h?n</th>
             <th>Tr?ng thái</th>
             <th></th>
         </tr>
@@ -28,8 +28,13 @@
     <tbody>
     @foreach (var item in Model ?? Enumerable.Empty<NT.SHARED.Models.Voucher>())
     {
-        var isValid = item.IsValid();
-        <tr class="@(isValid ? "" : "table-secondary")">
+        var now = DateTime.UtcNow;
+        var isNotStarted = item.StartDate.HasValue && now < item.StartDate.Value;
+        var isExpiredByDate = item.EndDate.HasValue && now > item.EndDate.Value;
+        var isExpiredByUsage = item.MaxUsage.HasValue && item.UsageCount >= item.MaxUsage.Value;
+        var isActive = !isNotStarted && !isExpiredByDate && !isExpiredByUsage;
+        
+        <tr class="@(isActive ? "" : (isNotStarted ? "table-warning" : "table-secondary"))">
             <td>@item.Code</td>
             <td>@(item.DiscountPercentage?.ToString("N0") ?? "-")%</td>
             <td>@(item.MaxDiscountAmount?.ToString("N0") ?? "-") ?</td>
@@ -39,7 +44,11 @@
             <td>@item.UsageCount</td>
             <td>@(item.MaxUsage?.ToString() ?? "Không gi?i h?n")</td>
             <td>
-                @if (isValid)
+                @if (isNotStarted)
+                {
+                    <span class="badge bg-warning">Ch?a b?t ??u</span>
+                }
+                else if (isActive)
                 {
                     <span class="badge bg-success">Còn hi?u l?c</span>
                 }

@@ -1,16 +1,17 @@
 @model NT.SHARED.Models.Length
 
 @{
-    ViewBag.Title = "Delete Length";
+    ViewBag.Title = "Xóa chi?u dài";
 }
 
-<h1>Delete Length</h1>
+<h1>Xóa chi?u dài</h1>
 
 <h4>@Model.Name</h4>
 <p>@Model.Description</p>
+<p class="text-danger">B?n có ch?c ch?n mu?n xóa?</p>
 
 <form asp-action="Delete" method="post">
     <input type="hidden" asp-for="Id" />
-    <button type="submit" class="btn btn-danger">Delete</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+    <button type="submit" class="btn btn-danger">Xóa</button>
+    <a asp-action="Index" class="btn btn-secondary">H?y</a>
 </form>

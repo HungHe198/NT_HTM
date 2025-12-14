@@ -1,16 +1,17 @@
 @model NT.SHARED.Models.OriginCountry
 
 @{
-    ViewBag.Title = "Delete Origin Country";
+    ViewBag.Title = "Xóa xu?t x?";
 }
 
-<h1>Delete Origin Country</h1>
+<h1>Xóa xu?t x?</h1>
 
 <h4>@Model.Name</h4>
 <p>@Model.Description</p>
+<p class="text-danger">B?n có ch?c ch?n mu?n xóa?</p>
 
 <form asp-action="Delete" method="post">
     <input type="hidden" asp-for="Id" />
-    <button class="btn btn-danger" type="submit">Delete</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+    <button class="btn btn-danger" type="submit">Xóa</button>
+    <a asp-action="Index" class="btn btn-secondary">H?y</a>
 </form>
