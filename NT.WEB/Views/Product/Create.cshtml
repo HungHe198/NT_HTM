@@ -41,8 +41,12 @@
         <div class="mb-2">
             <input type="file" id="thumbnail-file" accept="image/*" class="form-control" />
         </div>
-        <input asp-for="Thumbnail" id="Thumbnail" class="form-control" />
+        <div class="mb-2">
+            <img id="thumbnail-preview" src="" alt="preview" style="max-height:160px; display:none; object-fit:contain;" />
+        </div>
+        <input asp-for="Thumbnail" id="Thumbnail" class="form-control" readonly />
         <span asp-validation-for="Thumbnail" class="text-danger"></span>
+        <small class="form-text text-muted">Chọn ảnh để tải lên. Đường dẫn sẽ được tự động điền.</small>
     </div>
     <div class="form-group">
         <label asp-for="Status">Trạng thái</label>
@@ -92,3 +96,36 @@
     <button type="submit" class="btn btn-primary">Lưu</button>
     <a asp-action="Index" class="btn btn-secondary">Hủy</a>
 </form>
+
+<script>
+    (function(){
+        const fileInput = document.getElementById('thumbnail-file');
+        const preview = document.getElementById('thumbnail-preview');
+        const thumbnailInput = document.getElementById('Thumbnail');
+
+        fileInput.addEventListener('change', async function(){
+            const f = this.files && this.files[0];
+            if(!f) return;
+
+            // Preview ảnh
+            const url = URL.createObjectURL(f);
+            preview.src = url;
+            preview.style.display = 'inline-block';
+
+            // Upload ảnh lên server
+            const data = new FormData();
+            data.append('file', f);
+            try {
+                const res = await fetch('/ProductImage/Upload', { method: 'POST', body: data });
+                if(!res.ok) {
+                    alert('Tải ảnh thất bại');
+                    return;
+                }
+                const json = await res.json();
+                thumbnailInput.value = json.url || '';
+            } catch(e) {
+                alert('Có lỗi khi tải ảnh: ' + e.message);
+            }
+        });
+    })();
+</script>

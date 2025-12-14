@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace NT.DAL.Migrations
 {
     /// <inheritdoc />
-    public partial class dungpt9 : Migration
+    public partial class tiendung1214_5532 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -164,11 +164,12 @@ namespace NT.DAL.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Code = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    DiscountAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
+                    DiscountPercentage = table.Column<decimal>(type: "decimal(5,2)", nullable: true),
                     MaxDiscountAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
                     MinOrderAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
-                    ExpiryDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    UsageCount = table.Column<int>(type: "int", nullable: true),
+                    StartDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    EndDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    UsageCount = table.Column<int>(type: "int", nullable: false, defaultValue: 0),
                     MaxUsage = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
@@ -562,7 +563,7 @@ namespace NT.DAL.Migrations
                 columns: new[] { "Id", "Name", "Website" },
                 values: new object[,]
                 {
-                    { new Guid("413d52be-41dc-4c2c-bd98-0ec5dedf368f"), "NT Fishing", "https://ntfishing.example" },
+                    { new Guid("002a480e-d921-4367-945d-61af0c4269f9"), "NT Fishing", "https://ntfishing.example" },
                     { new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"), "Daiwa", "https://www.daiwa.com" },
                     { new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"), "Shimano", "https://www.shimano.com" },
                     { new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"), "Okuma", "https://www.okumafishing.com" },
@@ -572,28 +573,28 @@ namespace NT.DAL.Migrations
             migrationBuilder.InsertData(
                 table: "Color",
                 columns: new[] { "Id", "HexCode", "Name" },
-                values: new object[] { new Guid("66666666-6666-6666-6666-000000000001"), "#000000", "?en" });
+                values: new object[] { new Guid("66666666-6666-6666-6666-000000000001"), "#000000", "Đen" });
 
             migrationBuilder.InsertData(
                 table: "Elasticity",
                 columns: new[] { "Id", "Description", "Name" },
-                values: new object[] { new Guid("88888888-8888-8888-8888-000000000001"), null, "?àn h?i tiêu chu?n" });
+                values: new object[] { new Guid("88888888-8888-8888-8888-000000000001"), null, "Đàn hồi tiêu chuẩn" });
 
             migrationBuilder.InsertData(
                 table: "Hardness",
                 columns: new[] { "Id", "Description", "Name" },
                 values: new object[,]
                 {
-                    { new Guid("00000000-0000-0000-0000-000000000003"), "?? c?ng 3H cho c?n câu ?ài", "3H" },
-                    { new Guid("00000000-0000-0000-0000-000000000004"), "?? c?ng 4H cho c?n câu ?ài", "4H" },
-                    { new Guid("00000000-0000-0000-0000-000000000005"), "?? c?ng 5H cho c?n câu ?ài", "5H" },
-                    { new Guid("00000000-0000-0000-0000-000000000006"), "?? c?ng 6H cho c?n câu ?ài", "6H" },
-                    { new Guid("00000000-0000-0000-0000-000000000007"), "?? c?ng 7H cho c?n câu ?ài", "7H" },
-                    { new Guid("00000000-0000-0000-0000-000000000008"), "?? c?ng 8H cho c?n câu ?ài", "8H" },
-                    { new Guid("00000000-0000-0000-0000-000000000009"), "?? c?ng 9H cho c?n câu ?ài", "9H" },
-                    { new Guid("00000000-0000-0000-0000-000000000010"), "?? c?ng 10H cho c?n câu ?ài", "10H" },
-                    { new Guid("00000000-0000-0000-0000-000000000011"), "?? c?ng 11H cho c?n câu ?ài", "11H" },
-                    { new Guid("00000000-0000-0000-0000-000000000012"), "?? c?ng 12H cho c?n câu ?ài", "12H" }
+                    { new Guid("00000000-0000-0000-0000-000000000003"), "Độ cứng 3H cho cần câu đài", "3H" },
+                    { new Guid("00000000-0000-0000-0000-000000000004"), "Độ cứng 4H cho cần câu đài", "4H" },
+                    { new Guid("00000000-0000-0000-0000-000000000005"), "Độ cứng 5H cho cần câu đài", "5H" },
+                    { new Guid("00000000-0000-0000-0000-000000000006"), "Độ cứng 6H cho cần câu đài", "6H" },
+                    { new Guid("00000000-0000-0000-0000-000000000007"), "Độ cứng 7H cho cần câu đài", "7H" },
+                    { new Guid("00000000-0000-0000-0000-000000000008"), "Độ cứng 8H cho cần câu đài", "8H" },
+                    { new Guid("00000000-0000-0000-0000-000000000009"), "Độ cứng 9H cho cần câu đài", "9H" },
+                    { new Guid("00000000-0000-0000-0000-000000000010"), "Độ cứng 10H cho cần câu đài", "10H" },
+                    { new Guid("00000000-0000-0000-0000-000000000011"), "Độ cứng 11H cho cần câu đài", "11H" },
+                    { new Guid("00000000-0000-0000-0000-000000000012"), "Độ cứng 12H cho cần câu đài", "12H" }
                 });
 
             migrationBuilder.InsertData(
@@ -601,82 +602,102 @@ namespace NT.DAL.Migrations
                 columns: new[] { "Id", "Description", "Name" },
                 values: new object[,]
                 {
-                    { new Guid("11111111-1111-1111-1111-111111111111"), "C?n câu ?ài 2m7", "2m7" },
-                    { new Guid("22222222-2222-2222-2222-222222222222"), "C?n câu ?ài 3m9", "3m9" },
-                    { new Guid("33333333-3333-3333-3333-333333333333"), "C?n câu ?ài 4m5", "4m5" },
-                    { new Guid("44444444-4444-4444-4444-444444444444"), "C?n câu ?ài 5m4", "5m4" },
-                    { new Guid("55555555-5555-5555-5555-555555555555"), "C?n câu ?ài 6m3", "6m3" },
-                    { new Guid("66666666-6666-6666-6666-666666666666"), "C?n câu ?ài 7m2", "7m2" },
-                    { new Guid("77777777-7777-7777-7777-777777777777"), "C?n câu ?ài 8m1", "8m1" },
-                    { new Guid("88888888-8888-8888-8888-888888888888"), "C?n câu ?ài 9m", "9m" }
+                    { new Guid("11111111-1111-1111-1111-111111111111"), "Cần câu đài 2m7", "2m7" },
+                    { new Guid("22222222-2222-2222-2222-222222222222"), "Cần câu đài 3m9", "3m9" },
+                    { new Guid("33333333-3333-3333-3333-333333333333"), "Cần câu đài 4m5", "4m5" },
+                    { new Guid("44444444-4444-4444-4444-444444444444"), "Cần câu đài 5m4", "5m4" },
+                    { new Guid("55555555-5555-5555-5555-555555555555"), "Cần câu đài 6m3", "6m3" },
+                    { new Guid("66666666-6666-6666-6666-666666666666"), "Cần câu đài 7m2", "7m2" },
+                    { new Guid("77777777-7777-7777-7777-777777777777"), "Cần câu đài 8m1", "8m1" },
+                    { new Guid("88888888-8888-8888-8888-888888888888"), "Cần câu đài 9m", "9m" }
                 });
 
             migrationBuilder.InsertData(
                 table: "OriginCountry",
                 columns: new[] { "Id", "Description", "Name" },
-                values: new object[] { new Guid("77777777-7777-7777-7777-000000000001"), null, "Vi?t Nam" });
+                values: new object[] { new Guid("77777777-7777-7777-7777-000000000001"), null, "Việt Nam" });
+
+            migrationBuilder.InsertData(
+                table: "Role",
+                columns: new[] { "Id", "Name" },
+                values: new object[,]
+                {
+                    { new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), "Admin" },
+                    { new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbb0001"), "Employee" },
+                    { new Guid("cccccccc-cccc-cccc-cccc-cccccccc0001"), "Customer" }
+                });
 
             migrationBuilder.InsertData(
                 table: "SurfaceFinish",
                 columns: new[] { "Id", "Description", "Name" },
-                values: new object[] { new Guid("99999999-9999-9999-9999-999999999999"), null, "S?n bóng" });
+                values: new object[] { new Guid("99999999-9999-9999-9999-999999999999"), null, "Sơn bóng" });
 
             migrationBuilder.InsertData(
                 table: "Product",
                 columns: new[] { "Id", "BrandId", "CreatedBy", "CreatedDate", "Description", "Name", "ProductCode", "SeoDescription", "SeoTitle", "ShortDescription", "Status", "Thumbnail", "UpdatedBy", "UpdatedDate" },
                 values: new object[,]
                 {
-                    { new Guid("00000000-0000-0000-0000-000000000001"), new Guid("413d52be-41dc-4c2c-bd98-0ec5dedf368f"), null, new DateTime(2025, 12, 9, 16, 34, 34, 921, DateTimeKind.Utc).AddTicks(8750), null, "C?n câu ?ài m?u 1", "CD001", null, null, "C?n câu ?ài ch?t l??ng, phù h?p h? d?ch v? và t? nhiên", "Active", "/images/product-placeholder.png", null, null },
-                    { new Guid("00000000-0000-0000-0000-000000000002"), new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"), null, new DateTime(2025, 12, 9, 16, 34, 34, 921, DateTimeKind.Utc).AddTicks(8760), null, "C?n câu ?ài m?u 2", "CD002", null, null, "C?n câu ?ài ch?t l??ng, phù h?p h? d?ch v? và t? nhiên", "Active", "/images/product-placeholder.png", null, null },
-                    { new Guid("00000000-0000-0000-0000-000000000003"), new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"), null, new DateTime(2025, 12, 9, 16, 34, 34, 921, DateTimeKind.Utc).AddTicks(8764), null, "C?n câu ?ài m?u 3", "CD003", null, null, "C?n câu ?ài ch?t l??ng, phù h?p h? d?ch v? và t? nhiên", "Active", "/images/product-placeholder.png", null, null },
-                    { new Guid("00000000-0000-0000-0000-000000000004"), new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"), null, new DateTime(2025, 12, 9, 16, 34, 34, 921, DateTimeKind.Utc).AddTicks(8768), null, "C?n câu ?ài m?u 4", "CD004", null, null, "C?n câu ?ài ch?t l??ng, phù h?p h? d?ch v? và t? nhiên", "Active", "/images/product-placeholder.png", null, null },
-                    { new Guid("00000000-0000-0000-0000-000000000005"), new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"), null, new DateTime(2025, 12, 9, 16, 34, 34, 921, DateTimeKind.Utc).AddTicks(8773), null, "C?n câu ?ài m?u 5", "CD005", null, null, "C?n câu ?ài ch?t l??ng, phù h?p h? d?ch v? và t? nhiên", "Active", "/images/product-placeholder.png", null, null },
-                    { new Guid("00000000-0000-0000-0000-000000000006"), new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"), null, new DateTime(2025, 12, 9, 16, 34, 34, 921, DateTimeKind.Utc).AddTicks(8778), null, "C?n câu ?ài m?u 6", "CD006", null, null, "C?n câu ?ài ch?t l??ng, phù h?p h? d?ch v? và t? nhiên", "Active", "/images/product-placeholder.png", null, null },
-                    { new Guid("00000000-0000-0000-0000-000000000007"), new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"), null, new DateTime(2025, 12, 9, 16, 34, 34, 921, DateTimeKind.Utc).AddTicks(8782), null, "C?n câu ?ài m?u 7", "CD007", null, null, "C?n câu ?ài ch?t l??ng, phù h?p h? d?ch v? và t? nhiên", "Active", "/images/product-placeholder.png", null, null },
-                    { new Guid("00000000-0000-0000-0000-000000000008"), new Guid("413d52be-41dc-4c2c-bd98-0ec5dedf368f"), null, new DateTime(2025, 12, 9, 16, 34, 34, 921, DateTimeKind.Utc).AddTicks(8785), null, "C?n câu ?ài m?u 8", "CD008", null, null, "C?n câu ?ài ch?t l??ng, phù h?p h? d?ch v? và t? nhiên", "Active", "/images/product-placeholder.png", null, null },
-                    { new Guid("00000000-0000-0000-0000-000000000009"), new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"), null, new DateTime(2025, 12, 9, 16, 34, 34, 921, DateTimeKind.Utc).AddTicks(8789), null, "C?n câu ?ài m?u 9", "CD009", null, null, "C?n câu ?ài ch?t l??ng, phù h?p h? d?ch v? và t? nhiên", "Active", "/images/product-placeholder.png", null, null },
-                    { new Guid("00000000-0000-0000-0000-000000000010"), new Guid("413d52be-41dc-4c2c-bd98-0ec5dedf368f"), null, new DateTime(2025, 12, 9, 16, 34, 34, 921, DateTimeKind.Utc).AddTicks(8795), null, "C?n câu ?ài m?u 10", "CD010", null, null, "C?n câu ?ài ch?t l??ng, phù h?p h? d?ch v? và t? nhiên", "Active", "/images/product-placeholder.png", null, null },
-                    { new Guid("00000000-0000-0000-0000-000000000011"), new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"), null, new DateTime(2025, 12, 9, 16, 34, 34, 921, DateTimeKind.Utc).AddTicks(8799), null, "C?n câu ?ài m?u 11", "CD011", null, null, "C?n câu ?ài ch?t l??ng, phù h?p h? d?ch v? và t? nhiên", "Active", "/images/product-placeholder.png", null, null },
-                    { new Guid("00000000-0000-0000-0000-000000000012"), new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"), null, new DateTime(2025, 12, 9, 16, 34, 34, 921, DateTimeKind.Utc).AddTicks(8803), null, "C?n câu ?ài m?u 12", "CD012", null, null, "C?n câu ?ài ch?t l??ng, phù h?p h? d?ch v? và t? nhiên", "Active", "/images/product-placeholder.png", null, null },
-                    { new Guid("00000000-0000-0000-0000-000000000013"), new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"), null, new DateTime(2025, 12, 9, 16, 34, 34, 921, DateTimeKind.Utc).AddTicks(8813), null, "C?n câu ?ài m?u 13", "CD013", null, null, "C?n câu ?ài ch?t l??ng, phù h?p h? d?ch v? và t? nhiên", "Active", "/images/product-placeholder.png", null, null },
-                    { new Guid("00000000-0000-0000-0000-000000000014"), new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"), null, new DateTime(2025, 12, 9, 16, 34, 34, 921, DateTimeKind.Utc).AddTicks(8817), null, "C?n câu ?ài m?u 14", "CD014", null, null, "C?n câu ?ài ch?t l??ng, phù h?p h? d?ch v? và t? nhiên", "Active", "/images/product-placeholder.png", null, null },
-                    { new Guid("00000000-0000-0000-0000-000000000015"), new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"), null, new DateTime(2025, 12, 9, 16, 34, 34, 921, DateTimeKind.Utc).AddTicks(8821), null, "C?n câu ?ài m?u 15", "CD015", null, null, "C?n câu ?ài ch?t l??ng, phù h?p h? d?ch v? và t? nhiên", "Active", "/images/product-placeholder.png", null, null },
-                    { new Guid("00000000-0000-0000-0000-000000000016"), new Guid("413d52be-41dc-4c2c-bd98-0ec5dedf368f"), null, new DateTime(2025, 12, 9, 16, 34, 34, 921, DateTimeKind.Utc).AddTicks(8825), null, "C?n câu ?ài m?u 16", "CD016", null, null, "C?n câu ?ài ch?t l??ng, phù h?p h? d?ch v? và t? nhiên", "Active", "/images/product-placeholder.png", null, null },
-                    { new Guid("00000000-0000-0000-0000-000000000017"), new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"), null, new DateTime(2025, 12, 9, 16, 34, 34, 921, DateTimeKind.Utc).AddTicks(8828), null, "C?n câu ?ài m?u 17", "CD017", null, null, "C?n câu ?ài ch?t l??ng, phù h?p h? d?ch v? và t? nhiên", "Active", "/images/product-placeholder.png", null, null },
-                    { new Guid("00000000-0000-0000-0000-000000000018"), new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"), null, new DateTime(2025, 12, 9, 16, 34, 34, 921, DateTimeKind.Utc).AddTicks(8833), null, "C?n câu ?ài m?u 18", "CD018", null, null, "C?n câu ?ài ch?t l??ng, phù h?p h? d?ch v? và t? nhiên", "Active", "/images/product-placeholder.png", null, null },
-                    { new Guid("00000000-0000-0000-0000-000000000019"), new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"), null, new DateTime(2025, 12, 9, 16, 34, 34, 921, DateTimeKind.Utc).AddTicks(8836), null, "C?n câu ?ài m?u 19", "CD019", null, null, "C?n câu ?ài ch?t l??ng, phù h?p h? d?ch v? và t? nhiên", "Active", "/images/product-placeholder.png", null, null },
-                    { new Guid("00000000-0000-0000-0000-000000000020"), new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"), null, new DateTime(2025, 12, 9, 16, 34, 34, 921, DateTimeKind.Utc).AddTicks(8840), null, "C?n câu ?ài m?u 20", "CD020", null, null, "C?n câu ?ài ch?t l??ng, phù h?p h? d?ch v? và t? nhiên", "Active", "/images/product-placeholder.png", null, null },
-                    { new Guid("00000000-0000-0000-0000-000000000021"), new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"), null, new DateTime(2025, 12, 9, 16, 34, 34, 921, DateTimeKind.Utc).AddTicks(8845), null, "C?n câu ?ài m?u 21", "CD021", null, null, "C?n câu ?ài ch?t l??ng, phù h?p h? d?ch v? và t? nhiên", "Active", "/images/product-placeholder.png", null, null },
-                    { new Guid("00000000-0000-0000-0000-000000000022"), new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"), null, new DateTime(2025, 12, 9, 16, 34, 34, 921, DateTimeKind.Utc).AddTicks(8849), null, "C?n câu ?ài m?u 22", "CD022", null, null, "C?n câu ?ài ch?t l??ng, phù h?p h? d?ch v? và t? nhiên", "Active", "/images/product-placeholder.png", null, null },
-                    { new Guid("00000000-0000-0000-0000-000000000023"), new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"), null, new DateTime(2025, 12, 9, 16, 34, 34, 921, DateTimeKind.Utc).AddTicks(8852), null, "C?n câu ?ài m?u 23", "CD023", null, null, "C?n câu ?ài ch?t l??ng, phù h?p h? d?ch v? và t? nhiên", "Active", "/images/product-placeholder.png", null, null },
-                    { new Guid("00000000-0000-0000-0000-000000000024"), new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"), null, new DateTime(2025, 12, 9, 16, 34, 34, 921, DateTimeKind.Utc).AddTicks(8855), null, "C?n câu ?ài m?u 24", "CD024", null, null, "C?n câu ?ài ch?t l??ng, phù h?p h? d?ch v? và t? nhiên", "Active", "/images/product-placeholder.png", null, null },
-                    { new Guid("00000000-0000-0000-0000-000000000025"), new Guid("413d52be-41dc-4c2c-bd98-0ec5dedf368f"), null, new DateTime(2025, 12, 9, 16, 34, 34, 921, DateTimeKind.Utc).AddTicks(8859), null, "C?n câu ?ài m?u 25", "CD025", null, null, "C?n câu ?ài ch?t l??ng, phù h?p h? d?ch v? và t? nhiên", "Active", "/images/product-placeholder.png", null, null },
-                    { new Guid("00000000-0000-0000-0000-000000000026"), new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"), null, new DateTime(2025, 12, 9, 16, 34, 34, 921, DateTimeKind.Utc).AddTicks(8867), null, "C?n câu ?ài m?u 26", "CD026", null, null, "C?n câu ?ài ch?t l??ng, phù h?p h? d?ch v? và t? nhiên", "Active", "/images/product-placeholder.png", null, null },
-                    { new Guid("00000000-0000-0000-0000-000000000027"), new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"), null, new DateTime(2025, 12, 9, 16, 34, 34, 921, DateTimeKind.Utc).AddTicks(8870), null, "C?n câu ?ài m?u 27", "CD027", null, null, "C?n câu ?ài ch?t l??ng, phù h?p h? d?ch v? và t? nhiên", "Active", "/images/product-placeholder.png", null, null },
-                    { new Guid("00000000-0000-0000-0000-000000000028"), new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"), null, new DateTime(2025, 12, 9, 16, 34, 34, 921, DateTimeKind.Utc).AddTicks(8873), null, "C?n câu ?ài m?u 28", "CD028", null, null, "C?n câu ?ài ch?t l??ng, phù h?p h? d?ch v? và t? nhiên", "Active", "/images/product-placeholder.png", null, null },
-                    { new Guid("00000000-0000-0000-0000-000000000029"), new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"), null, new DateTime(2025, 12, 9, 16, 34, 34, 921, DateTimeKind.Utc).AddTicks(8879), null, "C?n câu ?ài m?u 29", "CD029", null, null, "C?n câu ?ài ch?t l??ng, phù h?p h? d?ch v? và t? nhiên", "Active", "/images/product-placeholder.png", null, null },
-                    { new Guid("00000000-0000-0000-0000-000000000030"), new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"), null, new DateTime(2025, 12, 9, 16, 34, 34, 921, DateTimeKind.Utc).AddTicks(8892), null, "C?n câu ?ài m?u 30", "CD030", null, null, "C?n câu ?ài ch?t l??ng, phù h?p h? d?ch v? và t? nhiên", "Active", "/images/product-placeholder.png", null, null },
-                    { new Guid("00000000-0000-0000-0000-000000000031"), new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"), null, new DateTime(2025, 12, 9, 16, 34, 34, 921, DateTimeKind.Utc).AddTicks(8896), null, "C?n câu ?ài m?u 31", "CD031", null, null, "C?n câu ?ài ch?t l??ng, phù h?p h? d?ch v? và t? nhiên", "Active", "/images/product-placeholder.png", null, null },
-                    { new Guid("00000000-0000-0000-0000-000000000032"), new Guid("413d52be-41dc-4c2c-bd98-0ec5dedf368f"), null, new DateTime(2025, 12, 9, 16, 34, 34, 921, DateTimeKind.Utc).AddTicks(8899), null, "C?n câu ?ài m?u 32", "CD032", null, null, "C?n câu ?ài ch?t l??ng, phù h?p h? d?ch v? và t? nhiên", "Active", "/images/product-placeholder.png", null, null },
-                    { new Guid("00000000-0000-0000-0000-000000000033"), new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"), null, new DateTime(2025, 12, 9, 16, 34, 34, 921, DateTimeKind.Utc).AddTicks(8903), null, "C?n câu ?ài m?u 33", "CD033", null, null, "C?n câu ?ài ch?t l??ng, phù h?p h? d?ch v? và t? nhiên", "Active", "/images/product-placeholder.png", null, null },
-                    { new Guid("00000000-0000-0000-0000-000000000034"), new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"), null, new DateTime(2025, 12, 9, 16, 34, 34, 921, DateTimeKind.Utc).AddTicks(8907), null, "C?n câu ?ài m?u 34", "CD034", null, null, "C?n câu ?ài ch?t l??ng, phù h?p h? d?ch v? và t? nhiên", "Active", "/images/product-placeholder.png", null, null },
-                    { new Guid("00000000-0000-0000-0000-000000000035"), new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"), null, new DateTime(2025, 12, 9, 16, 34, 34, 921, DateTimeKind.Utc).AddTicks(8910), null, "C?n câu ?ài m?u 35", "CD035", null, null, "C?n câu ?ài ch?t l??ng, phù h?p h? d?ch v? và t? nhiên", "Active", "/images/product-placeholder.png", null, null },
-                    { new Guid("00000000-0000-0000-0000-000000000036"), new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"), null, new DateTime(2025, 12, 9, 16, 34, 34, 921, DateTimeKind.Utc).AddTicks(8913), null, "C?n câu ?ài m?u 36", "CD036", null, null, "C?n câu ?ài ch?t l??ng, phù h?p h? d?ch v? và t? nhiên", "Active", "/images/product-placeholder.png", null, null },
-                    { new Guid("00000000-0000-0000-0000-000000000037"), new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"), null, new DateTime(2025, 12, 9, 16, 34, 34, 921, DateTimeKind.Utc).AddTicks(8918), null, "C?n câu ?ài m?u 37", "CD037", null, null, "C?n câu ?ài ch?t l??ng, phù h?p h? d?ch v? và t? nhiên", "Active", "/images/product-placeholder.png", null, null },
-                    { new Guid("00000000-0000-0000-0000-000000000038"), new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"), null, new DateTime(2025, 12, 9, 16, 34, 34, 921, DateTimeKind.Utc).AddTicks(8922), null, "C?n câu ?ài m?u 38", "CD038", null, null, "C?n câu ?ài ch?t l??ng, phù h?p h? d?ch v? và t? nhiên", "Active", "/images/product-placeholder.png", null, null },
-                    { new Guid("00000000-0000-0000-0000-000000000039"), new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"), null, new DateTime(2025, 12, 9, 16, 34, 34, 921, DateTimeKind.Utc).AddTicks(8925), null, "C?n câu ?ài m?u 39", "CD039", null, null, "C?n câu ?ài ch?t l??ng, phù h?p h? d?ch v? và t? nhiên", "Active", "/images/product-placeholder.png", null, null },
-                    { new Guid("00000000-0000-0000-0000-000000000040"), new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"), null, new DateTime(2025, 12, 9, 16, 34, 34, 921, DateTimeKind.Utc).AddTicks(8928), null, "C?n câu ?ài m?u 40", "CD040", null, null, "C?n câu ?ài ch?t l??ng, phù h?p h? d?ch v? và t? nhiên", "Active", "/images/product-placeholder.png", null, null },
-                    { new Guid("00000000-0000-0000-0000-000000000041"), new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"), null, new DateTime(2025, 12, 9, 16, 34, 34, 921, DateTimeKind.Utc).AddTicks(8932), null, "C?n câu ?ài m?u 41", "CD041", null, null, "C?n câu ?ài ch?t l??ng, phù h?p h? d?ch v? và t? nhiên", "Active", "/images/product-placeholder.png", null, null },
-                    { new Guid("00000000-0000-0000-0000-000000000042"), new Guid("413d52be-41dc-4c2c-bd98-0ec5dedf368f"), null, new DateTime(2025, 12, 9, 16, 34, 34, 921, DateTimeKind.Utc).AddTicks(8936), null, "C?n câu ?ài m?u 42", "CD042", null, null, "C?n câu ?ài ch?t l??ng, phù h?p h? d?ch v? và t? nhiên", "Active", "/images/product-placeholder.png", null, null },
-                    { new Guid("00000000-0000-0000-0000-000000000043"), new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"), null, new DateTime(2025, 12, 9, 16, 34, 34, 921, DateTimeKind.Utc).AddTicks(8940), null, "C?n câu ?ài m?u 43", "CD043", null, null, "C?n câu ?ài ch?t l??ng, phù h?p h? d?ch v? và t? nhiên", "Active", "/images/product-placeholder.png", null, null },
-                    { new Guid("00000000-0000-0000-0000-000000000044"), new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"), null, new DateTime(2025, 12, 9, 16, 34, 34, 921, DateTimeKind.Utc).AddTicks(8943), null, "C?n câu ?ài m?u 44", "CD044", null, null, "C?n câu ?ài ch?t l??ng, phù h?p h? d?ch v? và t? nhiên", "Active", "/images/product-placeholder.png", null, null },
-                    { new Guid("00000000-0000-0000-0000-000000000045"), new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"), null, new DateTime(2025, 12, 9, 16, 34, 34, 921, DateTimeKind.Utc).AddTicks(8949), null, "C?n câu ?ài m?u 45", "CD045", null, null, "C?n câu ?ài ch?t l??ng, phù h?p h? d?ch v? và t? nhiên", "Active", "/images/product-placeholder.png", null, null },
-                    { new Guid("00000000-0000-0000-0000-000000000046"), new Guid("413d52be-41dc-4c2c-bd98-0ec5dedf368f"), null, new DateTime(2025, 12, 9, 16, 34, 34, 921, DateTimeKind.Utc).AddTicks(8959), null, "C?n câu ?ài m?u 46", "CD046", null, null, "C?n câu ?ài ch?t l??ng, phù h?p h? d?ch v? và t? nhiên", "Active", "/images/product-placeholder.png", null, null },
-                    { new Guid("00000000-0000-0000-0000-000000000047"), new Guid("413d52be-41dc-4c2c-bd98-0ec5dedf368f"), null, new DateTime(2025, 12, 9, 16, 34, 34, 921, DateTimeKind.Utc).AddTicks(8962), null, "C?n câu ?ài m?u 47", "CD047", null, null, "C?n câu ?ài ch?t l??ng, phù h?p h? d?ch v? và t? nhiên", "Active", "/images/product-placeholder.png", null, null },
-                    { new Guid("00000000-0000-0000-0000-000000000048"), new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"), null, new DateTime(2025, 12, 9, 16, 34, 34, 921, DateTimeKind.Utc).AddTicks(8966), null, "C?n câu ?ài m?u 48", "CD048", null, null, "C?n câu ?ài ch?t l??ng, phù h?p h? d?ch v? và t? nhiên", "Active", "/images/product-placeholder.png", null, null },
-                    { new Guid("00000000-0000-0000-0000-000000000049"), new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"), null, new DateTime(2025, 12, 9, 16, 34, 34, 921, DateTimeKind.Utc).AddTicks(8969), null, "C?n câu ?ài m?u 49", "CD049", null, null, "C?n câu ?ài ch?t l??ng, phù h?p h? d?ch v? và t? nhiên", "Active", "/images/product-placeholder.png", null, null },
-                    { new Guid("00000000-0000-0000-0000-000000000050"), new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"), null, new DateTime(2025, 12, 9, 16, 34, 34, 921, DateTimeKind.Utc).AddTicks(8973), null, "C?n câu ?ài m?u 50", "CD050", null, null, "C?n câu ?ài ch?t l??ng, phù h?p h? d?ch v? và t? nhiên", "Active", "/images/product-placeholder.png", null, null }
+                    { new Guid("00000000-0000-0000-0000-000000000001"), new Guid("002a480e-d921-4367-945d-61af0c4269f9"), null, new DateTime(2025, 12, 14, 4, 12, 47, 38, DateTimeKind.Utc).AddTicks(7086), null, "Cần câu đài mẫu 1", "CD001", null, null, "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên", "Active", "/images/product-placeholder.png", null, null },
+                    { new Guid("00000000-0000-0000-0000-000000000002"), new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"), null, new DateTime(2025, 12, 14, 4, 12, 47, 38, DateTimeKind.Utc).AddTicks(7096), null, "Cần câu đài mẫu 2", "CD002", null, null, "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên", "Active", "/images/product-placeholder.png", null, null },
+                    { new Guid("00000000-0000-0000-0000-000000000003"), new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"), null, new DateTime(2025, 12, 14, 4, 12, 47, 38, DateTimeKind.Utc).AddTicks(7100), null, "Cần câu đài mẫu 3", "CD003", null, null, "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên", "Active", "/images/product-placeholder.png", null, null },
+                    { new Guid("00000000-0000-0000-0000-000000000004"), new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"), null, new DateTime(2025, 12, 14, 4, 12, 47, 38, DateTimeKind.Utc).AddTicks(7104), null, "Cần câu đài mẫu 4", "CD004", null, null, "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên", "Active", "/images/product-placeholder.png", null, null },
+                    { new Guid("00000000-0000-0000-0000-000000000005"), new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"), null, new DateTime(2025, 12, 14, 4, 12, 47, 38, DateTimeKind.Utc).AddTicks(7111), null, "Cần câu đài mẫu 5", "CD005", null, null, "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên", "Active", "/images/product-placeholder.png", null, null },
+                    { new Guid("00000000-0000-0000-0000-000000000006"), new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"), null, new DateTime(2025, 12, 14, 4, 12, 47, 38, DateTimeKind.Utc).AddTicks(7116), null, "Cần câu đài mẫu 6", "CD006", null, null, "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên", "Active", "/images/product-placeholder.png", null, null },
+                    { new Guid("00000000-0000-0000-0000-000000000007"), new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"), null, new DateTime(2025, 12, 14, 4, 12, 47, 38, DateTimeKind.Utc).AddTicks(7120), null, "Cần câu đài mẫu 7", "CD007", null, null, "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên", "Active", "/images/product-placeholder.png", null, null },
+                    { new Guid("00000000-0000-0000-0000-000000000008"), new Guid("002a480e-d921-4367-945d-61af0c4269f9"), null, new DateTime(2025, 12, 14, 4, 12, 47, 38, DateTimeKind.Utc).AddTicks(7123), null, "Cần câu đài mẫu 8", "CD008", null, null, "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên", "Active", "/images/product-placeholder.png", null, null },
+                    { new Guid("00000000-0000-0000-0000-000000000009"), new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"), null, new DateTime(2025, 12, 14, 4, 12, 47, 38, DateTimeKind.Utc).AddTicks(7127), null, "Cần câu đài mẫu 9", "CD009", null, null, "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên", "Active", "/images/product-placeholder.png", null, null },
+                    { new Guid("00000000-0000-0000-0000-000000000010"), new Guid("002a480e-d921-4367-945d-61af0c4269f9"), null, new DateTime(2025, 12, 14, 4, 12, 47, 38, DateTimeKind.Utc).AddTicks(7133), null, "Cần câu đài mẫu 10", "CD010", null, null, "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên", "Active", "/images/product-placeholder.png", null, null },
+                    { new Guid("00000000-0000-0000-0000-000000000011"), new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"), null, new DateTime(2025, 12, 14, 4, 12, 47, 38, DateTimeKind.Utc).AddTicks(7137), null, "Cần câu đài mẫu 11", "CD011", null, null, "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên", "Active", "/images/product-placeholder.png", null, null },
+                    { new Guid("00000000-0000-0000-0000-000000000012"), new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"), null, new DateTime(2025, 12, 14, 4, 12, 47, 38, DateTimeKind.Utc).AddTicks(7147), null, "Cần câu đài mẫu 12", "CD012", null, null, "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên", "Active", "/images/product-placeholder.png", null, null },
+                    { new Guid("00000000-0000-0000-0000-000000000013"), new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"), null, new DateTime(2025, 12, 14, 4, 12, 47, 38, DateTimeKind.Utc).AddTicks(7153), null, "Cần câu đài mẫu 13", "CD013", null, null, "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên", "Active", "/images/product-placeholder.png", null, null },
+                    { new Guid("00000000-0000-0000-0000-000000000014"), new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"), null, new DateTime(2025, 12, 14, 4, 12, 47, 38, DateTimeKind.Utc).AddTicks(7157), null, "Cần câu đài mẫu 14", "CD014", null, null, "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên", "Active", "/images/product-placeholder.png", null, null },
+                    { new Guid("00000000-0000-0000-0000-000000000015"), new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"), null, new DateTime(2025, 12, 14, 4, 12, 47, 38, DateTimeKind.Utc).AddTicks(7160), null, "Cần câu đài mẫu 15", "CD015", null, null, "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên", "Active", "/images/product-placeholder.png", null, null },
+                    { new Guid("00000000-0000-0000-0000-000000000016"), new Guid("002a480e-d921-4367-945d-61af0c4269f9"), null, new DateTime(2025, 12, 14, 4, 12, 47, 38, DateTimeKind.Utc).AddTicks(7163), null, "Cần câu đài mẫu 16", "CD016", null, null, "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên", "Active", "/images/product-placeholder.png", null, null },
+                    { new Guid("00000000-0000-0000-0000-000000000017"), new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"), null, new DateTime(2025, 12, 14, 4, 12, 47, 38, DateTimeKind.Utc).AddTicks(7167), null, "Cần câu đài mẫu 17", "CD017", null, null, "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên", "Active", "/images/product-placeholder.png", null, null },
+                    { new Guid("00000000-0000-0000-0000-000000000018"), new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"), null, new DateTime(2025, 12, 14, 4, 12, 47, 38, DateTimeKind.Utc).AddTicks(7172), null, "Cần câu đài mẫu 18", "CD018", null, null, "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên", "Active", "/images/product-placeholder.png", null, null },
+                    { new Guid("00000000-0000-0000-0000-000000000019"), new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"), null, new DateTime(2025, 12, 14, 4, 12, 47, 38, DateTimeKind.Utc).AddTicks(7176), null, "Cần câu đài mẫu 19", "CD019", null, null, "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên", "Active", "/images/product-placeholder.png", null, null },
+                    { new Guid("00000000-0000-0000-0000-000000000020"), new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"), null, new DateTime(2025, 12, 14, 4, 12, 47, 38, DateTimeKind.Utc).AddTicks(7180), null, "Cần câu đài mẫu 20", "CD020", null, null, "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên", "Active", "/images/product-placeholder.png", null, null },
+                    { new Guid("00000000-0000-0000-0000-000000000021"), new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"), null, new DateTime(2025, 12, 14, 4, 12, 47, 38, DateTimeKind.Utc).AddTicks(7186), null, "Cần câu đài mẫu 21", "CD021", null, null, "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên", "Active", "/images/product-placeholder.png", null, null },
+                    { new Guid("00000000-0000-0000-0000-000000000022"), new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"), null, new DateTime(2025, 12, 14, 4, 12, 47, 38, DateTimeKind.Utc).AddTicks(7189), null, "Cần câu đài mẫu 22", "CD022", null, null, "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên", "Active", "/images/product-placeholder.png", null, null },
+                    { new Guid("00000000-0000-0000-0000-000000000023"), new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"), null, new DateTime(2025, 12, 14, 4, 12, 47, 38, DateTimeKind.Utc).AddTicks(7193), null, "Cần câu đài mẫu 23", "CD023", null, null, "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên", "Active", "/images/product-placeholder.png", null, null },
+                    { new Guid("00000000-0000-0000-0000-000000000024"), new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"), null, new DateTime(2025, 12, 14, 4, 12, 47, 38, DateTimeKind.Utc).AddTicks(7196), null, "Cần câu đài mẫu 24", "CD024", null, null, "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên", "Active", "/images/product-placeholder.png", null, null },
+                    { new Guid("00000000-0000-0000-0000-000000000025"), new Guid("002a480e-d921-4367-945d-61af0c4269f9"), null, new DateTime(2025, 12, 14, 4, 12, 47, 38, DateTimeKind.Utc).AddTicks(7200), null, "Cần câu đài mẫu 25", "CD025", null, null, "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên", "Active", "/images/product-placeholder.png", null, null },
+                    { new Guid("00000000-0000-0000-0000-000000000026"), new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"), null, new DateTime(2025, 12, 14, 4, 12, 47, 38, DateTimeKind.Utc).AddTicks(7203), null, "Cần câu đài mẫu 26", "CD026", null, null, "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên", "Active", "/images/product-placeholder.png", null, null },
+                    { new Guid("00000000-0000-0000-0000-000000000027"), new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"), null, new DateTime(2025, 12, 14, 4, 12, 47, 38, DateTimeKind.Utc).AddTicks(7207), null, "Cần câu đài mẫu 27", "CD027", null, null, "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên", "Active", "/images/product-placeholder.png", null, null },
+                    { new Guid("00000000-0000-0000-0000-000000000028"), new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"), null, new DateTime(2025, 12, 14, 4, 12, 47, 38, DateTimeKind.Utc).AddTicks(7210), null, "Cần câu đài mẫu 28", "CD028", null, null, "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên", "Active", "/images/product-placeholder.png", null, null },
+                    { new Guid("00000000-0000-0000-0000-000000000029"), new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"), null, new DateTime(2025, 12, 14, 4, 12, 47, 38, DateTimeKind.Utc).AddTicks(7220), null, "Cần câu đài mẫu 29", "CD029", null, null, "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên", "Active", "/images/product-placeholder.png", null, null },
+                    { new Guid("00000000-0000-0000-0000-000000000030"), new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"), null, new DateTime(2025, 12, 14, 4, 12, 47, 38, DateTimeKind.Utc).AddTicks(7225), null, "Cần câu đài mẫu 30", "CD030", null, null, "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên", "Active", "/images/product-placeholder.png", null, null },
+                    { new Guid("00000000-0000-0000-0000-000000000031"), new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"), null, new DateTime(2025, 12, 14, 4, 12, 47, 38, DateTimeKind.Utc).AddTicks(7229), null, "Cần câu đài mẫu 31", "CD031", null, null, "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên", "Active", "/images/product-placeholder.png", null, null },
+                    { new Guid("00000000-0000-0000-0000-000000000032"), new Guid("002a480e-d921-4367-945d-61af0c4269f9"), null, new DateTime(2025, 12, 14, 4, 12, 47, 38, DateTimeKind.Utc).AddTicks(7233), null, "Cần câu đài mẫu 32", "CD032", null, null, "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên", "Active", "/images/product-placeholder.png", null, null },
+                    { new Guid("00000000-0000-0000-0000-000000000033"), new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"), null, new DateTime(2025, 12, 14, 4, 12, 47, 38, DateTimeKind.Utc).AddTicks(7237), null, "Cần câu đài mẫu 33", "CD033", null, null, "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên", "Active", "/images/product-placeholder.png", null, null },
+                    { new Guid("00000000-0000-0000-0000-000000000034"), new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"), null, new DateTime(2025, 12, 14, 4, 12, 47, 38, DateTimeKind.Utc).AddTicks(7242), null, "Cần câu đài mẫu 34", "CD034", null, null, "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên", "Active", "/images/product-placeholder.png", null, null },
+                    { new Guid("00000000-0000-0000-0000-000000000035"), new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"), null, new DateTime(2025, 12, 14, 4, 12, 47, 38, DateTimeKind.Utc).AddTicks(7246), null, "Cần câu đài mẫu 35", "CD035", null, null, "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên", "Active", "/images/product-placeholder.png", null, null },
+                    { new Guid("00000000-0000-0000-0000-000000000036"), new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"), null, new DateTime(2025, 12, 14, 4, 12, 47, 38, DateTimeKind.Utc).AddTicks(7250), null, "Cần câu đài mẫu 36", "CD036", null, null, "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên", "Active", "/images/product-placeholder.png", null, null },
+                    { new Guid("00000000-0000-0000-0000-000000000037"), new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"), null, new DateTime(2025, 12, 14, 4, 12, 47, 38, DateTimeKind.Utc).AddTicks(7256), null, "Cần câu đài mẫu 37", "CD037", null, null, "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên", "Active", "/images/product-placeholder.png", null, null },
+                    { new Guid("00000000-0000-0000-0000-000000000038"), new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"), null, new DateTime(2025, 12, 14, 4, 12, 47, 38, DateTimeKind.Utc).AddTicks(7260), null, "Cần câu đài mẫu 38", "CD038", null, null, "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên", "Active", "/images/product-placeholder.png", null, null },
+                    { new Guid("00000000-0000-0000-0000-000000000039"), new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"), null, new DateTime(2025, 12, 14, 4, 12, 47, 38, DateTimeKind.Utc).AddTicks(7264), null, "Cần câu đài mẫu 39", "CD039", null, null, "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên", "Active", "/images/product-placeholder.png", null, null },
+                    { new Guid("00000000-0000-0000-0000-000000000040"), new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"), null, new DateTime(2025, 12, 14, 4, 12, 47, 38, DateTimeKind.Utc).AddTicks(7268), null, "Cần câu đài mẫu 40", "CD040", null, null, "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên", "Active", "/images/product-placeholder.png", null, null },
+                    { new Guid("00000000-0000-0000-0000-000000000041"), new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"), null, new DateTime(2025, 12, 14, 4, 12, 47, 38, DateTimeKind.Utc).AddTicks(7272), null, "Cần câu đài mẫu 41", "CD041", null, null, "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên", "Active", "/images/product-placeholder.png", null, null },
+                    { new Guid("00000000-0000-0000-0000-000000000042"), new Guid("002a480e-d921-4367-945d-61af0c4269f9"), null, new DateTime(2025, 12, 14, 4, 12, 47, 38, DateTimeKind.Utc).AddTicks(7276), null, "Cần câu đài mẫu 42", "CD042", null, null, "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên", "Active", "/images/product-placeholder.png", null, null },
+                    { new Guid("00000000-0000-0000-0000-000000000043"), new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"), null, new DateTime(2025, 12, 14, 4, 12, 47, 38, DateTimeKind.Utc).AddTicks(7281), null, "Cần câu đài mẫu 43", "CD043", null, null, "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên", "Active", "/images/product-placeholder.png", null, null },
+                    { new Guid("00000000-0000-0000-0000-000000000044"), new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"), null, new DateTime(2025, 12, 14, 4, 12, 47, 38, DateTimeKind.Utc).AddTicks(7285), null, "Cần câu đài mẫu 44", "CD044", null, null, "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên", "Active", "/images/product-placeholder.png", null, null },
+                    { new Guid("00000000-0000-0000-0000-000000000045"), new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"), null, new DateTime(2025, 12, 14, 4, 12, 47, 38, DateTimeKind.Utc).AddTicks(7300), null, "Cần câu đài mẫu 45", "CD045", null, null, "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên", "Active", "/images/product-placeholder.png", null, null },
+                    { new Guid("00000000-0000-0000-0000-000000000046"), new Guid("002a480e-d921-4367-945d-61af0c4269f9"), null, new DateTime(2025, 12, 14, 4, 12, 47, 38, DateTimeKind.Utc).AddTicks(7304), null, "Cần câu đài mẫu 46", "CD046", null, null, "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên", "Active", "/images/product-placeholder.png", null, null },
+                    { new Guid("00000000-0000-0000-0000-000000000047"), new Guid("002a480e-d921-4367-945d-61af0c4269f9"), null, new DateTime(2025, 12, 14, 4, 12, 47, 38, DateTimeKind.Utc).AddTicks(7308), null, "Cần câu đài mẫu 47", "CD047", null, null, "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên", "Active", "/images/product-placeholder.png", null, null },
+                    { new Guid("00000000-0000-0000-0000-000000000048"), new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"), null, new DateTime(2025, 12, 14, 4, 12, 47, 38, DateTimeKind.Utc).AddTicks(7312), null, "Cần câu đài mẫu 48", "CD048", null, null, "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên", "Active", "/images/product-placeholder.png", null, null },
+                    { new Guid("00000000-0000-0000-0000-000000000049"), new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"), null, new DateTime(2025, 12, 14, 4, 12, 47, 38, DateTimeKind.Utc).AddTicks(7316), null, "Cần câu đài mẫu 49", "CD049", null, null, "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên", "Active", "/images/product-placeholder.png", null, null },
+                    { new Guid("00000000-0000-0000-0000-000000000050"), new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"), null, new DateTime(2025, 12, 14, 4, 12, 47, 38, DateTimeKind.Utc).AddTicks(7321), null, "Cần câu đài mẫu 50", "CD050", null, null, "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên", "Active", "/images/product-placeholder.png", null, null }
                 });
+
+            migrationBuilder.InsertData(
+                table: "User",
+                columns: new[] { "Id", "Email", "Fullname", "PasswordHash", "PhoneNumber", "RoleId", "Status", "Username" },
+                values: new object[] { new Guid("11111111-2222-3333-4444-555555555555"), "admin@example.com", "System Administrator", "AQAAAAIAAYagAAAAEGewC3YDqVQYmodL49+PvP1VVhKL34Fq2tuUrfYPeF/VE6cxHUcroa+3Zr0vwBT7RQ==", null, new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), "Active", "admin" });
+
+            migrationBuilder.InsertData(
+                table: "Admin",
+                columns: new[] { "Id", "Position", "Salary", "UserId" },
+                values: new object[] { new Guid("22222222-3333-4444-5555-666666666666"), "Administrator", null, new Guid("11111111-2222-3333-4444-555555555555") });
 
             migrationBuilder.InsertData(
                 table: "ProductDetail",
