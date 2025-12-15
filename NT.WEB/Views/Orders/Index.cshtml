@@ -44,10 +44,11 @@
     </div>
 
        <div class="col-sm-4 col-md-6">
-   <div class="input-group">
+   <form method="get" class="input-group">
         <span class="input-group-text">Tìm</span>
-        <input id="searchInput" type="search" class="form-control" placeholder="Tìm theo mã đơn hoặc tên khách..." aria-label="Search orders">
-  </div>
+        <input id="searchInput" name="q" value="@((ViewBag.Query as string) ?? string.Empty)" type="search" class="form-control" placeholder="Tìm theo SĐT khách hoặc mã/ tên" aria-label="Search orders">
+        <button class="btn btn-primary" type="submit">Lọc</button>
+  </form>
  </div>
          </div>
 
@@ -138,9 +139,12 @@ if (!q) { rows.forEach(r => r.style.display=''); return; }
        rows.forEach(function(r){
         var id = r.children[0].innerText.toLowerCase();
             var customer = r.children[1].innerText.toLowerCase();
-        r.style.display = (id.indexOf(q) !== -1 || customer.indexOf(q) !== -1) ? '' : 'none';
+            var phone = r.children[2].innerText.toLowerCase();
+        r.style.display = (id.indexOf(q) !== -1 || customer.indexOf(q) !== -1 || phone.indexOf(q) !== -1) ? '' : 'none';
           });
         });
+        // Submit on Enter key
+        input.addEventListener('keyup', function(e){ if (e.key === 'Enter') { e.target.form?.submit(); } });
 })();
     </script>
 }
