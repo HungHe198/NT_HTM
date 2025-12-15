@@ -1,4 +1,4 @@
-﻿@{
+@{
     Layout = null;
     var title = ViewData["Title"] ?? "NT.WEB";
     // Product cards data is prepared in HomeController.Index and passed via ViewBag.ClientLayoutProducts.
@@ -58,7 +58,7 @@
                        @*  <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Privacy">Chính sách</a></li> *@
                     </ul>
 
-                    <form class="d-flex position-relative mx-auto flex-grow-1" role="search" method="get" asp-controller="Product" asp-action="Index" autocomplete="off" style="max-width: 680px;">
+                    <form id="client-search-form" class="d-flex position-relative mx-auto flex-grow-1" role="search" method="get" asp-controller="Product" asp-action="Index" autocomplete="off" style="max-width: 680px;">
                         <input id="client-search" class="form-control form-control-sm me-2 w-100" type="search" name="q" placeholder="Tìm kiếm sản phẩm..." />
                         <button class="btn btn-sm btn-outline-primary" type="submit"><i class="fa fa-search"></i></button>
                         <div id="client-suggest" class="list-group position-absolute w-100" style="top:100%;left:0;max-height:420px;overflow:auto;display:none;z-index:1050"></div>
@@ -202,6 +202,7 @@
         (function(){
             const input = document.getElementById('client-search');
             const box = document.getElementById('client-suggest');
+            const form = document.getElementById('client-search-form');
             if(!input || !box) return;
             let timer = null;
             const currency = n => { try { return new Intl.NumberFormat('vi-VN',{style:'currency',currency:'VND',maximumFractionDigits:0}).format(n); } catch { return n; } };
@@ -232,6 +233,15 @@
                 }, 250);
             });
             document.addEventListener('click', e => { if(!box.contains(e.target) && e.target !== input) hide(); });
+
+            // If user submits with empty keyword, go to client product page instead of admin list
+            form?.addEventListener('submit', function(e){
+                const q = (input?.value || '').trim();
+                if(q.length === 0){
+                    e.preventDefault();
+                    window.location.href = '/Home/GetAllProducts';
+                }
+            });
         })();
 
         // Simple client-side 30-minute session window starting after login/register

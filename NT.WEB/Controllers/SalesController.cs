@@ -134,9 +134,9 @@ d.Price,
             if (voucher == null)
        return Json(new { success = false, message = "Mã giảm giá không tồn tại" });
 
-    // Kiểm tra ngày hết hạn
-   if (voucher.EndDate.HasValue && DateTime.UtcNow > voucher.EndDate.Value)
-    return Json(new { success = false, message = "Mã giảm giá đã hết hạn" });
+            // Kiểm tra ngày hết hạn (dùng thời gian máy chủ theo local time)
+            if (voucher.EndDate.HasValue && DateTime.Now > voucher.EndDate.Value)
+                return Json(new { success = false, message = "Mã voucher đã hết hạn" });
 
        // Kiểm tra số lần sử dụng
             if (voucher.MaxUsage.HasValue && voucher.UsageCount >= voucher.MaxUsage.Value)
@@ -229,7 +229,7 @@ d.Price,
                 {
             var vouchers = await _voucherRepo.FindAsync(v => v.Code == model.VoucherCode.Trim().ToUpper());
             var voucher = vouchers?.FirstOrDefault();
-  if (voucher != null && voucher.EndDate > DateTime.UtcNow)
+  if (voucher != null && (!voucher.EndDate.HasValue || DateTime.Now <= voucher.EndDate.Value))
           {
      voucherId = voucher.Id;
         if (voucher.DiscountPercentage.HasValue)

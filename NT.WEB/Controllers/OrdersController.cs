@@ -30,15 +30,28 @@ namespace NT.WEB.Controllers
 
         
         [Authorize(Roles = "Admin,Employee")]
-        public async Task<IActionResult> Index(string? status)
+        public async Task<IActionResult> Index(string? status, string? q)
         {
-            var orders = await _orderRepo.GetAllAsync();
+            // Include Customer and nested User so that the view can show customer name
+            var orders = await _orderRepo.FindAsync(o => true,
+                                                    o => o.Customer!,
+                                                    o => o.Customer!.User!);
             var list = orders ?? Array.Empty<Order>();
             if (!string.IsNullOrWhiteSpace(status))
             {
                 list = list.Where(o => string.Equals(o.Status, status, StringComparison.Ordinal)).ToList();
             }
+            // Filter by phone number (order phone or customer's phone) if query provided
+            if (!string.IsNullOrWhiteSpace(q))
+            {
+                var query = q.Trim().ToLowerInvariant();
+                list = list.Where(o =>
+                    (!string.IsNullOrWhiteSpace(o.PhoneNumber) && o.PhoneNumber.ToLowerInvariant().Contains(query)) ||
+                    (!string.IsNullOrWhiteSpace(o.Customer?.User?.PhoneNumber) && o.Customer!.User!.PhoneNumber!.ToLowerInvariant().Contains(query))
+                ).ToList();
+            }
             ViewBag.FilterStatus = status;
+            ViewBag.Query = q;
             return View(list);
         }
 
