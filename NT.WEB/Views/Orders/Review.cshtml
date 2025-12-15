@@ -1,132 +1,334 @@
-﻿@model NT.SHARED.Models.Order
+@model NT.SHARED.Models.Order
 @{
     var isAdmin = User.IsInRole("Admin") || User.IsInRole("Employee");
     Layout = isAdmin ? "~/Views/Shared/_AdminLayout.cshtml" : "~/Views/Shared/_ClientLayout.cshtml";
     var details = ViewBag.Details as IEnumerable<NT.SHARED.Models.OrderDetail> ?? Enumerable.Empty<NT.SHARED.Models.OrderDetail>();
-    var status = Model.Status ?? "0";       
-}
-
-<h2>Chi tiết đơn hàng</h2>
-@if (TempData["Error"] != null)
-{
-    <div class="alert alert-danger">@TempData["Error"]</div>
-}
-@* Show cancel reason only for Admin/Employee when the order is canceled *@
-@if (isAdmin && status == "-1")
-{
-    <div class="alert alert-danger">
-       
-        @if (!string.IsNullOrWhiteSpace(Model?.Note))
-        {
-            <div class="mt-2"><strong>Lý do hủy:</strong> @Model.Note</div>
-        }
-    </div>
-}
-@if (TempData["Success"] != null)
-{
-    <div class="alert alert-success">@TempData["Success"]</div>
-}
-
-<div class="mb-2">Mã đơn: @Model.Id</div>
-<div class="mb-2">Trạng thái: @(ViewBag.StatusText as string ?? Model.Status)</div>
-<div class="mb-2">Tổng tiền: @Model.TotalAmount.ToString("#,##0")</div>
-<div class="mb-2">Số tiền phải trả: @Model.FinalAmount.ToString("#,##0")</div>
-<div class="mb-2">Số điện thoại: @Model.PhoneNumber</div>
-<div class="mb-2">Địa chỉ: @Model.ShippingAddress</div>
-
-<h5>Sản phẩm</h5>
-<table class="table">
-    <thead>
-        <tr>
-            <th>Tên</th>
-            <th>Thuộc tính</th>
-            <th>Số lượng</th>
-            <th>Đơn giá</th>
-            <th>Tổng</th>
-        </tr>
-    </thead>
-    <tbody>
-    @foreach (var d in details)
+    var status = Model.Status ?? "0";
+    
+    // Status helper
+    string statusText, statusBadge;
+    switch (status)
     {
-        <tr>
-            <td>@(d.NameAtOrder ?? d.ProductDetail?.Product?.Name)</td>
-            <td><small>Chiều dài: @(d.LengthAtOrder ?? d.ProductDetail?.Length?.Name), Độ cứng: @(d.HardnessAtOrder ?? d.ProductDetail?.Hardness?.Name),/*  Màu: @(d.ColorAtOrder ?? d.ProductDetail?.Color?.Name) */</small></td>
-            <td>@d.Quantity</td>
-            <td>@d.UnitPrice.ToString("#,##0")</td>
-            <td>@((d.UnitPrice * d.Quantity).ToString("#,##0"))</td>
-        </tr>
+        case "-1": statusText = "Đã hủy"; statusBadge = "bg-danger"; break;
+        case "0": statusText = "Chờ xác nhận"; statusBadge = "bg-warning text-dark"; break;
+        case "1": statusText = "Đã xác nhận"; statusBadge = "bg-info text-dark"; break;
+        case "2": statusText = "Đang giao hàng"; statusBadge = "bg-primary"; break;
+  case "3": statusText = "Giao thành công"; statusBadge = "bg-success"; break;
+        default: statusText = "Không rõ"; statusBadge = "bg-secondary"; break;
     }
-    </tbody>
-</table>
-
-@if (User.IsInRole("Admin") || User.IsInRole("Employee"))
-{
-    <h5>Cập nhật trạng thái</h5>
-    <div class="mt-2 d-flex flex-wrap gap-2">
-        @* Adjacent transitions for admin/employee *@
-        @if (status == "0")
-        {
-            <form asp-action="UpdateStatus" asp-controller="Orders" method="post">
-                @Html.AntiForgeryToken()
-                <input type="hidden" name="id" value="@Model.Id" />
-                <input type="hidden" name="status" value="1" />
-                <button class="btn btn-success" type="submit">Xác nhận đơn (lên 1)</button>
-            </form>
-            <form asp-action="Cancel" asp-controller="Orders" method="post">
-                @Html.AntiForgeryToken()
-                <input type="hidden" name="id" value="@Model.Id" />
-                <input type="text" name="note" class="form-control" placeholder="Lý do hủy đơn" required />
-                <button class="btn btn-danger" type="submit">Hủy đơn </button>
-            </form>
-        }
-        else if (status == "1")
-        {
-            <form asp-action="UpdateStatus" asp-controller="Orders" method="post">
-                @Html.AntiForgeryToken()
-                <input type="hidden" name="id" value="@Model.Id" />
-                <input type="hidden" name="status" value="2" />
-                <button class="btn btn-warning" type="submit">Đưa vào vận chuyển </button>
-            </form>
-            <form asp-action="Cancel" asp-controller="Orders" method="post">
-                @Html.AntiForgeryToken()
-                <input type="hidden" name="id" value="@Model.Id" />
-                <input type="text" name="note" class="form-control" placeholder="Lý do hủy đơn" required />
-                <button class="btn btn-danger" type="submit">Hủy đơn </button>
-            </form>
-        }
-        else if (status == "2")
-        {
-            <form asp-action="UpdateStatus" asp-controller="Orders" method="post">
-                @Html.AntiForgeryToken()
-                <input type="hidden" name="id" value="@Model.Id" />
-                <input type="hidden" name="status" value="3" />
-                <button class="btn btn-info" type="submit">Đánh dấu giao thành công </button>
-            </form>
-            <form asp-action="Cancel" asp-controller="Orders" method="post">
-                @Html.AntiForgeryToken()
-                <input type="hidden" name="id" value="@Model.Id" />
-                <input type="text" name="note" class="form-control" placeholder="Lý do hủy đơn" required />
-                <button class="btn btn-outline-danger" type="submit">Hủy đơn </button>
-            </form>
-        }
-        else if (status == "3")
-        {
-            @* No cancel allowed in status 3 *@
-        }
-    </div>
+    
+    var utc = DateTime.SpecifyKind(Model.CreatedTime, DateTimeKind.Utc);
+    DateTime gmt7;
+    try { gmt7 = TimeZoneInfo.ConvertTimeFromUtc(utc, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time")); }
+    catch { gmt7 = utc.ToLocalTime(); }
 }
 
-@* Customer cancel: hide when status is 2 or 3 *@
-@if (!(User.IsInRole("Admin") || User.IsInRole("Employee")))
-{
-    if (status != "2" && status != "3" && status != "-1")
+<div class="container py-4">
+    @* Alert messages *@
+    @if (TempData["Error"] != null)
     {
-        <h5>Hủy đơn</h5>
-        <form asp-action="Cancel" asp-controller="Orders" method="post" class="d-flex gap-2">
-            @Html.AntiForgeryToken()
-            <input type="hidden" name="id" value="@Model.Id" />
-            <input type="text" name="note" class="form-control" placeholder="Lý do hủy đơn" required />
-            <button class="btn btn-danger" type="submit">Hủy đơn</button>
+      <div class="alert alert-danger alert-dismissible fade show" role="alert">
+ @TempData["Error"]
+     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+  }
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    
+    <div class="row mb-4">
+        <div class="col-lg-8">
+  <!-- Order Header Card -->
+     <div class="card shadow-sm mb-3">
+           <div class="card-header bg-light d-flex align-items-center justify-content-between">
+         <div>
+    <h4 class="mb-0">Chi tiết đơn hàng</h4>
+   <small class="text-muted">Mã đơn: <strong>@Model.Id</strong></small>
+        </div>
+      <span class="badge @statusBadge" style="font-size: 0.9rem; padding: 0.5rem 0.8rem;">@statusText</span>
+            </div>
+    
+          <div class="card-body">
+            <div class="row mb-3">
+    <div class="col-md-6">
+           <label class="text-muted small">Ngày đặt đơn</label>
+             <div class="fw-semibold">@gmt7.ToString("dd/MM/yyyy HH:mm")</div>
+   </div>
+             <div class="col-md-6">
+    <label class="text-muted small">Số điện thoại</label>
+     <div class="fw-semibold">@Model.PhoneNumber</div>
+  </div>
+     </div>
+         <div class="row">
+    <div class="col-12">
+         <label class="text-muted small">Địa chỉ giao hàng</label>
+       <div class="fw-semibold">@Model.ShippingAddress</div>
+            </div>
+   </div>
+     </div>
+    </div>
+
+       <!-- Cancel Reason (Admin only) -->
+            @if (isAdmin && status == "-1" && !string.IsNullOrWhiteSpace(Model?.Note))
+     {
+    <div class="alert alert-danger mb-3" role="alert">
+<h6 class="alert-heading mb-2">Lý do hủy đơn</h6>
+         <p class="mb-0">@Model.Note</p>
+          </div>
+            }
+
+      <!-- Products Card -->
+            <div class="card shadow-sm mb-3">
+       <div class="card-header bg-light">
+   <h5 class="mb-0">Sản phẩm trong đơn hàng</h5>
+     </div>
+         <div class="card-body p-0">
+             <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+     <tr>
+ <th style="width: 40%;">Tên sản phẩm</th>
+        <th style="width: 25%;">Thuộc tính</th>
+            <th style="width: 12%; text-align: center;">Số lượng</th>
+  <th style="width: 12%; text-align: right;">Đơn giá</th>
+           <th style="width: 15%; text-align: right;">Tổng cộng</th>
+       </tr>
+        </thead>
+<tbody>
+        @foreach (var d in details)
+  {
+        <tr>
+      <td class="fw-semibold">@(d.NameAtOrder ?? d.ProductDetail?.Product?.Name ?? "N/A")</td>
+        <td>
+     <small class="text-muted">
+                @if (!string.IsNullOrWhiteSpace(d.LengthAtOrder ?? d.ProductDetail?.Length?.Name))
+     {
+  <div>Chiều dài: @(d.LengthAtOrder ?? d.ProductDetail?.Length?.Name)</div>
+          }
+         @if (!string.IsNullOrWhiteSpace(d.HardnessAtOrder ?? d.ProductDetail?.Hardness?.Name))
+             {
+    <div>Độ cứng: @(d.HardnessAtOrder ?? d.ProductDetail?.Hardness?.Name)</div>
+       }
+    </small>
+        </td>
+            <td style="text-align: center;">@d.Quantity</td>
+                 <td style="text-align: right;">@d.UnitPrice.ToString("#,##0")</td>
+                  <td style="text-align: right;" class="fw-semibold">@((d.UnitPrice * d.Quantity).ToString("#,##0"))</td>
+          </tr>
+   }
+          </tbody>
+            </table>
+        </div>
+           </div>
+            </div>
+        </div>
+
+        <!-- Summary Sidebar -->
+      <div class="col-lg-4">
+            <!-- Summary Card -->
+  <div class="card shadow-sm mb-3 sticky-top" style="top: 20px;">
+    <div class="card-header bg-light">
+             <h5 class="mb-0">Tóm tắt thanh toán</h5>
+          </div>
+         <div class="card-body">
+  <div class="d-flex justify-content-between mb-2">
+             <span class="text-muted">Tổng tiền hàng:</span>
+        <span>@Model.TotalAmount.ToString("#,##0")</span>
+   </div>
+     <div class="d-flex justify-content-between mb-3 pb-3 border-bottom">
+     <span class="text-muted">Chiết khấu:</span>
+      <span class="text-danger">-@((Model.TotalAmount - Model.FinalAmount).ToString("#,##0"))</span>
+         </div>
+  <div class="d-flex justify-content-between align-items-center">
+       <span class="fw-semibold">Số tiền phải trả:</span>
+              <span class="fw-semibold" style="font-size: 1.3rem; color: #28a745;">@Model.FinalAmount.ToString("#,##0")</span>
+    </div>
+ </div>
+     </div>
+
+    <!-- Status Timeline -->
+          <div class="card shadow-sm">
+        <div class="card-header bg-light">
+   <h5 class="mb-0">Tiến trình đơn hàng</h5>
+          </div>
+    <div class="card-body">
+      <div class="timeline">
+          <div class="timeline-item @(status == "-1" ? "active" : (int.Parse(status ?? "0") >= -1 ? "completed" : ""))">
+           <div class="timeline-marker bg-danger"></div>
+                  <div class="timeline-content">Đã hủy</div>
+        </div>
+     <div class="timeline-item @(status == "0" ? "active" : (int.Parse(status ?? "0") >= 0 && status != "-1" ? "completed" : ""))">
+       <div class="timeline-marker bg-warning"></div>
+      <div class="timeline-content">Chờ xác nhận</div>
+            </div>
+          <div class="timeline-item @(status == "1" ? "active" : (int.Parse(status ?? "0") >= 1 && status != "-1" ? "completed" : ""))">
+            <div class="timeline-marker bg-info"></div>
+ <div class="timeline-content">Đã xác nhận</div>
+             </div>
+            <div class="timeline-item @(status == "2" ? "active" : (int.Parse(status ?? "0") >= 2 && status != "-1" ? "completed" : ""))">
+     <div class="timeline-marker bg-primary"></div>
+    <div class="timeline-content">Đang giao</div>
+ </div>
+         <div class="timeline-item @(status == "3" ? "active" : (int.Parse(status ?? "0") >= 3 && status != "-1" ? "completed" : ""))">
+    <div class="timeline-marker bg-success"></div>
+  <div class="timeline-content">Giao thành công</div>
+    </div>
+     </div>
+         </div>
+ </div>
+        </div>
+    </div>
+
+    <!-- Admin Actions -->
+    @if (isAdmin && status != "-1" && status != "3")
+    {
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-light">
+   <h5 class="mb-0">Quản lý đơn hàng</h5>
+            </div>
+            <div class="card-body">
+           <div class="row g-2">
+  @if (status == "0")
+  {
+       <div class="col-sm-6 col-md-4">
+           <form asp-action="UpdateStatus" asp-controller="Orders" method="post" class="w-100">
+   @Html.AntiForgeryToken()
+    <input type="hidden" name="id" value="@Model.Id" />
+    <input type="hidden" name="status" value="1" />
+              <button class="btn btn-success w-100" type="submit">✓ Xác nhận đơn</button>
+         </form>
+       </div>
+                <div class="col-sm-6 col-md-4">
+       <button class="btn btn-danger w-100" data-bs-toggle="modal" data-bs-target="#cancelModal">✕ Hủy đơn</button>
+      </div>
+         }
+          else if (status == "1")
+        {
+                <div class="col-sm-6 col-md-4">
+       <form asp-action="UpdateStatus" asp-controller="Orders" method="post" class="w-100">
+@Html.AntiForgeryToken()
+      <input type="hidden" name="id" value="@Model.Id" />
+   <input type="hidden" name="status" value="2" />
+       <button class="btn btn-warning w-100" type="submit">📦 Đưa vào vận chuyển</button>
+         </form>
+  </div>
+          <div class="col-sm-6 col-md-4">
+                <button class="btn btn-danger w-100" data-bs-toggle="modal" data-bs-target="#cancelModal">✕ Hủy đơn</button>
+</div>
+         }
+          else if (status == "2")
+    {
+     <div class="col-sm-6 col-md-4">
+   <form asp-action="UpdateStatus" asp-controller="Orders" method="post" class="w-100">
+          @Html.AntiForgeryToken()
+     <input type="hidden" name="id" value="@Model.Id" />
+   <input type="hidden" name="status" value="3" />
+        <button class="btn btn-info w-100" type="submit">✓ Giao thành công</button>
+    </form>
+         </div>
+   <div class="col-sm-6 col-md-4">
+          <button class="btn btn-outline-danger w-100" data-bs-toggle="modal" data-bs-target="#cancelModal">✕ Hủy đơn</button>
+  </div>
+        }
+    </div>
+            </div>
+        </div>
+    }
+
+    <!-- Customer Cancel Section -->
+    @if (!isAdmin && status != "2" && status != "3" && status != "-1")
+    {
+        <div class="card shadow-sm">
+  <div class="card-header bg-light">
+           <h5 class="mb-0">Hủy đơn hàng</h5>
+            </div>
+ <div class="card-body">
+    <p class="text-muted mb-3">Bạn có thể hủy đơn hàng này. Vui lòng nhập lý do hủy:</p>
+          <form asp-action="Cancel" asp-controller="Orders" method="post">
+ @Html.AntiForgeryToken()
+        <input type="hidden" name="id" value="@Model.Id" />
+      <div class="mb-2">
+        <textarea name="note" class="form-control" placeholder="Lý do hủy đơn (bắt buộc)" required rows="3"></textarea>
+  </div>
+     <button class="btn btn-danger w-100" type="submit">Xác nhận hủy đơn</button>
+   </form>
+  </div>
+   </div>
+  }
+</div>
+
+<!-- Cancel Modal for Admin -->
+@if (isAdmin)
+{
+    <div class="modal fade" id="cancelModal" tabindex="-1" aria-labelledby="cancelModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+     <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+ <h5 class="modal-title" id="cancelModalLabel">Hủy đơn hàng</h5>
+       <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+        <form asp-action="Cancel" asp-controller="Orders" method="post">
+   @Html.AntiForgeryToken()
+            <div class="modal-body">
+                  <input type="hidden" name="id" value="@Model.Id" />
+            <div class="mb-3">
+           <label for="cancelNote" class="form-label">Lý do hủy (bắt buộc)</label>
+         <textarea id="cancelNote" name="note" class="form-control" placeholder="Nhập lý do hủy đơn" required rows="4"></textarea>
+              </div>
+             </div>
+<div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+              <button type="submit" class="btn btn-danger">Xác nhận hủy</button>
+      </div>
         </form>
-    }
+         </div>
+     </div>
+    </div>
 }
+
+<style>
+    .timeline {
+  position: relative;
+        padding: 20px 0;
+    }
+    
+    .timeline-item {
+    display: flex;
+        align-items: center;
+   margin-bottom: 20px;
+        opacity: 0.5;
+        transition: opacity 0.3s ease;
+    }
+    
+    .timeline-item.completed,
+    .timeline-item.active {
+        opacity: 1;
+    }
+  
+    .timeline-marker {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        margin-right: 12px;
+ flex-shrink: 0;
+border: 2px solid #fff;
+        display: flex;
+   align-items: center;
+        justify-content: center;
+        font-weight: bold;
+      color: white;
+    }
+    
+    .timeline-content {
+        flex: 1;
+        font-weight: 500;
+    }
+    
+    .sticky-top {
+        position: sticky !important;
+    }
+</style>

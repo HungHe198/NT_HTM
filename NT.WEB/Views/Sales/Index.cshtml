@@ -1,0 +1,617 @@
+@{
+    ViewBag.Title = "Bán hàng tại quầy (POS)";
+    Layout = "~/Views/Shared/_ClientLayout.cshtml";
+    var products = ViewBag.Products as List<NT.SHARED.Models.Product> ?? new();
+    var paymentMethods = ViewBag.PaymentMethods as List<NT.SHARED.Models.PaymentMethod> ?? new();
+}
+
+<style>
+    .product-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 12px;
+     max-height: 500px;
+        overflow-y: auto;
+  padding: 10px;
+    }
+
+    .product-card {
+        border: 2px solid #e9ecef;
+   border-radius: 10px;
+        padding: 12px;
+        text-align: center;
+   cursor: pointer;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+    .product-card:hover {
+        border-color: #667eea;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        transform: translateY(-4px);
+    }
+
+    .product-card.active {
+        border-color: #667eea;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+    }
+
+    .product-name {
+     font-weight: 600;
+     font-size: 0.85rem;
+        margin: 8px 0 4px 0;
+        display: -webkit-box;
+   -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+        overflow: hidden;
+        color: #2c3e50;
+    }
+
+    .product-code {
+        font-size: 0.75rem;
+      color: #7f8c8d;
+        margin-bottom: 4px;
+    }
+
+    .product-price {
+    font-weight: 700;
+  color: #667eea;
+    font-size: 0.9rem;
+    }
+</style>
+
+<div class="container-fluid py-3">
+    <div class="row g-3">
+        <!-- LEFT: PRODUCT SEARCH & SELECTION -->
+        <div class="col-lg-8">
+     <div class="card shadow-sm">
+           <div class="card-header bg-primary text-white fw-bold">
+           <i class="bi bi-search"></i> Tìm kiếm & Chọn sản phẩm
+      </div>
+     <div class="card-body">
+  <!-- Search Products -->
+     <div class="input-group input-group-lg mb-3">
+ <input type="text" id="product-search" class="form-control" placeholder="Tìm tên hoặc mã sản phẩm...">
+         <button class="btn btn-primary" onclick="searchProducts()">
+         <i class="bi bi-search"></i> Tìm
+     </button>
+      </div>
+
+         <!-- Product Suggestions List (Dropdown) -->
+        <div id="product-suggestions" class="list-group mb-3" style="max-height: 300px; overflow-y: auto; display: none;"></div>
+
+     <!-- Products Grid (Initial View) -->
+         <div id="products-grid-section">
+          <label class="fw-bold text-muted small mb-2 d-block">Sản phẩm phổ biến:</label>
+   <div class="product-grid" id="products-grid">
+             @if (products.Any())
+     {
+     @foreach (var product in products.Take(20))
+    {
+             <div class="product-card" onclick="selectProductFromGrid('@product.Id', '@product.Name.Replace("'", "\\'")', this)">
+           <div class="product-code">@product.ProductCode</div>
+    <div class="product-name">@product.Name</div>
+        <div class="product-price">Chọn</div>
+         </div>
+    }
+    }
+      else
+      {
+      <div class="alert alert-warning w-100 mb-0">Chưa có sản phẩm nào. Vui lòng thêm sản phẩm.</div>
+  }
+      </div>
+        </div>
+
+          <!-- Variants Select -->
+      <div class="mb-3">
+       <label class="form-label fw-bold">Chọn loại sản phẩm:</label>
+     <select id="variant-select" class="form-select" onchange="updateSelectedVariant()">
+ <option value="">-- Chọn biến thể --</option>
+     </select>
+         </div>
+
+      <!-- Quantity Input -->
+  <div class="mb-3">
+     <label class="form-label fw-bold">Số lượng:</label>
+     <div class="input-group">
+   <button class="btn btn-outline-secondary" onclick="decreaseQty()">−</button>
+         <input type="number" id="qty-input" class="form-control text-center" value="1" min="1">
+    <button class="btn btn-outline-secondary" onclick="increaseQty()">+</button>
+     </div>
+       </div>
+
+        <!-- Add to Cart Button -->
+          <button class="btn btn-success btn-lg w-100" onclick="addToCart()">
+        <i class="bi bi-cart-plus"></i> Thêm vào giỏ
+       </button>
+ </div>
+   </div>
+
+     <!-- Cart Items Table -->
+<div class="card shadow-sm mt-3">
+         <div class="card-header bg-info text-white fw-bold">
+   <i class="bi bi-cart3"></i> Giỏ hàng (<span id="cart-count">0</span> sản phẩm)
+             </div>
+        <div class="card-body p-0">
+     <div class="table-responsive">
+          <table class="table table-sm mb-0">
+  <thead class="table-light">
+ <tr>
+      <th>STT</th>
+     <th>Sản phẩm</th>
+  <th>Loại</th>
+    <th>Giá</th>
+    <th>SL</th>
+   <th>Tổng</th>
+        <th>Hành động</th>
+     </tr>
+     </thead>
+     <tbody id="cart-items">
+ <tr id="empty-cart">
+ <td colspan="7" class="text-center py-3 text-muted">Giỏ hàng trống</td>
+    </tr>
+         </tbody>
+  </table>
+       </div>
+        </div>
+       </div>
+  </div>
+
+    <!-- RIGHT: CUSTOMER & PAYMENT -->
+        <div class="col-lg-4">
+      <!-- Customer Info -->
+          <div class="card shadow-sm mb-3">
+    <div class="card-header bg-warning text-dark fw-bold">
+      <i class="bi bi-person"></i> T thông tin khách hàng
+      </div>
+        <div class="card-body">
+      <div class="mb-3">
+        <label class="form-label fw-bold">Số điện thoại:</label>
+   <div class="input-group">
+  <input type="tel" id="customer-phone" class="form-control" placeholder="Nhập SĐT khách">
+      <button class="btn btn-outline-primary" onclick="searchCustomer()">
+      <i class="bi bi-search"></i>
+    </button>
+    </div>
+     </div>
+
+     <div class="mb-3">
+  <label class="form-label">Tên khách hàng:</label>
+    <input type="text" id="customer-name" class="form-control" readonly>
+       </div>
+
+       <div class="mb-3">
+       <label class="form-label">Địa chỉ:</label>
+        <textarea id="customer-address" class="form-control" rows="2" readonly></textarea>
+        </div>
+           </div>
+         </div>
+
+          <!-- Voucher -->
+ <div class="card shadow-sm mb-3">
+ <div class="card-header bg-success text-white fw-bold">
+   <i class="bi bi-ticket-perforated"></i> Mã giảm giá
+       </div>
+     <div class="card-body">
+         <div class="input-group mb-2">
+   <input type="text" id="voucher-code" class="form-control" placeholder="Nhập mã giảm giá">
+     <button class="btn btn-outline-success" onclick="applyVoucher()">
+    <i class="bi bi-check"></i>
+     </button>
+           </div>
+  <small id="voucher-message" class="text-muted"></small>
+          </div>
+       </div>
+
+      <!-- Payment Method -->
+   <div class="card shadow-sm mb-3">
+        <div class="card-header bg-danger text-white fw-bold">
+      <i class="bi bi-credit-card"></i> Phương thức thanh toán
+      </div>
+           <div class="card-body">
+           <select id="payment-method" class="form-select">
+      <option value="">-- Chọn phương thức --</option>
+     @foreach (var pm in paymentMethods)
+         {
+<option value="@pm.Id">@pm.Name</option>
+ }
+          </select>
+   </div>
+  </div>
+
+  <!-- Order Summary -->
+      <div class="card shadow-sm mb-3">
+   <div class="card-header bg-dark text-white fw-bold">
+          <i class="bi bi-calculator"></i> Tóm tắt
+      </div>
+      <div class="card-body">
+    <div class="row mb-2">
+   <div class="col-6">Tổng tiền:</div>
+<div class="col-6 text-end"><strong id="total-amount">0₫</strong></div>
+      </div>
+    <div class="row mb-2">
+ <div class="col-6">Giảm giá:</div>
+ <div class="col-6 text-end"><strong id="discount-amount" class="text-danger">0₫</strong></div>
+   </div>
+   <hr>
+  <div class="row">
+        <div class="col-6">Thành tiền:</div>
+       <div class="col-6 text-end"><strong id="final-amount" style="font-size: 1.2rem; color: #dc3545;">0₫</strong></div>
+           </div>
+
+     <textarea id="order-note" class="form-control mt-3" rows="2" placeholder="Ghi chú đơn hàng (tùy chọn)"></textarea>
+
+   <button class="btn btn-primary btn-lg w-100 mt-3" onclick="createOrder()">
+         <i class="bi bi-check-circle"></i> Tạo đơn hàng
+   </button>
+    </div>
+</div>
+
+        <!-- Quick Actions -->
+    <div class="d-grid gap-2">
+ <a href="@Url.Action("History", "Sales")" class="btn btn-info">
+       <i class="bi bi-clock-history"></i> Lịch sử bán hàng
+     </a>
+      <button class="btn btn-warning" onclick="clearCart()">
+     <i class="bi bi-trash"></i> Xóa giỏ hàng
+  </button>
+      </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Notification -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <div id="toast" class="toast align-items-center text-white border-0" role="alert">
+        <div class="d-flex">
+         <div id="toast-body" class="toast-body"></div>
+     <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    let cart = [];
+    let selectedVariants = {};
+    let totalAmount = 0;
+  let discountAmount = 0;
+    let customerData = null;
+    let selectedProductId = null;
+
+    // Search products
+    async function searchProducts() {
+        const q = document.getElementById('product-search').value.trim();
+      if (!q) {
+       document.getElementById('product-suggestions').style.display = 'none';
+         document.getElementById('products-grid-section').style.display = 'block';
+  return;
+    }
+
+   try {
+       const res = await fetch(`/Sales/SearchProducts?q=${encodeURIComponent(q)}`);
+       
+   if (!res.ok) {
+       showToast('Lỗi khi tìm kiếm sản phẩm', 'danger');
+      return;
+   }
+
+const products = await res.json();
+
+    if (!Array.isArray(products)) {
+       showToast('Dữ liệu trả về không hợp lệ', 'danger');
+       console.error('Invalid response:', products);
+    return;
+    }
+
+    const box = document.getElementById('product-suggestions');
+     if (products.length === 0) {
+        box.innerHTML = '<div class="list-group-item">Không tìm thấy sản phẩm nào</div>';
+       box.style.display = 'block';
+    document.getElementById('products-grid-section').style.display = 'none';
+      return;
+   }
+
+   box.style.display = 'block';
+    document.getElementById('products-grid-section').style.display = 'none';
+
+     box.innerHTML = products.map(p => `
+        <a href="javascript:void(0)" class="list-group-item list-group-item-action" 
+     onclick="selectProduct('${p.Id}', '${p.Name.replace(/'/g, "\\'")}')">
+  <div class="d-flex justify-content-between">
+          <strong>${p.Name}</strong>
+        <code class="text-muted small">${p.ProductCode}</code>
+   </div>
+    </a>
+  `).join('');
+
+   showToast(`Tìm thấy ${products.length} sản phẩm`, 'info');
+    } catch (error) {
+       console.error('Search error:', error);
+    showToast('Lỗi khi tìm kiếm: ' + error.message, 'danger');
+   }
+    }
+
+ // Select product from grid
+ function selectProductFromGrid(productId, productName, element) {
+     // Remove active class from all cards
+        document.querySelectorAll('.product-card').forEach(el => {
+   el.classList.remove('active');
+       });
+     // Add active class to clicked card
+    element.classList.add('active');
+ selectProduct(productId, productName);
+    }
+
+// Select product and load variants
+    async function selectProduct(productId, productName) {
+        selectedProductId = productId;
+   document.getElementById('product-search').value = productName;
+    document.getElementById('product-suggestions').style.display = 'none';
+   document.getElementById('products-grid-section').style.display = 'none';
+
+        try {
+            const res = await fetch(`/Sales/GetProductVariants?productId=${productId}`);
+   
+       if (!res.ok) {
+        showToast('Lỗi khi lấy biến thể sản phẩm', 'danger');
+    return;
+   }
+            
+     const variants = await res.json();
+
+    if (!Array.isArray(variants) || variants.length === 0) {
+       showToast('Sản phẩm này không có biến thể hoặc hết hàng', 'warning');
+     document.getElementById('variant-select').innerHTML = '<option value="">-- Chọn biến thể --</option>';
+        return;
+    }
+
+            const select = document.getElementById('variant-select');
+     select.innerHTML = '<option value="">-- Chọn biến thể --</option>' + variants.map(v => {
+        const variantDisplay = `${v.length || 'N/A'} - ${v.hardness || 'N/A'} - ${v.color || 'N/A'} (${v.StockQuantity || 0} cái) - ${(v.Price || 0).toLocaleString()}₫`;
+        return `<option value="${v.Id}" data-price="${v.Price}" data-stock="${v.StockQuantity}">
+       ${variantDisplay}
+        </option>`;
+    }).join('');
+
+ selectedVariants = {};
+    
+    showToast(`Đã tải ${variants.length} biến thể`, 'info');
+   } catch (error) {
+            console.error('Error:', error);
+     showToast('Lỗi khi tải biến thể sản phẩm', 'danger');
+  }
+    }
+
+    function updateSelectedVariant() {
+     const select = document.getElementById('variant-select');
+   const option = select.options[select.selectedIndex];
+        if (option.value) {
+      selectedVariants[selectedProductId] = {
+     variantId: option.value,
+     price: parseFloat(option.dataset.price) || 0,
+ stock: parseInt(option.dataset.stock) || 0
+  };
+        }
+    }
+
+function increaseQty() {
+        const qty = document.getElementById('qty-input');
+        qty.value = Math.max(1, parseInt(qty.value || 1) + 1);
+    }
+
+    function decreaseQty() {
+        const qty = document.getElementById('qty-input');
+        qty.value = Math.max(1, parseInt(qty.value || 1) - 1);
+    }
+
+  // Add to cart
+    function addToCart() {
+  const select = document.getElementById('variant-select');
+   if (!select.value) {
+       showToast('Vui lòng chọn biến thể sản phẩm', 'warning');
+        return;
+        }
+
+        const qty = parseInt(document.getElementById('qty-input').value) || 1;
+        const productName = document.getElementById('product-search').value;
+        const option = select.options[select.selectedIndex];
+
+  const item = {
+     productDetailId: select.value,
+            productName: productName,
+     variantText: option.text,
+     price: parseFloat(option.dataset.price),
+      quantity: qty
+   };
+
+        cart.push(item);
+    updateCart();
+   clearProductForm();
+      showToast(`Đã thêm ${item.productName}`, 'success');
+    }
+
+    function removeFromCart(index) {
+   cart.splice(index, 1);
+     updateCart();
+  }
+
+    function updateCart() {
+  const tbody = document.getElementById('cart-items');
+        if (cart.length === 0) {
+ tbody.innerHTML = '<tr id="empty-cart"><td colspan="7" class="text-center py-3 text-muted">Giỏ hàng trống</td></tr>';
+      document.getElementById('cart-count').textContent = '0';
+          totalAmount = 0;
+        updateSummary();
+       return;
+        }
+
+        document.getElementById('empty-cart')?.remove();
+   totalAmount = 0;
+        tbody.innerHTML = cart.map((item, idx) => {
+            const itemTotal = item.price * item.quantity;
+   totalAmount += itemTotal;
+    return `
+         <tr>
+    <td>${idx + 1}</td>
+   <td>${item.productName}</td>
+          <td><small>${item.variantText}</small></td>
+ <td>${Number(item.price).toLocaleString()}₫</td>
+    <td><input type="number" class="form-control form-control-sm" style="width: 60px" value="${item.quantity}" 
+onchange="updateItemQty(${idx}, this.value)"></td>
+    <td><strong>${Number(itemTotal).toLocaleString()}₫</strong></td>
+            <td>
+          <button class="btn btn-sm btn-danger" onclick="removeFromCart(${idx})">
+   <i class="bi bi-trash"></i>
+        </button>
+         </td>
+         </tr>
+    `;
+   }).join('');
+
+document.getElementById('cart-count').textContent = cart.length;
+   updateSummary();
+    }
+
+    function updateItemQty(index, newQty) {
+ newQty = Math.max(1, parseInt(newQty) || 1);
+        cart[index].quantity = newQty;
+   updateCart();
+    }
+
+    function clearProductForm() {
+ document.getElementById('product-search').value = '';
+        document.getElementById('qty-input').value = '1';
+        document.getElementById('variant-select').innerHTML = '<option value="">-- Chọn biến thể --</option>';
+        document.getElementById('products-grid-section').style.display = 'block';
+        document.getElementById('product-suggestions').style.display = 'none';
+     selectedProductId = null;
+  }
+
+    // Customer search
+    async function searchCustomer() {
+    const phone = document.getElementById('customer-phone').value;
+     if (!phone) {
+   showToast('Nhập số điện thoại', 'warning');
+  return;
+        }
+
+      const res = await fetch(`/Sales/SearchCustomer?phone=${encodeURIComponent(phone)}`);
+        const customer = await res.json();
+
+      if (customer) {
+   customerData = customer;
+   document.getElementById('customer-name').value = customer.name || '';
+document.getElementById('customer-address').value = customer.address || '';
+ } else {
+    showToast('Khách hàng không tồn tại', 'danger');
+   document.getElementById('customer-name').value = '';
+   document.getElementById('customer-address').value = '';
+    }
+    }
+
+    // Apply voucher
+async function applyVoucher() {
+      const code = document.getElementById('voucher-code').value;
+  if (!code || totalAmount === 0) {
+       showToast('Nhập mã và có sản phẩm trong giỏ', 'warning');
+    return;
+   }
+
+     const res = await fetch('/Sales/ValidateVoucher', {
+            method: 'POST',
+       headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ voucherCode: code, totalAmount: totalAmount })
+      });
+   const result = await res.json();
+
+        if (result.success) {
+   discountAmount = result.discount;
+    document.getElementById('voucher-message').textContent = `Giảm giá: ${Number(result.discount).toLocaleString()}₫`;
+    updateSummary();
+    showToast('Áp dụng mã thành công', 'success');
+        } else {
+         document.getElementById('voucher-message').textContent = result.message;
+       showToast(result.message, 'danger');
+}
+    }
+
+    function updateSummary() {
+        const total = totalAmount;
+        const discount = discountAmount;
+        const final = total - discount;
+
+        document.getElementById('total-amount').textContent = Number(total).toLocaleString() + '₫';
+        document.getElementById('discount-amount').textContent = Number(discount).toLocaleString() + '₫';
+        document.getElementById('final-amount').textContent = Number(final).toLocaleString() + '₫';
+    }
+
+    // Create order
+    async function createOrder() {
+        if (!customerData?.Id) {
+          showToast('Chọn khách hàng', 'warning');
+         return;
+        }
+        if (cart.length === 0) {
+   showToast('Giỏ hàng trống', 'warning');
+        return;
+   }
+    if (!document.getElementById('payment-method').value) {
+    showToast('Chọn phương thức thanh toán', 'warning');
+       return;
+        }
+
+      const payload = {
+            customerPhone: document.getElementById('customer-phone').value,
+     shippingAddress: document.getElementById('customer-address').value,
+     voucherCode: document.getElementById('voucher-code').value,
+     paymentMethodId: document.getElementById('payment-method').value,
+   note: document.getElementById('order-note').value,
+ items: cart.map(c => ({ productDetailId: c.productDetailId, quantity: c.quantity }))
+        };
+
+        const res = await fetch('/Sales/CreateOrder', {
+    method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+     body: JSON.stringify(payload)
+        });
+   const result = await res.json();
+
+ if (result.success) {
+        showToast('Tạo đơn hàng thành công!', 'success');
+    setTimeout(() => {
+         window.location.href = `/Sales/PrintReceipt?orderId=${result.orderId}`;
+     }, 1500);
+        } else {
+    showToast(result.message, 'danger');
+        }
+    }
+
+    function clearCart() {
+        if (confirm('Bạn có chắc muốn xóa giỏ hàng?')) {
+    cart = [];
+         totalAmount = 0;
+       discountAmount = 0;
+      updateCart();
+  }
+    }
+
+    function showToast(message, type = 'info') {
+   const toast = document.getElementById('toast');
+        const body = document.getElementById('toast-body');
+     body.textContent = message;
+ toast.className = `toast align-items-center text-white border-0 bg-${type}`;
+        const bsToast = new bootstrap.Toast(toast);
+        bsToast.show();
+    }
+
+    // Auto-search on input
+    document.getElementById('product-search')?.addEventListener('keyup', (e) => {
+  if (e.key === 'Enter') searchProducts();
+    });
+
+    document.getElementById('customer-phone')?.addEventListener('keyup', (e) => {
+  if (e.key === 'Enter') searchCustomer();
+    });
+</script>
+}

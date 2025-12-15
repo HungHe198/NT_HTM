@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using NT.SHARED.Models;
 using NT.WEB.Services;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace NT.WEB.Controllers
@@ -17,8 +18,32 @@ namespace NT.WEB.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var items = await _service.GetAllAsync();
+            var items = await _service.GetAllAsyncWithUser();
             return View(items);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Suggest(string q)
+        {
+            if (string.IsNullOrWhiteSpace(q)) return Json(new { });
+            q = q.Trim().ToLower();
+            
+            var customers = await _service.GetAllAsyncWithUser();
+            var results = customers?
+                .Where(c => (c.User?.Fullname ?? "").ToLower().Contains(q) ||
+                            (c.User?.Email ?? "").ToLower().Contains(q) ||
+                            (c.User?.PhoneNumber ?? "").ToLower().Contains(q))
+                .Take(10)
+                .Select(c => new
+                {
+                    id = c.Id,
+                    fullname = c.User?.Fullname ?? "N/A",
+                    email = c.User?.Email ?? "N/A",
+                    phoneNumber = c.User?.PhoneNumber ?? "N/A"
+                })
+                .ToList() ?? new();
+   
+            return Json(results);
         }
 
         public async Task<IActionResult> Details(Guid id)
@@ -46,7 +71,7 @@ namespace NT.WEB.Controllers
             if (!ModelState.IsValid) return View(model);
             await _service.AddAsync(model);
             await _service.SaveChangesAsync();
-            return RedirectToAction("Login","Account");
+            return RedirectToAction("Login", "Account");
         }
 
         public async Task<IActionResult> Edit(Guid id)

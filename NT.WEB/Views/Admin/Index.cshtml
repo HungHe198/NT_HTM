@@ -1,29 +1,469 @@
 @model IEnumerable<NT.SHARED.Models.Admin>
 
-<h2>Quản trị viên</h2>
-<p><a asp-action="Create" class="btn btn-primary">Tạo mới</a></p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>Mã người dùng</th>
-            <th>Chức vụ</th>
-            <th>Lương</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-    @foreach(var item in Model)
-    {
-        <tr>
-            <td>@item.UserId</td>
-            <td>@item.Position</td>
-            <td>@item.Salary?.ToString("N0")</td>
-            <td>
-                <a asp-action="Details" asp-route-id="@item.Id">Chi tiết</a> |
-                <a asp-action="Edit" asp-route-id="@item.Id">Sửa</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Xóa</a>
-            </td>
-        </tr>
+@{
+    ViewBag.Title = "Bảng Điều Khiển Quản Trị";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<style>
+    .hero-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    padding: 40px 0;
+        margin-bottom: 30px;
+        border-radius: 0 0 20px 20px;
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
     }
-    </tbody>
-</table>
+
+    .hero-header h1 {
+        font-size: 2.5rem;
+    font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    .hero-header p {
+     font-size: 1.1rem;
+        opacity: 0.9;
+    }
+
+    .stat-card {
+     position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200px;
+   height: 200px;
+  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+border-radius: 50%;
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15) !important;
+    }
+
+    .stat-card:hover::before {
+        top: -20%;
+        right: -20%;
+    }
+
+    .menu-card {
+        position: relative;
+        overflow: hidden;
+        border: none;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        height: 100%;
+    }
+
+    .menu-card::before {
+        content: '';
+        position: absolute;
+   top: 0;
+        left: -100%;
+     width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .menu-card:hover::before {
+        left: 100%;
+    }
+
+    .menu-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2) !important;
+    }
+
+    .icon-box {
+        width: 70px;
+        height: 70px;
+  border-radius: 15px;
+   display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 32px;
+     flex-shrink: 0;
+    }
+
+ .stat-icon {
+        font-size: 2.5rem;
+    opacity: 0.2;
+    }
+
+    .section-title {
+    font-size: 1.3rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 20px;
+padding-left: 10px;
+        border-left: 4px solid #667eea;
+    }
+
+    .table-striped tbody tr {
+        transition: all 0.2s ease;
+    }
+
+    .table-striped tbody tr:hover {
+      background-color: rgba(102, 126, 234, 0.05);
+    }
+
+    .badge-custom {
+        font-size: 0.85rem;
+        padding: 6px 12px;
+        font-weight: 600;
+        border-radius: 20px;
+ }
+
+    .empty-state {
+        padding: 60px 20px;
+      text-align: center;
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        opacity: 0.15;
+        margin-bottom: 20px;
+    }
+
+    .dash-chart {
+    position: relative;
+height: 300px;
+ background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        border-radius: 15px;
+        overflow: hidden;
+    }
+
+    .info-box {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 25px;
+      border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-action {
+        border-radius: 10px;
+   padding: 8px 16px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-action:hover {
+        transform: translateY(-2px);
+    }
+</style>
+
+<!-- HERO HEADER -->
+<div class="hero-header">
+    <div class="container-fluid">
+     <div class="row align-items-center">
+  <div class="col">
+                <h1>
+   <i class="bi bi-speedometer2 me-3"></i>Bảng Điều Khiển Quản Trị
+       </h1>
+       <p class="mb-0">Chào mừng quay lại, <strong>@User.Identity?.Name</strong></p>
+    </div>
+      <div class="col-auto text-end">
+          <p class="mb-2">
+           <i class="bi bi-calendar3"></i>
+  <strong>@DateTime.Now.ToString("dddd, dd/MM/yyyy HH:mm")</strong>
+   </p>
+          </div>
+      </div>
+    </div>
+</div>
+
+<div class="container-fluid">
+<!-- TOP STATS ROW -->
+    @{
+        var customerService = ViewContext.HttpContext.RequestServices
+          .GetService(typeof(NT.WEB.Services.CustomerWebService)) as NT.WEB.Services.CustomerWebService;
+  var allCustomers = customerService?.GetAllAsyncWithUser().Result ?? Enumerable.Empty<NT.SHARED.Models.Customer>();
+        var totalCustomers = allCustomers.Count();
+     var activeCustomers = allCustomers.Count(c => c.User?.Status == "Active");
+        var totalAdmins = Model?.Count() ?? 0;
+    }
+
+    <div class="row g-3 mb-5">
+        <div class="col-lg-3 col-md-6">
+            <div class="card stat-card shadow-sm border-0">
+                <div class="card-body">
+      <div class="d-flex align-items-end justify-content-between">
+    <div>
+              <p class="text-muted small fw-bold mb-2">TỔNG KHÁCH HÀNG</p>
+ <h3 class="mb-0 fw-bold" style="color: #667eea;">@totalCustomers</h3>
+       <small class="text-success">
+       <i class="bi bi-arrow-up"></i> Tăng 12% tuần này
+     </small>
+      </div>
+   <i class="bi bi-people-fill stat-icon" style="color: #667eea;"></i>
+        </div>
+            </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+   <div class="card stat-card shadow-sm border-0">
+                <div class="card-body">
+    <div class="d-flex align-items-end justify-content-between">
+   <div>
+         <p class="text-muted small fw-bold mb-2">KHÁCH HÀNG HOẠT ĐỘNG</p>
+   <h3 class="mb-0 fw-bold" style="color: #10b981;">@activeCustomers</h3>
+   <small class="text-success">
+  <i class="bi bi-arrow-up"></i> @((totalCustomers > 0 ? (activeCustomers * 100 / totalCustomers) : 0))% tổng số
+               </small>
+    </div>
+   <i class="bi bi-person-check-fill stat-icon" style="color: #10b981;"></i>
+             </div>
+      </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+    <div class="card stat-card shadow-sm border-0">
+                <div class="card-body">
+        <div class="d-flex align-items-end justify-content-between">
+     <div>
+            <p class="text-muted small fw-bold mb-2">QUẢN TRỊ VIÊN</p>
+          <h3 class="mb-0 fw-bold" style="color: #f59e0b;">@totalAdmins</h3>
+     <small class="text-muted">Tài khoản quản lý</small>
+            </div>
+            <i class="bi bi-shield-lock-fill stat-icon" style="color: #f59e0b;"></i>
+               </div>
+         </div>
+      </div>
+    </div>
+
+   <div class="col-lg-3 col-md-6">
+            <div class="info-box">
+      <h6 class="mb-3">Hành Động Nhanh</h6>
+        <a href="@Url.Action("Index", "Sales")" class="btn btn-light btn-action w-100 mb-2">
+<i class="bi bi-shop"></i> Bán Tại Quầy
+       </a>
+                <a href="@Url.Action("Index", "Customer")" class="btn btn-light btn-action w-100">
+                    <i class="bi bi-person-plus"></i> Khách Hàng
+      </a>
+            </div>
+     </div>
+    </div>
+
+    <!-- MAIN MENU SECTION -->
+    <h5 class="section-title">Quản Lý Chính</h5>
+
+    <div class="row g-4 mb-5">
+        <!-- PRODUCTS -->
+     <div class="col-lg-3 col-md-6">
+            <a href="@Url.Action("Index", "Product")" class="card menu-card shadow-sm h-100">
+<div class="card-body">
+             <div class="d-flex align-items-center gap-3 mb-3">
+           <div class="icon-box" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+          <i class="bi bi-box-seam"></i>
+               </div>
+   <div>
+        <h6 class="card-title mb-1">Sản Phẩm</h6>
+     <p class="text-muted small mb-0">Quản lý kho hàng</p>
+   </div>
+      </div>
+           <div class="text-end">
+        <small class="badge bg-light text-dark">Xem chi tiết →</small>
+   </div>
+           </div>
+       </a>
+        </div>
+
+        <!-- CUSTOMERS -->
+        <div class="col-lg-3 col-md-6">
+     <a href="@Url.Action("Index", "Customer")" class="card menu-card shadow-sm h-100">
+     <div class="card-body">
+   <div class="d-flex align-items-center gap-3 mb-3">
+   <div class="icon-box" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
+         <i class="bi bi-people"></i>
+          </div>
+       <div>
+    <h6 class="card-title mb-1">Khách Hàng</h6>
+              <p class="text-muted small mb-0">Quản lý khách hàng</p>
+  </div>
+              </div>
+   <div class="text-end">
+  <small class="badge bg-light text-dark">@totalCustomers khách</small>
+   </div>
+       </div>
+     </a>
+     </div>
+
+        <!-- ORDERS -->
+   <div class="col-lg-3 col-md-6">
+      <a href="@Url.Action("Index", "Orders")" class="card menu-card shadow-sm h-100">
+   <div class="card-body">
+    <div class="d-flex align-items-center gap-3 mb-3">
+  <div class="icon-box" style="background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%); color: white;">
+    <i class="bi bi-bag-check"></i>
+  </div>
+                 <div>
+           <h6 class="card-title mb-1">Đơn Hàng</h6>
+  <p class="text-muted small mb-0">Quản lý đơn bán</p>
+         </div>
+   </div>
+             <div class="text-end">
+         <small class="badge bg-light text-dark">Xem chi tiết →</small>
+      </div>
+   </div>
+     </a>
+        </div>
+
+        <!-- POS SALES -->
+  <div class="col-lg-3 col-md-6">
+            <a href="@Url.Action("Index", "Sales")" class="card menu-card shadow-sm h-100">
+            <div class="card-body">
+          <div class="d-flex align-items-center gap-3 mb-3">
+     <div class="icon-box" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white;">
+            <i class="bi bi-shop"></i>
+     </div>
+ <div>
+      <h6 class="card-title mb-1">Bán Tại Quầy</h6>
+         <p class="text-muted small mb-0">POS - Bán trực tiếp</p>
+   </div>
+         </div>
+          <div class="text-end">
+ <small class="badge bg-light text-dark">Bắt đầu →</small>
+   </div>
+      </div>
+            </a>
+        </div>
+
+        <!-- ADMINS -->
+ <div class="col-lg-3 col-md-6">
+            <a href="@Url.Action("Index", "Admin")" class="card menu-card shadow-sm h-100">
+   <div class="card-body">
+            <div class="d-flex align-items-center gap-3 mb-3">
+           <div class="icon-box" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white;">
+           <i class="bi bi-shield-lock"></i>
+  </div>
+       <div>
+    <h6 class="card-title mb-1">Quản Trị Viên</h6>
+  <p class="text-muted small mb-0">Quản lý admin</p>
+      </div>
+     </div>
+            <div class="text-end">
+      <small class="badge bg-light text-dark">@totalAdmins admin</small>
+ </div>
+         </div>
+            </a>
+   </div>
+    </div>
+
+    <!-- CUSTOMER TABLE SECTION -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+             <div class="card-header border-0 d-flex align-items-center justify-content-between" style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); padding: 20px;">
+     <h5 class="mb-0 fw-bold">
+           <i class="bi bi-people-fill me-2" style="color: #667eea;"></i>Khách Hàng Mới Nhất
+         </h5>
+        <a href="@Url.Action("Index", "Customer")" class="btn btn-sm btn-primary btn-action">
+  <i class="bi bi-arrow-right"></i> Xem tất cả
+  </a>
+              </div>
+
+           <div class="card-body p-0">
+            @if (!allCustomers.Any())
+          {
+           <div class="empty-state">
+         <i class="bi bi-inbox"></i>
+      <p class="text-muted fw-bold">Chưa có khách hàng nào</p>
+    <a href="@Url.Action("Index", "Customer")" class="btn btn-sm btn-primary mt-3">Thêm khách hàng mới</a>
+              </div>
+      }
+             else
+           {
+   <div class="table-responsive">
+     <table class="table table-striped table-hover mb-0">
+       <thead class="table-light">
+         <tr>
+        <th style="width: 20%;">
+           <i class="bi bi-person"></i> Tên Khách
+                 </th>
+                <th style="width: 18%;">
+        <i class="bi bi-envelope"></i> Email
+        </th>
+<th style="width: 15%;">
+             <i class="bi bi-telephone"></i> SĐT
+      </th>
+      <th style="width: 15%;">
+      <i class="bi bi-calendar"></i> Ngày Sinh
+          </th>
+        <th style="width: 12%;">
+         <i class="bi bi-person-lines-fill"></i> Giới Tính
+  </th>
+     <th style="width: 20%; text-align: center;">Hành Động</th>
+  </tr>
+              </thead>
+     <tbody>
+        @foreach (var customer in allCustomers.OrderByDescending(c => c.Id).Take(10))
+            {
+                <tr>
+     <td>
+    <div class="d-flex align-items-center gap-2">
+          <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+         @(string.IsNullOrEmpty(customer.User?.Fullname) ? "?" : customer.User.Fullname[0])
+        </div>
+   <span class="fw-semibold">@(customer.User?.Fullname ?? "N/A")</span>
+               </div>
+     </td>
+   <td>
+     <small class="text-muted">@(customer.User?.Email ?? "N/A")</small>
+   </td>
+    <td>
+          <small>@(customer.User?.PhoneNumber ?? "—")</small>
+     </td>
+           <td>
+         @if (customer.DoB.HasValue)
+            {
+  <small>@customer.DoB.Value.ToString("dd/MM/yyyy")</small>
+            }
+        else
+              {
+         <small class="text-muted">—</small>
+         }
+      </td>
+          <td>
+         @if (!string.IsNullOrWhiteSpace(customer.Gender))
+ {
+      <span class="badge-custom" style="background: rgba(102, 126, 234, 0.1); color: #667eea;">
+         @customer.Gender
+                   </span>
+          }
+   else
+     {
+      <small class="text-muted">—</small>
+     }
+          </td>
+     <td class="text-center">
+          <div class="btn-group btn-group-sm" role="group">
+            <a asp-controller="Customer" asp-action="Details" asp-route-id="@customer.Id" class="btn btn-outline-info btn-action" title="Xem chi tiết">
+              <i class="bi bi-eye"></i>
+           </a>
+                <a asp-controller="Customer" asp-action="Edit" asp-route-id="@customer.Id" class="btn btn-outline-primary btn-action" title="Chỉnh sửa">
+   <i class="bi bi-pencil"></i>
+    </a>
+      </div>
+          </td>
+   </tr>
+    }
+          </tbody>
+ </table>
+    </div>
+                }
+         </div>
+       </div>
+        </div>
+    </div>
+</div>
