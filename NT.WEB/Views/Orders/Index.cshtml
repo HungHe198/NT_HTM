@@ -1,81 +1,146 @@
-﻿@model IEnumerable<NT.SHARED.Models.Order>
+@model IEnumerable<NT.SHARED.Models.Order>
 @{
     var isAdmin = User.IsInRole("Admin") || User.IsInRole("Employee");
     Layout = isAdmin ? "~/Views/Shared/_AdminLayout.cshtml" : "~/Views/Shared/_ClientLayout.cshtml";
+    var orders = Model ?? Enumerable.Empty<NT.SHARED.Models.Order>();
+    var totalCount = orders.Count();
+    var countAll = totalCount;
+    var countCancelled = orders.Count(o => (o.Status ?? "0") == "-1");
+    var countPending = orders.Count(o => (o.Status ?? "0") == "0");
+    var countConfirmed = orders.Count(o => (o.Status ?? "0") == "1");
+    var countShipping = orders.Count(o => (o.Status ?? "0") == "2");
+    var countDone = orders.Count(o => (o.Status ?? "0") == "3");
 }
-<h2>Danh sách đơn hàng</h2>
-<form method="get" class="mb-3 d-flex align-items-center gap-2">
-    <label for="status" class="form-label mb-0">Lọc theo trạng thái:</label>
-    <select id="status" name="status" class="form-select" style="max-width:220px" onchange="this.form.submit()">
-        <option value="" selected="@(string.IsNullOrWhiteSpace(ViewBag.FilterStatus as string) ? "selected" : null)">Tất cả</option>
-        <option value="-1" selected="@(ViewBag.FilterStatus as string == "-1" ? "selected" : null)">Đã hủy</option>
-        <option value="0" selected="@(ViewBag.FilterStatus as string == "0" ? "selected" : null)">Chờ xác nhận</option>
-        <option value="1" selected="@(ViewBag.FilterStatus as string == "1" ? "selected" : null)">Đã xác nhận</option>
-        <option value="2" selected="@(ViewBag.FilterStatus as string == "2" ? "selected" : null)">Đang giao hàng</option>
-        <option value="3" selected="@(ViewBag.FilterStatus as string == "3" ? "selected" : null)">Giao thành công</option>
+
+<div class="container py-4">
+    <div class="card shadow-sm">
+      <div class="card-body">
+       <div class="d-flex align-items-center mb-3">
+    <h2 class="mb-0">Danh sách đơn hàng</h2>
+                <div class="ms-auto text-end">
+    <div class="small text-muted">Tổng: <strong>@countAll</strong></div>
+            <div class="small text-muted">Thời gian hiển thị theo GMT+7</div>
+      </div>
+   </div>
+
+            <div class="row g-2 mb-3">
+           <div class="col-sm-8 col-md-6">
+   <form method="get" class="d-flex align-items-center gap-2">
+    <label for="status" class="form-label mb-0 me-2">Lọc:</label>
+          <select id="status" name="status" class="form-select" style="max-width:220px" onchange="this.form.submit()">
+            <option value="" selected="@(string.IsNullOrWhiteSpace(ViewBag.FilterStatus as string) ? "selected" : null)">Tất cả</option>
+                  <option value="-1" selected="@(ViewBag.FilterStatus as string == "-1" ? "selected" : null)">Đã hủy</option>
+ <option value="0" selected="@(ViewBag.FilterStatus as string == "0" ? "selected" : null)">Chờ xác nhận</option>
+            <option value="1" selected="@(ViewBag.FilterStatus as string == "1" ? "selected" : null)">Đã xác nhận</option>
+       <option value="2" selected="@(ViewBag.FilterStatus as string == "2" ? "selected" : null)">Đang giao hàng</option>
+       <option value="3" selected="@(ViewBag.FilterStatus as string == "3" ? "selected" : null)">Giao thành công</option>
     </select>
-    <noscript><button class="btn btn-primary" type="submit">Lọc</button></noscript>
-    @if (!string.IsNullOrWhiteSpace(ViewBag.FilterStatus as string))
+     <noscript><button class="btn btn-primary" type="submit">Lọc</button></noscript>
+   @if (!string.IsNullOrWhiteSpace(ViewBag.FilterStatus as string))
     {
-        <a class="btn btn-link" href="@Url.Action("Index", "Orders")">Bỏ lọc</a>
-    }
-    else
-    {
-        <span class="text-muted">Hiển thị tất cả</span>
-    }
-    <span class="ms-auto text-muted small">Thời gian hiển thị theo GMT+7</span>
-</form>
-<table class="table">
-    <thead>
-        <tr>
-            <th>Mã đơn</th>
-            <th>Khách hàng</th>
-            <th>Trạng thái</th>
-            <th>Tổng tiền</th>
-            <th>Thời gian đặt đơn</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-    @foreach (var o in Model ?? Enumerable.Empty<NT.SHARED.Models.Order>())
-    {
-        <tr>
-            <td>@o.Id</td>
-            <td>@o.CustomerId</td>
-            <td>
-                @{ string st = o.Status ?? "0"; }
-                @{
-                    string statusText;
-                    switch (st)
-                    {
-                        case "-1": statusText = "Đã hủy"; break;
-                        case "0": statusText = "Chờ xác nhận"; break;
-                        case "1": statusText = "Đã xác nhận"; break;
-                        case "2": statusText = "Đang giao hàng"; break;
-                        case "3": statusText = "Giao thành công"; break;
-                        default: statusText = "Không rõ"; break;
-                    }
+    <a class="btn btn-link" href="@Url.Action("Index", "Orders")">Bỏ lọc</a>
+ }
+         </form>
+    </div>
+
+       <div class="col-sm-4 col-md-6">
+   <div class="input-group">
+        <span class="input-group-text">Tìm</span>
+        <input id="searchInput" type="search" class="form-control" placeholder="Tìm theo mã đơn hoặc tên khách..." aria-label="Search orders">
+  </div>
+ </div>
+         </div>
+
+       <div class="mb-3">
+        <span class="badge bg-secondary me-1">Tất cả: @countAll</span>
+    <span class="badge bg-danger me-1">Đã hủy: @countCancelled</span>
+             <span class="badge bg-warning text-dark me-1">Chờ xác nhận: @countPending</span>
+   <span class="badge bg-info text-dark me-1">Đã xác nhận: @countConfirmed</span>
+         <span class="badge bg-primary me-1">Đang giao: @countShipping</span>
+ <span class="badge bg-success me-1">Giao thành công: @countDone</span>
+   </div>
+
+       <div class="table-responsive">
+                <table class="table table-hover table-striped align-middle">
+           <thead class="table-light">
+       <tr>
+     <th style="width:120px">Mã đơn</th>
+        <th>Khách hàng</th>
+             <th style="width:100px">Số điện thoại</th>
+          <th style="width:160px">Trạng thái</th>
+                     <th class="text-end" style="width:120px">Tổng tiền</th>
+    <th style="width:170px">Thời gian đặt</th>
+             <th style="width:220px"></th>
+       </tr>
+         </thead>
+         <tbody id="ordersTableBody">
+       @foreach (var o in orders)
+          {
+<tr>
+ <td class="fw-semibold">@o.Id</td>
+    <td class="text-muted small">@(o.Customer?.User?.Fullname ?? "N/A")</td>
+    <td class="text-muted small">@(o.PhoneNumber ?? "N/A")</td>
+         <td>
+         @{ var st = o.Status ?? "0"; string statusText; string badgeClass;
+     switch (st)
+     {
+            case "-1": statusText = "Đã hủy"; badgeClass = "bg-danger"; break;
+         case "0": statusText = "Chờ xác nhận"; badgeClass = "bg-warning text-dark"; break;
+       case "1": statusText = "Đã xác nhận"; badgeClass = "bg-info text-dark"; break;
+       case "2": statusText = "Đang giao hàng"; badgeClass = "bg-primary"; break;
+  case "3": statusText = "Giao thành công"; badgeClass = "bg-success"; break;
+         default: statusText = "Không rõ"; badgeClass = "bg-secondary"; break;
                 }
-                @statusText
-            </td>
-            <td>@o.FinalAmount.ToString("#,##0")</td>
-            <td>
-                @{ var utc = DateTime.SpecifyKind(o.CreatedTime, DateTimeKind.Utc); var gmt7 = TimeZoneInfo.ConvertTimeFromUtc(utc, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time")); }
-                @gmt7.ToString("yyyy-MM-dd HH:mm")
-            </td>
-            <td class="text-nowrap">
-                <a class="btn btn-sm btn-outline-primary" asp-action="Review" asp-controller="Orders" asp-route-id="@o.Id">Xem chi tiết</a>
-                @if (isAdmin)
-                {
-                    <form asp-action="UpdateStatus" asp-controller="Orders" method="post" class="d-inline">
-                        @Html.AntiForgeryToken()
-                        <input type="hidden" name="id" value="@o.Id" />
-                        <input type="hidden" name="status" value="1" />
-                        <button class="btn btn-sm btn-success" type="submit">Xác nhận</button>
-                    </form>
-                }
-            </td>
-        </tr>
-    }
-    </tbody>
-</table>
+        }
+         <span class="badge @badgeClass">@statusText</span>
+          </td>
+             <td class="text-end">@o.FinalAmount.ToString("#,##0")</td>
+       <td>
+  @{ var utc = DateTime.SpecifyKind(o.CreatedTime, DateTimeKind.Utc);
+      DateTime gmt7;
+ try { gmt7 = TimeZoneInfo.ConvertTimeFromUtc(utc, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time")); }
+                catch { gmt7 = utc.ToLocalTime(); }
+     }
+       <span title="@gmt7.ToString("yyyy-MM-dd HH:mm:ss")">@gmt7.ToString("yyyy-MM-dd HH:mm")</span>
+   </td>
+                   <td class="text-nowrap">
+            <a class="btn btn-sm btn-outline-primary me-1" asp-action="Review" asp-controller="Orders" asp-route-id="@o.Id">Xem chi tiết</a>
+        @if (isAdmin)
+          {
+      <form asp-action="UpdateStatus" asp-controller="Orders" method="post" class="d-inline">
+         @Html.AntiForgeryToken()
+ <input type="hidden" name="id" value="@o.Id" />
+     <input type="hidden" name="status" value="1" />
+            <button class="btn btn-sm btn-success" type="submit">Xác nhận</button>
+        </form>
+      }
+      </td>
+            </tr>
+  }
+               </tbody>
+    </table>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+(function(){
+        var input = document.getElementById('searchInput');
+        var tbody = document.getElementById('ordersTableBody');
+        if (!input || !tbody) return;
+        input.addEventListener('input', function(e){
+            var q = (e.target.value || '').trim().toLowerCase();
+        var rows = tbody.querySelectorAll('tr');
+if (!q) { rows.forEach(r => r.style.display=''); return; }
+       rows.forEach(function(r){
+        var id = r.children[0].innerText.toLowerCase();
+            var customer = r.children[1].innerText.toLowerCase();
+        r.style.display = (id.indexOf(q) !== -1 || customer.indexOf(q) !== -1) ? '' : 'none';
+          });
+        });
+})();
+    </script>
+}

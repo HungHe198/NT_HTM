@@ -1,0 +1,158 @@
+@model NT.SHARED.Models.Order
+
+@{
+    ViewBag.Title = "In hóa đơn";
+    var details = ViewBag.Details as List<NT.SHARED.Models.OrderDetail> ?? new();
+}
+
+<div class="container mt-4">
+ <div class="row justify-content-center">
+        <div class="col-md-8">
+          <!-- Receipt -->
+ <div class="card shadow-lg" id="receipt">
+       <div class="card-body">
+     <!-- Header -->
+       <div class="text-center mb-4">
+           <h2 class="fw-bold mb-0">HÓA ĐƠN BÁN HÀNG TẠI QUẦY</h2>
+    <p class="text-muted small">POS - BÁN HÀNG TRỰC TIẾP</p>
+  <hr>
+                </div>
+
+    <!-- Order Info -->
+  <div class="row mb-4 small">
+  <div class="col-6">
+       <p><strong>Mã đơn:</strong> <code>@ViewBag.OrderCode</code></p>
+        <p><strong>Ngày:</strong> @Model.CreatedTime.ToString("dd/MM/yyyy HH:mm")</p>
+  </div>
+               <div class="col-6 text-end">
+          <p><strong>SĐT KH:</strong> @Model.PhoneNumber</p>
+             <p><strong>Địa chỉ:</strong> @(string.IsNullOrWhiteSpace(Model.ShippingAddress) ? "N/A" : Model.ShippingAddress)</p>
+   </div>
+     </div>
+
+       <hr>
+
+     <!-- Items Table -->
+       <div class="table-responsive mb-4">
+      <table class="table table-sm table-borderless">
+       <thead>
+    <tr>
+             <th>STT</th>
+       <th>Tên sản phẩm</th>
+       <th>Loại</th>
+    <th class="text-end">Đơn giá</th>
+          <th class="text-center">SL</th>
+   <th class="text-end">Thành tiền</th>
+    </tr>
+  </thead>
+       <tbody>
+           @{
+      int index = 1;
+     foreach (var detail in details)
+        {
+<tr>
+       <td>@index</td>
+     <td>@(detail.NameAtOrder ?? "N/A")</td>
+   <td>
+          <small>
+               @if (!string.IsNullOrWhiteSpace(detail.LengthAtOrder))
+     {
+      <span>@detail.LengthAtOrder</span>
+  }
+    @if (!string.IsNullOrWhiteSpace(detail.HardnessAtOrder))
+           {
+         <span> - @detail.HardnessAtOrder</span>
+                  }
+                 @if (!string.IsNullOrWhiteSpace(detail.ColorAtOrder))
+        {
+<span> - @detail.ColorAtOrder</span>
+       }
+       </small>
+         </td>
+             <td class="text-end">@detail.UnitPrice.ToString("#,##0")₫</td>
+        <td class="text-center">@detail.Quantity</td>
+         <td class="text-end"><strong>@detail.TotalPrice.ToString("#,##0")₫</strong></td>
+  </tr>
+   index++;
+                  }
+ }
+        </tbody>
+             </table>
+      </div>
+
+      <hr>
+
+          <!-- Summary -->
+         <div class="row mb-4 small fw-bold">
+    <div class="col-6 text-end">Tổng cộng:</div>
+     <div class="col-6 text-end">@Model.TotalAmount.ToString("#,##0")₫</div>
+             </div>
+
+           @if (Model.DiscountAmount.HasValue && Model.DiscountAmount > 0)
+           {
+          <div class="row mb-4 small fw-bold text-danger">
+         <div class="col-6 text-end">Giảm giá:</div>
+         <div class="col-6 text-end">-@Model.DiscountAmount.Value.ToString("#,##0")₫</div>
+       </div>
+  }
+
+               <div class="row mb-4 fw-bold" style="font-size: 1.2rem; border-top: 2px solid #000; border-bottom: 2px solid #000; padding: 10px 0;">
+       <div class="col-6 text-end">THÀNH TIỀN:</div>
+     <div class="col-6 text-end" style="color: #dc3545;">@Model.FinalAmount.ToString("#,##0")₫</div>
+    </div>
+
+       <!-- Payment Method -->
+        <div class="row mb-4 small">
+             <div class="col-6">
+  <p><strong>PT thanh toán:</strong> @(Model.PaymentMethod?.Name ?? "N/A")</p>
+       </div>
+          </div>
+
+             @if (!string.IsNullOrWhiteSpace(Model.Note))
+   {
+     <div class="alert alert-light mb-3">
+            <strong>Ghi chú:</strong> @Model.Note
+     </div>
+     }
+
+           <!-- Footer -->
+      <div class="text-center mt-4 pt-3 border-top">
+         <p class="small text-muted mb-1">Cảm ơn quý khách!</p>
+       <p class="small text-muted">Cửa hàng đảm bảo chất lượng hàng hóa</p>
+         <p class="small text-muted">Mọi thắc mắc vui lòng liên hệ: 0901234567</p>
+    </div>
+ </div>
+        </div>
+
+            <!-- Actions -->
+     <div class="d-flex gap-2 mt-4 mb-4">
+            <button class="btn btn-primary flex-grow-1" onclick="printReceipt()">
+      <i class="bi bi-printer"></i> In hóa đơn
+          </button>
+        <a href="@Url.Action("Index", "Sales")" class="btn btn-secondary flex-grow-1">
+    <i class="bi bi-shop"></i> Bán hàng tiếp
+    </a>
+      <a href="@Url.Action("History", "Sales")" class="btn btn-info flex-grow-1">
+ <i class="bi bi-clock-history"></i> Lịch sử
+      </a>
+</div>
+   </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    function printReceipt() {
+        const receipt = document.getElementById('receipt');
+        const printWindow = window.open('', '', 'height=600,width=800');
+        printWindow.document.write(receipt.outerHTML);
+    printWindow.document.close();
+printWindow.print();
+    }
+
+    // Auto-focus on Print
+    window.addEventListener('load', () => {
+        document.querySelector('.btn-primary').focus();
+    });
+</script>
+}

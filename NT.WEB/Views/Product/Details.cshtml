@@ -1,69 +1,334 @@
-﻿@model NT.SHARED.Models.Product
+@model NT.SHARED.Models.Product
 
 @{
     ViewBag.Title = "Chi tiết sản phẩm";
     var details = ViewBag.ProductDetails as IEnumerable<NT.SHARED.Models.ProductDetail> ?? Enumerable.Empty<NT.SHARED.Models.ProductDetail>();
 }
 
-<h1>Chi tiết sản phẩm</h1>
+<div class="container-fluid py-4">
+    <!-- HEADER -->
+    <div class="mb-4">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+            <div>
+   <h1 class="h3 mb-0">Chi tiết Sản phẩm</h1>
+      <p class="text-muted small mb-0">Quản lý biến thể và thông tin</p>
+  </div>
+            <a asp-action="Index" class="btn btn-secondary">
+<i class="bi bi-arrow-left"></i> Quay lại danh sách
+   </a>
+        </div>
+    </div>
 
-<div>
-    <h4>@Model.Name (@Model.ProductCode)</h4>
-    <p>@Model.ShortDescription</p>
-    @if (!string.IsNullOrWhiteSpace(Model.Thumbnail))
+    <!-- PRODUCT INFO CARD -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-8">
+        <div class="card shadow-sm border-0">
+     <div class="card-body">
+          <div class="row">
+          <div class="col-md-3">
+            @if (!string.IsNullOrWhiteSpace(Model.Thumbnail))
+        {
+           <img src="@Model.Thumbnail" alt="thumbnail" 
+  style="width: 100%; height: auto; border-radius: 8px; object-fit: cover;" 
+   class="shadow-sm" />
+       }
+      else
+        {
+                   <img src="/images/product-placeholder.png" alt="thumbnail" 
+    style="width: 100%; height: 200px; border-radius: 8px; object-fit: cover; opacity: 0.3;" 
+              class="shadow-sm" />
+        }
+             </div>
+    <div class="col-md-9">
+          <h4 class="mb-2">@Model.Name</h4>
+   <p class="text-muted mb-3">
+   <strong>Mã sản phẩm:</strong> <code class="text-danger">@Model.ProductCode</code>
+    </p>
+        
+       @if (!string.IsNullOrWhiteSpace(Model.ShortDescription))
+      {
+   <p class="mb-3">
+            <strong>Mô tả ngắn:</strong><br/>
+    <span class="text-muted">@Model.ShortDescription</span>
+      </p>
+                }
+
+<div class="row g-3 small">
+        @if (Model.Brand != null)
+          {
+             <div class="col-12">
+     <strong>Thương hiệu:</strong> 
+ <span class="badge bg-secondary">@Model.Brand.Name</span>
+      </div>
+        }
+      @if (!string.IsNullOrWhiteSpace(Model.Status))
+      {
+  <div class="col-12">
+    <strong>Trạng thái:</strong> 
+              <span class="badge bg-success">@Model.Status</span>
+  </div>
+   }
+   </div>
+     </div>
+           </div>
+          </div>
+            </div>
+        </div>
+
+        <!-- SUMMARY CARD -->
+        <div class="col-lg-4">
+ <div class="card shadow-sm border-0 bg-light">
+    <div class="card-body">
+               <h5 class="card-title mb-3">Tóm tắt</h5>
+           <div class="row g-3">
+      <div class="col-12">
+   <div class="text-muted small">Tổng biến thể</div>
+ <div class="h4 mb-0">@details.Count()</div>
+           </div>
+       <div class="col-12 border-top pt-3">
+      <div class="text-muted small">Có hàng</div>
+             <div class="h4 mb-0">@details.Count(d => d.StockQuantity > 0)</div>
+             </div>
+           <div class="col-12 border-top pt-3">
+<div class="text-muted small">Tổng tồn kho</div>
+           <div class="h4 mb-0">@details.Sum(d => d.StockQuantity)</div>
+      </div>
+            <div class="col-12 border-top pt-3">
+     <div class="text-muted small">Đã bán</div>
+      <div class="h4 mb-0">@details.Sum(d => d.SoldQuantity)</div>
+        </div>
+ </div>
+            </div>
+      </div>
+
+       <!-- ACTION BUTTON -->
+    <a asp-action="CreateDetail" asp-route-productId="@Model.Id" class="btn btn-primary btn-lg w-100 mt-3 fw-bold">
+         <i class="bi bi-plus-circle"></i> Thêm biến thể mới
+            </a>
+        </div>
+    </div>
+
+    <!-- PRODUCT DETAILS TABLE -->
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-light d-flex align-items-center justify-content-between">
+  <h5 class="mb-0">Danh sách Biến thể <span class="badge bg-secondary">@details.Count()</span></h5>
+        </div>
+        <div class="card-body p-0">
+  @if (!details.Any())
+      {
+     <div class="text-center py-5 text-muted">
+  <i class="bi bi-inbox" style="font-size: 3rem; opacity: 0.3;"></i>
+           <p class="mt-3">Chưa có biến thể nào<br/>
+        <a asp-action="CreateDetail" asp-route-productId="@Model.Id" class="btn btn-sm btn-primary mt-2">Tạo biến thể đầu tiên</a></p>
+     </div>
+       }
+    else
+            {
+                <div class="table-responsive">
+             <table class="table table-hover align-middle mb-0">
+     <thead class="table-light">
+      <tr>
+<th style="width: 5%;">STT</th>
+        <th style="width: 10%;">Giá</th>
+     <th style="width: 12%;">Tồn kho</th>
+    <th style="width: 12%;">Chiều dài</th>
+           <th style="width: 10%;">Màu</th>
+      <th style="width: 12%;">Độ cứng</th>
+      <th style="width: 12%;">Hoàn thiện</th>
+       <th style="width: 17%;">Hành động</th>
+            </tr>
+     </thead>
+   <tbody>
+              @{ var index = 1; }
+           @foreach(var d in details)
+  {
+             <tr>
+     <td class="fw-bold">@index</td>
+              <td>
+          <span class="text-danger fw-bold">@d.Price.ToString("#,##0")₫</span>
+         </td>
+     <td>
+         @if (d.StockQuantity > 0)
+          {
+               <span class="badge bg-success">@d.StockQuantity</span>
+ }
+           else
+                {
+          <span class="badge bg-danger">Hết</span>
+        }
+   </td>
+    <td>@(d.Length?.Name ?? "-")</td>
+   <td>@(d.Color?.Name ?? "-")</td>
+<td>@(d.Hardness?.Name ?? "-")</td>
+        <td>
+          <small>@(d.SurfaceFinish?.Name ?? "-")</small>
+           </td>
+     <td>
+       <div class="btn-group btn-group-sm" role="group">
+     <button type="button" class="btn btn-outline-info" 
+data-bs-toggle="modal" data-bs-target="#detailModal-@d.Id"
+      title="Xem chi tiết">
+            <i class="bi bi-eye"></i> Chi tiết
+                  </button>
+ <a asp-action="EditDetail" asp-route-id="@d.Id" 
+      class="btn btn-outline-primary" title="Chỉnh sửa">
+           <i class="bi bi-pencil"></i> Sửa
+    </a>
+     <button type="button" class="btn btn-outline-danger" 
+         data-bs-toggle="modal" data-bs-target="#deleteModal-@d.Id"
+     title="Xóa">
+    <i class="bi bi-trash"></i> Xóa
+        </button>
+          </div>
+          </td>
+          </tr>
+   index++;
+                   }
+   </tbody>
+            </table>
+ </div>
+          }
+        </div>
+    </div>
+
+    <!-- MODALS -->
+  @foreach(var d in details)
     {
-        <img src="@Model.Thumbnail" alt="thumbnail" style="height:120px;object-fit:contain" />
+        <!-- DETAIL MODAL -->
+<div class="modal fade" id="detailModal-@d.Id" tabindex="-1" aria-hidden="true">
+     <div class="modal-dialog modal-lg modal-dialog-scrollable">
+ <div class="modal-content">
+        <div class="modal-header border-bottom">
+       <h5 class="modal-title">
+  <strong>@(d.Length?.Name)</strong> · @(d.Hardness?.Name) · @(d.Color?.Name)
+         </h5>
+<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+       <div class="modal-body">
+          <div class="row g-4 mb-4">
+         <div class="col-md-6">
+           <h6 class="fw-bold text-primary mb-3">Thông tin giá & kho</h6>
+        <table class="table table-sm table-borderless">
+                <tr><td class="text-muted">Giá bán</td><td class="fw-semibold text-danger">@d.Price.ToString("#,##0")₫</td></tr>
+          <tr><td class="text-muted">Tồn kho</td><td class="fw-semibold">@d.StockQuantity</td></tr>
+   <tr><td class="text-muted">Đã bán</td><td class="fw-semibold">@d.SoldQuantity</td></tr>
+                 <tr><td class="text-muted">Trạng thái</td><td><span class="badge @(d.IsActive ? "bg-success" : "bg-secondary")">@(d.IsActive ? "Kích hoạt" : "Vô hiệu")</span></td></tr>
+   </table>
+           </div>
+            <div class="col-md-6">
+               <h6 class="fw-bold text-primary mb-3">Thông tin biến thể</h6>
+      <table class="table table-sm table-borderless">
+      <tr><td class="text-muted">Chiều dài</td><td class="fw-semibold">@(d.Length?.Name ?? "-")</td></tr>
+                 <tr><td class="text-muted">Độ cứng</td><td class="fw-semibold">@(d.Hardness?.Name ?? "-")</td></tr>
+                 <tr><td class="text-muted">Màu sắc</td><td class="fw-semibold">@(d.Color?.Name ?? "-")</td></tr>
+     <tr><td class="text-muted">Độ đàn hồi</td><td class="fw-semibold">@(d.Elasticity?.Name ?? "-")</td></tr>
+        <tr><td class="text-muted">Bề mặt</td><td class="fw-semibold">@(d.SurfaceFinish?.Name ?? "-")</td></tr>
+     <tr><td class="text-muted">Xuất xứ</td><td class="fw-semibold">@(d.OriginCountry?.Name ?? "-")</td></tr>
+               </table>
+     </div>
+             </div>
+
+         <div class="border-top pt-3">
+              <h6 class="fw-bold text-primary mb-3">Thông số kỹ thuật</h6>
+            <div class="row g-2 small">
+         @if (!string.IsNullOrWhiteSpace(d.Sections))
+          {
+    <div class="col-md-6"><strong>Số lóng:</strong> @d.Sections</div>
+    }
+  @if (!string.IsNullOrWhiteSpace(d.CollapsedLength))
+           {
+  <div class="col-md-6"><strong>Chiều dài gập:</strong> @d.CollapsedLength</div>
+         }
+             @if (!string.IsNullOrWhiteSpace(d.Weight))
+         {
+                  <div class="col-md-6"><strong>Trọng lượng:</strong> @d.Weight</div>
+ }
+@if (!string.IsNullOrWhiteSpace(d.TipWeight))
+              {
+    <div class="col-md-6"><strong>TL đầu:</strong> @d.TipWeight</div>
+        }
+   @if (!string.IsNullOrWhiteSpace(d.ButtWeight))
+         {
+           <div class="col-md-6"><strong>TL cán:</strong> @d.ButtWeight</div>
+      }
+       @if (!string.IsNullOrWhiteSpace(d.TipDiameter))
+      {
+           <div class="col-md-6"><strong>ĐK ngọn:</strong> @d.TipDiameter</div>
+     }
+      @if (!string.IsNullOrWhiteSpace(d.TopDiameter))
+      {
+        <div class="col-md-6"><strong>ĐK đầu:</strong> @d.TopDiameter</div>
+       }
+          @if (!string.IsNullOrWhiteSpace(d.ButtDiameter))
+         {
+  <div class="col-md-6"><strong>ĐK cán:</strong> @d.ButtDiameter</div>
+        }
+               @if (!string.IsNullOrWhiteSpace(d.BalancePoint))
+            {
+                <div class="col-md-6"><strong>Điểm cân bằng:</strong> @d.BalancePoint</div>
+  }
+            </div>
+   </div>
+
+           @if (!string.IsNullOrWhiteSpace(d.RecommendedLine) || !string.IsNullOrWhiteSpace(d.RecommendedFishWeight) || !string.IsNullOrWhiteSpace(d.HandleType) || !string.IsNullOrWhiteSpace(d.JointType) || !string.IsNullOrWhiteSpace(d.Warranty))
+        {
+  <div class="border-top pt-3 mt-3">
+     <h6 class="fw-bold text-primary mb-3">Thông tin bổ sung</h6>
+            <div class="row g-2 small">
+  @if (!string.IsNullOrWhiteSpace(d.RecommendedLine))
+   {
+      <div class="col-12"><strong>Dây câu đề xuất:</strong> @d.RecommendedLine</div>
+       }
+          @if (!string.IsNullOrWhiteSpace(d.RecommendedFishWeight))
+        {
+         <div class="col-12"><strong>Cá đề xuất:</strong> @d.RecommendedFishWeight</div>
+           }
+ @if (!string.IsNullOrWhiteSpace(d.HandleType))
+      {
+          <div class="col-12"><strong>Loại tay cầm:</strong> @d.HandleType</div>
+            }
+         @if (!string.IsNullOrWhiteSpace(d.JointType))
+   {
+               <div class="col-12"><strong>Loại khớp nối:</strong> @d.JointType</div>
+             }
+                 @if (!string.IsNullOrWhiteSpace(d.Warranty))
+            {
+       <div class="col-12"><strong>Bảo hành:</strong> @d.Warranty</div>
+        }
+            </div>
+       </div>
+     }
+     </div>
+   <div class="modal-footer">
+<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+              <a asp-action="EditDetail" asp-route-id="@d.Id" class="btn btn-primary">
+    <i class="bi bi-pencil"></i> Chỉnh sửa
+  </a>
+         </div>
+    </div>
+         </div>
+        </div>
+
+        <!-- DELETE MODAL -->
+        <div class="modal fade" id="deleteModal-@d.Id" tabindex="-1" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+        <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title">Xác nhận xóa</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+           </div>
+     <div class="modal-body">
+         <p>Bạn có chắc muốn xóa biến thể <strong>@(d.Length?.Name) - @(d.Hardness?.Name) - @(d.Color?.Name)</strong>?</p>
+         <p class="text-muted small">Giá: <strong class="text-danger">@d.Price.ToString("#,##0")₫</strong> | Tồn kho: <strong>@d.StockQuantity</strong></p>
+        </div>
+                    <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+   <form asp-action="DeleteDetail" asp-route-id="@d.Id" method="post" class="d-inline">
+       <button type="submit" class="btn btn-danger">Xóa</button>
+   </form>
+ </div>
+           </div>
+ </div>
+   </div>
     }
 </div>
-
-<p>
-    <a asp-action="CreateDetail" asp-route-productId="@Model.Id" class="btn btn-sm btn-primary">Thêm biến thể</a>
-    <a asp-action="Index" class="btn btn-sm btn-secondary">Quay lại danh sách</a>
-</p>
-
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>Mã</th>
-            <th>Giá</th>
-            <th>Tồn kho</th>
-            <th>Chiều dài</th>
-            <th>Màu</th>
-            <th>Hoàn thiện</th>
-            <th>Độ cứng</th>
-            <th>Độ đàn hồi</th>
-            <th>Xuất xứ</th>
-            <th>Thông số</th>
-            <th>Hoạt động</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-    @foreach(var d in details)
-    {
-        <tr>
-            <td>@d.Id</td>
-            <td>@(d.Price.ToString("N2"))</td>
-            <td>@d.StockQuantity</td>
-            <td>@(d.Length != null ? d.Length.Name : (d.LengthId != Guid.Empty ? d.LengthId.ToString() : ""))</td>
-            <td>@(d.Color != null ? d.Color.Name : (d.ColorId != Guid.Empty ? d.ColorId.ToString() : ""))</td>
-            <td>@(d.SurfaceFinish != null ? d.SurfaceFinish.Name : (d.SurfaceFinishId != Guid.Empty ? d.SurfaceFinishId.ToString() : ""))</td>
-            <td>@(d.Hardness != null ? d.Hardness.Name : (d.HardnessId != Guid.Empty ? d.HardnessId.ToString() : ""))</td>
-            <td>@(d.Elasticity != null ? d.Elasticity.Name : (d.ElasticityId != Guid.Empty ? d.ElasticityId.ToString() : ""))</td>
-            <td>@(d.OriginCountry != null ? d.OriginCountry.Name : (d.OriginCountryId != Guid.Empty ? d.OriginCountryId.ToString() : ""))</td>
-            <td>
-                @if(!string.IsNullOrWhiteSpace(d.Sections)) { <div><strong>Số lượng:</strong> @d.Sections</div> }
-                @if(!string.IsNullOrWhiteSpace(d.CollapsedLength)) { <div><strong>Chiều dài thu cần:</strong> @d.CollapsedLength</div> }
-                @if(!string.IsNullOrWhiteSpace(d.Weight)) { <div><strong>Trọng lượng:</strong> @d.Weight</div> }
-            </td>
-            <td>@(d.IsActive ? "Có" : "Không")</td>
-            <td>
-                <a asp-action="EditDetail" asp-route-id="@d.Id">Sửa</a> |
-                <form asp-action="DeleteDetail" asp-route-id="@d.Id" method="post" class="d-inline">
-                    <button type="submit" class="btn btn-link p-0">Xóa</button>
-                </form>
-            </td>
-        </tr>
-    }
-    </tbody>
-</table>
