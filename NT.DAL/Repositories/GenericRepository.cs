@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using NT.BLL.Interfaces;
 using NT.DAL.ContextFile;
 using System;
@@ -110,6 +110,30 @@ namespace NT.DAL.Repositories
                 }
             }
             return await query.Where(predicate).ToListAsync();
+        }
+
+        /// <summary>
+        /// Xóa entity theo điều kiện (dùng cho composite key hoặc xóa nhiều bản ghi).
+        /// </summary>
+        public async Task<int> DeleteWhereAsync(Expression<Func<H, bool>> predicate)
+        {
+            var entities = await _dbSet.Where(predicate).ToListAsync();
+            if (entities.Any())
+            {
+                _dbSet.RemoveRange(entities);
+                await _context.SaveChangesAsync();
+            }
+            return entities.Count;
+        }
+
+        /// <summary>
+        /// Xóa một entity cụ thể (dùng cho entity có composite key).
+        /// </summary>
+        public async Task DeleteEntityAsync(H entity)
+        {
+            if (entity == null) throw new ArgumentNullException(nameof(entity));
+            _dbSet.Remove(entity);
+            await _context.SaveChangesAsync();
         }
 
         /// <summary>

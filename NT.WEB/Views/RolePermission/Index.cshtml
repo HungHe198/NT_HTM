@@ -1,0 +1,122 @@
+@model IEnumerable<NT.WEB.ViewModels.RoleListViewModel>
+
+@{
+    ViewData["Title"] = "Quản lý phân quyền";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <h2><i class="fas fa-user-shield me-2"></i>Quản lý phân quyền</h2>
+            <p class="text-muted">Quản lý quyền truy cập cho từng vai trò trong hệ thống</p>
+        </div>
+        <div class="col-auto">
+            <form asp-action="SyncPermissions" method="post" class="d-inline">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-outline-primary" onclick="return confirm('Đồng bộ Permission từ tất cả Endpoint?')">
+                    <i class="fas fa-sync me-1"></i> Đồng bộ Permission
+                </button>
+            </form>
+            <a asp-action="Endpoints" class="btn btn-outline-secondary ms-2">
+                <i class="fas fa-list me-1"></i> Xem Endpoints
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>@TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>@TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="fas fa-users-cog me-2"></i>Danh sách vai trò</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 50px;">#</th>
+                            <th>Tên vai trò</th>
+                            <th class="text-center">Số quyền được gán</th>
+                            <th class="text-center" style="width: 200px;">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{ var index = 1; }
+                        @foreach (var role in Model)
+                        {
+                            <tr>
+                                <td>@(index++)</td>
+                                <td>
+                                    <strong>@role.Name</strong>
+                                    @if (role.Name == "Admin")
+                                    {
+                                        <span class="badge bg-danger ms-2">Full quyền</span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge bg-info fs-6">@role.PermissionCount quyền</span>
+                                </td>
+                                <td class="text-center">
+                                    @if (role.Name != "Admin")
+                                    {
+                                        <a asp-action="Manage" asp-route-id="@role.Id" class="btn btn-sm btn-primary">
+                                            <i class="fas fa-cog me-1"></i> Phân quyền
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">
+                                            <i class="fas fa-crown me-1"></i> Không cần phân quyền
+                                        </span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow mt-4">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Hướng dẫn</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6><i class="fas fa-cogs me-2"></i>Cách hoạt động</h6>
+                    <ul>
+                        <li>Mỗi <strong>Endpoint</strong> (Controller/Action) tương ứng với một <strong>Permission</strong></li>
+                        <li>Permission được gán cho <strong>Role</strong> thông qua bảng <strong>RolePermission</strong></li>
+                        <li>Khi user truy cập endpoint, hệ thống kiểm tra Role có Permission tương ứng không</li>
+                        <li><strong>Admin</strong> luôn có full quyền, không cần gán Permission</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h6><i class="fas fa-sync me-2"></i>Đồng bộ Permission</h6>
+                    <ul>
+                        <li>Click <strong>"Đồng bộ Permission"</strong> để quét tất cả Controller/Action</li>
+                        <li>Hệ thống sẽ tự động tạo Permission mới cho các endpoint chưa có</li>
+                        <li>Permission đã tồn tại sẽ không bị ảnh hưởng</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
