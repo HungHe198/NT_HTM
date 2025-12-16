@@ -96,6 +96,15 @@ namespace NT.WEB.Controllers
                 });
             }
 
+            // Lấy danh sách vouchers có thể sử dụng
+            var allVouchers = await _voucherRepo.GetAllAsync();
+            var availableVouchers = (allVouchers ?? new List<Voucher>())
+                .Where(v => v.IsValid() && (!v.MinOrderAmount.HasValue || subtotal >= v.MinOrderAmount.Value))
+                .OrderByDescending(v => v.DiscountPercentage)
+                .ToList();
+            ViewBag.AvailableVouchers = availableVouchers;
+            ViewBag.Subtotal = subtotal;
+
             // Tính toán voucher discount từ session
             decimal voucherDiscount = 0m;
             var appliedCode = HttpContext.Session.GetString("SESSION_VOUCHER_CODE");
@@ -117,7 +126,6 @@ namespace NT.WEB.Controllers
             }
 
             var shippingFee = 35000m;
-            ViewBag.Subtotal = subtotal;
             ViewBag.ShippingFee = shippingFee;
             ViewBag.VoucherDiscount = voucherDiscount;
             ViewBag.Total = subtotal + shippingFee - voucherDiscount;

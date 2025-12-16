@@ -1,6 +1,304 @@
-﻿@{
+@{
     ViewData["Title"] = "Home Page";
     Layout = "~/Views/Shared/_ClientLayout.cshtml";
+}
+
+<!-- Banner Section -->
+<section class="hero-banner">
+    <div class="banner-wrapper">
+        <img src="~/uploads/banner/unnamed.jpg" alt="Banner" class="banner-bg" />
+    <div class="banner-overlay"></div>
+        <div class="banner-content">
+  <span class="badge-hot">🎣 Fishing Shop</span>
+       <h1 class="hero-title">Chào mừng đến với<br /><span class="highlight">NT Fishing Store</span></h1>
+   <p class="hero-subtitle">Khám phá bộ sưu tập đồ câu chất lượng cao với giá tốt nhất thị trường</p>
+       <div class="hero-buttons">
+           <a href="@Url.Action("GetAllProducts", "Home")" class="btn btn-shop">
+         <i class="fas fa-shopping-bag me-2"></i>Mua sắm ngay
+        </a>
+           <a href="#products-section" class="btn btn-explore">
+             <i class="fas fa-arrow-down me-2"></i>Xem sản phẩm
+         </a>
+  </div>
+         <div class="hero-features">
+           <div class="feature-item">
+            <i class="fas fa-truck"></i>
+        <span>Miễn phí ship</span>
+           </div>
+          <div class="feature-item">
+     <i class="fas fa-headset"></i>
+          <span>Hỗ trợ 24/7</span>
+     </div>
+   </div>
+      </div>
+    </div>
+</section>
+
+<!-- Section Title for Products -->
+<section id="products-section" class="products-header">
+    <div class="section-title">
+        <span class="title-badge">Sản phẩm nổi bật</span>
+        <h2>Khám phá bộ sưu tập của chúng tôi</h2>
+        <p>Những sản phẩm được yêu thích nhất tại cửa hàng</p>
+    </div>
+</section>
+
+<style>
+    /* Hero Banner Styles */
+    .hero-banner {
+        margin: -1.5rem -0.75rem 2rem -0.75rem;
+        width: calc(100% + 1.5rem);
     }
+
+    .banner-wrapper {
+        position: relative;
+        width: 100%;
+        height: 550px;
+    overflow: hidden;
+        border-radius: 0 0 30px 30px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    }
+
+    .banner-bg {
+        width: 100%;
+        height: 100%;
+   object-fit: cover;
+    object-position: center;
+        animation: zoomIn 20s ease-in-out infinite alternate;
+    }
+
+    @@keyframes zoomIn {
+        0% { transform: scale(1); }
+     100% { transform: scale(1.1); }
+    }
+
+    .banner-overlay {
+        position: absolute;
+        top: 0;
+    left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, rgba(0, 40, 60, 0.85) 0%, rgba(0, 100, 120, 0.6) 50%, rgba(0, 150, 180, 0.4) 100%);
+    }
+
+    .banner-content {
+        position: absolute;
+     top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        color: white;
+      padding: 20px;
+        width: 100%;
+    max-width: 800px;
+        animation: fadeInUp 1s ease-out;
+    }
+
+    @@keyframes fadeInUp {
+        from {
+  opacity: 0;
+  transform: translate(-50%, -40%);
+        }
+    to {
+            opacity: 1;
+    transform: translate(-50%, -50%);
+        }
+    }
+
+    .badge-hot {
+   display: inline-block;
+        background: linear-gradient(135deg, #00bcd4, #00838f);
+        color: white;
+        padding: 8px 20px;
+        border-radius: 50px;
+      font-size: 0.9rem;
+     font-weight: 600;
+    margin-bottom: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0, 188, 212, 0.4);
+    }
+
+    .hero-title {
+        font-size: 3.2rem;
+    font-weight: 800;
+  margin-bottom: 1rem;
+        line-height: 1.2;
+        text-shadow: 2px 4px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .hero-title .highlight {
+   background: linear-gradient(135deg, #00bcd4, #4dd0e1);
+  -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    background-clip: text;
+    }
+
+    .hero-subtitle {
+        font-size: 1.2rem;
+      margin-bottom: 2rem;
+        opacity: 0.95;
+ max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+}
+
+    .hero-buttons {
+     display: flex;
+        gap: 1rem;
+ justify-content: center;
+  flex-wrap: wrap;
+        margin-bottom: 2.5rem;
+    }
+
+    .btn-shop {
+        background: linear-gradient(135deg, #00bcd4, #00838f);
+        color: white;
+        padding: 15px 35px;
+        border-radius: 50px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border: none;
+        transition: all 0.3s ease;
+     box-shadow: 0 8px 25px rgba(0, 188, 212, 0.4);
+    }
+
+    .btn-shop:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 35px rgba(0, 188, 212, 0.5);
+        color: white;
+    }
+
+    .btn-explore {
+  background: rgba(255, 255, 255, 0.15);
+        color: white;
+     padding: 15px 35px;
+        border-radius: 50px;
+     font-size: 1.1rem;
+      font-weight: 600;
+        border: 2px solid rgba(255, 255, 255, 0.4);
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+    }
+
+    .btn-explore:hover {
+        background: rgba(255, 255, 255, 0.25);
+     border-color: rgba(255, 255, 255, 0.6);
+        color: white;
+        transform: translateY(-3px);
+    }
+
+  .hero-features {
+        display: flex;
+        justify-content: center;
+        gap: 2.5rem;
+      flex-wrap: wrap;
+    }
+
+    .feature-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      font-size: 0.95rem;
+        opacity: 0.9;
+    }
+
+    .feature-item i {
+        font-size: 1.2rem;
+ color: #4dd0e1;
+ }
+
+    /* Products Header */
+    .products-header {
+        text-align: center;
+   margin-bottom: 2rem;
+     padding-top: 1rem;
+    }
+
+    .section-title .title-badge {
+        display: inline-block;
+ background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+      color: #0277bd;
+  padding: 6px 16px;
+     border-radius: 20px;
+     font-size: 0.85rem;
+        font-weight: 600;
+        margin-bottom: 0.8rem;
+    }
+
+    .section-title h2 {
+        font-size: 2rem;
+        font-weight: 700;
+   color: #1a237e;
+      margin-bottom: 0.5rem;
+    }
+
+    .section-title p {
+        color: #607d8b;
+        font-size: 1rem;
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .hero-banner {
+       margin: -1rem -0.5rem 1.5rem -0.5rem;
+            width: calc(100% + 1rem);
+        }
+
+        .banner-wrapper {
+height: 480px;
+          border-radius: 0 0 20px 20px;
+        }
+
+        .hero-title {
+   font-size: 2rem;
+        }
+
+        .hero-subtitle {
+    font-size: 1rem;
+        }
+
+        .hero-buttons {
+          flex-direction: column;
+            align-items: center;
+        }
+
+        .btn-shop, .btn-explore {
+        width: 100%;
+    max-width: 280px;
+padding: 14px 30px;
+        }
+
+        .hero-features {
+     gap: 1.5rem;
+        }
+
+        .feature-item {
+ font-size: 0.85rem;
+        }
+
+        .section-title h2 {
+ font-size: 1.5rem;
+        }
+    }
+
+    @@media (max-width: 480px) {
+   .banner-wrapper {
+  height: 420px;
+        }
+
+      .hero-title {
+            font-size: 1.6rem;
+    }
+
+        .badge-hot {
+            font-size: 0.8rem;
+   padding: 6px 15px;
+        }
+
+        .hero-features {
+            flex-direction: column;
+      gap: 1rem;
+        }
+    }
+</style>
 
 
