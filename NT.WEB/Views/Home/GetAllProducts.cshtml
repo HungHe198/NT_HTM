@@ -1,4 +1,4 @@
-﻿@using NT.SHARED.Models
+@using NT.SHARED.Models
 @model IEnumerable<dynamic>
 @inject NT.WEB.Services.BrandWebService BrandService
 @inject NT.WEB.Services.ProductDetailWebService ProductDetailService
@@ -42,16 +42,14 @@
     var categoryOptions = categoryIds.OrderBy(x => x).ToList();
 }
 <div class="container my-4">
-    <h2 class="mb-3">Danh sách sản phẩm</h2>
-
     <form class="row g-2 align-items-end mb-3" method="get" asp-controller="Home" asp-action="GetAllProducts">
         <div class="col-12 col-md-4">
-            <label for="q" class="form-label small">Từ khóa</label>
-            <input type="text" name="q" id="q" value="@qVal" class="form-control form-control-sm" placeholder="Tên hoặc mã sản phẩm" />
+            <label for="q" class="form-label small text-muted">Từ khóa</label>
+            <input type="text" name="q" id="q" value="@qVal" class="form-control form-control-sm search-input" placeholder="Tên hoặc mã sản phẩm" />
         </div>
         <div class="col-6 col-md-2">
-            <label for="brandId" class="form-label small">Thương hiệu</label>
-            <select name="brandId" id="brandId" class="form-select form-select-sm">
+            <label for="brandId" class="form-label small text-muted">Thương hiệu</label>
+            <select name="brandId" id="brandId" class="form-select form-select-sm search-input">
                 <option value="">-- Tất cả --</option>
                 @foreach (var b in brandOptions)
                 {
@@ -61,8 +59,8 @@
             </select>
         </div>
         <div class="col-6 col-md-2">
-            <label for="categoryId" class="form-label small">Danh mục</label>
-            <select name="categoryId" id="categoryId" class="form-select form-select-sm">
+            <label for="categoryId" class="form-label small text-muted">Danh mục</label>
+            <select name="categoryId" id="categoryId" class="form-select form-select-sm search-input">
                 <option value="">-- Tất cả --</option>
                 @foreach (var gid in categoryOptions)
                 {
@@ -71,16 +69,16 @@
             </select>
         </div>
         <div class="col-6 col-md-2">
-            <label for="minPrice" class="form-label small">Giá từ</label>
-            <input type="number" name="minPrice" id="minPrice" value="@Context.Request.Query["minPrice"]" class="form-control form-control-sm" min="0" step="1000" />
+            <label for="minPrice" class="form-label small text-muted">Giá từ</label>
+            <input type="number" name="minPrice" id="minPrice" value="@Context.Request.Query["minPrice"]" class="form-control form-control-sm search-input" min="0" step="1000" />
         </div>
         <div class="col-6 col-md-2">
-            <label for="maxPrice" class="form-label small">Giá đến</label>
-            <input type="number" name="maxPrice" id="maxPrice" value="@Context.Request.Query["maxPrice"]" class="form-control form-control-sm" min="0" step="1000" />
+            <label for="maxPrice" class="form-label small text-muted">Giá đến</label>
+            <input type="number" name="maxPrice" id="maxPrice" value="@Context.Request.Query["maxPrice"]" class="form-control form-control-sm search-input" min="0" step="1000" />
         </div>
         <div class="col-12">
-            <button type="submit" class="btn btn-sm btn-primary">Lọc</button>
-            <a class="btn btn-sm btn-outline-secondary" asp-controller="Home" asp-action="GetAllProducts">Xóa lọc</a>
+            <button type="submit" class="btn btn-sm btn-primary rounded-pill fw-semibold">Lọc</button>
+            <a class="btn btn-sm btn-outline-secondary rounded-pill ms-2" asp-controller="Home" asp-action="GetAllProducts">Xóa lọc</a>
         </div>
     </form>
     <div class="row g-3">
@@ -92,15 +90,18 @@
                         <img src="@((p.thumbnail ?? "/images/product-placeholder.png"))" class="card-img-top" alt="product" style="height:160px;object-fit:contain" />
                     </a>
                     <div class="card-body p-2">
-                        <div class="small fw-semibold text-dark mb-1">
+                        <h6 class="mb-1 fw-semibold text-dark">
                             <a asp-controller="Product" asp-action="ProductDetailIndex" asp-route-id="@p.id" class="text-decoration-none text-dark">@p.name</a>
-                        </div>
+                        </h6>
                         <div class="small text-muted">@p.brandName <span class="text-muted">@p.productCode</span></div>
                         <div class="small fw-semibold text-primary mt-1">
-                            @if(p.priceMin != null || p.priceMax != null)
+                            @if (p.priceMin != null || p.priceMax != null)
                             {
                                 @string.Format(System.Globalization.CultureInfo.GetCultureInfo("vi-VN"), "{0:C0}", p.priceMin ?? p.priceMax)
-                                @if(p.priceMin != null && p.priceMax != null && p.priceMin != p.priceMax){<text> - </text> @string.Format(System.Globalization.CultureInfo.GetCultureInfo("vi-VN"), "{0:C0}", p.priceMax)}
+                                @if (p.priceMin != null && p.priceMax != null && p.priceMin != p.priceMax)
+                                {
+                                    <text> - </text> @string.Format(System.Globalization.CultureInfo.GetCultureInfo("vi-VN"), "{0:C0}", p.priceMax)
+                                }
                             }
                             else
                             {

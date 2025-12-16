@@ -1,13 +1,15 @@
-﻿@model NT.SHARED.DTOs.LoginDto
+@model NT.SHARED.DTOs.LoginDto
 @{
     ViewBag.Title = "Login";
 }
 
 <h1>Đăng nhập</h1>
-@if(TempData["Success"] != null){
+@if (TempData["Success"] != null)
+{
     <div class="alert alert-success">@TempData["Success"]</div>
 }
-@if(TempData["Error"] != null){
+@if (TempData["Error"] != null)
+{
     <div class="alert alert-danger">@TempData["Error"]</div>
 }
 <form asp-action="Login" asp-controller="Account" method="post">
@@ -29,8 +31,9 @@
     </div>
     <button type="submit" class="btn btn-primary">Đăng nhập</button>
     <a asp-action="RegisterCustomer" asp-controller="Account" asp-route-client="true" class="btn btn-outline-secondary ms-2">Đăng kí</a>
+    <a href="/" class="btn btn-outline-primary ms-2">Quay lại trang chủ</a>
 </form>
 
-@section Scripts{
+@section Scripts {
     <partial name="_ValidationScriptsPartial" />
 }
