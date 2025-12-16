@@ -20,72 +20,228 @@
     @RenderSection("Styles", required: false)
 
     <style>
-        html, body { height: 100%; }
-        body { background: #f5f7fb; display: flex; flex-direction: column; min-height: 100vh; }
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            background: #f5f7fb;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
 
         /* Header / Topbar */
-        .topbar { background: #fff; border-bottom: 1px solid #e6eef9; position: sticky; top: 0; z-index: 1030; transition: box-shadow .2s ease, background .2s ease; }
-        .topbar.scrolled { box-shadow: 0 6px 20px rgba(14,30,70,0.08); }
+        .topbar {
+            background: #fff;
+            border-bottom: 1px solid #e6eef9;
+            position: sticky;
+            top: 0;
+            z-index: 1030;
+            transition: box-shadow .2s ease, background .2s ease;
+        }
 
-        .site-logo { color:#00bcd4; font-weight:700; display:flex; align-items:center; gap:.5rem; }
-        .site-logo img { background: none; display:block; height:56px; width:auto; }
+            .topbar.scrolled {
+                box-shadow: 0 6px 20px rgba(14,30,70,0.08);
+            }
 
-        .navbar { padding-top: .5rem; padding-bottom: .5rem; }
+        .site-logo {
+            color: #00bcd4;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+        }
 
-        .footer-cta { background:#00b8d4; color:#fff; padding:2rem 1rem; }
-        main { flex: 1 0 auto; }
-        footer { margin-top: auto; }
+            .site-logo img {
+                background: none;
+                display: block;
+                height: 56px;
+                width: auto;
+            }
+
+        .navbar {
+            padding-top: .5rem;
+            padding-bottom: .5rem;
+        }
+
+        .footer-cta {
+            background: #00b8d4;
+            color: #fff;
+            padding: 2rem 1rem;
+        }
+
+        main {
+            flex: 1 0 auto;
+        }
+
+        footer {
+            margin-top: auto;
+        }
 
         /* Auth Buttons Styling */
-        .auth-buttons { display: flex; gap: 0.5rem; align-items: center; }
-        .auth-separator { color: #999; font-weight: 300; margin: 0 0.5rem; }
+        .auth-buttons {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .auth-separator {
+            color: #999;
+            font-weight: 300;
+            margin: 0 0.5rem;
+        }
+
         .btn-auth-login {
-            padding: 0.45rem 1rem; font-size: 0.9rem; font-weight: 600; border-radius: 8px; transition: all 0.3s ease;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; color: white; text-decoration: none;
+            padding: 0.45rem 1rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            text-decoration: none;
         }
-        .btn-auth-login:hover { background: linear-gradient(135deg, #764ba2 0%, #667eea 100%); transform: translateY(-2px); box-shadow: 0 8px 16px rgba(102, 126, 234, 0.4); color: white; }
+
+            .btn-auth-login:hover {
+                background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+                transform: translateY(-2px);
+                box-shadow: 0 8px 16px rgba(102, 126, 234, 0.4);
+                color: white;
+            }
+
         .btn-auth-register {
-            padding: 0.45rem 1rem; font-size: 0.9rem; font-weight: 600; border-radius: 8px; transition: all 0.3s ease;
-            background: #fff; border: 2px solid #667eea; color: #667eea; text-decoration: none;
+            padding: 0.45rem 1rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            background: #fff;
+            border: 2px solid #667eea;
+            color: #667eea;
+            text-decoration: none;
         }
-        .btn-auth-register:hover { background: #667eea; color: white; transform: translateY(-2px); box-shadow: 0 8px 16px rgba(102, 126, 234, 0.2); }
-        .auth-container { display: flex; align-items: center; gap: 0.75rem; }
+
+            .btn-auth-register:hover {
+                background: #667eea;
+                color: white;
+                transform: translateY(-2px);
+                box-shadow: 0 8px 16px rgba(102, 126, 234, 0.2);
+            }
+
+        .auth-container {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
 
         /* Navbar primary links */
-        .nav-link-main { color: #333 !important; padding: .45rem .75rem; border-radius: 8px; font-weight: 600; transition: background .18s ease, color .18s ease; }
-        .nav-link-main:hover { background: #eef4ff; color: #0b60d6 !important; text-decoration: none; }
+        .nav-link-main {
+            color: #333 !important;
+            padding: .45rem .75rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: background .18s ease, color .18s ease;
+        }
+
+            .nav-link-main:hover {
+                background: #eef4ff;
+                color: #0b60d6 !important;
+                text-decoration: none;
+            }
 
         /* Search input & button */
-        .search-input { border-radius: 999px; padding-left: 1rem; height: calc(1.8em + .7rem); box-shadow: none; }
-        .btn-search { border-radius: 999px; padding: .35rem .8rem; background: #00bcd4; color: white; border: none; }
-        .btn-search:hover { background: #00aab0; }
+        .search-input {
+            border-radius: 999px;
+            padding-left: 1rem;
+            height: calc(1.8em + .7rem);
+            box-shadow: none;
+        }
+
+        .btn-search {
+            border-radius: 999px;
+            padding: .35rem .8rem;
+            background: #00bcd4;
+            color: white;
+            border: none;
+        }
+
+            .btn-search:hover {
+                background: #00aab0;
+            }
 
         /* Icon buttons (notification, cart, etc) */
-        .btn-icon { display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px; border-radius:50%; border:1px solid #e6eef9; background:#fff; color:#333; transition: all .18s ease; }
-        .btn-icon i { font-size: 16px; }
-        .btn-icon:hover { background: #f6fbff; transform: translateY(-2px); box-shadow: 0 6px 14px rgba(14,30,70,0.06); }
+        .btn-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 1px solid #e6eef9;
+            background: #fff;
+            color: #333;
+            transition: all .18s ease;
+        }
 
-        .badge-circle { position:absolute; top:-4px; right:-6px; min-width:18px; height:18px; padding:0 4px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:11px; }
+            .btn-icon i {
+                font-size: 16px;
+            }
+
+            .btn-icon:hover {
+                background: #f6fbff;
+                transform: translateY(-2px);
+                box-shadow: 0 6px 14px rgba(14,30,70,0.06);
+            }
+
+        .badge-circle {
+            position: absolute;
+            top: -4px;
+            right: -6px;
+            min-width: 18px;
+            height: 18px;
+            padding: 0 4px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+        }
 
         /* Adjust dropdown menu style for notifications/cart */
-        .dropdown-menu-end { box-shadow: 0 8px 24px rgba(31,41,55,0.08); }
+        .dropdown-menu-end {
+            box-shadow: 0 8px 24px rgba(31,41,55,0.08);
+        }
 
         /* Responsive tweaks */
         @@media (max-width: 767.98px) {
-            .site-logo img { height:44px; }
-            .search-input { height: calc(1.6em + .6rem); }
-            .nav-link-main { padding: .35rem .5rem; }
-            .btn-auth-login, .btn-auth-register { padding: .35rem .6rem; font-size: .85rem; }
+            .site-logo img {
+                height: 44px;
+            }
+
+            .search-input {
+                height: calc(1.6em + .6rem);
+            }
+
+            .nav-link-main {
+                padding: .35rem .5rem;
+            }
+
+            .btn-auth-login, .btn-auth-register {
+                padding: .35rem .6rem;
+                font-size: .85rem;
+            }
         }
     </style>
 </head>
 @using System.Security.Claims
 @{
-    var isAuth = User?.Identity?.IsAuthenticated ?? false;
-    var userId = isAuth ? User?.FindFirst(ClaimTypes.NameIdentifier)?.Value : null;
-    var role = isAuth ? User?.FindFirst(ClaimTypes.Role)?.Value : null;
-    var fullName = isAuth ? User?.FindFirst("Fullname")?.Value : null;
-    var userName = isAuth ? User?.FindFirst(ClaimTypes.Name)?.Value : null;
+        var isAuth = User?.Identity?.IsAuthenticated ?? false;
+        var userId = isAuth ? User?.FindFirst(ClaimTypes.NameIdentifier)?.Value : null;
+        var role = isAuth ? User?.FindFirst(ClaimTypes.Role)?.Value : null;
+        var fullName = isAuth ? User?.FindFirst("Fullname")?.Value : null;
+        var userName = isAuth ? User?.FindFirst(ClaimTypes.Name)?.Value : null;
 }
 <body data-auth="@isAuth" data-userid="@userId" data-role="@role">
     <header class="topbar" id="siteTopbar">
@@ -104,7 +260,7 @@
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                         <li class="nav-item"><a class="nav-link nav-link-main" asp-controller="Home" asp-action="Index">Trang chủ</a></li>
                         <li class="nav-item"><a class="nav-link nav-link-main" asp-controller="Home" asp-action="GetAllProducts">Sản phẩm</a></li>
-                       @*  <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Privacy">Chính sách</a></li> *@
+                        @*  <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Privacy">Chính sách</a></li> *@
                     </ul>
 
                     <form id="client-search-form" class="d-flex position-relative mx-auto flex-grow-1" role="search" method="get" asp-controller="Product" asp-action="Index" autocomplete="off" style="max-width: 680px;">
@@ -138,8 +294,10 @@
                                 }
                             </ul>
                         </div>
-                      @*   <a class="me-3 text-muted" href="#"><i class="fa fa-heart"></i></a> *@
-                        @{ var isAdminOrEmpTop = string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase) || string.Equals(role, "Employee", StringComparison.OrdinalIgnoreCase); }
+                        @*   <a class="me-3 text-muted" href="#"><i class="fa fa-heart"></i></a> *@
+                        @{
+                            var isAdminOrEmpTop = string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase) || string.Equals(role, "Employee", StringComparison.OrdinalIgnoreCase);
+                        }
                         @if (!isAdminOrEmpTop)
                         {
                             @await Component.InvokeAsync("CartSummary")

@@ -4,10 +4,12 @@
 }
 
 <h1>Đăng nhập</h1>
-@if(TempData["Success"] != null){
+@if (TempData["Success"] != null)
+{
     <div class="alert alert-success">@TempData["Success"]</div>
 }
-@if(TempData["Error"] != null){
+@if (TempData["Error"] != null)
+{
     <div class="alert alert-danger">@TempData["Error"]</div>
 }
 <form asp-action="Login" asp-controller="Account" method="post">
@@ -32,6 +34,6 @@
     <a href="/" class="btn btn-outline-primary ms-2">Quay lại trang chủ</a>
 </form>
 
-@section Scripts{
+@section Scripts {
     <partial name="_ValidationScriptsPartial" />
 }

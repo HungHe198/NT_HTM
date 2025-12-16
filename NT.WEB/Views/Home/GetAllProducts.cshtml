@@ -95,10 +95,13 @@
                         </h6>
                         <div class="small text-muted">@p.brandName <span class="text-muted">@p.productCode</span></div>
                         <div class="small fw-semibold text-primary mt-1">
-                            @if(p.priceMin != null || p.priceMax != null)
+                            @if (p.priceMin != null || p.priceMax != null)
                             {
                                 @string.Format(System.Globalization.CultureInfo.GetCultureInfo("vi-VN"), "{0:C0}", p.priceMin ?? p.priceMax)
-                                @if(p.priceMin != null && p.priceMax != null && p.priceMin != p.priceMax){<text> - </text> @string.Format(System.Globalization.CultureInfo.GetCultureInfo("vi-VN"), "{0:C0}", p.priceMax)}
+                                @if (p.priceMin != null && p.priceMax != null && p.priceMin != p.priceMax)
+                                {
+                                    <text> - </text> @string.Format(System.Globalization.CultureInfo.GetCultureInfo("vi-VN"), "{0:C0}", p.priceMax)
+                                }
                             }
                             else
                             {
