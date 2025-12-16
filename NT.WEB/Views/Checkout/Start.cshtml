@@ -107,125 +107,63 @@
 
             <!-- Mã giảm giá -->
        <div class="checkout-card mb-3">
-     <div class="card-header-custom">
-        <i class="fas fa-ticket-alt me-2"></i>Mã giảm giá
-</div>
-      <div class="card-body-custom">
-          @if (string.IsNullOrWhiteSpace(appliedCode))
-      {
-   @if (availableVouchers.Any())
-        {
-   <div class="voucher-dropdown-container">
-        <button type="button" class="btn btn-voucher-select w-100" id="voucherDropdownBtn">
-            <i class="fas fa-tags me-2"></i>Chọn mã giảm giá
-                 <i class="fas fa-chevron-down ms-auto"></i>
-         </button>
-      <div class="voucher-dropdown" id="voucherDropdown">
-     @foreach (var v in availableVouchers)
-       {
-      var discountPreview = v.CalculateDiscount(subtotal);
-       var remainingUsage = v.MaxUsage.HasValue ? (v.MaxUsage.Value - v.UsageCount) : (int?)null;
-    <div class="voucher-item" data-code="@v.Code">
-               <div class="voucher-item-left">
-     <div class="voucher-icon">
-         <i class="fas fa-percent"></i>
-            </div>
-     </div>
-   <div class="voucher-item-content">
-     <div class="voucher-code">@v.Code</div>
-         <div class="voucher-desc">Giảm @(v.DiscountPercentage?.ToString("N0") ?? "0")%@(v.MaxDiscountAmount.HasValue ? $" (tối đa {v.MaxDiscountAmount.Value:#,##0}₫)" : "")</div>
+         <div class="card-header-custom">
+            <i class="fas fa-ticket-alt me-2"></i>Mã giảm giá
          </div>
-  <div class="voucher-item-right">
-    <span class="voucher-save">-@discountPreview.ToString("#,##0")₫</span>
-          </div>
-   <!-- Tooltip chi tiết -->
-    <div class="voucher-tooltip">
-                <div class="tooltip-header">
-    <i class="fas fa-ticket-alt me-2"></i>Chi tiết voucher
-     </div>
-  <div class="tooltip-body">
-           <div class="tooltip-row">
-    <span class="tooltip-label">Mã:</span>
-     <span class="tooltip-value fw-bold">@v.Code</span>
-    </div>
-     <div class="tooltip-row">
-      <span class="tooltip-label">Giảm:</span>
-     <span class="tooltip-value">@(v.DiscountPercentage?.ToString("N0") ?? "0")%</span>
- </div>
-        @if (v.MaxDiscountAmount.HasValue)
-             {
-     <div class="tooltip-row">
-         <span class="tooltip-label">Giảm tối đa:</span>
-  <span class="tooltip-value">@v.MaxDiscountAmount.Value.ToString("#,##0")₫</span>
-        </div>
-         }
-     @if (v.MinOrderAmount.HasValue)
-  {
-               <div class="tooltip-row">
-       <span class="tooltip-label">Đơn tối thiểu:</span>
-       <span class="tooltip-value">@v.MinOrderAmount.Value.ToString("#,##0")₫</span>
- </div>
-     }
-        @if (v.EndDate.HasValue)
-     {
-   <div class="tooltip-row">
-       <span class="tooltip-label">Hết hạn:</span>
-              <span class="tooltip-value">@v.EndDate.Value.ToString("dd/MM/yyyy HH:mm")</span>
-  </div>
-    }
-       @if (remainingUsage.HasValue)
-                   {
-         <div class="tooltip-row">
-       <span class="tooltip-label">Còn lại:</span>
-             <span class="tooltip-value">@remainingUsage lượt</span>
-               </div>
-            }
-      <div class="tooltip-row highlight">
-          <span class="tooltip-label">Bạn tiết kiệm:</span>
-          <span class="tooltip-value text-success fw-bold">@discountPreview.ToString("#,##0")₫</span>
-           </div>
-           </div>
-             </div>
-                  </div>
- }
-          </div>
-   </div>
-        
-          <!-- Form ẩn để submit voucher -->
-            <form asp-action="ApplyVoucher" asp-controller="Checkout" method="post" id="voucherForm" class="mt-2" style="display:none;">
-       @Html.AntiForgeryToken()
-          <input type="hidden" name="cartId" value="@cartId" />
-      <input type="hidden" name="selectedIds" value="@selectedIds" />
-         <input type="hidden" name="code" id="selectedVoucherCode" />
-        </form>
-     }
-      else
-        {
- <div class="text-muted text-center py-3">
-        <i class="fas fa-ticket-alt fa-2x mb-2 opacity-50"></i>
-    <p class="mb-0">Không có mã giảm giá khả dụng</p>
-   </div>
-     }
-    }
+         <div class="card-body-custom">
+           @if (string.IsNullOrWhiteSpace(appliedCode))
+           {
+               if (availableVouchers.Any())
+               {
+                   <div class="mb-2">
+                       <label class="form-label"><i class="fas fa-tags me-1"></i>Chọn mã giảm giá</label>
+                       <select id="voucherSelect" class="form-select">
+                           <option value="">-- Chọn mã giảm giá --</option>
+                           @foreach (var v in availableVouchers)
+                           {
+                               var percent = v.DiscountPercentage?.ToString("0") ?? "0";
+                               var max = v.MaxDiscountAmount.HasValue ? v.MaxDiscountAmount.Value.ToString("#,##0") + "đ" : "Không giới hạn";
+                               var min = v.MinOrderAmount.HasValue ? v.MinOrderAmount.Value.ToString("#,##0") + "đ" : "0đ";
+                               var hsd = v.EndDate.HasValue ? v.EndDate.Value.ToString("dd/MM/yyyy") : "Không xác định";
+                               <option value="@v.Code">@v.Code | @percent% | Tối đa: @max | Đơn tối thiểu: @min | HSD: @hsd</option>
+                           }
+                       </select>
+                   </div>
+
+                   <form asp-action="ApplyVoucher" asp-controller="Checkout" method="post" id="voucherForm" class="mt-2">
+                       @Html.AntiForgeryToken()
+                       <input type="hidden" name="cartId" value="@cartId" />
+                       <input type="hidden" name="selectedIds" value="@selectedIds" />
+                       <input type="hidden" name="code" id="selectedVoucherCode" />
+                   </form>
+               }
+               else
+               {
+                   <div class="text-muted text-center py-3">
+                       <i class="fas fa-ticket-alt fa-2x mb-2 opacity-50"></i>
+                       <p class="mb-0">Không có mã giảm giá khả dụng</p>
+                   </div>
+               }
+           }
            else
-          {
-            <div class="applied-voucher">
-      <div class="applied-voucher-info">
-       <i class="fas fa-check-circle text-success me-2"></i>
-    <span>Đã áp dụng: <strong class="text-success">@appliedCode</strong></span>
- </div>
-           <form asp-action="RemoveVoucher" asp-controller="Checkout" method="post" class="d-inline">
-  @Html.AntiForgeryToken()
-            <input type="hidden" name="cartId" value="@cartId" />
-         <input type="hidden" name="selectedIds" value="@selectedIds" />
-        <button class="btn btn-remove-voucher" type="submit">
- <i class="fas fa-times"></i> Bỏ mã
-    </button>
-     </form>
-  </div>
-          }
-      </div>
-     </div>
+           {
+               <div class="applied-voucher">
+                   <div class="applied-voucher-info">
+                       <i class="fas fa-check-circle text-success me-2"></i>
+                       <span>Đã áp dụng: <strong class="text-success">@appliedCode</strong></span>
+                   </div>
+                   <form asp-action="RemoveVoucher" asp-controller="Checkout" method="post" class="d-inline">
+                       @Html.AntiForgeryToken()
+                       <input type="hidden" name="cartId" value="@cartId" />
+                       <input type="hidden" name="selectedIds" value="@selectedIds" />
+                       <button class="btn btn-remove-voucher" type="submit">
+                           <i class="fas fa-times"></i> Bỏ mã
+                       </button>
+                   </form>
+               </div>
+           }
+         </div>
+       </div>
 
      <!-- Tổng cộng -->
        <div class="checkout-card summary-card">
@@ -604,37 +542,18 @@ border-radius: 10px;
 @section Scripts {
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const dropdownBtn = document.getElementById('voucherDropdownBtn');
-  const dropdown = document.getElementById('voucherDropdown');
-  const voucherForm = document.getElementById('voucherForm');
-         const selectedCodeInput = document.getElementById('selectedVoucherCode');
-  
-    if (dropdownBtn && dropdown) {
-        // Toggle dropdown
-                dropdownBtn.addEventListener('click', function(e) {
- e.stopPropagation();
-          dropdown.classList.toggle('show');
+            const select = document.getElementById('voucherSelect');
+            const form = document.getElementById('voucherForm');
+            const input = document.getElementById('selectedVoucherCode');
+            if (select && form && input) {
+                select.addEventListener('change', function () {
+                    const val = this.value;
+                    if (val) {
+                        input.value = val;
+                        form.submit();
+                    }
+                });
+            }
         });
-     
-         // Close dropdown when clicking outside
-     document.addEventListener('click', function(e) {
-            if (!dropdown.contains(e.target) && e.target !== dropdownBtn) {
-        dropdown.classList.remove('show');
-        }
-  });
-   
-          // Handle voucher selection
-                const voucherItems = dropdown.querySelectorAll('.voucher-item');
-           voucherItems.forEach(function(item) {
-    item.addEventListener('click', function() {
-     const code = this.getAttribute('data-code');
-      if (code && selectedCodeInput && voucherForm) {
-          selectedCodeInput.value = code;
-              voucherForm.submit();
-           }
-      });
-     });
-         }
-    });
     </script>
 }
