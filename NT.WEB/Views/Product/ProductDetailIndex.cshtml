@@ -11,416 +11,929 @@
     {
         if (detailImages.TryGetValue(d.Id, out var imgs))
         {
-   foreach (var img in imgs)
- {
+            foreach (var img in imgs)
+            {
                 allVariantImages.Add((d.Id, img));
             }
-  }
+        }
     }
 }
 
-<div class="container py-5">
-    <!-- PRODUCT MAIN SECTION -->
-  <div class="row g-4 mb-5">
-        <!-- LEFT: IMAGES & GALLERY -->
-   <div class="col-lg-5">
- <div class="card shadow-sm position-sticky" style="top: 20px;">
- <div class="card-body">
-    <!-- Main Product Image -->
-          <div class="ratio ratio-1x1 mb-3 bg-light rounded overflow-hidden border">
-     <img id="main-product-image" 
-       src="@((product?.Thumbnail) ?? "/images/product-placeholder.png")" 
-alt="@product?.Name" 
-class="img-fluid" 
-  style="object-fit: contain; cursor: zoom-in;"
-   onclick="openLightbox(this.src)" />
-        </div>
-
-       <!-- Thumbnail Gallery -->
-            <div class="thumbnail-gallery d-flex flex-nowrap gap-2 overflow-auto">
-     @if (!string.IsNullOrWhiteSpace(product?.Thumbnail))
-  {
-          <img src="@product.Thumbnail" 
-        alt="Ảnh chính" 
-   class="thumbnail-img active flex-shrink-0" 
-     data-detail-id="" 
-             data-image-url="@product.Thumbnail"
-     style="width: 70px; height: 70px; object-fit: cover; cursor: pointer; border: 3px solid #007bff; border-radius: 8px;" 
-          onclick="selectThumbnail(this)" />
-   }
-@foreach (var item in allVariantImages.Take(8))
-             {
-         <img src="@item.imageUrl" 
-        alt="Ảnh biến thể" 
- class="thumbnail-img flex-shrink-0" 
-        data-detail-id="@item.detailId" 
-         data-image-url="@item.imageUrl"
-            style="width: 70px; height: 70px; object-fit: cover; cursor: pointer; border: 3px solid #e9ecef; border-radius: 8px; transition: border-color 0.2s;" 
-   onclick="selectThumbnail(this)" />
+@section Styles {
+<style>
+    .product-detail-page {
+        background: linear-gradient(135deg, #f5f7fb 0%, #e8f4f8 100%);
+        min-height: 100vh;
+        padding: 2rem 0;
     }
-        </div>
-        </div>
-  </div>
-        </div>
-
-  <!-- RIGHT: PRODUCT INFO & SELECTION -->
-  <div class="col-lg-7">
-         <!-- Header Info -->
-      <div class="mb-4">
-         <div class="d-flex align-items-start justify-content-between mb-3">
-    <div>
-  <h1 class="h2 mb-2">@product?.Name</h1>
-       <p class="text-muted mb-0">
-   <strong>Mã:</strong> <code>@product?.ProductCode</code>
-       </p>
-     </div>
-   @if (product?.Brand != null)
-          {
-             <span class="badge bg-secondary py-2 px-3">@product.Brand.Name</span>
+    
+    .product-detail-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        border: none;
     }
-              </div>
-
-        @if (!string.IsNullOrWhiteSpace(product?.ShortDescription))
-    {
-           <p class="lead text-muted">@product.ShortDescription</p>
-        }
-
-    <!-- Price Range -->
-  @if (details.Any())
-                {
- var minPrice = details.Min(d => d.Price);
-        var maxPrice = details.Max(d => d.Price);
-                    <div class="mb-4">
-          <span class="fs-4 text-danger fw-bold">@minPrice.ToString("#,##0")₫</span>
-       @if (minPrice != maxPrice)
-          {
- <span class="fs-5 text-muted"> – @maxPrice.ToString("#,##0")₫</span>
-          }
-            </div>
-         }
-            </div>
-
-  <!-- Variant Selection Card -->
-    <div class="card shadow-sm mb-4 border-0">
- <div class="card-body">
-           <h5 class="card-title mb-3">Chọn thông số</h5>
-
-           <!-- Hardness Options -->
-            <div class="mb-4">
-    <label class="form-label fw-bold mb-2">Độ cứng</label>
-  <div id="hardness-options" class="d-flex flex-wrap gap-2">
-   @foreach (var h in hardnessOptions)
-   {
-var countForH = details.Count(d => d.HardnessId == h.Id && d.StockQuantity > 0);
-           var disabled = countForH == 0;
-        <button type="button"
-  class="btn btn-sm btn-outline-primary option-btn hardness-btn fw-500 px-3"
-       data-hardness-id="@h.Id"
-        disabled="@(disabled ? "disabled" : null)">
-          @h.Name
-      </button>
-           }
-       </div>
-     </div>
-
-         <!-- Length Options -->
-    <div class="mb-4">
-                   <label class="form-label fw-bold mb-2">Chiều dài</label>
-     <div id="length-options" class="d-flex flex-wrap gap-2">
-          @foreach (var l in lengthOptions)
-      {
-          var countForL = details.Count(d => d.LengthId == l.Id && d.StockQuantity > 0);
-      var disabled = countForL == 0;
-          <button type="button"
-           class="btn btn-sm btn-outline-primary option-btn length-btn fw-500 px-3"
-        data-length-id="@l.Id"
-          disabled="@(disabled ? "disabled" : null)">
-          @l.Name
-      </button>
-           }
-          </div>
-                 </div>
-
-          <!-- Quantity -->
-         <div class="mb-4">
-    <label class="form-label fw-bold mb-2">Số lượng</label>
- <div class="input-group" style="max-width: 150px;">
-       <button class="btn btn-outline-secondary" type="button" id="qty-minus">−</button>
-  <input type="number" class="form-control text-center fw-semibold" id="qty" value="1" min="1" />
-      <button class="btn btn-outline-secondary" type="button" id="qty-plus">+</button>
-         </div>
-           </div>
-
-             <!-- Summary -->
-   <div class="alert alert-info py-2 mb-0" id="selection-summary">
-            Vui lòng chọn độ cứng và chiều dài
-              </div>
-        </div>
-            </div>
-
-            <!-- Action Buttons -->
-<div class="d-grid gap-2 gap-sm-0 d-sm-flex gap-sm-2 mb-4">
-<button id="add-to-cart" class="btn btn-outline-warning btn-lg fw-bold">
-    <i class="bi bi-cart-plus"></i> Thêm vào giỏ
-      </button>
-                <button id="buy-now" class="btn btn-danger btn-lg fw-bold">
-         <i class="bi bi-lightning"></i> Mua ngay
-                </button>
-            </div>
-
-            <!-- Additional Info -->
-   <div class="row g-2 small">
-      @if (!string.IsNullOrWhiteSpace(product?.Status))
-   {
-      <div class="col-12">
-         <strong>Trạng thái:</strong>
-            <span class="badge bg-success">@product.Status</span>
-            </div>
-           }
-</div>
-  </div>
- </div>
-
-    <!-- DESCRIPTION SECTION -->
-    @if (!string.IsNullOrWhiteSpace(product?.Description))
- {
-    <div class="card shadow-sm mb-5 border-0">
- <div class="card-body">
-          <h4 class="card-title mb-3">Mô tả sản phẩm</h4>
- <div class="description-content text-muted lh-lg">
-      @Html.Raw(product.Description)
-       </div>
-            </div>
-</div>
+    
+    .product-image-section {
+        background: linear-gradient(135deg, #f8f9fa, #ffffff);
+        padding: 1.5rem;
+        border-radius: 16px;
     }
+    
+    .main-image-wrapper {
+        position: relative;
+        border-radius: 16px;
+        overflow: hidden;
+        background: linear-gradient(135deg, #f5f5f5, #fafafa);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+    
+    .main-image-wrapper img {
+        transition: transform 0.4s ease;
+    }
+    
+    .main-image-wrapper:hover img {
+        transform: scale(1.02);
+    }
+    
+    .thumbnail-gallery {
+        display: flex;
+        gap: 10px;
+        padding: 10px 0;
+        overflow-x: auto;
+        scrollbar-width: thin;
+    }
+    
+    .thumbnail-img {
+        width: 75px;
+        height: 75px;
+        object-fit: cover;
+        border-radius: 12px;
+        border: 3px solid #e9ecef;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        flex-shrink: 0;
+    }
+    
+    .thumbnail-img:hover, .thumbnail-img.active {
+        border-color: #00838f;
+        transform: translateY(-3px);
+        box-shadow: 0 4px 12px rgba(0, 131, 143, 0.3);
+    }
+    
+    .product-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #263238;
+        margin-bottom: 0.5rem;
+        line-height: 1.3;
+    }
+    
+    .product-code {
+        display: inline-block;
+        background: linear-gradient(135deg, #e0f7fa, #b2ebf2);
+        color: #00838f;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+    
+    .brand-badge {
+        background: linear-gradient(135deg, #00838f, #00bcd4);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        box-shadow: 0 4px 15px rgba(0, 131, 143, 0.3);
+    }
+    
+    .price-display {
+        background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+        padding: 1rem 1.5rem;
+        border-radius: 16px;
+        margin: 1rem 0;
+    }
+    
+    .price-main {
+        font-size: 1.8rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #ff5722, #ff9800);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .price-range {
+        font-size: 1.2rem;
+        color: #ff9800;
+        font-weight: 500;
+    }
+    
+    .variant-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid #e0f7fa;
+    }
+    
+    .variant-card-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #00838f;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .option-label {
+        font-weight: 600;
+        color: #37474f;
+        margin-bottom: 0.75rem;
+        font-size: 0.95rem;
+    }
+    
+    .option-btn {
+        border-radius: 25px !important;
+        padding: 8px 18px !important;
+        font-weight: 500 !important;
+        border: 2px solid #e0e0e0 !important;
+        background: white !important;
+        color: #37474f !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    .option-btn:hover:not(:disabled) {
+        border-color: #00838f !important;
+        background: #e0f7fa !important;
+        color: #00838f !important;
+        transform: translateY(-2px);
+    }
+    
+    .option-btn.btn-primary {
+        background: linear-gradient(135deg, #00838f, #00bcd4) !important;
+        border-color: #00838f !important;
+        color: white !important;
+        box-shadow: 0 4px 15px rgba(0, 131, 143, 0.3);
+    }
+    
+    .option-btn:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+    }
+    
+    .qty-control {
+        display: flex;
+        align-items: center;
+        gap: 0;
+        background: #f5f5f5;
+        border-radius: 30px;
+        padding: 4px;
+        width: fit-content;
+    }
+    
+    .qty-control button {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border: none;
+        background: white;
+        color: #00838f;
+        font-weight: bold;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .qty-control button:hover {
+        background: #00838f;
+        color: white;
+    }
+    
+    .qty-control input {
+        width: 60px;
+        text-align: center;
+        border: none;
+        background: transparent;
+        font-weight: 600;
+        font-size: 1.1rem;
+        color: #263238;
+    }
+    
+    .qty-control input:focus {
+        outline: none;
+    }
+    
+    .selection-summary {
+        background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+        border: none;
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+        color: #1565c0;
+        font-weight: 500;
+    }
+    
+    .selection-summary.alert-danger {
+        background: linear-gradient(135deg, #ffebee, #ffcdd2);
+        color: #c62828;
+    }
+    
+    .action-btn {
+        padding: 14px 28px;
+        border-radius: 30px;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+    
+    .btn-add-cart {
+        background: linear-gradient(135deg, #ff9800, #ffc107);
+        border: none;
+        color: white;
+        box-shadow: 0 4px 20px rgba(255, 152, 0, 0.4);
+    }
+    
+    .btn-add-cart:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(255, 152, 0, 0.5);
+        background: linear-gradient(135deg, #f57c00, #ffb300);
+        color: white;
+    }
+    
+    .btn-buy-now {
+        background: linear-gradient(135deg, #e53935, #ff5252);
+        border: none;
+        color: white;
+        box-shadow: 0 4px 20px rgba(229, 57, 53, 0.4);
+    }
+    
+    .btn-buy-now:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(229, 57, 53, 0.5);
+        background: linear-gradient(135deg, #c62828, #e53935);
+        color: white;
+    }
+    
+    .description-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        border: none;
+    }
+    
+    .description-header {
+        background: linear-gradient(135deg, #00838f, #00bcd4);
+        color: white;
+        padding: 1rem 1.5rem;
+        font-weight: 700;
+        font-size: 1.1rem;
+    }
+    
+    .description-body {
+        padding: 1.5rem;
+        color: #546e7a;
+        line-height: 1.8;
+    }
+    
+    .specs-table-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+    }
+    
+    .specs-header {
+        background: linear-gradient(135deg, #00838f, #00bcd4);
+        color: white;
+        padding: 1rem 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    .specs-header h4 {
+        margin: 0;
+        font-weight: 700;
+        font-size: 1.1rem;
+    }
+    
+    .variant-count-badge {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+    }
+    
+    .specs-table {
+        margin: 0;
+    }
+    
+    .specs-table thead {
+        background: linear-gradient(135deg, #e0f7fa, #b2ebf2);
+    }
+    
+    .specs-table thead th {
+        border: none;
+        padding: 1rem;
+        font-weight: 600;
+        color: #00695c;
+        font-size: 0.9rem;
+    }
+    
+    .specs-table tbody tr {
+        transition: all 0.3s ease;
+    }
+    
+    .specs-table tbody tr:hover {
+        background: #f5f5f5;
+    }
+    
+    .specs-table tbody td {
+        padding: 1rem;
+        vertical-align: middle;
+        border-color: #f0f0f0;
+    }
+    
+    .stock-badge {
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+    
+    .stock-badge.in-stock {
+        background: linear-gradient(135deg, #c8e6c9, #a5d6a7);
+        color: #2e7d32;
+    }
+    
+    .stock-badge.out-of-stock {
+        background: linear-gradient(135deg, #ffcdd2, #ef9a9a);
+        color: #c62828;
+    }
+    
+    .detail-btn {
+        background: linear-gradient(135deg, #00838f, #00bcd4);
+        border: none;
+        color: white;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+    
+    .detail-btn:hover {
+        transform: scale(1.1);
+        box-shadow: 0 4px 15px rgba(0, 131, 143, 0.4);
+        color: white;
+    }
+    
+    .gallery-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+    }
+    
+    .gallery-header {
+        background: linear-gradient(135deg, #00838f, #00bcd4);
+        color: white;
+        padding: 1rem 1.5rem;
+        font-weight: 700;
+        font-size: 1.1rem;
+    }
+    
+    .gallery-item {
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .gallery-item:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+    
+    .gallery-item img {
+        transition: transform 0.4s ease;
+    }
+    
+    .gallery-item:hover img {
+        transform: scale(1.08);
+    }
+    
+    .gallery-item-label {
+        background: linear-gradient(135deg, rgba(0, 131, 143, 0.9), rgba(0, 188, 212, 0.9));
+        color: white;
+        padding: 0.5rem;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+    
+    .modal-modern .modal-content {
+        border-radius: 20px;
+        overflow: hidden;
+        border: none;
+    }
+    
+    .modal-modern .modal-header {
+        background: linear-gradient(135deg, #00838f, #00bcd4);
+        color: white;
+        border: none;
+        padding: 1rem 1.5rem;
+    }
+    
+    .modal-modern .modal-title {
+        font-weight: 600;
+    }
+    
+    .modal-modern .btn-close {
+        filter: brightness(0) invert(1);
+    }
+    
+    .modal-modern .modal-body {
+        padding: 1.5rem;
+    }
+    
+    .modal-modern .modal-footer {
+        border-top: 1px solid #e0e0e0;
+        padding: 1rem 1.5rem;
+    }
+    
+    .info-section-title {
+        color: #00838f;
+        font-weight: 700;
+        font-size: 1rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #e0f7fa;
+    }
+    
+    .info-table td {
+        padding: 0.5rem 0;
+        border: none;
+    }
+    
+    .info-table td:first-child {
+        color: #78909c;
+        width: 40%;
+    }
+    
+    .info-table td:last-child {
+        font-weight: 600;
+        color: #37474f;
+    }
+    
+    .variant-images-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 10px;
+    }
+    
+    .variant-image-item {
+        border-radius: 12px;
+        overflow: hidden;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .variant-image-item:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .lightbox-modal .modal-content {
+        background: rgba(0, 0, 0, 0.95);
+        border: none;
+    }
+</style>
+}
 
-    <!-- VARIANTS SPECIFICATIONS TABLE -->
-    <div class="card shadow-sm mb-5 border-0">
-        <div class="card-body">
-            <h4 class="card-title mb-4">Thông số các biến thể <span class="badge bg-secondary">@details.Count()</span></h4>
-  
-     @if (details.Any())
-     {
-                <div class="table-responsive">
-        <table class="table table-hover align-middle">
-       <thead class="table-light">
-         <tr>
-         <th style="width: 5%;">STT</th>
-         <th style="width: 15%;">Chiều dài</th>
-              <th style="width: 15%;">Độ cứng</th>
-         <th style="width: 12%;">Màu sắc</th>
-<th style="width: 13%;" class="text-danger">Giá</th>
-       <th style="width: 15%;">Tồn kho</th>
-         <th style="width: 10%; text-align: center;">Chi tiết</th>
-          </tr>
-            </thead>
-     <tbody>
-   @{ var index = 1; }
-       @foreach (var detail in details)
-           {
-       <tr class="variant-row" data-detail-id="@detail.Id">
-         <td class="fw-bold">@index</td>
-          <td>@(detail.Length?.Name ?? "N/A")</td>
-    <td>@(detail.Hardness?.Name ?? "N/A")</td>
-    <td>@(detail.Color?.Name ?? "N/A")</td>
-       <td class="text-danger fw-bold">@detail.Price.ToString("#,##0")₫</td>
-  <td>
-         @if (detail.StockQuantity > 0)
-  {
-          <span class="badge bg-success">Còn @detail.StockQuantity</span>
-   }
-        else
-  {
-         <span class="badge bg-danger">Hết hàng</span>
-       }
-      </td>
-         <td class="text-center">
-     <button type="button" class="btn btn-sm btn-outline-primary" 
-data-bs-toggle="modal" 
- data-bs-target="#detailModal-@detail.Id">
-            <i class="bi bi-info-circle"></i>
-         </button>
-           </td>
-   </tr>
-      index++;
-         }
-    </tbody>
-           </table>
+<div class="product-detail-page">
+    <div class="container">
+        <!-- PRODUCT MAIN SECTION -->
+        <div class="row g-4 mb-5">
+            <!-- LEFT: IMAGES & GALLERY -->
+            <div class="col-lg-5">
+                <div class="product-detail-card position-sticky" style="top: 100px;">
+                    <div class="product-image-section">
+                        <!-- Main Product Image -->
+                        <div class="main-image-wrapper ratio ratio-1x1 mb-3">
+                            <img id="main-product-image" 
+                                 src="@((product?.Thumbnail) ?? "/images/product-placeholder.png")" 
+                                 alt="@product?.Name" 
+                                 class="img-fluid" 
+                                 style="object-fit: contain; cursor: zoom-in;"
+                                 onclick="openLightbox(this.src)" />
+                        </div>
+
+                        <!-- Thumbnail Gallery -->
+                        <div class="thumbnail-gallery">
+                            @if (!string.IsNullOrWhiteSpace(product?.Thumbnail))
+                            {
+                                <img src="@product.Thumbnail" 
+                                     alt="Ảnh chính" 
+                                     class="thumbnail-img active" 
+                                     data-detail-id="" 
+                                     data-image-url="@product.Thumbnail"
+                                     onclick="selectThumbnail(this)" />
+                            }
+                            @foreach (var item in allVariantImages.Take(8))
+                            {
+                                <img src="@item.imageUrl" 
+                                     alt="Ảnh biến thể" 
+                                     class="thumbnail-img" 
+                                     data-detail-id="@item.detailId" 
+                                     data-image-url="@item.imageUrl"
+                                     onclick="selectThumbnail(this)" />
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT: PRODUCT INFO & SELECTION -->
+            <div class="col-lg-7">
+                <!-- Header Info -->
+                <div class="mb-4">
+                    <div class="d-flex align-items-start justify-content-between mb-3 flex-wrap gap-2">
+                        <div>
+                            <h1 class="product-title">@product?.Name</h1>
+                            <span class="product-code">
+                                <i class="fas fa-barcode me-1"></i> @product?.ProductCode
+                            </span>
+                        </div>
+                        @if (product?.Brand != null)
+                        {
+                            <span class="brand-badge">
+                                <i class="fas fa-tag me-1"></i> @product.Brand.Name
+                            </span>
+                        }
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(product?.ShortDescription))
+                    {
+                        <p class="text-muted lead mb-3">@product.ShortDescription</p>
+                    }
+
+                    <!-- Price Range -->
+                    @if (details.Any())
+                    {
+                        var minPrice = details.Min(d => d.Price);
+                        var maxPrice = details.Max(d => d.Price);
+                        <div class="price-display">
+                            <span class="price-main">@minPrice.ToString("#,##0")₫</span>
+                            @if (minPrice != maxPrice)
+                            {
+                                <span class="price-range"> – @maxPrice.ToString("#,##0")₫</span>
+                            }
+                        </div>
+                    }
                 </div>
 
-            <!-- Detail Modals -->
-    @foreach (var detail in details)
+                <!-- Variant Selection Card -->
+                <div class="variant-card">
+                    <h5 class="variant-card-title">
+                        <i class="fas fa-sliders-h"></i> Chọn thông số
+                    </h5>
+
+                    <!-- Hardness Options -->
+                    <div class="mb-4">
+                        <label class="option-label"><i class="fas fa-gem me-2"></i>Độ cứng</label>
+                        <div id="hardness-options" class="d-flex flex-wrap gap-2">
+                            @foreach (var h in hardnessOptions)
+                            {
+                                var countForH = details.Count(d => d.HardnessId == h.Id && d.StockQuantity > 0);
+                                var disabled = countForH == 0;
+                                <button type="button"
+                                        class="btn option-btn hardness-btn"
+                                        data-hardness-id="@h.Id"
+                                        disabled="@(disabled ? "disabled" : null)">
+                                    @h.Name
+                                </button>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Length Options -->
+                    <div class="mb-4">
+                        <label class="option-label"><i class="fas fa-ruler me-2"></i>Chiều dài</label>
+                        <div id="length-options" class="d-flex flex-wrap gap-2">
+                            @foreach (var l in lengthOptions)
+                            {
+                                var countForL = details.Count(d => d.LengthId == l.Id && d.StockQuantity > 0);
+                                var disabled = countForL == 0;
+                                <button type="button"
+                                        class="btn option-btn length-btn"
+                                        data-length-id="@l.Id"
+                                        disabled="@(disabled ? "disabled" : null)">
+                                    @l.Name
+                                </button>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Quantity -->
+                    <div class="mb-4">
+                        <label class="option-label"><i class="fas fa-sort-numeric-up me-2"></i>Số lượng</label>
+                        <div class="qty-control">
+                            <button type="button" id="qty-minus">−</button>
+                            <input type="number" id="qty" value="1" min="1" />
+                            <button type="button" id="qty-plus">+</button>
+                        </div>
+                    </div>
+
+                    <!-- Summary -->
+                    <div class="selection-summary" id="selection-summary">
+                        <i class="fas fa-info-circle me-2"></i> Vui lòng chọn độ cứng và chiều dài
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="d-grid gap-3 d-sm-flex mb-4">
+                    <button id="add-to-cart" class="btn action-btn btn-add-cart flex-fill">
+                        <i class="fas fa-cart-plus"></i> Thêm vào giỏ
+                    </button>
+                    <button id="buy-now" class="btn action-btn btn-buy-now flex-fill">
+                        <i class="fas fa-bolt"></i> Mua ngay
+                    </button>
+                </div>
+
+                <!-- Additional Info -->
+                @if (!string.IsNullOrWhiteSpace(product?.Status))
+                {
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="text-muted"><i class="fas fa-check-circle me-1"></i>Trạng thái:</span>
+                        <span class="stock-badge in-stock">@product.Status</span>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- DESCRIPTION SECTION -->
+        @if (!string.IsNullOrWhiteSpace(product?.Description))
         {
-   <div class="modal fade" id="detailModal-@detail.Id" tabindex="-1" aria-hidden="true">
-         <div class="modal-dialog modal-lg modal-dialog-scrollable">
-    <div class="modal-content">
-      <div class="modal-header border-bottom">
-     <h5 class="modal-title">
-           <strong>@(detail.Length?.Name)</strong> · @(detail.Hardness?.Name) · @(detail.Color?.Name)
-  </h5>
-  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-     <div class="modal-body">
-     <div class="row g-4 mb-4">
-        <div class="col-md-6">
-      <h6 class="fw-bold text-primary mb-3">Thông tin cơ bản</h6>
-    <table class="table table-sm table-borderless">
-        <tr><td class="text-muted">Chiều dài</td><td class="fw-semibold">@(detail.Length?.Name ?? "-")</td></tr>
-<tr><td class="text-muted">Độ cứng</td><td class="fw-semibold">@(detail.Hardness?.Name ?? "-")</td></tr>
-   <tr><td class="text-muted">Màu sắc</td><td class="fw-semibold">@(detail.Color?.Name ?? "-")</td></tr>
-   <tr><td class="text-muted">Độ đàn hồi</td><td class="fw-semibold">@(detail.Elasticity?.Name ?? "-")</td></tr>
-        <tr><td class="text-muted">Bề mặt</td><td class="fw-semibold">@(detail.SurfaceFinish?.Name ?? "-")</td></tr>
-        <tr><td class="text-muted">Xuất xứ</td><td class="fw-semibold">@(detail.OriginCountry?.Name ?? "-")</td></tr>
-             <tr><td class="text-muted">Giá</td><td class="text-danger fw-bold">@detail.Price.ToString("#,##0")₫</td></tr>
-         <tr><td class="text-muted">Tồn kho</td><td class="fw-semibold">@detail.StockQuantity</td></tr>
-    <tr><td class="text-muted">Đã bán</td><td class="fw-semibold">@detail.SoldQuantity</td></tr>
-  </table>
-       </div>
-       <div class="col-md-6">
-   <h6 class="fw-bold text-primary mb-3">Thông số kỹ thuật</h6>
-          <table class="table table-sm table-borderless">
-          <tr><td class="text-muted">Số lóng</td><td class="fw-semibold">@(detail.Sections ?? "-")</td></tr>
-                 <tr><td class="text-muted">Chiều dài gập</td><td class="fw-semibold">@(detail.CollapsedLength ?? "-")</td></tr>
-   <tr><td class="text-muted">Trọng lượng</td><td class="fw-semibold">@(detail.Weight ?? "-")</td></tr>
-        <tr><td class="text-muted">TL đầu</td><td class="fw-semibold">@(detail.TipWeight ?? "-")</td></tr>
-             <tr><td class="text-muted">TL cán</td><td class="fw-semibold">@(detail.ButtWeight ?? "-")</td></tr>
-   <tr><td class="text-muted">ĐK ngọn</td><td class="fw-semibold">@(detail.TipDiameter ?? "-")</td></tr>
-   <tr><td class="text-muted">ĐK đầu</td><td class="fw-semibold">@(detail.TopDiameter ?? "-")</td></tr>
-            <tr><td class="text-muted">ĐK cán</td><td class="fw-semibold">@(detail.ButtDiameter ?? "-")</td></tr>
-  <tr><td class="text-muted">Điểm cân bằng</td><td class="fw-semibold">@(detail.BalancePoint ?? "-")</td></tr>
-          </table>
-     </div>
-   </div>
+            <div class="description-card mb-5">
+                <div class="description-header">
+                    <i class="fas fa-file-alt me-2"></i> Mô tả sản phẩm
+                </div>
+                <div class="description-body">
+                    @Html.Raw(product.Description)
+                </div>
+            </div>
+        }
+
+        <!-- VARIANTS SPECIFICATIONS TABLE -->
+        <div class="specs-table-card mb-5">
+            <div class="specs-header">
+                <h4><i class="fas fa-list-alt me-2"></i> Thông số các biến thể</h4>
+                <span class="variant-count-badge">@details.Count() biến thể</span>
+            </div>
+  
+            @if (details.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table specs-table align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th style="width: 5%;">STT</th>
+                                <th style="width: 15%;">Chiều dài</th>
+                                <th style="width: 15%;">Độ cứng</th>
+                                <th style="width: 12%;">Màu sắc</th>
+                                <th style="width: 13%;">Giá</th>
+                                <th style="width: 15%;">Tồn kho</th>
+                                <th style="width: 10%; text-align: center;">Chi tiết</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{ var index = 1; }
+                            @foreach (var detail in details)
+                            {
+                                <tr class="variant-row" data-detail-id="@detail.Id">
+                                    <td class="fw-bold text-center">@index</td>
+                                    <td>@(detail.Length?.Name ?? "N/A")</td>
+                                    <td>@(detail.Hardness?.Name ?? "N/A")</td>
+                                    <td>@(detail.Color?.Name ?? "N/A")</td>
+                                    <td class="fw-bold" style="color: #ff5722;">@detail.Price.ToString("#,##0")₫</td>
+                                    <td>
+                                        @if (detail.StockQuantity > 0)
+                                        {
+                                            <span class="stock-badge in-stock">Còn @detail.StockQuantity</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="stock-badge out-of-stock">Hết hàng</span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        <button type="button" class="btn detail-btn" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#detailModal-@detail.Id">
+                                            <i class="fas fa-info"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                index++;
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Detail Modals -->
+                @foreach (var detail in details)
+                {
+                    <div class="modal fade modal-modern" id="detailModal-@detail.Id" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">
+                                        <i class="fas fa-cube me-2"></i>
+                                        <strong>@(detail.Length?.Name)</strong> · @(detail.Hardness?.Name) · @(detail.Color?.Name)
+                                    </h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row g-4 mb-4">
+                                        <div class="col-md-6">
+                                            <h6 class="info-section-title"><i class="fas fa-info-circle me-2"></i>Thông tin cơ bản</h6>
+                                            <table class="table info-table">
+                                                <tr><td>Chiều dài</td><td>@(detail.Length?.Name ?? "-")</td></tr>
+                                                <tr><td>Độ cứng</td><td>@(detail.Hardness?.Name ?? "-")</td></tr>
+                                                <tr><td>Màu sắc</td><td>@(detail.Color?.Name ?? "-")</td></tr>
+                                                <tr><td>Độ đàn hồi</td><td>@(detail.Elasticity?.Name ?? "-")</td></tr>
+                                                <tr><td>Bề mặt</td><td>@(detail.SurfaceFinish?.Name ?? "-")</td></tr>
+                                                <tr><td>Xuất xứ</td><td>@(detail.OriginCountry?.Name ?? "-")</td></tr>
+                                                <tr><td>Giá</td><td style="color: #ff5722; font-weight: 700;">@detail.Price.ToString("#,##0")₫</td></tr>
+                                                <tr><td>Tồn kho</td><td>@detail.StockQuantity</td></tr>
+                                                <tr><td>Đã bán</td><td>@detail.SoldQuantity</td></tr>
+                                            </table>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h6 class="info-section-title"><i class="fas fa-cogs me-2"></i>Thông số kỹ thuật</h6>
+                                            <table class="table info-table">
+                                                <tr><td>Số lóng</td><td>@(detail.Sections ?? "-")</td></tr>
+                                                <tr><td>Chiều dài gập</td><td>@(detail.CollapsedLength ?? "-")</td></tr>
+                                                <tr><td>Trọng lượng</td><td>@(detail.Weight ?? "-")</td></tr>
+                                                <tr><td>TL đầu</td><td>@(detail.TipWeight ?? "-")</td></tr>
+                                                <tr><td>TL cán</td><td>@(detail.ButtWeight ?? "-")</td></tr>
+                                                <tr><td>ĐK ngọn</td><td>@(detail.TipDiameter ?? "-")</td></tr>
+                                                <tr><td>ĐK đầu</td><td>@(detail.TopDiameter ?? "-")</td></tr>
+                                                <tr><td>ĐK cán</td><td>@(detail.ButtDiameter ?? "-")</td></tr>
+                                                <tr><td>Điểm cân bằng</td><td>@(detail.BalancePoint ?? "-")</td></tr>
+                                            </table>
+                                        </div>
+                                    </div>
    
-@if (!string.IsNullOrWhiteSpace(detail.RecommendedLine) || 
-             !string.IsNullOrWhiteSpace(detail.RecommendedFishWeight) || 
-          !string.IsNullOrWhiteSpace(detail.HandleType) || 
-        !string.IsNullOrWhiteSpace(detail.JointType) || 
-          !string.IsNullOrWhiteSpace(detail.Warranty))
-      {
-     <div class="border-top pt-3">
-       <h6 class="fw-bold text-primary mb-3">Thông tin bổ sung</h6>
-          <table class="table table-sm table-borderless">
-             @if (!string.IsNullOrWhiteSpace(detail.RecommendedLine))
-           {
-    <tr><td class="text-muted">Dây câu đề xuất</td><td class="fw-semibold">@detail.RecommendedLine</td></tr>
-            }
-    @if (!string.IsNullOrWhiteSpace(detail.RecommendedFishWeight))
-    {
- <tr><td class="text-muted">Cá đề xuất</td><td class="fw-semibold">@detail.RecommendedFishWeight</td></tr>
-       }
-                @if (!string.IsNullOrWhiteSpace(detail.HandleType))
-    {
-    <tr><td class="text-muted">Loại tay cầm</td><td class="fw-semibold">@detail.HandleType</td></tr>
-            }
-       @if (!string.IsNullOrWhiteSpace(detail.JointType))
-        {
-<tr><td class="text-muted">Loại khớp nối</td><td class="fw-semibold">@detail.JointType</td></tr>
-        }
-      @if (!string.IsNullOrWhiteSpace(detail.Warranty))
-     {
- <tr><td class="text-muted">Bảo hành</td><td class="fw-semibold">@detail.Warranty</td></tr>
-                 }
-       </table>
-  </div>
-        }
+                                    @if (!string.IsNullOrWhiteSpace(detail.RecommendedLine) || 
+                                         !string.IsNullOrWhiteSpace(detail.RecommendedFishWeight) || 
+                                         !string.IsNullOrWhiteSpace(detail.HandleType) || 
+                                         !string.IsNullOrWhiteSpace(detail.JointType) || 
+                                         !string.IsNullOrWhiteSpace(detail.Warranty))
+                                    {
+                                        <div class="border-top pt-3">
+                                            <h6 class="info-section-title"><i class="fas fa-plus-circle me-2"></i>Thông tin bổ sung</h6>
+                                            <table class="table info-table">
+                                                @if (!string.IsNullOrWhiteSpace(detail.RecommendedLine))
+                                                {
+                                                    <tr><td>Dây câu đề xuất</td><td>@detail.RecommendedLine</td></tr>
+                                                }
+                                                @if (!string.IsNullOrWhiteSpace(detail.RecommendedFishWeight))
+                                                {
+                                                    <tr><td>Cá đề xuất</td><td>@detail.RecommendedFishWeight</td></tr>
+                                                }
+                                                @if (!string.IsNullOrWhiteSpace(detail.HandleType))
+                                                {
+                                                    <tr><td>Loại tay cầm</td><td>@detail.HandleType</td></tr>
+                                                }
+                                                @if (!string.IsNullOrWhiteSpace(detail.JointType))
+                                                {
+                                                    <tr><td>Loại khớp nối</td><td>@detail.JointType</td></tr>
+                                                }
+                                                @if (!string.IsNullOrWhiteSpace(detail.Warranty))
+                                                {
+                                                    <tr><td>Bảo hành</td><td>@detail.Warranty</td></tr>
+                                                }
+                                            </table>
+                                        </div>
+                                    }
 
-         @if (!string.IsNullOrWhiteSpace(detail.BalanceLoadDescription))
-    {
-        <div class="border-top pt-3">
-   <h6 class="fw-bold text-primary mb-2">Mô tả tải</h6>
-           <p class="text-muted mb-0">@detail.BalanceLoadDescription</p>
-         </div>
-        }
+                                    @if (!string.IsNullOrWhiteSpace(detail.BalanceLoadDescription))
+                                    {
+                                        <div class="border-top pt-3">
+                                            <h6 class="info-section-title"><i class="fas fa-balance-scale me-2"></i>Mô tả tải</h6>
+                                            <p class="text-muted mb-0">@detail.BalanceLoadDescription</p>
+                                        </div>
+                                    }
 
-                <!-- Variant Images -->
-              @if (detailImages.TryGetValue(detail.Id, out var variantImgs) && variantImgs.Any())
+                                    <!-- Variant Images -->
+                                    @if (detailImages.TryGetValue(detail.Id, out var variantImgs) && variantImgs.Any())
+                                    {
+                                        <div class="border-top pt-3 mt-3">
+                                            <h6 class="info-section-title"><i class="fas fa-images me-2"></i>Hình ảnh biến thể</h6>
+                                            <div class="variant-images-grid">
+                                                @foreach (var imgUrl in variantImgs)
+                                                {
+                                                    <img src="@imgUrl" alt="Ảnh biến thể" 
+                                                         class="variant-image-item img-fluid" 
+                                                         style="width: 100%; height: 100px; object-fit: cover;"
+                                                         onclick="openLightbox('@imgUrl')" />
+                                                }
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                        <i class="fas fa-times me-1"></i> Đóng
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">Chưa có biến thể nào cho sản phẩm này.</p>
+                </div>
+            }
+        </div>
+
+        <!-- GALLERY SECTION -->
+        @if (!string.IsNullOrWhiteSpace(product?.Thumbnail) || allVariantImages.Any())
         {
- <div class="border-top pt-3 mt-3">
- <h6 class="fw-bold text-primary mb-3">Hình ảnh biến thể</h6>
-        <div class="d-flex flex-wrap gap-2">
-          @foreach (var imgUrl in variantImgs)
-      {
-           <img src="@imgUrl" alt="Ảnh biến thể" 
-         class="img-thumbnail" 
-      style="width: 100px; height: 100px; object-fit: cover; cursor: pointer;"
-        onclick="openLightbox('@imgUrl')" />
-        }
+            <div class="gallery-card mb-5">
+                <div class="gallery-header">
+                    <i class="fas fa-images me-2"></i> Bộ sưu tập ảnh
+                </div>
+                <div class="p-4">
+                    <div class="row g-3">
+                        @if (!string.IsNullOrWhiteSpace(product?.Thumbnail))
+                        {
+                            <div class="col-6 col-md-4 col-lg-3">
+                                <div class="gallery-item" onclick="openLightbox('@product.Thumbnail')">
+                                    <div class="ratio ratio-1x1">
+                                        <img src="@product.Thumbnail" alt="Ảnh đại diện" class="img-fluid" style="object-fit: cover;">
+                                    </div>
+                                    <div class="gallery-item-label text-center">
+                                        <i class="fas fa-star me-1"></i> Ảnh đại diện
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+                        @foreach (var detail in details)
+                        {
+                            if (detailImages.TryGetValue(detail.Id, out var variantImgs) && variantImgs.Any())
+                            {
+                                var firstImg = variantImgs.FirstOrDefault();
+                                <div class="col-6 col-md-4 col-lg-3">
+                                    <div class="gallery-item" onclick="openLightbox('@firstImg')">
+                                        <div class="ratio ratio-1x1">
+                                            <img src="@firstImg" alt="Ảnh" class="img-fluid" style="object-fit: cover;">
+                                        </div>
+                                        <div class="gallery-item-label text-center text-truncate">
+                                            @detail.Length?.Name · @detail.Hardness?.Name
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
             </div>
+        }
     </div>
-         }
- </div>
-      <div class="modal-footer">
- <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-        </div>
-      </div>
-      </div>
-         </div>
-       }
-            }
-     else
-     {
-      <p class="text-muted text-center py-4">Chưa có biến thể nào cho sản phẩm này.</p>
-     }
-        </div>
-    </div>
-
-    <!-- GALLERY SECTION -->
-    @if (!string.IsNullOrWhiteSpace(product?.Thumbnail) || allVariantImages.Any())
-    {
-        <div class="card shadow-sm border-0">
-            <div class="card-body">
-    <h4 class="card-title mb-4">Bộ sưu tập ảnh</h4>
-                <div class="row g-3">
-    @if (!string.IsNullOrWhiteSpace(product?.Thumbnail))
-      {
-   <div class="col-md-4 col-lg-3">
-             <div class="card border-0 shadow-sm overflow-hidden cursor-pointer" onclick="openLightbox('@product.Thumbnail')" style="cursor: pointer;">
-       <div class="ratio ratio-1x1">
-               <img src="@product.Thumbnail" alt="Ảnh đại diện" class="img-fluid" style="object-fit: cover;">
-  </div>
-      <div class="card-body p-2 text-center">
-          <small class="text-muted">Ảnh đại diện</small>
-       </div>
-  </div>
-      </div>
-    }
-
-          @foreach (var detail in details)
-        {
-if (detailImages.TryGetValue(detail.Id, out var variantImgs) && variantImgs.Any())
-  {
-           var firstImg = variantImgs.FirstOrDefault();
-               <div class="col-md-4 col-lg-3">
-            <div class="card border-0 shadow-sm overflow-hidden" style="cursor: pointer;" onclick="openLightbox('@firstImg')">
-       <div class="ratio ratio-1x1">
-    <img src="@firstImg" alt="Ảnh" class="img-fluid" style="object-fit: cover;">
-    </div>
-        <div class="card-body p-2 text-center">
-    <small class="text-muted d-block text-truncate">@detail.Length?.Name</small>
-     <small class="text-muted d-block text-truncate">@detail.Hardness?.Name</small>
-      </div>
-  </div>
-       </div>
-         }
-       }
-     </div>
-            </div>
-        </div>
-    }
 </div>
 
 <!-- Lightbox Modal -->
-<div class="modal fade" id="lightboxModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade lightbox-modal" id="lightboxModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-fullscreen modal-dialog-centered">
         <div class="modal-content bg-dark border-0">
-      <div class="modal-header border-0">
-         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-header border-0 position-absolute w-100" style="z-index: 10;">
+                <button type="button" class="btn-close btn-close-white ms-auto me-3 mt-3" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body d-flex align-items-center justify-content-center p-0">
+                <img id="lightboxImage" src="" alt="Ảnh phóng to" class="img-fluid" style="max-height: 90vh; object-fit: contain;">
+            </div>
         </div>
-     <div class="modal-body d-flex align-items-center justify-content-center p-0">
-         <img id="lightboxImage" src="" alt="Ảnh phóng to" class="img-fluid" style="max-height: 90vh; object-fit: contain;">
-  </div>
-     </div>
     </div>
 </div>
 
@@ -430,70 +943,63 @@ if (detailImages.TryGetValue(detail.Id, out var variantImgs) && variantImgs.Any(
         id = d.Id,
         price = d.Price,
         stock = d.StockQuantity,
-     lengthId = d.LengthId,
+        lengthId = d.LengthId,
         hardnessId = d.HardnessId
     })));
 
     const detailImagesMap = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(detailImages.ToDictionary(kv => kv.Key.ToString(), kv => kv.Value)));
     const productThumbnail = '@Html.Raw((product?.Thumbnail ?? "/images/product-placeholder.png").Replace("'", "\\'"))';
 
-  function openLightbox(imageSrc) {
+    function openLightbox(imageSrc) {
         document.getElementById('lightboxImage').src = imageSrc;
         var lightboxModal = new bootstrap.Modal(document.getElementById('lightboxModal'));
-      lightboxModal.show();
+        lightboxModal.show();
     }
 
     function selectThumbnail(imgEl) {
         document.querySelectorAll('.thumbnail-img').forEach(t => {
-            t.style.borderColor = '#e9ecef';
-        t.classList.remove('active');
+            t.classList.remove('active');
         });
-   imgEl.style.borderColor = '#007bff';
         imgEl.classList.add('active');
         document.getElementById('main-product-image').src = imgEl.getAttribute('data-image-url');
     }
 
-  function updateMainImageForVariant(detailId) {
+    function updateMainImageForVariant(detailId) {
         if (!detailId) {
-         document.getElementById('main-product-image').src = productThumbnail;
-document.querySelectorAll('.thumbnail-img').forEach(t => {
-      t.style.borderColor = '#e9ecef';
-      t.classList.remove('active');
+            document.getElementById('main-product-image').src = productThumbnail;
+            document.querySelectorAll('.thumbnail-img').forEach(t => {
+                t.classList.remove('active');
             });
-          const firstThumb = document.querySelector('.thumbnail-img[data-detail-id=""]');
+            const firstThumb = document.querySelector('.thumbnail-img[data-detail-id=""]');
             if (firstThumb) {
-            firstThumb.style.borderColor = '#007bff';
-      firstThumb.classList.add('active');
+                firstThumb.classList.add('active');
             }
-          return;
+            return;
         }
-    const images = detailImagesMap[detailId];
+        const images = detailImagesMap[detailId];
         if (images && images.length > 0) {
-   document.getElementById('main-product-image').src = images[0];
-        document.querySelectorAll('.thumbnail-img').forEach(t => {
-       t.style.borderColor = '#e9ecef';
+            document.getElementById('main-product-image').src = images[0];
+            document.querySelectorAll('.thumbnail-img').forEach(t => {
                 t.classList.remove('active');
             });
             const matchingThumb = document.querySelector('.thumbnail-img[data-detail-id="' + detailId + '"]');
-   if (matchingThumb) {
-              matchingThumb.style.borderColor = '#007bff';
-   matchingThumb.classList.add('active');
-   }
+            if (matchingThumb) {
+                matchingThumb.classList.add('active');
+            }
         }
     }
 
-  let selectedHardnessId = null;
-  let selectedLengthId = null;
+    let selectedHardnessId = null;
+    let selectedLengthId = null;
 
     const hardnessButtons = document.querySelectorAll('.hardness-btn');
-  const lengthButtons = document.querySelectorAll('.length-btn');
+    const lengthButtons = document.querySelectorAll('.length-btn');
     const summaryEl = document.getElementById('selection-summary');
 
     function setActive(btns, idAttr, id) {
-btns.forEach(b => {
-      const isActive = id && b.getAttribute(idAttr) === id;
- b.classList.toggle('btn-primary', isActive);
-       b.classList.toggle('btn-outline-primary', !isActive);
+        btns.forEach(b => {
+            const isActive = id && b.getAttribute(idAttr) === id;
+            b.classList.toggle('btn-primary', isActive);
         });
     }
 
@@ -502,42 +1008,42 @@ btns.forEach(b => {
         if (selectedHardnessId) {
             validDetails = validDetails.filter(d => d.hardnessId === selectedHardnessId);
         }
-     if (selectedLengthId) {
-     validDetails = validDetails.filter(d => d.lengthId === selectedLengthId);
+        if (selectedLengthId) {
+            validDetails = validDetails.filter(d => d.lengthId === selectedLengthId);
         }
 
         const validHardnessIds = new Set(validDetails.map(d => d.hardnessId));
         const validLengthIds = new Set(validDetails.map(d => d.lengthId));
 
- hardnessButtons.forEach(b => {
-          const id = b.getAttribute('data-hardness-id');
-       const hasStock = details.some(d => d.hardnessId === id && d.stock > 0);
+        hardnessButtons.forEach(b => {
+            const id = b.getAttribute('data-hardness-id');
+            const hasStock = details.some(d => d.hardnessId === id && d.stock > 0);
             b.disabled = !hasStock || (selectedLengthId && !validHardnessIds.has(id));
         });
 
-      lengthButtons.forEach(b => {
-    const id = b.getAttribute('data-length-id');
-    const hasStock = details.some(d => d.lengthId === id && d.stock > 0);
-      b.disabled = !hasStock || (selectedHardnessId && !validLengthIds.has(id));
+        lengthButtons.forEach(b => {
+            const id = b.getAttribute('data-length-id');
+            const hasStock = details.some(d => d.lengthId === id && d.stock > 0);
+            b.disabled = !hasStock || (selectedHardnessId && !validLengthIds.has(id));
         });
 
         if (validDetails.length > 0) {
-      const prices = validDetails.map(d => Number(d.price));
+            const prices = validDetails.map(d => Number(d.price));
             const min = Math.min(...prices);
-   const max = Math.max(...prices);
-    const totalStock = validDetails.reduce((s,d)=> s + Number(d.stock), 0);
-            summaryEl.innerHTML = `<strong>Giá:</strong> ${min.toLocaleString()}₫${min !== max ? ' – ' + max.toLocaleString() + '₫' : ''} | <strong>Còn:</strong> ${totalStock} hàng`;
-     summaryEl.classList.remove('alert-danger');
- summaryEl.classList.add('alert-info');
+            const max = Math.max(...prices);
+            const totalStock = validDetails.reduce((s,d)=> s + Number(d.stock), 0);
+            summaryEl.innerHTML = `<i class="fas fa-check-circle me-2"></i><strong>Giá:</strong> ${min.toLocaleString()}₫${min !== max ? ' – ' + max.toLocaleString() + '₫' : ''} | <strong>Còn:</strong> ${totalStock} sản phẩm`;
+            summaryEl.classList.remove('alert-danger');
+            summaryEl.classList.add('selection-summary');
       
             if (validDetails.length === 1) {
-       updateMainImageForVariant(validDetails[0].id);
+                updateMainImageForVariant(validDetails[0].id);
             } else {
-     updateMainImageForVariant(null);
+                updateMainImageForVariant(null);
             }
         } else {
-      summaryEl.innerHTML = '<strong>⚠ Không có sản phẩm phù hợp với lựa chọn của bạn</strong>';
- summaryEl.classList.remove('alert-info');
+            summaryEl.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i><strong>Không có sản phẩm phù hợp với lựa chọn của bạn</strong>';
+            summaryEl.classList.remove('selection-summary');
             summaryEl.classList.add('alert-danger');
             updateMainImageForVariant(null);
         }
@@ -547,17 +1053,17 @@ btns.forEach(b => {
         b.addEventListener('click', () => {
             const id = b.getAttribute('data-hardness-id');
             selectedHardnessId = (selectedHardnessId === id) ? null : id;
-    setActive(hardnessButtons, 'data-hardness-id', selectedHardnessId);
- updateAvailability();
+            setActive(hardnessButtons, 'data-hardness-id', selectedHardnessId);
+            updateAvailability();
         });
     });
     
     lengthButtons.forEach(b => {
-    b.addEventListener('click', () => {
-     const id = b.getAttribute('data-length-id');
+        b.addEventListener('click', () => {
+            const id = b.getAttribute('data-length-id');
             selectedLengthId = (selectedLengthId === id) ? null : id;
             setActive(lengthButtons, 'data-length-id', selectedLengthId);
-       updateAvailability();
+            updateAvailability();
         });
     });
 
@@ -575,30 +1081,30 @@ btns.forEach(b => {
 
     function findSelectedDetail() {
         if (!selectedHardnessId || !selectedLengthId) return null;
-  return details.find(d => d.hardnessId === selectedHardnessId && d.lengthId === selectedLengthId && d.stock > 0) || null;
+        return details.find(d => d.hardnessId === selectedHardnessId && d.lengthId === selectedLengthId && d.stock > 0) || null;
     }
 
     document.getElementById('add-to-cart').addEventListener('click', async () => {
-  const selected = findSelectedDetail();
+        const selected = findSelectedDetail();
         if (!selected) { 
             alert('Vui lòng chọn độ dài và độ cứng có hàng.');
-         return;
+            return;
         }
         const qty = Math.max(1, parseInt(document.getElementById('qty').value || '1'));
         const data = new URLSearchParams();
-    data.append('productDetailId', selected.id);
+        data.append('productDetailId', selected.id);
         data.append('quantity', qty);
         try {
-          const res = await fetch('/Cart/Add', {
-method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: data.toString(),
-           credentials: 'same-origin'
-    });
-    if (res.ok) {
-        location.reload();
+            const res = await fetch('/Cart/Add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: data.toString(),
+                credentials: 'same-origin'
+            });
+            if (res.ok) {
+                location.reload();
             } else {
-   alert('Không thể thêm vào giỏ hàng. Vui lòng thử lại.');
+                alert('Không thể thêm vào giỏ hàng. Vui lòng thử lại.');
             }
         } catch (e) {
             alert('Có lỗi xảy ra khi thêm vào giỏ hàng.');

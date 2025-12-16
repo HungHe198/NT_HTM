@@ -74,7 +74,7 @@ namespace NT.WEB.Controllers
                     appliedDiscount = voucher.CalculateDiscount(subtotal);
                     if (appliedDiscount == 0 && voucher.MinOrderAmount.HasValue && subtotal < voucher.MinOrderAmount.Value)
                     {
-                        TempData["Error"] = $"Gi· tr? ??n h‡ng t?i thi?u ?? ·p d?ng voucher l‡ {voucher.MinOrderAmount.Value:#,##0}";
+                        TempData["Error"] = $"Gi√° tr? ??n h√†ng t?i thi?u ?? √°p d?ng voucher l√† {voucher.MinOrderAmount.Value:#,##0}";
                     }
                 }
                 else
@@ -102,6 +102,52 @@ namespace NT.WEB.Controllers
             return RedirectToAction(nameof(Index), new { cartId });
         }
 
+        /// <summary>
+        /// AJAX endpoint for updating quantity without page reload
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> UpdateQtyAjax(Guid cartId, Guid productDetailId, int quantity)
+        {
+            if (cartId == Guid.Empty || productDetailId == Guid.Empty)
+            {
+                return Json(new { success = false, message = "Invalid parameters" });
+            }
+
+            try
+            {
+                var item = (await _service.FindAsync(cd => cd.CartId == cartId && cd.ProductDetailId == productDetailId))?.FirstOrDefault();
+                if (item is null)
+                {
+                    return Json(new { success = false, message = "Item not found" });
+                }
+
+                item.Quantity = Math.Max(1, quantity);
+                await _service.UpdateAsync(item);
+                await _service.SaveChangesAsync();
+
+                // Get unit price for the product detail
+                var productDetail = await _productDetailService.GetByIdAsync(productDetailId);
+                var unitPrice = productDetail?.Price ?? 0;
+
+                // Calculate total items in cart
+                var allItems = await _service.FindAsync(cd => cd.CartId == cartId && cd.Quantity > 0);
+                var totalItems = allItems?.Count() ?? 0;
+
+                return Json(new
+                {
+                    success = true,
+                    quantity = item.Quantity,
+                    unitPrice = unitPrice,
+                    subtotal = unitPrice * item.Quantity,
+                    totalItems = totalItems
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
         [HttpPost]
         public async Task<IActionResult> Remove(Guid cartId, Guid productDetailId)
         {
@@ -123,7 +169,7 @@ namespace NT.WEB.Controllers
             if (cartId == Guid.Empty) return BadRequest();
             if (selectedIds == null || selectedIds.Length == 0)
             {
-                TempData["Error"] = "Vui lÚng ch?n Ìt nh?t m?t s?n ph?m ?? thanh to·n.";
+                TempData["Error"] = "Vui l√≤ng ch?n √≠t nh?t m?t s?n ph?m ?? thanh to√°n.";
                 return RedirectToAction(nameof(Index), new { cartId });
             }
 
@@ -134,7 +180,7 @@ namespace NT.WEB.Controllers
 
             if (!selected.Any())
             {
-                TempData["Error"] = "KhÙng cÛ s?n ph?m h?p l? ?? thanh to·n.";
+                TempData["Error"] = "Kh√¥ng c√≥ s?n ph?m h?p l? ?? thanh to√°n.";
                 return RedirectToAction(nameof(Index), new { cartId });
             }
 

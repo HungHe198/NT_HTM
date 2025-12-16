@@ -3,100 +3,708 @@
 @{
     Layout = "~/Views/Shared/_ClientLayout.cshtml";
     var shipping = 35000m; // flat demo fee
+    var itemCount = Model?.Count(i => i.Quantity > 0) ?? 0;
 }
 
-<h2>Giỏ hàng của bạn</h2>
-<div class="row">
-    <div class="col-md-8">
-        @if (!Model.Any())
-        {
-            <div>Giỏ hàng trống.</div>
-        }
-        else
-        {
-            <form asp-action="CheckoutSelected" asp-controller="CartDetail" asp-route-cartId="@ViewBag.CartId" method="post">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>
-                            <input type="checkbox" id="selectAll" title="Chọn tất cả" />
-                        </th>
-                        <th>Sản phẩm</th>
-                        <th>Giá</th>
-                        <th>Số lượng</th>
-                        <th>Tạm tính</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                @foreach (var item in Model.Where(i => i.Quantity > 0))
-                {
-                    <tr>
-                        <td>
-                            <input type="checkbox" name="selectedIds" value="@item.ProductDetailId" 
-                                   class="item-checkbox"
-                                   data-price="@item.UnitPrice" 
-                                   data-quantity="@item.Quantity" />
-                        </td>
-                        <td>
-                            <div class="d-flex align-items-center gap-2">
-                                <img src="@(item.Thumbnail ?? "/images/product-placeholder.png")" alt="@item.ProductName" style="width:60px;height:60px;object-fit:cover" />
-                                <div>
-                                    <div>@(string.IsNullOrWhiteSpace(item.ProductName) ? "Sản phẩm" : item.ProductName)</div>
-                                    <small class="text-muted">Độ dài: @(string.IsNullOrWhiteSpace(item.LengthName) ? "N/A" : item.LengthName), Độ cứng: @(string.IsNullOrWhiteSpace(item.HardnessName) ? "N/A" : item.HardnessName)</small>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="text-nowrap">@item.UnitPrice.ToString("#,##0")</td>
-                        <td>
-                            <div class="d-inline-flex align-items-center gap-1" data-pd-id="@item.ProductDetailId">
-                                <button type="button" class="btn btn-outline-secondary btn-sm qty-minus">-</button>
-                                <input type="number" class="form-control form-control-sm qty-input" value="@item.Quantity" min="1" style="width:60px" />
-                                <button type="button" class="btn btn-outline-secondary btn-sm qty-plus">+</button>
-                            </div>
-                        </td>
-                        <td class="text-nowrap item-subtotal">@string.Format("{0:#,##0}", item.UnitPrice * item.Quantity)</td>
-                        <td>
-                            <button class="btn btn-link text-danger" type="submit" formmethod="post" formaction="@Url.Action("Remove", "CartDetail", new { cartId = ViewBag.CartId, productDetailId = item.ProductDetailId })">Xóa</button>
-                        </td>
-                    </tr>
-                }
-                </tbody>
-            </table>
-            <div class="d-flex gap-2 mb-3">
-                <button type="submit" class="btn btn-warning" id="btnCheckout" disabled>Thanh toán mục đã chọn</button>
-                <span class="text-muted align-self-center" id="selectedCount">(Chưa chọn sản phẩm nào)</span>
-            </div>
-            </form>
-        }
-        <div class="d-flex gap-2">
-            <a class="btn btn-outline-secondary" asp-controller="Home" asp-action="Index">Tiếp tục xem sản phẩm</a>
-        </div>
+@section Styles {
+<style>
+    .cart-page {
+        min-height: 100vh;
+    }
     
-    </div>
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">Tổng cộng đã chọn</h5>
-                <div class="d-flex justify-content-between"><span>Tạm tính (<span id="itemCount">0</span> sản phẩm)</span> <strong id="subtotalDisplay">0</strong></div>
-                <div class="d-flex justify-content-between"><span>Vận chuyển</span> <strong id="shippingDisplay">@shipping.ToString("#,##0")</strong></div>
-                <hr />
-                <div class="d-flex justify-content-between"><span>Tổng</span> <strong class="fs-5" id="totalDisplay">0</strong></div>
-                <p class="text-muted small mt-2">Mã giảm giá sẽ được áp dụng tại bước thanh toán</p>
-                <div id="noSelectionMsg" class="text-warning small">Vui lòng chọn sản phẩm để xem tổng tiền</div>
+    /* Page Header */
+    .cart-header {
+        background: linear-gradient(135deg, #00838f, #00bcd4);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        color: white;
+        box-shadow: 0 8px 30px rgba(0, 131, 143, 0.3);
+    }
+    
+    .cart-header h1 {
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    
+    .cart-header p {
+        opacity: 0.9;
+        margin-bottom: 0;
+    }
+    
+    .cart-count-badge {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 8px 20px;
+        border-radius: 25px;
+        font-weight: 600;
+    }
+    
+    /* Cart Card */
+    .cart-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        border: none;
+    }
+    
+    .cart-card-header {
+        background: linear-gradient(135deg, #f8f9fa, #ffffff);
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid #e0f7fa;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .cart-card-header h5 {
+        margin: 0;
+        font-weight: 700;
+        color: #00838f;
+    }
+    
+    .cart-card-body {
+        padding: 0;
+    }
+    
+    /* Cart Table */
+    .cart-table {
+        margin: 0;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+    
+    .cart-table thead {
+        background: linear-gradient(135deg, #e0f7fa, #b2ebf2);
+    }
+    
+    .cart-table thead th {
+        border: none;
+        padding: 1rem 1.25rem;
+        font-weight: 600;
+        color: #00695c;
+        font-size: 0.9rem;
+        white-space: nowrap;
+    }
+    
+    .cart-table tbody tr {
+        transition: all 0.3s ease;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .cart-table tbody tr:hover {
+        background: #fafafa;
+    }
+    
+    .cart-table tbody tr:last-child {
+        border-bottom: none;
+    }
+    
+    .cart-table tbody td {
+        padding: 1.25rem;
+        vertical-align: middle;
+    }
+    
+    /* Custom Checkbox */
+    .custom-checkbox {
+        width: 22px;
+        height: 22px;
+        border-radius: 6px;
+        border: 2px solid #b0bec5;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        accent-color: #00838f;
+    }
+    
+    .custom-checkbox:checked {
+        background: #00838f;
+        border-color: #00838f;
+    }
+    
+    .custom-checkbox:hover {
+        border-color: #00838f;
+    }
+    
+    /* Product Info */
+    .product-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .product-img {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+    }
+    
+    .product-img:hover {
+        transform: scale(1.05);
+    }
+    
+    .product-details h6 {
+        font-weight: 600;
+        color: #263238;
+        margin-bottom: 0.25rem;
+        line-height: 1.4;
+    }
+    
+    .product-details .variant-info {
+        font-size: 0.85rem;
+        color: #78909c;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    
+    .variant-badge {
+        background: #e0f7fa;
+        color: #00838f;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+    
+    /* Price */
+    .item-price {
+        font-weight: 600;
+        color: #37474f;
+        font-size: 1rem;
+    }
+    
+    .item-subtotal-price {
+        font-weight: 700;
+        font-size: 1.1rem;
+        background: linear-gradient(135deg, #ff5722, #ff9800);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    /* Quantity Control */
+    .qty-control {
+        display: flex;
+        align-items: center;
+        gap: 0;
+        background: #f5f5f5;
+        border-radius: 25px;
+        padding: 4px;
+        width: fit-content;
+    }
+    
+    .qty-control button {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: none;
+        background: white;
+        color: #00838f;
+        font-weight: bold;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .qty-control button:hover {
+        background: #00838f;
+        color: white;
+    }
+    
+    .qty-control input {
+        width: 50px;
+        text-align: center;
+        border: none;
+        background: transparent;
+        font-weight: 600;
+        font-size: 1rem;
+        color: #263238;
+    }
+    
+    .qty-control input:focus {
+        outline: none;
+    }
+    
+    /* Delete Button */
+    .delete-btn {
+        background: linear-gradient(135deg, #ffebee, #ffcdd2);
+        border: none;
+        color: #c62828;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .delete-btn:hover {
+        background: linear-gradient(135deg, #ef5350, #e53935);
+        color: white;
+        transform: scale(1.1);
+    }
+    
+    /* Summary Card */
+    .summary-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        position: sticky;
+        top: 100px;
+    }
+    
+    .summary-header {
+        background: linear-gradient(135deg, #00838f, #00bcd4);
+        color: white;
+        padding: 1.25rem 1.5rem;
+    }
+    
+    .summary-header h5 {
+        margin: 0;
+        font-weight: 700;
+    }
+    
+    .summary-body {
+        padding: 1.5rem;
+    }
+    
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px dashed #e0e0e0;
+    }
+    
+    .summary-row:last-of-type {
+        border-bottom: none;
+    }
+    
+    .summary-row span {
+        color: #546e7a;
+    }
+    
+    .summary-row strong {
+        color: #263238;
+        font-weight: 600;
+    }
+    
+    .summary-total {
+        background: linear-gradient(135deg, #e0f7fa, #b2ebf2);
+        margin: 1rem -1.5rem -1.5rem;
+        padding: 1.25rem 1.5rem;
+    }
+    
+    .summary-total .total-label {
+        font-size: 1rem;
+        color: #00695c;
+        font-weight: 600;
+    }
+    
+    .summary-total .total-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #00838f, #00bcd4);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .summary-note {
+        background: #fff8e1;
+        border-radius: 12px;
+        padding: 0.75rem 1rem;
+        margin-top: 1rem;
+        font-size: 0.85rem;
+        color: #f57c00;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .no-selection-msg {
+        background: linear-gradient(135deg, #ffebee, #ffcdd2);
+        border-radius: 12px;
+        padding: 0.75rem 1rem;
+        font-size: 0.85rem;
+        color: #c62828;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    /* Action Buttons */
+    .action-btn {
+        padding: 12px 24px;
+        border-radius: 25px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+    
+    .btn-checkout {
+        background: linear-gradient(135deg, #ff9800, #ffc107);
+        border: none;
+        color: white;
+        box-shadow: 0 4px 20px rgba(255, 152, 0, 0.4);
+        width: 100%;
+        margin-top: 1rem;
+    }
+    
+    .btn-checkout:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 25px rgba(255, 152, 0, 0.5);
+        background: linear-gradient(135deg, #f57c00, #ffb300);
+        color: white;
+    }
+    
+    .btn-checkout:disabled {
+        background: #e0e0e0;
+        color: #9e9e9e;
+        box-shadow: none;
+        cursor: not-allowed;
+    }
+    
+    .btn-continue {
+        background: white;
+        border: 2px solid #00838f;
+        color: #00838f;
+    }
+    
+    .btn-continue:hover {
+        background: #00838f;
+        color: white;
+    }
+    
+    /* Empty Cart */
+    .empty-cart {
+        text-align: center;
+        padding: 4rem 2rem;
+    }
+    
+    .empty-cart i {
+        font-size: 5rem;
+        color: #b0bec5;
+        margin-bottom: 1.5rem;
+    }
+    
+    .empty-cart h3 {
+        color: #546e7a;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    
+    .empty-cart p {
+        color: #90a4ae;
+        margin-bottom: 1.5rem;
+    }
+    
+    .btn-shop-now {
+        background: linear-gradient(135deg, #00838f, #00bcd4);
+        border: none;
+        color: white;
+        box-shadow: 0 4px 20px rgba(0, 131, 143, 0.4);
+    }
+    
+    .btn-shop-now:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 25px rgba(0, 131, 143, 0.5);
+        background: linear-gradient(135deg, #006064, #00838f);
+        color: white;
+    }
+    
+    /* Selection Info */
+    .selection-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem 1.5rem;
+        background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+        border-top: 1px solid #a5d6a7;
+    }
+    
+    .selection-info .selected-text {
+        color: #2e7d32;
+        font-weight: 500;
+    }
+    
+    /* Responsive */
+    @@media (max-width: 992px) {
+        .summary-card {
+            position: static;
+            margin-top: 2rem;
+        }
+    }
+    
+    @@media (max-width: 768px) {
+        .cart-header {
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .cart-header .d-flex {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .cart-table thead {
+            display: none;
+        }
+        
+        .cart-table tbody tr {
+            display: block;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+        }
+        
+        .cart-table tbody td {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border: none;
+        }
+        
+        .cart-table tbody td::before {
+            content: attr(data-label);
+            font-weight: 600;
+            color: #78909c;
+            font-size: 0.85rem;
+        }
+        
+        .product-info {
+            flex-direction: column;
+            align-items: flex-start;
+            width: 100%;
+        }
+        
+        .product-img {
+            width: 100%;
+            height: 150px;
+            margin-bottom: 0.5rem;
+        }
+    }
+</style>
+}
+
+<div class="cart-page">
+    <div class="container py-4">
+        <!-- Page Header -->
+        <div class="cart-header">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div>
+                    <h1><i class="fas fa-shopping-cart me-2"></i>Giỏ hàng của bạn</h1>
+                    <p>Kiểm tra và quản lý sản phẩm trước khi thanh toán</p>
+                </div>
+                <div class="cart-count-badge">
+                    <i class="fas fa-box me-2"></i><span id="headerItemCount">@itemCount</span> sản phẩm
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Cart Items -->
+            <div class="col-lg-8">
+                <div class="cart-card">
+                    @if (!Model.Any())
+                    {
+                        <div class="empty-cart">
+                            <i class="fas fa-shopping-basket"></i>
+                            <h3>Giỏ hàng trống</h3>
+                            <p>Bạn chưa có sản phẩm nào trong giỏ hàng</p>
+                            <a asp-controller="Home" asp-action="GetAllProducts" class="btn action-btn btn-shop-now">
+                                <i class="fas fa-store me-2"></i>Khám phá sản phẩm
+                            </a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="cart-card-header">
+                            <input type="checkbox" id="selectAll" class="custom-checkbox" title="Chọn tất cả" />
+                            <h5><i class="fas fa-list me-2"></i>Danh sách sản phẩm</h5>
+                        </div>
+                        <div class="cart-card-body">
+                            <form asp-action="CheckoutSelected" asp-controller="CartDetail" asp-route-cartId="@ViewBag.CartId" method="post" id="cartForm">
+                                <div class="table-responsive">
+                                    <table class="table cart-table">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 5%;"></th>
+                                                <th style="width: 35%;">Sản phẩm</th>
+                                                <th style="width: 15%;">Đơn giá</th>
+                                                <th style="width: 20%;">Số lượng</th>
+                                                <th style="width: 15%;">Thành tiền</th>
+                                                <th style="width: 10%;"></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var item in Model.Where(i => i.Quantity > 0))
+                                            {
+                                                <tr>
+                                                    <td data-label="">
+                                                        <input type="checkbox" name="selectedIds" value="@item.ProductDetailId" 
+                                                               class="custom-checkbox item-checkbox"
+                                                               data-price="@item.UnitPrice" 
+                                                               data-quantity="@item.Quantity" />
+                                                    </td>
+                                                    <td data-label="Sản phẩm">
+                                                        <div class="product-info">
+                                                            <img src="@(item.Thumbnail ?? "/images/product-placeholder.png")" 
+                                                                 alt="@item.ProductName" 
+                                                                 class="product-img" />
+                                                            <div class="product-details">
+                                                                <h6>@(string.IsNullOrWhiteSpace(item.ProductName) ? "Sản phẩm" : item.ProductName)</h6>
+                                                                <div class="variant-info">
+                                                                    <span class="variant-badge">
+                                                                        <i class="fas fa-ruler me-1"></i>@(string.IsNullOrWhiteSpace(item.LengthName) ? "N/A" : item.LengthName)
+                                                                    </span>
+                                                                    <span class="variant-badge">
+                                                                        <i class="fas fa-gem me-1"></i>@(string.IsNullOrWhiteSpace(item.HardnessName) ? "N/A" : item.HardnessName)
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td data-label="Đơn giá">
+                                                        <span class="item-price">@item.UnitPrice.ToString("#,##0")₫</span>
+                                                    </td>
+                                                    <td data-label="Số lượng">
+                                                        <div class="qty-control" data-pd-id="@item.ProductDetailId">
+                                                            <button type="button" class="qty-minus">−</button>
+                                                            <input type="number" class="qty-input" value="@item.Quantity" min="1" />
+                                                            <button type="button" class="qty-plus">+</button>
+                                                        </div>
+                                                    </td>
+                                                    <td data-label="Thành tiền">
+                                                        <span class="item-subtotal-price">@string.Format("{0:#,##0}₫", item.UnitPrice * item.Quantity)</span>
+                                                    </td>
+                                                    <td data-label="">
+                                                        <button class="delete-btn" type="submit" formmethod="post" 
+                                                                formaction="@Url.Action("Remove", "CartDetail", new { cartId = ViewBag.CartId, productDetailId = item.ProductDetailId })"
+                                                                title="Xóa sản phẩm">
+                                                            <i class="fas fa-trash-alt"></i>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                                
+                                <!-- Selection Info -->
+                                <div class="selection-info">
+                                    <i class="fas fa-check-circle text-success"></i>
+                                    <span class="selected-text" id="selectedCount">Chưa chọn sản phẩm nào</span>
+                                </div>
+                            </form>
+                        </div>
+                    }
+                </div>
+                
+                <!-- Continue Shopping -->
+                @if (Model.Any())
+                {
+                    <div class="mt-4">
+                        <a asp-controller="Home" asp-action="GetAllProducts" class="btn action-btn btn-continue">
+                            <i class="fas fa-arrow-left"></i> Tiếp tục mua sắm
+                        </a>
+                    </div>
+                }
+            </div>
+
+            <!-- Order Summary -->
+            <div class="col-lg-4">
+                <div class="summary-card">
+                    <div class="summary-header">
+                        <h5><i class="fas fa-receipt me-2"></i>Tóm tắt đơn hàng</h5>
+                    </div>
+                    <div class="summary-body">
+                        <div class="summary-row">
+                            <span><i class="fas fa-shopping-bag me-2 text-muted"></i>Tạm tính (<span id="itemCount">0</span> sản phẩm)</span>
+                            <strong id="subtotalDisplay">0₫</strong>
+                        </div>
+                        <div class="summary-row">
+                            <span><i class="fas fa-truck me-2 text-muted"></i>Phí vận chuyển</span>
+                            <strong id="shippingDisplay">@shipping.ToString("#,##0")₫</strong>
+                        </div>
+                        
+                        <div class="summary-total">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="total-label">Tổng cộng</span>
+                                <span class="total-value" id="totalDisplay">0₫</span>
+                            </div>
+                        </div>
+                        
+                        <div class="summary-note">
+                            <i class="fas fa-tag"></i>
+                            <span>Mã giảm giá sẽ được áp dụng tại bước thanh toán</span>
+                        </div>
+                        
+                        <div id="noSelectionMsg" class="no-selection-msg">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <span>Vui lòng chọn sản phẩm để thanh toán</span>
+                        </div>
+                        
+                        <button type="submit" form="cartForm" class="btn action-btn btn-checkout" id="btnCheckout" disabled>
+                            <i class="fas fa-credit-card"></i> Tiến hành thanh toán
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
+@section Scripts {
 <script>
     (function() {
         const cartId = '@ViewBag.CartId';
         const shippingFee = @((int)shipping);
+        const STORAGE_KEY = 'cart_selected_items';
         
         // Format number with thousand separators
         function formatNumber(num) {
-            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + '₫';
+        }
+        
+        // Save selected items to sessionStorage
+        function saveSelectedItems() {
+            const selectedIds = [];
+            document.querySelectorAll('.item-checkbox:checked').forEach(cb => {
+                selectedIds.push(cb.value);
+            });
+            sessionStorage.setItem(STORAGE_KEY, JSON.stringify(selectedIds));
+        }
+        
+        // Restore selected items from sessionStorage
+        function restoreSelectedItems() {
+            const saved = sessionStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                try {
+                    const selectedIds = JSON.parse(saved);
+                    document.querySelectorAll('.item-checkbox').forEach(cb => {
+                        if (selectedIds.includes(cb.value)) {
+                            cb.checked = true;
+                        }
+                    });
+                } catch (e) {
+                    console.error('Error restoring selected items:', e);
+                }
+            }
         }
         
         // Calculate and update totals based on selected checkboxes
@@ -117,7 +725,7 @@
             document.getElementById('subtotalDisplay').textContent = formatNumber(subtotal);
             document.getElementById('totalDisplay').textContent = formatNumber(total);
             document.getElementById('itemCount').textContent = itemCount;
-            document.getElementById('shippingDisplay').textContent = itemCount > 0 ? formatNumber(shippingFee) : '0';
+            document.getElementById('shippingDisplay').textContent = itemCount > 0 ? formatNumber(shippingFee) : '0₫';
             
             // Update button state and message
             const btnCheckout = document.getElementById('btnCheckout');
@@ -126,12 +734,12 @@
             
             if (itemCount > 0) {
                 btnCheckout.disabled = false;
-                selectedCount.textContent = `(Đã chọn ${itemCount} sản phẩm)`;
+                selectedCount.innerHTML = `<i class="fas fa-check-circle text-success me-1"></i> Đã chọn <strong>${itemCount}</strong> sản phẩm`;
                 noSelectionMsg.style.display = 'none';
             } else {
                 btnCheckout.disabled = true;
-                selectedCount.textContent = '(Chưa chọn sản phẩm nào)';
-                noSelectionMsg.style.display = 'block';
+                selectedCount.innerHTML = '<i class="fas fa-info-circle text-muted me-1"></i> Chưa chọn sản phẩm nào';
+                noSelectionMsg.style.display = 'flex';
             }
             
             // Update "Select All" checkbox state
@@ -141,6 +749,75 @@
                 selectAllCb.checked = allCheckboxes.length > 0 && checkboxes.length === allCheckboxes.length;
                 selectAllCb.indeterminate = checkboxes.length > 0 && checkboxes.length < allCheckboxes.length;
             }
+            
+            // Save selected items
+            saveSelectedItems();
+        }
+        
+        // Update item subtotal display
+        function updateItemSubtotal(pdId, quantity, price) {
+            const row = document.querySelector(`tr:has(.qty-control[data-pd-id="${pdId}"])`);
+            if (row) {
+                const subtotalEl = row.querySelector('.item-subtotal-price');
+                if (subtotalEl) {
+                    subtotalEl.textContent = formatNumber(price * quantity);
+                }
+                // Update checkbox data-quantity
+                const checkbox = row.querySelector('.item-checkbox');
+                if (checkbox) {
+                    checkbox.setAttribute('data-quantity', quantity);
+                }
+            }
+        }
+        
+        // AJAX update quantity (no page reload)
+        async function updateQuantityAjax(productDetailId, quantity) {
+            try {
+                const formData = new URLSearchParams();
+                formData.append('productDetailId', productDetailId);
+                formData.append('quantity', quantity);
+                
+                const response = await fetch(`/CartDetail/UpdateQtyAjax?cartId=${encodeURIComponent(cartId)}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: formData.toString(),
+                    credentials: 'same-origin'
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.success) {
+                        // Update the item subtotal
+                        updateItemSubtotal(productDetailId, quantity, result.unitPrice);
+                        // Recalculate totals
+                        updateTotals();
+                        // Update header cart count if exists
+                        const headerCount = document.getElementById('headerItemCount');
+                        if (headerCount && result.totalItems !== undefined) {
+                            headerCount.textContent = result.totalItems;
+                        }
+                        return true;
+                    }
+                }
+                return false;
+            } catch (error) {
+                console.error('Error updating quantity:', error);
+                return false;
+            }
+        }
+        
+        // Fallback: POST form submit (page reload)
+        function postUpdate(productDetailId, quantity) {
+            const form = document.createElement('form');
+            form.method = 'post';
+            form.action = '/CartDetail/UpdateQty?cartId=' + encodeURIComponent(cartId);
+            const pd = document.createElement('input'); pd.type = 'hidden'; pd.name = 'productDetailId'; pd.value = productDetailId;
+            const q = document.createElement('input'); q.type = 'hidden'; q.name = 'quantity'; q.value = quantity;
+            form.appendChild(pd); form.appendChild(q);
+            document.body.appendChild(form);
+            form.submit();
         }
         
         // Add event listeners to checkboxes
@@ -158,48 +835,82 @@
             });
         }
         
-        // Initial calculation
-        updateTotals();
-        
-        function postUpdate(productDetailId, quantity) {
-            const form = document.createElement('form');
-            form.method = 'post';
-            form.action = '/CartDetail/UpdateQty?cartId=' + encodeURIComponent(cartId);
-            const pd = document.createElement('input'); pd.type = 'hidden'; pd.name = 'productDetailId'; pd.value = productDetailId;
-            const q = document.createElement('input'); q.type = 'hidden'; q.name = 'quantity'; q.value = quantity;
-            form.appendChild(pd); form.appendChild(q);
-            document.body.appendChild(form);
-            form.submit();
-        }
-
+        // Quantity minus button
         document.querySelectorAll('.qty-minus').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const wrap = this.parentElement;
+            btn.addEventListener('click', async function() {
+                const wrap = this.closest('.qty-control');
                 const input = wrap.querySelector('.qty-input');
                 const pdId = wrap.getAttribute('data-pd-id');
-                const val = Math.max(1, parseInt(input.value || '1') - 1);
-                input.value = val;
-                postUpdate(pdId, val);
+                const currentVal = parseInt(input.value || '1');
+                const newVal = Math.max(1, currentVal - 1);
+                
+                if (newVal !== currentVal) {
+                    input.value = newVal;
+                    // Disable buttons during update
+                    const buttons = wrap.querySelectorAll('button');
+                    buttons.forEach(b => b.disabled = true);
+                    
+                    const success = await updateQuantityAjax(pdId, newVal);
+                    
+                    buttons.forEach(b => b.disabled = false);
+                    
+                    if (!success) {
+                        // Fallback to form submit if AJAX fails
+                        postUpdate(pdId, newVal);
+                    }
+                }
             });
         });
+        
+        // Quantity plus button
         document.querySelectorAll('.qty-plus').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const wrap = this.parentElement;
+            btn.addEventListener('click', async function() {
+                const wrap = this.closest('.qty-control');
                 const input = wrap.querySelector('.qty-input');
                 const pdId = wrap.getAttribute('data-pd-id');
-                const val = Math.max(1, parseInt(input.value || '1') + 1);
-                input.value = val;
-                postUpdate(pdId, val);
+                const currentVal = parseInt(input.value || '1');
+                const newVal = currentVal + 1;
+                
+                input.value = newVal;
+                // Disable buttons during update
+                const buttons = wrap.querySelectorAll('button');
+                buttons.forEach(b => b.disabled = true);
+                
+                const success = await updateQuantityAjax(pdId, newVal);
+                
+                buttons.forEach(b => b.disabled = false);
+                
+                if (!success) {
+                    // Fallback to form submit if AJAX fails
+                    postUpdate(pdId, newVal);
+                }
             });
         });
+        
+        // Quantity input change
         document.querySelectorAll('.qty-input').forEach(inp => {
-            inp.addEventListener('change', function() {
-                const wrap = this.parentElement;
+            let debounceTimer;
+            inp.addEventListener('change', async function() {
+                const wrap = this.closest('.qty-control');
                 const pdId = wrap.getAttribute('data-pd-id');
                 const val = Math.max(1, parseInt(this.value || '1'));
                 this.value = val;
-                postUpdate(pdId, val);
+                
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(async () => {
+                    const success = await updateQuantityAjax(pdId, val);
+                    if (!success) {
+                        postUpdate(pdId, val);
+                    }
+                }, 300);
             });
         });
+        
+        // Restore selected items on page load
+        restoreSelectedItems();
+        
+        // Initial calculation
+        updateTotals();
     })();
 </script>
+}
