@@ -62,6 +62,16 @@ namespace NT.WEB.Controllers
             return View();
         }
 
+        /// <summary>
+        /// Trang thông báo không có quyền truy cập
+        /// </summary>
+        public IActionResult AccessDenied(string? resource = null, string? action = null)
+        {
+            ViewBag.Resource = resource;
+            ViewBag.Action = action;
+            return View();
+        }
+
         // Returns all products
         [HttpGet]
         public async Task<IActionResult> GetAllProducts(string? q = null, Guid? brandId = null, Guid? categoryId = null, decimal? minPrice = null, decimal? maxPrice = null)

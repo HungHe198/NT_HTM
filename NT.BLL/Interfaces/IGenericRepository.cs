@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -202,5 +202,18 @@ namespace NT.BLL.Interfaces
         /// <param name="predicate">Điều kiện lọc.</param>
         /// <param name="includes">Danh sách các navigation cần Include.</param>
         Task<IEnumerable<H>> FindAsync(Expression<Func<H, bool>> predicate, params Expression<Func<H, object>>[] includes);
+
+        /// <summary>
+        /// Xóa entity theo điều kiện (dùng cho composite key hoặc xóa nhiều bản ghi).
+        /// </summary>
+        /// <param name="predicate">Điều kiện xác định các bản ghi cần xóa.</param>
+        /// <returns>Số lượng bản ghi đã xóa.</returns>
+        Task<int> DeleteWhereAsync(Expression<Func<H, bool>> predicate);
+
+        /// <summary>
+        /// Xóa một entity cụ thể (dùng cho entity có composite key).
+        /// </summary>
+        /// <param name="entity">Entity cần xóa.</param>
+        Task DeleteEntityAsync(H entity);
     }
 }

@@ -3,10 +3,12 @@ using NT.BLL.Services;
 using NT.DAL.ContextFile;
 using NT.DAL.Repositories;
 using NT.WEB.Services;
+using NT.WEB.Authorization;
 using System.Text;
 using Microsoft.AspNetCore.Localization;
 using System.Globalization;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -67,6 +69,12 @@ builder.Services.AddScoped<AdminWebService>();
 builder.Services.AddScoped<Microsoft.AspNetCore.Identity.IPasswordHasher<NT.SHARED.Models.User>, Microsoft.AspNetCore.Identity.PasswordHasher<NT.SHARED.Models.User>>();
 // Simple email service
 builder.Services.AddScoped<NT.WEB.Services.IEmailService, NT.WEB.Services.SmtpEmailService>();
+
+// Authorization services for endpoint-based permission
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddSingleton<EndpointScannerService>();
+builder.Services.AddScoped<NT.WEB.Authorization.RolePermissionService>();
+builder.Services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
 
 // Authentication - cookie
 builder.Services.AddAuthentication(Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme)

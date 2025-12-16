@@ -1,0 +1,198 @@
+@model NT.WEB.ViewModels.RolePermissionViewModel
+
+@{
+    ViewData["Title"] = $"Phân quyền cho {Model.Role.Name}";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a asp-action="Index">Quản lý phân quyền</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">@Model.Role.Name</li>
+                </ol>
+            </nav>
+            <h2><i class="fas fa-user-shield me-2"></i>Phân quyền cho vai trò: <span class="text-primary">@Model.Role.Name</span></h2>
+        </div>
+        <div class="col-auto">
+            <form asp-action="AssignAllPermissions" method="post" class="d-inline">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="roleId" value="@Model.Role.Id" />
+                <button type="submit" class="btn btn-success" onclick="return confirm('Gán TẤT CẢ quyền cho role này?')">
+                    <i class="fas fa-check-double me-1"></i> Gán tất cả
+                </button>
+            </form>
+            <form asp-action="RemoveAllPermissions" method="post" class="d-inline ms-2">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="roleId" value="@Model.Role.Id" />
+                <button type="submit" class="btn btn-danger" onclick="return confirm('Gỡ TẤT CẢ quyền khỏi role này?')">
+                    <i class="fas fa-times-circle me-1"></i> Gỡ tất cả
+                </button>
+            </form>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>@TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>@TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <form asp-action="UpdatePermissions" method="post" id="permissionForm">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="RoleId" value="@Model.Role.Id" />
+
+        <div class="row">
+            <div class="col-md-3">
+                <!-- Resource Navigation -->
+                <div class="card shadow-sm sticky-top" style="top: 20px;">
+                    <div class="card-header bg-secondary text-white">
+                        <h6 class="mb-0"><i class="fas fa-folder me-2"></i>Tài nguyên</h6>
+                    </div>
+                    <div class="list-group list-group-flush" style="max-height: 70vh; overflow-y: auto;">
+                        @foreach (var resource in Model.PermissionsByResource.Keys)
+                        {
+                            var assignedCount = Model.PermissionsByResource[resource].Count(p => p.IsAssigned);
+                            var totalCount = Model.PermissionsByResource[resource].Count;
+                            <a href="#resource-@resource" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                @resource
+                                <span class="badge @(assignedCount == totalCount ? "bg-success" : assignedCount > 0 ? "bg-warning" : "bg-secondary")">
+                                    @assignedCount/@totalCount
+                                </span>
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-9">
+                <!-- Permission Cards by Resource -->
+                @foreach (var kvp in Model.PermissionsByResource)
+                {
+                    var resource = kvp.Key;
+                    var permissions = kvp.Value;
+                    var assignedCount = permissions.Count(p => p.IsAssigned);
+
+                    <div class="card shadow-sm mb-4" id="resource-@resource">
+                        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">
+                                <i class="fas fa-cube me-2 text-primary"></i>@resource
+                                <small class="text-muted">(@assignedCount/@permissions.Count quyền)</small>
+                            </h5>
+                            <div>
+                                <button type="button" class="btn btn-sm btn-outline-success select-all-resource" data-resource="@resource">
+                                    <i class="fas fa-check-square"></i> Chọn tất cả
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-danger deselect-all-resource" data-resource="@resource">
+                                    <i class="fas fa-square"></i> Bỏ chọn tất cả
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                @foreach (var permission in permissions)
+                                {
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="form-check permission-item" data-resource="@resource">
+                                            <input class="form-check-input permission-checkbox" 
+                                                   type="checkbox" 
+                                                   name="PermissionIds" 
+                                                   value="@permission.Id"
+                                                   id="perm-@permission.Id"
+                                                   @(permission.IsAssigned ? "checked" : "")
+                                                   data-resource="@resource">
+                                            <label class="form-check-label" for="perm-@permission.Id">
+                                                <strong>@permission.Action</strong>
+                                                <br />
+                                                <small class="text-muted">@permission.Description</small>
+                                                @if (!string.IsNullOrEmpty(permission.Method))
+                                                {
+                                                    <span class="badge @GetMethodBadgeClass(permission.Method) ms-1">@permission.Method</span>
+                                                }
+                                            </label>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <div class="card shadow-sm">
+                    <div class="card-body text-center">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-save me-2"></i> Lưu thay đổi
+                        </button>
+                        <a asp-action="Index" class="btn btn-secondary btn-lg ms-2">
+                            <i class="fas fa-arrow-left me-2"></i> Quay lại
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@functions {
+    string GetMethodBadgeClass(string? method)
+    {
+        return method?.ToUpper() switch
+        {
+            "GET" => "bg-info",
+            "POST" => "bg-success",
+            "PUT" => "bg-warning",
+            "DELETE" => "bg-danger",
+            "PATCH" => "bg-secondary",
+            _ => "bg-light text-dark"
+        };
+    }
+}
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Select all for a resource
+            document.querySelectorAll('.select-all-resource').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const resource = this.dataset.resource;
+                    document.querySelectorAll(`.permission-checkbox[data-resource="${resource}"]`).forEach(cb => {
+                        cb.checked = true;
+                    });
+                });
+            });
+
+            // Deselect all for a resource
+            document.querySelectorAll('.deselect-all-resource').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const resource = this.dataset.resource;
+                    document.querySelectorAll(`.permission-checkbox[data-resource="${resource}"]`).forEach(cb => {
+                        cb.checked = false;
+                    });
+                });
+            });
+
+            // Smooth scroll for navigation
+            document.querySelectorAll('a[href^="#resource-"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                });
+            });
+        });
+    </script>
+}

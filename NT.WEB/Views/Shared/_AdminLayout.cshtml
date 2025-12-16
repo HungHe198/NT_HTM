@@ -88,15 +88,15 @@
             </div>
             <ul class="nav nav-pills flex-column mb-auto">
                 <li><a asp-controller="Admin" asp-action="Index" class="nav-link @isActive("Admin", "RevenueDaily")"><i class="fa fa-chart-line"></i>Thống kê</a></li>
-                <li><a asp-controller="Admin" asp-action="Index" class="nav-link @isActive("Admin", "Index")"><i class="fa fa-user"></i>Tài khoản</a></li>
-                <li><a asp-controller="Admin" asp-action="Index" class="nav-link @isActive("Admin", "create")"><i class="fa fa-user"></i>Phân quyền</a></li>
+                <li><a asp-controller="Account" asp-action="Index" class="nav-link @isActive("Account", "Index")"><i class="fa fa-user"></i>Tài khoản</a></li>
+                <li><a asp-controller="RolePermission" asp-action="Index" class="nav-link @isActive("RolePermission", "Index")"><i class="fa fa-user-shield"></i>Phân quyền</a></li>
                 <li><a asp-controller="Product" asp-action="Index" class="nav-link @isActive("Product", "Index")"><i class="fa fa-box"></i>Sản phẩm</a></li>
                 <li><a asp-controller="Orders" asp-action="Index" class="nav-link @isActive("Orders", "Index")"><i class="fa fa-receipt"></i>Đơn hàng</a></li>
-                <li><a asp-controller="Admin" asp-action="Index" class="nav-link @isActive("Admin", "Index")"><i class="fa fa-blog"></i>Bán hàng tại quầy</a></li>
-                <li><a asp-controller="Voucher" asp-action="Index" class="nav-link @isActive("Voucher", "Index")"><i class="fa fa-blog"></i>Mã giảm giá</a></li>
-                <li><a asp-controller="PaymentMethods" asp-action="Index" class="nav-link @isActive("PaymentMethods", "Index")"><i class="fa fa-blog"></i>Phương thức thanh toán</a></li>
-                <li><a asp-controller="Brand" asp-action="Index" class="nav-link @isActive("Brand", "Index")"><i class="fa fa-blog"></i>Nhà sản xuất</a></li>
-                <li><a asp-controller="OriginCountry" asp-action="Index" class="nav-link @isActive("OriginCountry", "Index")"><i class="fa fa-blog"></i>Nơi sản xuất</a></li>
+                <li><a asp-controller="Sales" asp-action="Index" class="nav-link @isActive("Sales", "Index")"><i class="fa fa-cash-register"></i>Bán hàng tại quầy</a></li>
+                <li><a asp-controller="Voucher" asp-action="Index" class="nav-link @isActive("Voucher", "Index")"><i class="fa fa-ticket"></i>Mã giảm giá</a></li>
+                <li><a asp-controller="PaymentMethods" asp-action="Index" class="nav-link @isActive("PaymentMethods", "Index")"><i class="fa fa-credit-card"></i>Phương thức thanh toán</a></li>
+                <li><a asp-controller="Brand" asp-action="Index" class="nav-link @isActive("Brand", "Index")"><i class="fa fa-industry"></i>Nhà sản xuất</a></li>
+                <li><a asp-controller="OriginCountry" asp-action="Index" class="nav-link @isActive("OriginCountry", "Index")"><i class="fa fa-globe"></i>Nơi sản xuất</a></li>
               
                 @* <li><a asp-controller="NotFound" asp-action="Index" class="nav-link @isActive("NotFound", "Index")"><i class="fa fa-ban"></i>Not found</a></li> *@
             </ul>

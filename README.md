@@ -18,6 +18,7 @@
 - [Hướng Dẫn Cài Đặt](#-hướng-dẫn-cài-đặt)
 - [Cấu Hình](#-cấu-hình)
 - [Chạy Ứng Dụng](#-chạy-ứng-dụng)
+- [Hệ Thống Phân Quyền](#-hệ-thống-phân-quyền)
 - [Cơ Sở Dữ Liệu](#-cơ-sở-dữ-liệu)
 - [API Documentation](#-api-documentation)
 - [Đóng Góp](#-đóng-góp)
@@ -397,6 +398,103 @@ dotnet run
 
 - **Web Application**: `https://localhost:5001` hoặc `http://localhost:5000`
 - **API (Swagger)**: `https://localhost:5001/swagger`
+
+---
+
+## 🔐 Hệ Thống Phân Quyền
+
+Hệ thống phân quyền endpoint cho phép kiểm soát quyền truy cập các Controller/Action dựa trên Role của người dùng. Tất cả quyền được lưu trong database và có thể cấu hình qua giao diện quản trị.
+
+### Cấu Trúc Authorization
+
+```
+NT.WEB/Authorization/
+├── EndpointInfo.cs              # DTO chứa thông tin endpoint
+├── EndpointScannerService.cs    # Quét tất cả Controller/Action
+├── PermissionAuthorizationHandler.cs  # Xử lý authorization
+├── PermissionHelper.cs          # Helper kiểm tra quyền trong View
+├── PermissionRequirement.cs     # Requirement cho policy-based auth
+├── PermissionTagHelper.cs       # TagHelper để ẩn/hiện element
+├── RequirePermissionAttribute.cs # Attribute đánh dấu endpoint cần quyền
+└── RolePermissionService.cs     # Service quản lý quyền cho Role
+```
+
+### Đánh Dấu Endpoint Cần Phân Quyền
+
+Sử dụng attribute `[RequirePermission]` trên Controller hoặc Action:
+
+```csharp
+public class ProductController : Controller
+{
+    [RequirePermission("Product", "Index")]
+    public async Task<IActionResult> Index() { ... }
+
+    [RequirePermission("Product", "Create")]
+    public async Task<IActionResult> Create() { ... }
+
+    [RequirePermission("Product", "Edit")]
+    public async Task<IActionResult> Edit(Guid id) { ... }
+
+    [RequirePermission("Product", "Delete")]
+    public async Task<IActionResult> Delete(Guid id) { ... }
+}
+```
+
+### Quản Lý Phân Quyền
+
+1. **Truy cập**: `/RolePermission`
+2. **Click "Đồng bộ Permission"** để quét và tạo Permission từ tất cả Endpoints
+3. **Chọn Role** cần phân quyền → Tick các Permission → **Lưu thay đổi**
+
+### Ẩn/Hiện Element Trong View
+
+#### Sử dụng TagHelper:
+
+```html
+<!-- Element sẽ bị ẩn nếu user không có quyền Product.Create -->
+<a asp-action="Create" 
+   permission-resource="Product" 
+   permission-action="Create" 
+   class="btn btn-primary">
+    Thêm sản phẩm
+</a>
+```
+
+#### Sử dụng Helper trong Razor:
+
+```csharp
+@if (await Html.HasPermissionAsync("Product", "Create"))
+{
+    <a asp-action="Create" class="btn btn-primary">Thêm sản phẩm</a>
+}
+```
+
+### Quy Tắc Phân Quyền
+
+| Role | Quyền hạn |
+|------|-----------|
+| **Admin** | Full quyền, không cần kiểm tra Permission |
+| **Employee** | Chỉ có quyền được gán qua RolePermission |
+| **Customer** | Mặc định chỉ truy cập client site |
+
+### Permission Code Convention
+
+- **Format**: `{Controller}.{Action}`
+- **Ví dụ**:
+  - `Product.Index` - Xem danh sách sản phẩm
+  - `Product.Create` - Thêm sản phẩm
+  - `Orders.Index` - Xem đơn hàng
+  - `Orders.Review` - Duyệt đơn hàng
+
+### API Quản Lý Quyền
+
+| Method | URL | Mô tả |
+|--------|-----|-------|
+| GET | `/RolePermission` | Danh sách Role |
+| GET | `/RolePermission/Manage/{id}` | Phân quyền cho Role |
+| POST | `/RolePermission/UpdatePermissions` | Cập nhật quyền |
+| POST | `/RolePermission/SyncPermissions` | Đồng bộ Permission |
+| GET | `/RolePermission/Endpoints` | Xem danh sách Endpoints |
 
 ---
 

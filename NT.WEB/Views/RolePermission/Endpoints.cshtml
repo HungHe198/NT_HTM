@@ -1,0 +1,156 @@
+@model IEnumerable<NT.WEB.Authorization.EndpointInfo>
+
+@{
+    ViewData["Title"] = "Danh sách Endpoints";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a asp-action="Index">Quản lý phân quyền</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Endpoints</li>
+                </ol>
+            </nav>
+            <h2><i class="fas fa-route me-2"></i>Danh sách Endpoints</h2>
+            <p class="text-muted">Tất cả các Controller/Action trong hệ thống</p>
+        </div>
+        <div class="col-auto">
+            <form asp-action="SyncPermissions" method="post" class="d-inline">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-primary" onclick="return confirm('Đồng bộ Permission từ tất cả Endpoint?')">
+                    <i class="fas fa-sync me-1"></i> Đồng bộ vào Database
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="fas fa-list me-2"></i>Endpoints (@Model.Count() endpoints)</h5>
+            <div>
+                <input type="text" id="searchEndpoint" class="form-control form-control-sm" placeholder="Tìm kiếm..." style="width: 250px;">
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped mb-0" id="endpointTable">
+                    <thead class="table-dark">
+                        <tr>
+                            <th style="width: 50px;">#</th>
+                            <th>Controller</th>
+                            <th>Action</th>
+                            <th style="width: 100px;">Method</th>
+                            <th>Permission Code</th>
+                            <th>Mô tả</th>
+                            <th style="width: 100px;">Admin Area</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{ var index = 1; }
+                        @foreach (var endpoint in Model)
+                        {
+                            <tr class="endpoint-row">
+                                <td>@(index++)</td>
+                                <td><strong>@endpoint.Controller</strong></td>
+                                <td>@endpoint.Action</td>
+                                <td>
+                                    <span class="badge @GetMethodBadgeClass(endpoint.HttpMethod)">@endpoint.HttpMethod</span>
+                                </td>
+                                <td><code>@endpoint.PermissionCode</code></td>
+                                <td>@endpoint.Description</td>
+                                <td class="text-center">
+                                    @if (endpoint.IsAdminArea)
+                                    {
+                                        <span class="badge bg-warning text-dark">
+                                            <i class="fas fa-lock"></i> Admin
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">
+                                            <i class="fas fa-globe"></i> Public
+                                        </span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow mt-4">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Thống kê</h5>
+        </div>
+        <div class="card-body">
+            <div class="row text-center">
+                <div class="col-md-3">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h3 class="text-primary">@Model.Count()</h3>
+                            <p class="mb-0">Tổng Endpoints</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h3 class="text-success">@Model.Select(e => e.Controller).Distinct().Count()</h3>
+                            <p class="mb-0">Controllers</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h3 class="text-warning">@Model.Count(e => e.IsAdminArea)</h3>
+                            <p class="mb-0">Admin Endpoints</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h3 class="text-info">@Model.Count(e => !e.IsAdminArea)</h3>
+                            <p class="mb-0">Public Endpoints</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+    string GetMethodBadgeClass(string method)
+    {
+        return method.ToUpper() switch
+        {
+            "GET" => "bg-info",
+            "POST" => "bg-success",
+            "PUT" => "bg-warning text-dark",
+            "DELETE" => "bg-danger",
+            "PATCH" => "bg-secondary",
+            _ => "bg-light text-dark"
+        };
+    }
+}
+
+@section Scripts {
+    <script>
+        document.getElementById('searchEndpoint').addEventListener('keyup', function() {
+            const filter = this.value.toLowerCase();
+            const rows = document.querySelectorAll('.endpoint-row');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(filter) ? '' : 'none';
+            });
+        });
+    </script>
+}

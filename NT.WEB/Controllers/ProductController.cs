@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using NT.SHARED.Models;
 using NT.WEB.Services;
+using NT.WEB.Authorization;
 
 namespace NT.WEB.Controllers
 {
@@ -55,6 +56,7 @@ namespace NT.WEB.Controllers
         }
 
         // GET: /Product
+        [RequirePermission("Product", "Index")]
         public async Task<IActionResult> Index(string? q)
         {
             var model = string.IsNullOrWhiteSpace(q)
@@ -130,6 +132,7 @@ namespace NT.WEB.Controllers
         }
 
         // GET: /Product/Create
+        [RequirePermission("Product", "Create")]
         public async Task<IActionResult> Create()
         {
             // prepare brand dropdown
@@ -140,6 +143,7 @@ namespace NT.WEB.Controllers
         // POST: /Product/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [RequirePermission("Product", "Create")]
         public async Task<IActionResult> Create(Product model)
         {
             _logger.LogInformation("Create POST invoked. Model values: BrandId={BrandId}, ProductCode={ProductCode}, Name={Name}", model?.BrandId, model?.ProductCode, model?.Name);
@@ -187,6 +191,7 @@ namespace NT.WEB.Controllers
         }
 
         // GET: /Product/Edit/{id}
+        [RequirePermission("Product", "Edit")]
         public async Task<IActionResult> Edit(Guid id)
         {
             if (id == Guid.Empty) return BadRequest();
@@ -202,6 +207,7 @@ namespace NT.WEB.Controllers
         // POST: /Product/Edit/{id}
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [RequirePermission("Product", "Edit")]
         public async Task<IActionResult> Edit(Guid id, Product model)
         {
             if (id == Guid.Empty || model is null || id != model.Id) return BadRequest();
@@ -238,6 +244,7 @@ namespace NT.WEB.Controllers
         }
 
         // GET: /Product/Delete/{id}
+        [RequirePermission("Product", "Delete")]
         public async Task<IActionResult> Delete(Guid id)
         {
             if (id == Guid.Empty) return BadRequest();
@@ -251,6 +258,7 @@ namespace NT.WEB.Controllers
         // POST: /Product/Delete/{id}
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [RequirePermission("Product", "Delete")]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
             if (id == Guid.Empty) return BadRequest();
