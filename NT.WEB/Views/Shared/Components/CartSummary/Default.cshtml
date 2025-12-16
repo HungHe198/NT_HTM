@@ -4,11 +4,11 @@
     var cartId = ViewData["CartId"] as Guid?;
 }
 <div class="dropdown me-3">
-    <a class="text-muted position-relative" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="Giỏ hàng">
+    <a class="text-muted position-relative btn-icon" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="Giỏ hàng">
         <i class="fa fa-shopping-cart"></i>
         @if (count > 0)
         {
-            <span class="badge bg-danger position-absolute" style="top:-6px;right:-10px">@count</span>
+            <span class="badge bg-danger badge-circle">@count</span>
         }
     </a>
     <ul class="dropdown-menu dropdown-menu-end p-0" style="min-width: 360px;">
@@ -19,7 +19,7 @@
             {
                 var pd = ci.ProductDetail;
                 <li class="p-2 d-flex align-items-center gap-2 border-bottom">
-                    <img src="@(pd?.Product?.Thumbnail ?? "/images/product-placeholder.png")" style="width:48px;height:48px;object-fit:cover;border-radius:4px" alt="thumb" />
+                    <img src="@(pd?.Product?.Thumbnail ?? "/images/product-placeholder.png")" style="width:48px;height:48px;object-fit:cover;border-radius:6px" alt="thumb" />
                     <div class="flex-grow-1 small">
                         <div class="fw-semibold">@(pd?.Product?.Name ?? "Sản phẩm")</div>
                         <div class="text-muted">SL: @ci.Quantity</div>
