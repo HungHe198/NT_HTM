@@ -1,4 +1,4 @@
-﻿@{
+@{
     Layout = null;
     var title = ViewData["Title"] ?? "NT.WEB";
     // Product cards data is prepared in HomeController.Index and passed via ViewBag.ClientLayoutProducts.
@@ -21,13 +21,190 @@
 
     <style>
         html, body { height: 100%; }
-        body { background: #f5f7fb; display: flex; flex-direction: column; min-height: 100vh; }
-        .topbar { background: #fff; border-bottom: 1px solid #e6eef9; }
-        .site-logo { color:#00bcd4; font-weight:700; display:flex; align-items:center; gap:.5rem; }
-        .site-logo img { background: none; display:block; height:48px; width:auto; }
-        .footer-cta { background:#00b8d4; color:#fff; padding:2rem 1rem; }
-        main { flex: 1 0 auto; }
+        body { background: linear-gradient(135deg, #f5f7fb 0%, #e8f4f8 100%); display: flex; flex-direction: column; min-height: 100vh; }
+        
+        /* Header Styles */
+        .topbar { 
+            background: #fff; 
+     border-bottom: none;
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+        position: sticky;
+            top: 0;
+            z-index: 1000;
+  }
+        
+      .site-logo { 
+            color: #00838f; 
+  font-weight: 700; 
+   display: flex; 
+        align-items: center; 
+gap: .5rem;
+        transition: transform 0.3s ease;
+      }
+        
+        .site-logo:hover {
+  transform: scale(1.02);
+        }
+        
+ .site-logo img { 
+     background: none; 
+      display: block; 
+            height: 48px; 
+       width: auto;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+        }
+        
+    .site-logo span {
+     background: linear-gradient(135deg, #00838f, #00bcd4);
+         -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+ }
+        
+        /* Navigation Links */
+        .navbar-nav .nav-link {
+   font-weight: 500;
+            color: #37474f;
+   padding: 0.5rem 1rem;
+         border-radius: 8px;
+          transition: all 0.3s ease;
+  }
+        
+    .navbar-nav .nav-link:hover {
+   background: #e0f7fa;
+            color: #00838f;
+        }
+        
+ /* Search Box */
+        #client-search {
+       border-radius: 25px;
+            border: 2px solid #e0e0e0;
+    padding: 10px 20px;
+     transition: all 0.3s ease;
+        }
+        
+        #client-search:focus {
+            border-color: #00bcd4;
+    box-shadow: 0 0 0 3px rgba(0, 188, 212, 0.15);
+      }
+        
+        /* Footer Styles */
+        .footer-cta { 
+     background: linear-gradient(135deg, #00838f 0%, #00bcd4 100%); 
+      color: #fff; 
+            padding: 3rem 1rem;
+        }
+    
+        .footer-cta h5, .footer-cta h6 {
+            font-weight: 700;
+       margin-bottom: 1rem;
+        }
+    
+        .footer-cta a {
+      transition: all 0.3s ease;
+        }
+        
+        .footer-cta a:hover {
+       color: #b2ebf2 !important;
+        padding-left: 5px;
+        }
+        
+  main { flex: 1 0 auto; }
         footer { margin-top: auto; }
+   
+        /* Product Card Styles */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+   padding: 0.5rem;
+        }
+
+        .product-card {
+ background: white;
+        border-radius: 16px;
+   overflow: hidden;
+box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+         transition: all 0.3s ease;
+      border: none;
+      }
+        
+        .product-card:hover {
+       transform: translateY(-8px);
+     box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        .product-card .card-img-wrapper {
+            position: relative;
+            overflow: hidden;
+    background: linear-gradient(135deg, #f5f5f5, #fafafa);
+        }
+    
+        .product-card .card-img-top {
+          height: 180px;
+       object-fit: contain;
+            padding: 15px;
+            transition: transform 0.4s ease;
+      }
+        
+        .product-card:hover .card-img-top {
+            transform: scale(1.08);
+        }
+        
+        .product-card .card-body {
+        padding: 1rem 1.2rem;
+        }
+        
+        .product-card .product-name {
+         font-weight: 600;
+            color: #263238;
+            font-size: 0.95rem;
+          line-height: 1.4;
+       margin-bottom: 0.5rem;
+        display: -webkit-box;
+   -webkit-line-clamp: 2;
+       -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+      .product-card .product-name:hover {
+  color: #00838f;
+        }
+        
+    .product-card .product-brand {
+ color: #78909c;
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+     }
+        
+        .product-card .product-price {
+            font-weight: 700;
+     font-size: 1.1rem;
+      background: linear-gradient(135deg, #00838f, #00bcd4);
+   -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+   background-clip: text;
+        }
+        
+        .product-card .quick-view {
+            position: absolute;
+            bottom: -50px;
+ left: 50%;
+      transform: translateX(-50%);
+     background: linear-gradient(135deg, #00838f, #00bcd4);
+   color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+        font-size: 0.85rem;
+            font-weight: 500;
+    transition: all 0.3s ease;
+        opacity: 0;
+    }
+        
+        .product-card:hover .quick-view {
+            bottom: 15px;
+            opacity: 1;
+   }
     </style>
 </head>
 @using System.Security.Claims
@@ -125,32 +302,35 @@
     </header>
 
     <main class="container my-4">
+        @RenderBody()
         @{
-            var products = ViewBag.ClientLayoutProducts as IEnumerable<dynamic>;
+        var products = ViewBag.ClientLayoutProducts as IEnumerable<dynamic>;
         }
         @if (products != null && products.Any())
         {
-            <div class="row g-3 mb-4">
-                @foreach (var p in products)
-                {
-                    <div class="col-6 col-sm-4 col-md-3">
-                        <div class="card h-100">
-                            <a asp-controller="Product" asp-action="ProductDetailIndex" asp-route-id="@p.Id" class="text-decoration-none">
-                                <img src="@((p.Thumbnail ?? "/images/product-placeholder.png"))" class="card-img-top" alt="product" style="height:140px;object-fit:contain" />
-                            </a>
-                            <div class="card-body p-2">
-                                <div class="small fw-semibold text-dark mb-1">
-                                    <a asp-controller="Product" asp-action="ProductDetailIndex" asp-route-id="@p.Id" class="text-decoration-none text-dark">@p.Name</a>
-                                </div>
-                                <div class="small text-muted">@p.BrandName</div>
-                                <div class="small fw-semibold text-primary mt-1">@((p.Price != null) ? string.Format(System.Globalization.CultureInfo.GetCultureInfo("vi-VN"), "{0:C0}", p.Price) : "Liên hệ")</div>
-                            </div>
-                        </div>
-                    </div>
-                }
-            </div>
+          <div class="product-grid mb-4">
+     @foreach (var p in products)
+    {
+             <div class="product-card">
+  <div class="card-img-wrapper">
+          <a asp-controller="Product" asp-action="ProductDetailIndex" asp-route-id="@p.Id" class="text-decoration-none">
+<img src="@((p.Thumbnail ?? "/images/product-placeholder.png"))" class="card-img-top" alt="@p.Name" />
+      </a>
+   <a asp-controller="Product" asp-action="ProductDetailIndex" asp-route-id="@p.Id" class="quick-view text-decoration-none">
+   <i class="fas fa-eye me-1"></i> Xem chi tiết
+      </a>
+           </div>
+      <div class="card-body">
+     <a asp-controller="Product" asp-action="ProductDetailIndex" asp-route-id="@p.Id" class="text-decoration-none">
+              <div class="product-name">@p.Name</div>
+      </a>
+              <div class="product-brand"><i class="fas fa-tag me-1"></i>@p.BrandName</div>
+<div class="product-price">@((p.Price != null) ? string.Format(System.Globalization.CultureInfo.GetCultureInfo("vi-VN"), "{0:C0}", p.Price) : "Liên hệ")</div>
+        </div>
+          </div>
+     }
+    </div>
         }
-        @RenderBody()
     </main>
 
     <footer>

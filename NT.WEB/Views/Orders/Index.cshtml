@@ -14,133 +14,235 @@
 
 <div class="container py-4">
     <div class="card shadow-sm">
-      <div class="card-body">
-       <div class="d-flex align-items-center mb-3">
-    <h2 class="mb-0">Danh sách đơn hàng</h2>
-                <div class="ms-auto text-end">
-    <div class="small text-muted">Tổng: <strong>@countAll</strong></div>
-            <div class="small text-muted">Thời gian hiển thị theo GMT+7</div>
-      </div>
-   </div>
+        <div class="card-body">
+            <div class="d-flex align-items-center mb-3">
+     <h2 class="mb-0"><i class="fas fa-shopping-bag me-2"></i>Danh sách đơn hàng</h2>
+   <div class="ms-auto text-end">
+     <div class="small text-muted">Tổng: <strong>@countAll</strong></div>
+      <div class="small text-muted">Thời gian hiển thị theo GMT+7</div>
+</div>
+</div>
 
+   <!-- Status Cards -->
             <div class="row g-2 mb-3">
-           <div class="col-sm-8 col-md-6">
-   <form method="get" class="d-flex align-items-center gap-2">
-    <label for="status" class="form-label mb-0 me-2">Lọc:</label>
-          <select id="status" name="status" class="form-select" style="max-width:220px" onchange="this.form.submit()">
-            <option value="" selected="@(string.IsNullOrWhiteSpace(ViewBag.FilterStatus as string) ? "selected" : null)">Tất cả</option>
-                  <option value="-1" selected="@(ViewBag.FilterStatus as string == "-1" ? "selected" : null)">Đã hủy</option>
- <option value="0" selected="@(ViewBag.FilterStatus as string == "0" ? "selected" : null)">Chờ xác nhận</option>
-            <option value="1" selected="@(ViewBag.FilterStatus as string == "1" ? "selected" : null)">Đã xác nhận</option>
-       <option value="2" selected="@(ViewBag.FilterStatus as string == "2" ? "selected" : null)">Đang giao hàng</option>
-       <option value="3" selected="@(ViewBag.FilterStatus as string == "3" ? "selected" : null)">Giao thành công</option>
-    </select>
-     <noscript><button class="btn btn-primary" type="submit">Lọc</button></noscript>
-   @if (!string.IsNullOrWhiteSpace(ViewBag.FilterStatus as string))
-    {
-    <a class="btn btn-link" href="@Url.Action("Index", "Orders")">Bỏ lọc</a>
- }
-         </form>
-    </div>
-
-       <div class="col-sm-4 col-md-6">
-   <div class="input-group">
-        <span class="input-group-text">Tìm</span>
-        <input id="searchInput" type="search" class="form-control" placeholder="Tìm theo mã đơn hoặc tên khách..." aria-label="Search orders">
+            <div class="col-6 col-md-4 col-lg-2">
+               <a href="@Url.Action("Index", "Orders")" class="status-card status-all @(string.IsNullOrWhiteSpace(ViewBag.FilterStatus as string) ? "active" : "")">
+        <div class="status-count">@countAll</div>
+    <div class="status-label">Tất cả</div>
+ </a>
+            </div>
+    <div class="col-6 col-md-4 col-lg-2">
+          <a href="@Url.Action("Index", "Orders", new { status = "0" })" class="status-card status-pending @(ViewBag.FilterStatus as string == "0" ? "active" : "")">
+  <div class="status-count">@countPending</div>
+             <div class="status-label">Chờ xác nhận</div>
+           </a>
+        </div>
+    <div class="col-6 col-md-4 col-lg-2">
+        <a href="@Url.Action("Index", "Orders", new { status = "1" })" class="status-card status-confirmed @(ViewBag.FilterStatus as string == "1" ? "active" : "")">
+       <div class="status-count">@countConfirmed</div>
+      <div class="status-label">Đã xác nhận</div>
+             </a>
   </div>
- </div>
+   <div class="col-6 col-md-4 col-lg-2">
+        <a href="@Url.Action("Index", "Orders", new { status = "2" })" class="status-card status-shipping @(ViewBag.FilterStatus as string == "2" ? "active" : "")">
+       <div class="status-count">@countShipping</div>
+      <div class="status-label">Đang giao</div>
+         </a>
          </div>
-
-       <div class="mb-3">
-        <span class="badge bg-secondary me-1">Tất cả: @countAll</span>
-    <span class="badge bg-danger me-1">Đã hủy: @countCancelled</span>
-             <span class="badge bg-warning text-dark me-1">Chờ xác nhận: @countPending</span>
-   <span class="badge bg-info text-dark me-1">Đã xác nhận: @countConfirmed</span>
-         <span class="badge bg-primary me-1">Đang giao: @countShipping</span>
- <span class="badge bg-success me-1">Giao thành công: @countDone</span>
-   </div>
-
-       <div class="table-responsive">
-                <table class="table table-hover table-striped align-middle">
-           <thead class="table-light">
-       <tr>
-     <th style="width:120px">Mã đơn</th>
-        <th>Khách hàng</th>
-             <th style="width:100px">Số điện thoại</th>
-          <th style="width:160px">Trạng thái</th>
-                     <th class="text-end" style="width:120px">Tổng tiền</th>
-    <th style="width:170px">Thời gian đặt</th>
-             <th style="width:220px"></th>
-       </tr>
-         </thead>
-         <tbody id="ordersTableBody">
-       @foreach (var o in orders)
-          {
-<tr>
- <td class="fw-semibold">@o.Id</td>
-    <td class="text-muted small">@(o.Customer?.User?.Fullname ?? "N/A")</td>
-    <td class="text-muted small">@(o.PhoneNumber ?? "N/A")</td>
-         <td>
-         @{ var st = o.Status ?? "0"; string statusText; string badgeClass;
-     switch (st)
-     {
-            case "-1": statusText = "Đã hủy"; badgeClass = "bg-danger"; break;
-         case "0": statusText = "Chờ xác nhận"; badgeClass = "bg-warning text-dark"; break;
-       case "1": statusText = "Đã xác nhận"; badgeClass = "bg-info text-dark"; break;
-       case "2": statusText = "Đang giao hàng"; badgeClass = "bg-primary"; break;
-  case "3": statusText = "Giao thành công"; badgeClass = "bg-success"; break;
-         default: statusText = "Không rõ"; badgeClass = "bg-secondary"; break;
-                }
-        }
-         <span class="badge @badgeClass">@statusText</span>
-          </td>
-             <td class="text-end">@o.FinalAmount.ToString("#,##0")</td>
-       <td>
-  @{ var utc = DateTime.SpecifyKind(o.CreatedTime, DateTimeKind.Utc);
-      DateTime gmt7;
- try { gmt7 = TimeZoneInfo.ConvertTimeFromUtc(utc, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time")); }
-                catch { gmt7 = utc.ToLocalTime(); }
-     }
-       <span title="@gmt7.ToString("yyyy-MM-dd HH:mm:ss")">@gmt7.ToString("yyyy-MM-dd HH:mm")</span>
-   </td>
-                   <td class="text-nowrap">
-            <a class="btn btn-sm btn-outline-primary me-1" asp-action="Review" asp-controller="Orders" asp-route-id="@o.Id">Xem chi tiết</a>
-        @if (isAdmin)
-          {
-      <form asp-action="UpdateStatus" asp-controller="Orders" method="post" class="d-inline">
-         @Html.AntiForgeryToken()
- <input type="hidden" name="id" value="@o.Id" />
-     <input type="hidden" name="status" value="1" />
-            <button class="btn btn-sm btn-success" type="submit">Xác nhận</button>
-        </form>
-      }
-      </td>
-            </tr>
-  }
-               </tbody>
-    </table>
+           <div class="col-6 col-md-4 col-lg-2">
+   <a href="@Url.Action("Index", "Orders", new { status = "3" })" class="status-card status-done @(ViewBag.FilterStatus as string == "3" ? "active" : "")">
+             <div class="status-count">@countDone</div>
+   <div class="status-label">Thành công</div>
+     </a>
+          </div>
+         <div class="col-6 col-md-4 col-lg-2">
+      <a href="@Url.Action("Index", "Orders", new { status = "-1" })" class="status-card status-cancelled @(ViewBag.FilterStatus as string == "-1" ? "active" : "")">
+   <div class="status-count">@countCancelled</div>
+ <div class="status-label">Đã hủy</div>
+        </a>
+</div>
             </div>
 
-        </div>
+            <!-- Search -->
+     <div class="row g-2 mb-3">
+              <div class="col-12 col-md-6">
+      <div class="input-group">
+     <span class="input-group-text"><i class="fas fa-search"></i></span>
+     <input id="searchInput" type="search" class="form-control" placeholder="Tìm theo mã đơn hoặc tên khách..." aria-label="Search orders">
+ </div>
+</div>
+      </div>
+
+   <div class="table-responsive">
+          <table class="table table-hover table-striped align-middle">
+ <thead class="table-light">
+         <tr>
+          <th style="width:120px">Mã đơn</th>
+      <th>Khách hàng</th>
+           <th style="width:100px">Số điện thoại</th>
+     <th style="width:160px">Trạng thái</th>
+    <th class="text-end" style="width:120px">Tổng tiền</th>
+      <th style="width:170px">Thời gian đặt</th>
+      <th style="width:220px"></th>
+    </tr>
+</thead>
+    <tbody id="ordersTableBody">
+      @foreach (var o in orders)
+      {
+     <tr>
+  <td class="fw-semibold">@o.Id.ToString().Substring(0, 8)...</td>
+   <td class="text-muted small">@(o.Customer?.User?.Fullname ?? "N/A")</td>
+        <td class="text-muted small">@(o.PhoneNumber ?? "N/A")</td>
+          <td>
+        @{
+   var st = o.Status ?? "0"; string statusText; string badgeClass;
+   switch (st)
+      {
+       case "-1": statusText = "Đã hủy"; badgeClass = "bg-danger"; break;
+case "0": statusText = "Chờ xác nhận"; badgeClass = "bg-warning text-dark"; break;
+        case "1": statusText = "Đã xác nhận"; badgeClass = "bg-info text-dark"; break;
+case "2": statusText = "Đang giao hàng"; badgeClass = "bg-primary"; break;
+        case "3": statusText = "Giao thành công"; badgeClass = "bg-success"; break;
+    default: statusText = "Không rõ"; badgeClass = "bg-secondary"; break;
+        }
+              }
+         <span class="badge @badgeClass">@statusText</span>
+</td>
+         <td class="text-end fw-semibold text-primary">@o.FinalAmount.ToString("#,##0")₫</td>
+          <td>
+          @{
+                var utc = DateTime.SpecifyKind(o.CreatedTime, DateTimeKind.Utc);
+        DateTime gmt7;
+                  try { gmt7 = TimeZoneInfo.ConvertTimeFromUtc(utc, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time")); }
+           catch { gmt7 = utc.ToLocalTime(); }
+   }
+       <span title="@gmt7.ToString("yyyy-MM-dd HH:mm:ss")">@gmt7.ToString("dd/MM/yyyy HH:mm")</span>
+    </td>
+      <td class="text-nowrap">
+           <a class="btn btn-sm btn-outline-primary me-1" asp-action="Review" asp-controller="Orders" asp-route-id="@o.Id">
+   <i class="fas fa-eye me-1"></i>Chi tiết
+           </a>
+         @if (isAdmin && (o.Status == "0"))
+          {
+   <form asp-action="UpdateStatus" asp-controller="Orders" method="post" class="d-inline">
+          @Html.AntiForgeryToken()
+  <input type="hidden" name="id" value="@o.Id" />
+          <input type="hidden" name="status" value="1" />
+              <button class="btn btn-sm btn-success" type="submit">
+            <i class="fas fa-check me-1"></i>Xác nhận
+         </button>
+ </form>
+           }
+             </td>
+  </tr>
+   }
+           </tbody>
+       </table>
+    </div>
+
+            @if (!orders.Any())
+  {
+    <div class="text-center py-5">
+          <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+        <p class="text-muted">Không có đơn hàng nào</p>
+       </div>
+      }
+</div>
     </div>
 </div>
 
+<style>
+    /* Status Cards */
+    .status-card {
+display: block;
+     padding: 0.75rem;
+        border-radius: 12px;
+        text-decoration: none;
+        text-align: center;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+
+    .status-card:hover {
+   transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .status-card.active {
+        border-width: 2px;
+        border-style: solid;
+    }
+
+    .status-count {
+        font-size: 1.5rem;
+    font-weight: 700;
+    }
+
+    .status-label {
+ font-size: 0.75rem;
+        font-weight: 500;
+    }
+
+    .status-all { background: #f8f9fa; color: #6c757d; }
+    .status-all.active { border-color: #6c757d; }
+ .status-all .status-count { color: #495057; }
+
+    .status-pending { background: #fff3cd; color: #856404; }
+    .status-pending.active { border-color: #ffc107; }
+    .status-pending .status-count { color: #856404; }
+
+    .status-confirmed { background: #d1ecf1; color: #0c5460; }
+    .status-confirmed.active { border-color: #17a2b8; }
+    .status-confirmed .status-count { color: #0c5460; }
+
+    .status-shipping { background: #cce5ff; color: #004085; }
+    .status-shipping.active { border-color: #007bff; }
+    .status-shipping .status-count { color: #004085; }
+
+    .status-done { background: #d4edda; color: #155724; }
+    .status-done.active { border-color: #28a745; }
+    .status-done .status-count { color: #155724; }
+
+    .status-cancelled { background: #f8d7da; color: #721c24; }
+    .status-cancelled.active { border-color: #dc3545; }
+    .status-cancelled .status-count { color: #721c24; }
+
+    /* Table improvements */
+    .table th {
+        font-weight: 600;
+        color: #495057;
+        border-bottom: 2px solid #dee2e6;
+    }
+
+    .table td {
+    vertical-align: middle;
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .status-count {
+        font-size: 1.25rem;
+        }
+    }
+</style>
+
 @section Scripts {
     <script>
-(function(){
-        var input = document.getElementById('searchInput');
-        var tbody = document.getElementById('ordersTableBody');
-        if (!input || !tbody) return;
-        input.addEventListener('input', function(e){
-            var q = (e.target.value || '').trim().toLowerCase();
-        var rows = tbody.querySelectorAll('tr');
-if (!q) { rows.forEach(r => r.style.display=''); return; }
-       rows.forEach(function(r){
+   (function () {
+ var input = document.getElementById('searchInput');
+            var tbody = document.getElementById('ordersTableBody');
+            if (!input || !tbody) return;
+            input.addEventListener('input', function (e) {
+                var q = (e.target.value || '').trim().toLowerCase();
+     var rows = tbody.querySelectorAll('tr');
+        if (!q) { rows.forEach(r => r.style.display = ''); return; }
+       rows.forEach(function (r) {
         var id = r.children[0].innerText.toLowerCase();
-            var customer = r.children[1].innerText.toLowerCase();
-        r.style.display = (id.indexOf(q) !== -1 || customer.indexOf(q) !== -1) ? '' : 'none';
-          });
-        });
-})();
+              var customer = r.children[1].innerText.toLowerCase();
+       var phone = r.children[2].innerText.toLowerCase();
+ r.style.display = (id.indexOf(q) !== -1 || customer.indexOf(q) !== -1 || phone.indexOf(q) !== -1) ? '' : 'none';
+                });
+            });
+        })();
     </script>
 }

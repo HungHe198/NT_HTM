@@ -10,113 +10,631 @@
     decimal discount = (decimal)(ViewBag.VoucherDiscount ?? 0m);
     decimal total = (decimal)(ViewBag.Total ?? 0m);
     string? appliedCode = ViewBag.AppliedVoucherCode as string;
+    var availableVouchers = ViewBag.AvailableVouchers as IEnumerable<NT.SHARED.Models.Voucher> ?? Enumerable.Empty<NT.SHARED.Models.Voucher>();
 }
 
-<h2>Thanh toán</h2>
-@if (TempData["Error"] != null)
-{
-    <div class="alert alert-danger">@TempData["Error"]</div>
-}
-@if (TempData["Success"] != null)
-{
-    <div class="alert alert-success">@TempData["Success"]</div>
-}
+<div class="checkout-page">
+    <h2 class="checkout-title"><i class="fas fa-shopping-cart me-2"></i>Thanh toán</h2>
+    
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <i class="fas fa-exclamation-circle me-2"></i>@TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>@TempData["Success"]
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+   </div>
+    }
 
-<div class="row">
-    <div class="col-md-7">
-        <h5>Sản phẩm đã chọn</h5>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Tên</th>
-                    <th>Thuộc tính</th>
-                    <th>Đơn giá</th>
-                    <th>Số lượng</th>
-                    <th>Tạm tính</th>
-                </tr>
-            </thead>
-            <tbody>
-            @foreach (var item in (IEnumerable<object>)Model)
-            {
-                dynamic it = item;
-                <tr>
-                    <td>@it.Name</td>
-                    <td><small>Chiều dài: @it.Length, độ cứng: @it.Hardness</small></td>
-                    <td>@string.Format("{0:#,##0}", it.Price)</td>
-                    <td>@it.Quantity</td>
-                    <td>@string.Format("{0:#,##0}", (decimal)it.Price * (int)it.Quantity)</td>
-                </tr>
-            }
-            </tbody>
-        </table>
-    </div>
-    <div class="col-md-5">
-        <h5>Thông tin người nhận</h5>
-        <form asp-action="Submit" asp-controller="Checkout" method="post">
-            @Html.AntiForgeryToken()
-            <input type="hidden" name="cartId" value="@cartId" />
-            <input type="hidden" name="selectedIds" value="@selectedIds" />
-            <div class="mb-2">
-                <label class="form-label">Số điện thoại</label>
-                <input type="text" name="phoneNumber" class="form-control" required />
-            </div>
-            <div class="mb-2">
-                <label class="form-label">Địa chỉ giao hàng</label>
-                <input type="text" name="shippingAddress" class="form-control" required />
-            </div>
-            <div class="mb-2">
-                <label class="form-label">Phương thức thanh toán</label>
-                <select name="paymentMethodId" class="form-select" required>
-                    <option value="">-- Chọn phương thức --</option>
-                    @foreach (var m in paymentMethods)
-                    {
-                        <option value="@m.Id">@m.Name</option>
-                    }
-                </select>
-            </div>
-            <button type="submit" class="btn btn-primary w-100">Đặt hàng</button>
-        </form>
-
-        <div class="card mt-3">
-            <div class="card-body">
-                <h6 class="card-title">Mã giảm giá</h6>
-                @if (string.IsNullOrWhiteSpace(appliedCode))
-                {
-                    <form asp-action="ApplyVoucher" asp-controller="Checkout" method="post" class="input-group mb-2">
-                        @Html.AntiForgeryToken()
-                        <input type="hidden" name="cartId" value="@cartId" />
-                        <input type="hidden" name="selectedIds" value="@selectedIds" />
-                        <input type="text" name="code" class="form-control" placeholder="Nhập mã giảm giá" />
-                        <button class="btn btn-outline-primary" type="submit">Áp dụng</button>
-                    </form>
-                }
-                else
-                {
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="text-success">Đã áp dụng: <strong>@appliedCode</strong></span>
-                        <form asp-action="RemoveVoucher" asp-controller="Checkout" method="post" class="d-inline">
-                            @Html.AntiForgeryToken()
-                            <input type="hidden" name="cartId" value="@cartId" />
-                            <input type="hidden" name="selectedIds" value="@selectedIds" />
-                            <button class="btn btn-link btn-sm text-danger p-0" type="submit">Bỏ mã</button>
-                        </form>
-                    </div>
-                }
-            </div>
+    <div class="row g-4">
+        <!-- Cột sản phẩm -->
+        <div class="col-lg-7">
+        <div class="checkout-card">
+              <div class="card-header-custom">
+        <i class="fas fa-box me-2"></i>Sản phẩm đã chọn
+     </div>
+         <div class="table-responsive">
+          <table class="table table-checkout mb-0">
+   <thead>
+     <tr>
+     <th>Tên sản phẩm</th>
+         <th>Thuộc tính</th>
+         <th class="text-end">Đơn giá</th>
+          <th class="text-center">SL</th>
+     <th class="text-end">Tạm tính</th>
+      </tr>
+          </thead>
+      <tbody>
+     @foreach (var item in (IEnumerable<object>)Model)
+         {
+           dynamic it = item;
+      <tr>
+        <td class="product-name">@it.Name</td>
+  <td><span class="badge bg-light text-dark">Dài: @it.Length</span> <span class="badge bg-light text-dark">Cứng: @it.Hardness</span></td>
+   <td class="text-end">@string.Format("{0:#,##0}", it.Price)₫</td>
+   <td class="text-center"><span class="qty-badge">@it.Quantity</span></td>
+     <td class="text-end fw-semibold">@string.Format("{0:#,##0}", (decimal)it.Price * (int)it.Quantity)₫</td>
+             </tr>
+             }
+        </tbody>
+         </table>
+   </div>
+          </div>
         </div>
 
-        <div class="card mt-3">
-            <div class="card-body">
-                <h6 class="card-title">Tổng cộng</h6>
-                <div class="d-flex justify-content-between"><span>Tạm tính</span><strong>@subtotal.ToString("#,##0")</strong></div>
-                <div class="d-flex justify-content-between"><span>Vận chuyển</span><strong>@shipping.ToString("#,##0")</strong></div>
-                @if (discount > 0)
-                {
-                    <div class="d-flex justify-content-between"><span>Giảm theo voucher</span><strong class="text-success">-@discount.ToString("#,##0")</strong></div>
-                }
-                <hr />
-                <div class="d-flex justify-content-between"><span>Tổng Tiền</span><strong class="fs-5">@total.ToString("#,##0")</strong></div>
+        <!-- Cột thông tin thanh toán -->
+     <div class="col-lg-5">
+     <!-- Form thông tin người nhận -->
+  <div class="checkout-card mb-3">
+      <div class="card-header-custom">
+             <i class="fas fa-user me-2"></i>Thông tin người nhận
+     </div>
+          <div class="card-body-custom">
+         <form asp-action="Submit" asp-controller="Checkout" method="post" id="checkoutForm">
+        @Html.AntiForgeryToken()
+      <input type="hidden" name="cartId" value="@cartId" />
+       <input type="hidden" name="selectedIds" value="@selectedIds" />
+            
+<div class="mb-3">
+             <label class="form-label"><i class="fas fa-phone me-1"></i>Số điện thoại</label>
+     <input type="text" name="phoneNumber" class="form-control" placeholder="Nhập số điện thoại..." required />
+              </div>
+         <div class="mb-3">
+         <label class="form-label"><i class="fas fa-map-marker-alt me-1"></i>Địa chỉ giao hàng</label>
+   <input type="text" name="shippingAddress" class="form-control" placeholder="Nhập địa chỉ giao hàng..." required />
+             </div>
+    <div class="mb-3">
+       <label class="form-label"><i class="fas fa-credit-card me-1"></i>Phương thức thanh toán</label>
+  <select name="paymentMethodId" class="form-select" required>
+            <option value="">-- Chọn phương thức --</option>
+     @foreach (var m in paymentMethods)
+     {
+      <option value="@m.Id">@m.Name</option>
+ }
+     </select>
+         </div>
+      <button type="submit" class="btn btn-checkout w-100">
+       <i class="fas fa-check-circle me-2"></i>Đặt hàng
+               </button>
+     </form>
+       </div>
             </div>
+
+            <!-- Mã giảm giá -->
+       <div class="checkout-card mb-3">
+     <div class="card-header-custom">
+        <i class="fas fa-ticket-alt me-2"></i>Mã giảm giá
+</div>
+      <div class="card-body-custom">
+          @if (string.IsNullOrWhiteSpace(appliedCode))
+      {
+   @if (availableVouchers.Any())
+        {
+   <div class="voucher-dropdown-container">
+        <button type="button" class="btn btn-voucher-select w-100" id="voucherDropdownBtn">
+            <i class="fas fa-tags me-2"></i>Chọn mã giảm giá
+                 <i class="fas fa-chevron-down ms-auto"></i>
+         </button>
+      <div class="voucher-dropdown" id="voucherDropdown">
+     @foreach (var v in availableVouchers)
+       {
+      var discountPreview = v.CalculateDiscount(subtotal);
+       var remainingUsage = v.MaxUsage.HasValue ? (v.MaxUsage.Value - v.UsageCount) : (int?)null;
+    <div class="voucher-item" data-code="@v.Code">
+               <div class="voucher-item-left">
+     <div class="voucher-icon">
+         <i class="fas fa-percent"></i>
+            </div>
+     </div>
+   <div class="voucher-item-content">
+     <div class="voucher-code">@v.Code</div>
+         <div class="voucher-desc">Giảm @(v.DiscountPercentage?.ToString("N0") ?? "0")%@(v.MaxDiscountAmount.HasValue ? $" (tối đa {v.MaxDiscountAmount.Value:#,##0}₫)" : "")</div>
+         </div>
+  <div class="voucher-item-right">
+    <span class="voucher-save">-@discountPreview.ToString("#,##0")₫</span>
+          </div>
+   <!-- Tooltip chi tiết -->
+    <div class="voucher-tooltip">
+                <div class="tooltip-header">
+    <i class="fas fa-ticket-alt me-2"></i>Chi tiết voucher
+     </div>
+  <div class="tooltip-body">
+           <div class="tooltip-row">
+    <span class="tooltip-label">Mã:</span>
+     <span class="tooltip-value fw-bold">@v.Code</span>
+    </div>
+     <div class="tooltip-row">
+      <span class="tooltip-label">Giảm:</span>
+     <span class="tooltip-value">@(v.DiscountPercentage?.ToString("N0") ?? "0")%</span>
+ </div>
+        @if (v.MaxDiscountAmount.HasValue)
+             {
+     <div class="tooltip-row">
+         <span class="tooltip-label">Giảm tối đa:</span>
+  <span class="tooltip-value">@v.MaxDiscountAmount.Value.ToString("#,##0")₫</span>
+        </div>
+         }
+     @if (v.MinOrderAmount.HasValue)
+  {
+               <div class="tooltip-row">
+       <span class="tooltip-label">Đơn tối thiểu:</span>
+       <span class="tooltip-value">@v.MinOrderAmount.Value.ToString("#,##0")₫</span>
+ </div>
+     }
+        @if (v.EndDate.HasValue)
+     {
+   <div class="tooltip-row">
+       <span class="tooltip-label">Hết hạn:</span>
+              <span class="tooltip-value">@v.EndDate.Value.ToString("dd/MM/yyyy HH:mm")</span>
+  </div>
+    }
+       @if (remainingUsage.HasValue)
+                   {
+         <div class="tooltip-row">
+       <span class="tooltip-label">Còn lại:</span>
+             <span class="tooltip-value">@remainingUsage lượt</span>
+               </div>
+            }
+      <div class="tooltip-row highlight">
+          <span class="tooltip-label">Bạn tiết kiệm:</span>
+          <span class="tooltip-value text-success fw-bold">@discountPreview.ToString("#,##0")₫</span>
+           </div>
+           </div>
+             </div>
+                  </div>
+ }
+          </div>
+   </div>
+        
+          <!-- Form ẩn để submit voucher -->
+            <form asp-action="ApplyVoucher" asp-controller="Checkout" method="post" id="voucherForm" class="mt-2" style="display:none;">
+       @Html.AntiForgeryToken()
+          <input type="hidden" name="cartId" value="@cartId" />
+      <input type="hidden" name="selectedIds" value="@selectedIds" />
+         <input type="hidden" name="code" id="selectedVoucherCode" />
+        </form>
+     }
+      else
+        {
+ <div class="text-muted text-center py-3">
+        <i class="fas fa-ticket-alt fa-2x mb-2 opacity-50"></i>
+    <p class="mb-0">Không có mã giảm giá khả dụng</p>
+   </div>
+     }
+    }
+           else
+          {
+            <div class="applied-voucher">
+      <div class="applied-voucher-info">
+       <i class="fas fa-check-circle text-success me-2"></i>
+    <span>Đã áp dụng: <strong class="text-success">@appliedCode</strong></span>
+ </div>
+           <form asp-action="RemoveVoucher" asp-controller="Checkout" method="post" class="d-inline">
+  @Html.AntiForgeryToken()
+            <input type="hidden" name="cartId" value="@cartId" />
+         <input type="hidden" name="selectedIds" value="@selectedIds" />
+        <button class="btn btn-remove-voucher" type="submit">
+ <i class="fas fa-times"></i> Bỏ mã
+    </button>
+     </form>
+  </div>
+          }
+      </div>
+     </div>
+
+     <!-- Tổng cộng -->
+       <div class="checkout-card summary-card">
+          <div class="card-header-custom">
+       <i class="fas fa-receipt me-2"></i>Tổng cộng
+       </div>
+  <div class="card-body-custom">
+   <div class="summary-row">
+     <span>Tạm tính</span>
+  <strong>@subtotal.ToString("#,##0")₫</strong>
+        </div>
+          <div class="summary-row">
+<span><i class="fas fa-truck me-1"></i>Vận chuyển</span>
+  <strong>@shipping.ToString("#,##0")₫</strong>
+         </div>
+        @if (discount > 0)
+        {
+               <div class="summary-row discount-row">
+      <span><i class="fas fa-tag me-1"></i>Giảm giá voucher</span>
+  <strong class="text-success">-@discount.ToString("#,##0")₫</strong>
+    </div>
+ }
+           <hr />
+            <div class="summary-row total-row">
+         <span>Tổng tiền</span>
+              <strong class="total-price">@total.ToString("#,##0")₫</strong>
+         </div>
+       </div>
+    </div>
         </div>
     </div>
 </div>
+
+<style>
+    .checkout-page {
+        padding: 1rem 0;
+    }
+    
+    .checkout-title {
+        font-weight: 700;
+     color: #1a237e;
+     margin-bottom: 1.5rem;
+    }
+    
+    .checkout-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+    }
+    
+    .card-header-custom {
+      background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        padding: 1rem 1.25rem;
+        font-weight: 600;
+        color: #37474f;
+        border-bottom: 1px solid #e0e0e0;
+    }
+    
+    .card-body-custom {
+        padding: 1.25rem;
+    }
+    
+    .table-checkout {
+      margin: 0;
+    }
+    
+    .table-checkout thead th {
+        background: #f8f9fa;
+  font-weight: 600;
+        font-size: 0.85rem;
+        color: #546e7a;
+        padding: 0.75rem 1rem;
+        border: none;
+    }
+    
+    .table-checkout tbody td {
+        padding: 1rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .product-name {
+      font-weight: 600;
+    color: #263238;
+    }
+    
+    .qty-badge {
+        background: #e3f2fd;
+        color: #1976d2;
+  padding: 4px 12px;
+ border-radius: 20px;
+ font-weight: 600;
+    }
+    
+    .form-control, .form-select {
+    border-radius: 10px;
+        border: 2px solid #e0e0e0;
+  padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus, .form-select:focus {
+      border-color: #00bcd4;
+        box-shadow: 0 0 0 3px rgba(0, 188, 212, 0.15);
+    }
+    
+    .btn-checkout {
+ background: linear-gradient(135deg, #00bcd4, #00838f);
+        color: white;
+        border: none;
+        padding: 1rem;
+        border-radius: 12px;
+      font-weight: 600;
+        font-size: 1.1rem;
+     transition: all 0.3s ease;
+    }
+    
+    .btn-checkout:hover {
+        transform: translateY(-2px);
+   box-shadow: 0 8px 25px rgba(0, 188, 212, 0.4);
+        color: white;
+    }
+    
+    /* Voucher Dropdown Styles */
+ .voucher-dropdown-container {
+        position: relative;
+  }
+    
+    .btn-voucher-select {
+        background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+    border: 2px dashed #ff9800;
+        color: #e65100;
+        padding: 0.75rem 1rem;
+        border-radius: 12px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        transition: all 0.3s ease;
+  }
+    
+    .btn-voucher-select:hover {
+        background: linear-gradient(135deg, #ffe0b2, #ffcc80);
+        border-color: #f57c00;
+        color: #e65100;
+}
+    
+    .voucher-dropdown {
+        position: absolute;
+        top: 100%;
+    left: 0;
+  right: 0;
+  background: white;
+        border-radius: 12px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+        z-index: 1000;
+        max-height: 300px;
+overflow-y: auto;
+        display: none;
+        margin-top: 8px;
+        border: 1px solid #e0e0e0;
+    }
+    
+    .voucher-dropdown.show {
+        display: block;
+        animation: slideDown 0.2s ease;
+    }
+    
+    @@keyframes slideDown {
+        from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .voucher-item {
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        border-bottom: 1px solid #f0f0f0;
+   cursor: pointer;
+transition: all 0.2s ease;
+        position: relative;
+    }
+    
+    .voucher-item:last-child {
+        border-bottom: none;
+    }
+    
+    .voucher-item:hover {
+    background: #f5f5f5;
+    }
+    
+    .voucher-item-left {
+        margin-right: 1rem;
+    }
+    
+    .voucher-icon {
+        width: 45px;
+        height: 45px;
+    background: linear-gradient(135deg, #ff9800, #f57c00);
+  border-radius: 10px;
+        display: flex;
+        align-items: center;
+      justify-content: center;
+     color: white;
+  font-size: 1.2rem;
+    }
+    
+    .voucher-item-content {
+        flex: 1;
+    }
+    
+    .voucher-code {
+  font-weight: 700;
+        color: #e65100;
+        font-size: 1rem;
+    }
+    
+    .voucher-desc {
+        font-size: 0.85rem;
+        color: #757575;
+    }
+    
+    .voucher-item-right {
+        text-align: right;
+    }
+
+    .voucher-save {
+        background: linear-gradient(135deg, #4caf50, #388e3c);
+        color: white;
+        padding: 4px 10px;
+   border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+    
+    /* Voucher Tooltip */
+    .voucher-tooltip {
+        position: absolute;
+        left: 105%;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 280px;
+        background: white;
+border-radius: 12px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        z-index: 1001;
+  display: none;
+      border: 1px solid #e0e0e0;
+    }
+    
+  .voucher-item:hover .voucher-tooltip {
+        display: block;
+        animation: fadeIn 0.2s ease;
+    }
+    
+    @@keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-50%) translateX(-10px); }
+        to { opacity: 1; transform: translateY(-50%) translateX(0); }
+    }
+ 
+    .tooltip-header {
+      background: linear-gradient(135deg, #ff9800, #f57c00);
+        color: white;
+        padding: 0.75rem 1rem;
+        font-weight: 600;
+border-radius: 12px 12px 0 0;
+    }
+    
+    .tooltip-body {
+        padding: 1rem;
+    }
+    
+    .tooltip-row {
+        display: flex;
+  justify-content: space-between;
+        padding: 0.4rem 0;
+        font-size: 0.9rem;
+        border-bottom: 1px solid #f5f5f5;
+    }
+    
+    .tooltip-row:last-child {
+        border-bottom: none;
+    }
+    
+    .tooltip-row.highlight {
+        background: #e8f5e9;
+        margin: 0.5rem -1rem -1rem;
+        padding: 0.75rem 1rem;
+    border-radius: 0 0 12px 12px;
+    }
+    
+    .tooltip-label {
+     color: #757575;
+    }
+    
+    .tooltip-value {
+        color: #263238;
+    }
+    
+    /* Applied Voucher */
+    .applied-voucher {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #e8f5e9;
+        padding: 1rem;
+border-radius: 10px;
+        border: 1px solid #a5d6a7;
+    }
+    
+    .btn-remove-voucher {
+        background: #ffebee;
+   color: #c62828;
+        border: none;
+    padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-size: 0.85rem;
+    transition: all 0.2s ease;
+    }
+    
+    .btn-remove-voucher:hover {
+    background: #ffcdd2;
+    }
+ 
+    /* Summary Card */
+    .summary-card {
+   border: 2px solid #00bcd4;
+    }
+    
+    .summary-row {
+  display: flex;
+    justify-content: space-between;
+        padding: 0.5rem 0;
+    }
+    
+    .discount-row {
+        background: #e8f5e9;
+     margin: 0 -1.25rem;
+        padding: 0.5rem 1.25rem;
+    }
+    
+    .total-row {
+    font-size: 1.2rem;
+    }
+    
+    .total-price {
+      font-size: 1.5rem;
+        background: linear-gradient(135deg, #00838f, #00bcd4);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    /* Responsive */
+    @@media (max-width: 992px) {
+        .voucher-tooltip {
+            left: auto;
+            right: 0;
+         top: 100%;
+            transform: none;
+            width: 100%;
+       margin-top: 8px;
+        }
+
+        .voucher-item:hover .voucher-tooltip {
+            animation: fadeInMobile 0.2s ease;
+   }
+      
+   @@keyframes fadeInMobile {
+         from { opacity: 0; transform: translateY(-10px); }
+     to { opacity: 1; transform: translateY(0); }
+        }
+    }
+</style>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropdownBtn = document.getElementById('voucherDropdownBtn');
+  const dropdown = document.getElementById('voucherDropdown');
+  const voucherForm = document.getElementById('voucherForm');
+         const selectedCodeInput = document.getElementById('selectedVoucherCode');
+  
+    if (dropdownBtn && dropdown) {
+        // Toggle dropdown
+                dropdownBtn.addEventListener('click', function(e) {
+ e.stopPropagation();
+          dropdown.classList.toggle('show');
+        });
+     
+         // Close dropdown when clicking outside
+     document.addEventListener('click', function(e) {
+            if (!dropdown.contains(e.target) && e.target !== dropdownBtn) {
+        dropdown.classList.remove('show');
+        }
+  });
+   
+          // Handle voucher selection
+                const voucherItems = dropdown.querySelectorAll('.voucher-item');
+           voucherItems.forEach(function(item) {
+    item.addEventListener('click', function() {
+     const code = this.getAttribute('data-code');
+      if (code && selectedCodeInput && voucherForm) {
+          selectedCodeInput.value = code;
+              voucherForm.submit();
+           }
+      });
+     });
+         }
+    });
+    </script>
+}
