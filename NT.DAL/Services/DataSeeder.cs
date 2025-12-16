@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using NT.SHARED.Models;
 using System;
 using System.Collections.Generic;
@@ -155,6 +155,51 @@ namespace NT.DAL.Services
                 Position = "Administrator",
                 Salary = (decimal?)null
             });
+
+            // Seed a few sample vouchers so clients can pick available ones at checkout
+            // These values will be captured into migrations when you create/update a migration
+            var voucherWelcomeId = Guid.Parse("11111111-aaaa-bbbb-cccc-111111111111");
+            var voucherSaveId = Guid.Parse("22222222-aaaa-bbbb-cccc-222222222222");
+            var voucherBigId = Guid.Parse("33333333-aaaa-bbbb-cccc-333333333333");
+
+            modelBuilder.Entity<Voucher>().HasData(
+                new Voucher
+                {
+                    Id = voucherWelcomeId,
+                    Code = "WELCOME10",
+                    DiscountPercentage = 10m,
+                    MaxDiscountAmount = 50000m,
+                    MinOrderAmount = 300000m,
+                    StartDate = DateTime.Now.AddDays(-7),
+                    EndDate = DateTime.Now.AddMonths(1),
+                    UsageCount = 0,
+                    MaxUsage = 1000
+                },
+                new Voucher
+                {
+                    Id = voucherSaveId,
+                    Code = "SAVE15",
+                    DiscountPercentage = 15m,
+                    MaxDiscountAmount = 100000m,
+                    MinOrderAmount = 500000m,
+                    StartDate = DateTime.Now.AddDays(-3),
+                    EndDate = DateTime.Now.AddMonths(2),
+                    UsageCount = 0,
+                    MaxUsage = 500
+                },
+                new Voucher
+                {
+                    Id = voucherBigId,
+                    Code = "BIGSALE25",
+                    DiscountPercentage = 25m,
+                    MaxDiscountAmount = 200000m,
+                    MinOrderAmount = 800000m,
+                    StartDate = DateTime.Now.AddDays(-1),
+                    EndDate = DateTime.Now.AddMonths(3),
+                    UsageCount = 0,
+                    MaxUsage = 300
+                }
+            );
         }
     }
 }
