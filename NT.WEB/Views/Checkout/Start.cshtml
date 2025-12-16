@@ -90,13 +90,16 @@
              </div>
     <div class="mb-3">
        <label class="form-label"><i class="fas fa-credit-card me-1"></i>Phương thức thanh toán</label>
-  <select name="paymentMethodId" class="form-select" required>
-            <option value="">-- Chọn phương thức --</option>
-     @foreach (var m in paymentMethods)
-     {
-      <option value="@m.Id">@m.Name</option>
- }
-     </select>
+       <div class="custom-select-wrapper">
+           <select name="paymentMethodId" class="form-select custom-select-styled" required>
+               <option value="">-- Chọn phương thức --</option>
+               @foreach (var m in paymentMethods)
+               {
+                   <option value="@m.Id" data-icon="fa-money-bill-wave">@m.Name</option>
+               }
+           </select>
+           <span class="custom-select-icon"><i class="fas fa-chevron-down"></i></span>
+       </div>
          </div>
       <button type="submit" class="btn btn-checkout w-100">
        <i class="fas fa-check-circle me-2"></i>Đặt hàng
@@ -110,60 +113,167 @@
          <div class="card-header-custom">
             <i class="fas fa-ticket-alt me-2"></i>Mã giảm giá
          </div>
-         <div class="card-body-custom">
-           @if (string.IsNullOrWhiteSpace(appliedCode))
-           {
-               if (availableVouchers.Any())
-               {
-                   <div class="mb-2">
-                       <label class="form-label"><i class="fas fa-tags me-1"></i>Chọn mã giảm giá</label>
-                       <select id="voucherSelect" class="form-select">
-                           <option value="">-- Chọn mã giảm giá --</option>
-                           @foreach (var v in availableVouchers)
-                           {
-                               var percent = v.DiscountPercentage?.ToString("0") ?? "0";
-                               var max = v.MaxDiscountAmount.HasValue ? v.MaxDiscountAmount.Value.ToString("#,##0") + "đ" : "Không giới hạn";
-                               var min = v.MinOrderAmount.HasValue ? v.MinOrderAmount.Value.ToString("#,##0") + "đ" : "0đ";
-                               var hsd = v.EndDate.HasValue ? v.EndDate.Value.ToString("dd/MM/yyyy") : "Không xác định";
-                               <option value="@v.Code">@v.Code | @percent% | Tối đa: @max | Đơn tối thiểu: @min | HSD: @hsd</option>
-                           }
-                       </select>
+         <div class="card-body-custom" id="voucherSection">
+           <!-- Nút mở modal chọn voucher -->
+           <div id="voucherSelectContainer" class="@(string.IsNullOrWhiteSpace(appliedCode) ? "" : "d-none")">
+               <button type="button" class="btn-open-voucher-modal w-100" data-bs-toggle="modal" data-bs-target="#voucherModal">
+                   <div class="btn-voucher-content">
+                       <i class="fas fa-ticket-alt"></i>
+                       <span>Chọn hoặc nhập mã giảm giá</span>
                    </div>
-
-                   <form asp-action="ApplyVoucher" asp-controller="Checkout" method="post" id="voucherForm" class="mt-2">
-                       @Html.AntiForgeryToken()
-                       <input type="hidden" name="cartId" value="@cartId" />
-                       <input type="hidden" name="selectedIds" value="@selectedIds" />
-                       <input type="hidden" name="code" id="selectedVoucherCode" />
-                   </form>
-               }
-               else
-               {
-                   <div class="text-muted text-center py-3">
-                       <i class="fas fa-ticket-alt fa-2x mb-2 opacity-50"></i>
-                       <p class="mb-0">Không có mã giảm giá khả dụng</p>
-                   </div>
-               }
-           }
-           else
-           {
-               <div class="applied-voucher">
-                   <div class="applied-voucher-info">
-                       <i class="fas fa-check-circle text-success me-2"></i>
-                       <span>Đã áp dụng: <strong class="text-success">@appliedCode</strong></span>
-                   </div>
-                   <form asp-action="RemoveVoucher" asp-controller="Checkout" method="post" class="d-inline">
-                       @Html.AntiForgeryToken()
-                       <input type="hidden" name="cartId" value="@cartId" />
-                       <input type="hidden" name="selectedIds" value="@selectedIds" />
-                       <button class="btn btn-remove-voucher" type="submit">
-                           <i class="fas fa-times"></i> Bỏ mã
-                       </button>
-                   </form>
+                   <i class="fas fa-chevron-right"></i>
+               </button>
+           </div>
+           
+           <!-- Hiển thị voucher đã áp dụng -->
+           <div class="applied-voucher @(string.IsNullOrWhiteSpace(appliedCode) ? "d-none" : "")" id="appliedVoucherContainer">
+               <div class="applied-voucher-info">
+                   <i class="fas fa-check-circle text-success me-2"></i>
+                   <span>Đã áp dụng: <strong class="text-success" id="appliedVoucherCode">@appliedCode</strong></span>
                </div>
-           }
+               <button class="btn btn-remove-voucher" type="button" id="btnRemoveVoucher">
+                   <i class="fas fa-times"></i> Bỏ mã
+               </button>
+           </div>
          </div>
        </div>
+
+<!-- Modal Chọn Voucher (Shopee Style) -->
+<div class="modal fade" id="voucherModal" tabindex="-1" aria-labelledby="voucherModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content voucher-modal-content">
+            <div class="modal-header voucher-modal-header">
+                <h5 class="modal-title" id="voucherModalLabel">
+                    <i class="fas fa-ticket-alt me-2"></i>Chọn NT Voucher
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body voucher-modal-body">
+                <!-- Nhập mã voucher -->
+                <div class="voucher-input-section">
+                    <label class="voucher-input-label">Mã Voucher</label>
+                    <div class="voucher-input-wrapper">
+                        <input type="text" id="voucherCodeInput" class="voucher-code-input" placeholder="Nhập mã voucher" />
+                        <button type="button" id="btnApplyVoucherCode" class="btn-apply-code">ÁP DỤNG</button>
+                    </div>
+                </div>
+
+                <!-- Danh sách voucher -->
+                <div class="voucher-list-section">
+                    <h6 class="voucher-list-title">
+                        <i class="fas fa-tags me-2"></i>Mã Giảm Giá
+                        <span class="voucher-count">(@availableVouchers.Count() mã)</span>
+                    </h6>
+                    
+                    <div class="voucher-list" id="voucherList">
+                        @if (availableVouchers.Any())
+                        {
+                            @foreach (var v in availableVouchers)
+                            {
+                                var percent = v.DiscountPercentage?.ToString("0") ?? "0";
+                                var max = v.MaxDiscountAmount.HasValue ? v.MaxDiscountAmount.Value.ToString("#,##0") + "đ" : "Không giới hạn";
+                                var min = v.MinOrderAmount.HasValue ? v.MinOrderAmount.Value.ToString("#,##0") + "đ" : "0đ";
+                                var hsd = v.EndDate.HasValue ? v.EndDate.Value.ToString("dd.MM.yyyy") : "Không giới hạn";
+                                var remaining = v.MaxUsage.HasValue ? (v.MaxUsage.Value - v.UsageCount) : (int?)null;
+                                var isEligible = !v.MinOrderAmount.HasValue || subtotal >= v.MinOrderAmount.Value;
+                                var daysLeft = v.EndDate.HasValue ? (v.EndDate.Value - DateTime.Now).Days : (int?)null;
+                                
+                                <div class="voucher-card @(isEligible ? "" : "voucher-disabled")" 
+                                     data-code="@v.Code" 
+                                     data-percent="@percent"
+                                     data-max="@max"
+                                     data-min="@min"
+                                     data-hsd="@hsd"
+                                     data-eligible="@isEligible.ToString().ToLower()">
+                                    <!-- Badge số lượng còn lại -->
+                                    @if (remaining.HasValue)
+                                    {
+                                        <div class="voucher-remaining-badge">x @remaining</div>
+                                    }
+                                    
+                                    <div class="voucher-card-left">
+                                        <div class="voucher-brand">
+                                            <span class="voucher-brand-text">GIẢM</span>
+                                            <span class="voucher-percent-text">@percent%</span>
+                                        </div>
+                                        <div class="voucher-type">Mã Giảm Giá</div>
+                                    </div>
+                                    
+                                    <div class="voucher-card-right">
+                                        <div class="voucher-info">
+                                            <div class="voucher-main-info">
+                                                <span class="voucher-discount-text">Giảm tối đa @max</span>
+                                                <span class="voucher-min-order">Đơn Tối Thiểu @min</span>
+                                            </div>
+                                            <div class="voucher-sub-info">
+                                                @if (daysLeft.HasValue && daysLeft.Value <= 7)
+                                                {
+                                                    <span class="voucher-expiry urgent">
+                                                        <i class="fas fa-clock me-1"></i>Sắp hết hạn: Còn @daysLeft ngày
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="voucher-expiry">HSD: @hsd</span>
+                                                }
+                                                <a href="javascript:void(0)" class="voucher-condition-link" data-code="@v.Code">Điều Kiện</a>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="voucher-action">
+                                            @if (isEligible)
+                                            {
+                                                <div class="voucher-radio">
+                                                    <input type="radio" name="selectedVoucher" value="@v.Code" id="voucher_@v.Code" />
+                                                    <label for="voucher_@v.Code"></label>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <div class="voucher-ineligible-msg">
+                                                    <i class="fas fa-info-circle"></i>
+                                                    <span>Chưa đủ điều kiện</span>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Điều kiện chi tiết (ẩn) -->
+                                    <div class="voucher-conditions-popup d-none" id="conditions_@v.Code">
+                                        <div class="conditions-header">
+                                            <strong>Điều kiện áp dụng</strong>
+                                        </div>
+                                        <ul class="conditions-list">
+                                            <li><i class="fas fa-check"></i> Giảm @percent% giá trị đơn hàng</li>
+                                            <li><i class="fas fa-check"></i> Giảm tối đa: @max</li>
+                                            <li><i class="fas fa-check"></i> Áp dụng cho đơn từ: @min</li>
+                                            <li><i class="fas fa-check"></i> Hạn sử dụng: @hsd</li>
+                                            @if (remaining.HasValue)
+                                            {
+                                                <li><i class="fas fa-check"></i> Còn lại: @remaining lượt sử dụng</li>
+                                            }
+                                        </ul>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="voucher-empty">
+                                <i class="fas fa-ticket-alt fa-3x mb-3"></i>
+                                <p>Không có mã giảm giá khả dụng</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer voucher-modal-footer">
+                <button type="button" class="btn btn-voucher-cancel" data-bs-dismiss="modal">TRỞ LẠI</button>
+                <button type="button" class="btn btn-voucher-apply" id="btnConfirmVoucher">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
 
      <!-- Tổng cộng -->
        <div class="checkout-card summary-card">
@@ -173,23 +283,20 @@
   <div class="card-body-custom">
    <div class="summary-row">
      <span>Tạm tính</span>
-  <strong>@subtotal.ToString("#,##0")₫</strong>
+  <strong id="subtotalDisplay">@subtotal.ToString("#,##0")₫</strong>
         </div>
           <div class="summary-row">
 <span><i class="fas fa-truck me-1"></i>Vận chuyển</span>
   <strong>@shipping.ToString("#,##0")₫</strong>
          </div>
-        @if (discount > 0)
-        {
-               <div class="summary-row discount-row">
+        <div class="summary-row discount-row" id="discountRow" style="@(discount > 0 ? "" : "display:none;")">
       <span><i class="fas fa-tag me-1"></i>Giảm giá voucher</span>
-  <strong class="text-success">-@discount.ToString("#,##0")₫</strong>
+  <strong class="text-success" id="discountDisplay">-@discount.ToString("#,##0")₫</strong>
     </div>
- }
            <hr />
             <div class="summary-row total-row">
          <span>Tổng tiền</span>
-              <strong class="total-price">@total.ToString("#,##0")₫</strong>
+              <strong class="total-price" id="totalDisplay">@total.ToString("#,##0")₫</strong>
          </div>
        </div>
     </div>
@@ -270,6 +377,481 @@
       border-color: #00bcd4;
         box-shadow: 0 0 0 3px rgba(0, 188, 212, 0.15);
     }
+
+    /* Custom Select Wrapper - Payment Method */
+    .custom-select-wrapper {
+        position: relative;
+    }
+
+    .custom-select-styled {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        padding-right: 2.5rem;
+        background: linear-gradient(135deg, #ffffff, #f8f9fa);
+        cursor: pointer;
+    }
+
+    .custom-select-styled:hover {
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        border-color: #00bcd4;
+    }
+
+    .custom-select-icon {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #00bcd4;
+        pointer-events: none;
+        transition: transform 0.3s ease;
+    }
+
+    .custom-select-wrapper:focus-within .custom-select-icon {
+        transform: translateY(-50%) rotate(180deg);
+    }
+
+    /* Button Open Voucher Modal */
+    .btn-open-voucher-modal {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        padding: 1rem 1.25rem;
+        background: linear-gradient(135deg, #fff8e1, #fff3e0);
+        border: 2px dashed #ff9800;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-open-voucher-modal:hover {
+        background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+        border-color: #f57c00;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(255, 152, 0, 0.2);
+    }
+
+    .btn-voucher-content {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: #e65100;
+        font-weight: 600;
+    }
+
+    .btn-voucher-content i {
+        font-size: 1.25rem;
+        color: #ff9800;
+    }
+
+    .btn-open-voucher-modal > i {
+        color: #ff9800;
+    }
+
+    /* Voucher Modal Styles */
+    .voucher-modal-content {
+        border: none;
+        border-radius: 16px;
+        overflow: hidden;
+    }
+
+    .voucher-modal-header {
+        background: linear-gradient(135deg, #00bcd4, #00838f);
+        color: white;
+        border: none;
+        padding: 1.25rem 1.5rem;
+    }
+
+    .voucher-modal-header .btn-close {
+        filter: brightness(0) invert(1);
+        opacity: 0.8;
+    }
+
+    .voucher-modal-header .btn-close:hover {
+        opacity: 1;
+    }
+
+    .voucher-modal-body {
+        padding: 0;
+        max-height: 60vh;
+        overflow-y: auto;
+    }
+
+    /* Voucher Input Section */
+    .voucher-input-section {
+        padding: 1.25rem 1.5rem;
+        background: #f8f9fa;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .voucher-input-label {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .voucher-input-wrapper {
+        display: flex;
+        gap: 0.75rem;
+    }
+
+    .voucher-code-input {
+        flex: 1;
+        padding: 0.75rem 1rem;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .voucher-code-input:focus {
+        outline: none;
+        border-color: #00bcd4;
+        box-shadow: 0 0 0 3px rgba(0, 188, 212, 0.15);
+    }
+
+    .btn-apply-code {
+        padding: 0.75rem 1.5rem;
+        background: #e0e0e0;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        color: #9e9e9e;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-apply-code:hover,
+    .btn-apply-code.active {
+        background: linear-gradient(135deg, #00bcd4, #00838f);
+        color: white;
+    }
+
+    /* Voucher List Section */
+    .voucher-list-section {
+        padding: 1rem 1.5rem 1.5rem;
+    }
+
+    .voucher-list-title {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .voucher-list-title i {
+        color: #ff9800;
+    }
+
+    .voucher-count {
+        font-weight: 400;
+        color: #757575;
+        font-size: 0.9rem;
+        margin-left: 0.5rem;
+    }
+
+    .voucher-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    /* Voucher Card (Shopee Style) */
+    .voucher-card {
+        display: flex;
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e0e0e0;
+        position: relative;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .voucher-card:hover {
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
+        transform: translateY(-2px);
+    }
+
+    .voucher-card.voucher-disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .voucher-card.voucher-disabled:hover {
+        transform: none;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .voucher-card.selected {
+        border-color: #00bcd4;
+        box-shadow: 0 0 0 2px rgba(0, 188, 212, 0.3);
+    }
+
+    /* Remaining Badge */
+    .voucher-remaining-badge {
+        position: absolute;
+        top: 0;
+        right: 0;
+        background: linear-gradient(135deg, #ff5722, #e64a19);
+        color: white;
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        border-radius: 0 12px 0 8px;
+    }
+
+    /* Voucher Card Left */
+    .voucher-card-left {
+        background: linear-gradient(135deg, #26c6da, #00acc1);
+        color: white;
+        padding: 1rem;
+        min-width: 100px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        position: relative;
+    }
+
+    .voucher-card-left::after {
+        content: '';
+        position: absolute;
+        right: -8px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 16px;
+        height: 16px;
+        background: #f8f9fa;
+        border-radius: 50%;
+    }
+
+    .voucher-brand {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .voucher-brand-text {
+        font-size: 0.75rem;
+        font-weight: 500;
+        opacity: 0.9;
+    }
+
+    .voucher-percent-text {
+        font-size: 1.5rem;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+
+    .voucher-type {
+        font-size: 0.7rem;
+        opacity: 0.8;
+        margin-top: 0.25rem;
+    }
+
+    /* Voucher Card Right */
+    .voucher-card-right {
+        flex: 1;
+        padding: 1rem 1rem 1rem 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .voucher-info {
+        flex: 1;
+    }
+
+    .voucher-main-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .voucher-discount-text {
+        font-weight: 600;
+        color: #333;
+        font-size: 0.95rem;
+    }
+
+    .voucher-min-order {
+        font-size: 0.85rem;
+        color: #757575;
+    }
+
+    .voucher-sub-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-top: 0.5rem;
+    }
+
+    .voucher-expiry {
+        font-size: 0.8rem;
+        color: #757575;
+    }
+
+    .voucher-expiry.urgent {
+        color: #f44336;
+        font-weight: 500;
+    }
+
+    .voucher-condition-link {
+        font-size: 0.8rem;
+        color: #00bcd4;
+        text-decoration: none;
+    }
+
+    .voucher-condition-link:hover {
+        text-decoration: underline;
+    }
+
+    /* Voucher Action */
+    .voucher-action {
+        display: flex;
+        align-items: center;
+        padding-left: 1rem;
+    }
+
+    .voucher-radio {
+        position: relative;
+    }
+
+    .voucher-radio input[type="radio"] {
+        appearance: none;
+        -webkit-appearance: none;
+        width: 22px;
+        height: 22px;
+        border: 2px solid #bdbdbd;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .voucher-radio input[type="radio"]:checked {
+        border-color: #00bcd4;
+        background: #00bcd4;
+    }
+
+    .voucher-radio input[type="radio"]:checked::after {
+        content: '✓';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white;
+        font-size: 14px;
+        font-weight: bold;
+    }
+
+    .voucher-ineligible-msg {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        font-size: 0.7rem;
+        color: #ff9800;
+        text-align: center;
+    }
+
+    .voucher-ineligible-msg i {
+        font-size: 1rem;
+        margin-bottom: 0.25rem;
+    }
+
+    /* Voucher Conditions Popup */
+    .voucher-conditions-popup {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border: 1px solid #e0e0e0;
+        border-radius: 0 0 12px 12px;
+        padding: 1rem;
+        z-index: 10;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .conditions-header {
+        margin-bottom: 0.75rem;
+        color: #333;
+    }
+
+    .conditions-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .conditions-list li {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.4rem 0;
+        font-size: 0.85rem;
+        color: #555;
+    }
+
+    .conditions-list li i {
+        color: #4caf50;
+        font-size: 0.75rem;
+    }
+
+    /* Voucher Empty */
+    .voucher-empty {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: #9e9e9e;
+    }
+
+    .voucher-empty i {
+        opacity: 0.5;
+    }
+
+    /* Modal Footer */
+    .voucher-modal-footer {
+        border-top: 1px solid #e0e0e0;
+        padding: 1rem 1.5rem;
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+    }
+
+    .btn-voucher-cancel {
+        padding: 0.75rem 2rem;
+        background: white;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        font-weight: 600;
+        color: #333;
+        transition: all 0.3s ease;
+    }
+
+    .btn-voucher-cancel:hover {
+        background: #f5f5f5;
+    }
+
+    .btn-voucher-apply {
+        padding: 0.75rem 2.5rem;
+        background: linear-gradient(135deg, #00bcd4, #00838f);
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        color: white;
+        transition: all 0.3s ease;
+    }
+
+    .btn-voucher-apply:hover {
+        background: linear-gradient(135deg, #00acc1, #00796b);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 188, 212, 0.4);
+    }
     
     .btn-checkout {
  background: linear-gradient(135deg, #00bcd4, #00838f);
@@ -286,181 +868,6 @@
         transform: translateY(-2px);
    box-shadow: 0 8px 25px rgba(0, 188, 212, 0.4);
         color: white;
-    }
-    
-    /* Voucher Dropdown Styles */
- .voucher-dropdown-container {
-        position: relative;
-  }
-    
-    .btn-voucher-select {
-        background: linear-gradient(135deg, #fff3e0, #ffe0b2);
-    border: 2px dashed #ff9800;
-        color: #e65100;
-        padding: 0.75rem 1rem;
-        border-radius: 12px;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        transition: all 0.3s ease;
-  }
-    
-    .btn-voucher-select:hover {
-        background: linear-gradient(135deg, #ffe0b2, #ffcc80);
-        border-color: #f57c00;
-        color: #e65100;
-}
-    
-    .voucher-dropdown {
-        position: absolute;
-        top: 100%;
-    left: 0;
-  right: 0;
-  background: white;
-        border-radius: 12px;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-        z-index: 1000;
-        max-height: 300px;
-overflow-y: auto;
-        display: none;
-        margin-top: 8px;
-        border: 1px solid #e0e0e0;
-    }
-    
-    .voucher-dropdown.show {
-        display: block;
-        animation: slideDown 0.2s ease;
-    }
-    
-    @@keyframes slideDown {
-        from { opacity: 0; transform: translateY(-10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    
-    .voucher-item {
-        display: flex;
-        align-items: center;
-        padding: 1rem;
-        border-bottom: 1px solid #f0f0f0;
-   cursor: pointer;
-transition: all 0.2s ease;
-        position: relative;
-    }
-    
-    .voucher-item:last-child {
-        border-bottom: none;
-    }
-    
-    .voucher-item:hover {
-    background: #f5f5f5;
-    }
-    
-    .voucher-item-left {
-        margin-right: 1rem;
-    }
-    
-    .voucher-icon {
-        width: 45px;
-        height: 45px;
-    background: linear-gradient(135deg, #ff9800, #f57c00);
-  border-radius: 10px;
-        display: flex;
-        align-items: center;
-      justify-content: center;
-     color: white;
-  font-size: 1.2rem;
-    }
-    
-    .voucher-item-content {
-        flex: 1;
-    }
-    
-    .voucher-code {
-  font-weight: 700;
-        color: #e65100;
-        font-size: 1rem;
-    }
-    
-    .voucher-desc {
-        font-size: 0.85rem;
-        color: #757575;
-    }
-    
-    .voucher-item-right {
-        text-align: right;
-    }
-
-    .voucher-save {
-        background: linear-gradient(135deg, #4caf50, #388e3c);
-        color: white;
-        padding: 4px 10px;
-   border-radius: 20px;
-        font-size: 0.85rem;
-        font-weight: 600;
-    }
-    
-    /* Voucher Tooltip */
-    .voucher-tooltip {
-        position: absolute;
-        left: 105%;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 280px;
-        background: white;
-border-radius: 12px;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-        z-index: 1001;
-  display: none;
-      border: 1px solid #e0e0e0;
-    }
-    
-  .voucher-item:hover .voucher-tooltip {
-        display: block;
-        animation: fadeIn 0.2s ease;
-    }
-    
-    @@keyframes fadeIn {
-        from { opacity: 0; transform: translateY(-50%) translateX(-10px); }
-        to { opacity: 1; transform: translateY(-50%) translateX(0); }
-    }
- 
-    .tooltip-header {
-      background: linear-gradient(135deg, #ff9800, #f57c00);
-        color: white;
-        padding: 0.75rem 1rem;
-        font-weight: 600;
-border-radius: 12px 12px 0 0;
-    }
-    
-    .tooltip-body {
-        padding: 1rem;
-    }
-    
-    .tooltip-row {
-        display: flex;
-  justify-content: space-between;
-        padding: 0.4rem 0;
-        font-size: 0.9rem;
-        border-bottom: 1px solid #f5f5f5;
-    }
-    
-    .tooltip-row:last-child {
-        border-bottom: none;
-    }
-    
-    .tooltip-row.highlight {
-        background: #e8f5e9;
-        margin: 0.5rem -1rem -1rem;
-        padding: 0.75rem 1rem;
-    border-radius: 0 0 12px 12px;
-    }
-    
-    .tooltip-label {
-     color: #757575;
-    }
-    
-    .tooltip-value {
-        color: #263238;
     }
     
     /* Applied Voucher */
@@ -519,22 +926,66 @@ border-radius: 10px;
     
     /* Responsive */
     @@media (max-width: 992px) {
-        .voucher-tooltip {
-            left: auto;
-            right: 0;
-         top: 100%;
-            transform: none;
-            width: 100%;
-       margin-top: 8px;
+        .voucher-card-left {
+            min-width: 80px;
+            padding: 0.75rem;
         }
-
-        .voucher-item:hover .voucher-tooltip {
-            animation: fadeInMobile 0.2s ease;
-   }
-      
-   @@keyframes fadeInMobile {
-         from { opacity: 0; transform: translateY(-10px); }
-     to { opacity: 1; transform: translateY(0); }
+        
+        .voucher-percent-text {
+            font-size: 1.25rem;
+        }
+        
+        .voucher-card-right {
+            padding: 0.75rem;
+        }
+        
+        .voucher-sub-info {
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        
+        .voucher-modal-body {
+            max-height: 70vh;
+        }
+    }
+    
+    @@media (max-width: 576px) {
+        .voucher-card {
+            flex-direction: column;
+        }
+        
+        .voucher-card-left {
+            flex-direction: row;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem;
+        }
+        
+        .voucher-card-left::after {
+            display: none;
+        }
+        
+        .voucher-brand {
+            flex-direction: row;
+            gap: 0.5rem;
+        }
+        
+        .voucher-card-right {
+            padding: 1rem;
+        }
+        
+        .voucher-remaining-badge {
+            top: auto;
+            bottom: 0;
+            border-radius: 8px 0 12px 0;
+        }
+        
+        .voucher-input-wrapper {
+            flex-direction: column;
+        }
+        
+        .btn-apply-code {
+            width: 100%;
         }
     }
 </style>
@@ -542,16 +993,214 @@ border-radius: 10px;
 @section Scripts {
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const select = document.getElementById('voucherSelect');
-            const form = document.getElementById('voucherForm');
-            const input = document.getElementById('selectedVoucherCode');
-            if (select && form && input) {
-                select.addEventListener('change', function () {
-                    const val = this.value;
-                    if (val) {
-                        input.value = val;
-                        form.submit();
+            const cartId = '@cartId';
+            const selectedIds = '@selectedIds';
+            const antiForgeryToken = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+            const btnRemoveVoucher = document.getElementById('btnRemoveVoucher');
+            const appliedVoucherContainer = document.getElementById('appliedVoucherContainer');
+            const appliedVoucherCode = document.getElementById('appliedVoucherCode');
+            const voucherSelectContainer = document.getElementById('voucherSelectContainer');
+            const discountRow = document.getElementById('discountRow');
+            const discountDisplay = document.getElementById('discountDisplay');
+            const totalDisplay = document.getElementById('totalDisplay');
+            
+            // Modal elements
+            const voucherModal = document.getElementById('voucherModal');
+            const voucherCodeInput = document.getElementById('voucherCodeInput');
+            const btnApplyVoucherCode = document.getElementById('btnApplyVoucherCode');
+            const btnConfirmVoucher = document.getElementById('btnConfirmVoucher');
+            const voucherList = document.getElementById('voucherList');
+
+            // Hàm hiển thị thông báo
+            function showAlert(message, type) {
+                const alertContainer = document.querySelector('.checkout-page');
+                const existingAlerts = alertContainer.querySelectorAll('.alert');
+                existingAlerts.forEach(a => a.remove());
+
+                const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+                const iconClass = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+                const alertHtml = `
+                    <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+                        <i class="fas ${iconClass} me-2"></i>${message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                `;
+                alertContainer.insertAdjacentHTML('afterbegin', alertHtml);
+
+                setTimeout(() => {
+                    const alert = alertContainer.querySelector('.alert');
+                    if (alert) alert.remove();
+                }, 5000);
+            }
+
+            // Hàm áp dụng voucher qua AJAX
+            async function applyVoucher(code) {
+                try {
+                    const response = await fetch('/Checkout/ApplyVoucherAjax', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': antiForgeryToken
+                        },
+                        body: JSON.stringify({
+                            cartId: cartId,
+                            selectedIds: selectedIds,
+                            code: code
+                        })
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        // Cập nhật UI
+                        appliedVoucherCode.textContent = result.appliedCode;
+                        appliedVoucherContainer.classList.remove('d-none');
+                        voucherSelectContainer.classList.add('d-none');
+
+                        // Cập nhật tổng tiền
+                        if (result.discount > 0) {
+                            discountRow.style.display = '';
+                            discountDisplay.textContent = '-' + result.discountFormatted + '₫';
+                        }
+                        totalDisplay.textContent = result.totalFormatted + '₫';
+
+                        // Đóng modal
+                        const modal = bootstrap.Modal.getInstance(voucherModal);
+                        if (modal) modal.hide();
+
+                        showAlert(result.message, 'success');
+                        return true;
+                    } else {
+                        showAlert(result.message, 'error');
+                        return false;
                     }
+                } catch (error) {
+                    console.error('Error:', error);
+                    showAlert('Có lỗi xảy ra. Vui lòng thử lại.', 'error');
+                    return false;
+                }
+            }
+
+            // Xử lý chọn voucher card
+            if (voucherList) {
+                voucherList.addEventListener('click', function(e) {
+                    const card = e.target.closest('.voucher-card');
+                    if (!card || card.classList.contains('voucher-disabled')) return;
+
+                    // Xử lý click vào link điều kiện
+                    if (e.target.classList.contains('voucher-condition-link')) {
+                        e.preventDefault();
+                        const code = e.target.dataset.code;
+                        const conditionsPopup = document.getElementById('conditions_' + code);
+                        if (conditionsPopup) {
+                            conditionsPopup.classList.toggle('d-none');
+                        }
+                        return;
+                    }
+
+                    // Chọn voucher
+                    const radio = card.querySelector('input[type="radio"]');
+                    if (radio) {
+                        radio.checked = true;
+                        
+                        // Bỏ selected class từ tất cả cards
+                        voucherList.querySelectorAll('.voucher-card').forEach(c => c.classList.remove('selected'));
+                        card.classList.add('selected');
+                    }
+                });
+            }
+
+            // Xử lý nhập mã voucher
+            if (voucherCodeInput) {
+                voucherCodeInput.addEventListener('input', function() {
+                    if (this.value.trim()) {
+                        btnApplyVoucherCode.classList.add('active');
+                    } else {
+                        btnApplyVoucherCode.classList.remove('active');
+                    }
+                });
+            }
+
+            // Áp dụng mã voucher từ input
+            if (btnApplyVoucherCode) {
+                btnApplyVoucherCode.addEventListener('click', async function() {
+                    const code = voucherCodeInput.value.trim().toUpperCase();
+                    if (!code) {
+                        showAlert('Vui lòng nhập mã voucher', 'error');
+                        return;
+                    }
+                    await applyVoucher(code);
+                });
+            }
+
+            // Xác nhận chọn voucher từ danh sách
+            if (btnConfirmVoucher) {
+                btnConfirmVoucher.addEventListener('click', async function() {
+                    const selectedRadio = voucherList.querySelector('input[type="radio"]:checked');
+                    if (!selectedRadio) {
+                        showAlert('Vui lòng chọn mã giảm giá', 'error');
+                        return;
+                    }
+                    await applyVoucher(selectedRadio.value);
+                });
+            }
+
+            // Bỏ voucher
+            if (btnRemoveVoucher) {
+                btnRemoveVoucher.addEventListener('click', async function () {
+                    try {
+                        const response = await fetch('/Checkout/RemoveVoucherAjax', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'RequestVerificationToken': antiForgeryToken
+                            },
+                            body: JSON.stringify({
+                                cartId: cartId,
+                                selectedIds: selectedIds
+                            })
+                        });
+
+                        const result = await response.json();
+
+                        if (result.success) {
+                            // Cập nhật UI
+                            appliedVoucherContainer.classList.add('d-none');
+                            appliedVoucherCode.textContent = '';
+                            
+                            // Hiển thị lại nút chọn voucher
+                            voucherSelectContainer.classList.remove('d-none');
+
+                            // Reset radio selections
+                            voucherList.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
+                            voucherList.querySelectorAll('.voucher-card').forEach(c => c.classList.remove('selected'));
+                            voucherCodeInput.value = '';
+
+                            // Ẩn dòng giảm giá
+                            discountRow.style.display = 'none';
+                            discountDisplay.textContent = '-0₫';
+
+                            // Cập nhật tổng tiền
+                            totalDisplay.textContent = result.totalFormatted + '₫';
+
+                            showAlert(result.message, 'success');
+                        } else {
+                            showAlert(result.message || 'Có lỗi xảy ra', 'error');
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        showAlert('Có lỗi xảy ra. Vui lòng thử lại.', 'error');
+                    }
+                });
+            }
+
+            // Reset modal khi đóng
+            if (voucherModal) {
+                voucherModal.addEventListener('hidden.bs.modal', function() {
+                    voucherCodeInput.value = '';
+                    btnApplyVoucherCode.classList.remove('active');
+                    voucherList.querySelectorAll('.voucher-conditions-popup').forEach(p => p.classList.add('d-none'));
                 });
             }
         });

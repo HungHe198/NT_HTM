@@ -232,6 +232,194 @@ namespace NT.WEB.Controllers
             return Redirect($"/Checkout/Start?cartId={cartId}&selected={selectedIds}");
         }
 
+        // POST: /Checkout/ApplyVoucherAjax - Áp dụng mã giảm giá qua AJAX
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ApplyVoucherAjax([FromBody] ApplyVoucherRequest request)
+        {
+            var code = request.Code?.Trim().ToUpperInvariant() ?? string.Empty;
+            var cartId = request.CartId;
+            var selectedIds = request.SelectedIds;
+
+            if (string.IsNullOrWhiteSpace(code))
+            {
+                return Json(new { success = false, message = "Vui lòng nhập mã voucher" });
+            }
+
+            // Tính subtotal để validate voucher
+            var ids = (selectedIds ?? string.Empty)
+                .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(s => Guid.TryParse(s, out var g) ? g : Guid.Empty)
+                .Where(g => g != Guid.Empty)
+                .ToArray();
+
+            var cartItems = await _cartDetailService.FindWithIncludesAsync(
+                cd => cd.CartId == cartId,
+                cd => cd.ProductDetail!
+            );
+            var selectedItems = (cartItems ?? Enumerable.Empty<CartDetail>())
+                .Where(ci => ids.Contains(ci.ProductDetailId) && ci.Quantity > 0)
+                .ToList();
+
+            decimal subtotal = 0m;
+            foreach (var ci in selectedItems)
+            {
+                var pd = ci.ProductDetail ?? await _productDetailService.GetByIdAsync(ci.ProductDetailId);
+                var price = pd?.Price ?? 0m;
+                subtotal += price * ci.Quantity;
+            }
+
+            // Tìm voucher
+            var found = await _voucherRepo.FindAsync(v => v.Code == code);
+            var voucher = found?.FirstOrDefault();
+
+            if (voucher == null)
+            {
+                HttpContext.Session.Remove("SESSION_VOUCHER_CODE");
+                HttpContext.Session.Remove("SESSION_VOUCHER_DISCOUNT");
+                return Json(new { success = false, message = "Mã voucher không tồn tại" });
+            }
+
+            if (!voucher.IsValid())
+            {
+                string errorMsg;
+                if (voucher.EndDate.HasValue && voucher.EndDate.Value < DateTime.Now)
+                    errorMsg = "Voucher đã hết hạn";
+                else if (voucher.StartDate.HasValue && voucher.StartDate.Value > DateTime.Now)
+                    errorMsg = "Voucher chưa bắt đầu";
+                else if (voucher.MaxUsage.HasValue && voucher.UsageCount >= voucher.MaxUsage.Value)
+                    errorMsg = "Voucher đã hết lượt sử dụng";
+                else
+                    errorMsg = "Voucher không hợp lệ";
+
+                HttpContext.Session.Remove("SESSION_VOUCHER_CODE");
+                HttpContext.Session.Remove("SESSION_VOUCHER_DISCOUNT");
+                return Json(new { success = false, message = errorMsg });
+            }
+
+            if (voucher.MinOrderAmount.HasValue && subtotal < voucher.MinOrderAmount.Value)
+            {
+                HttpContext.Session.Remove("SESSION_VOUCHER_CODE");
+                HttpContext.Session.Remove("SESSION_VOUCHER_DISCOUNT");
+                return Json(new { success = false, message = $"Giá trị đơn hàng tối thiểu để áp dụng voucher là {voucher.MinOrderAmount.Value:#,##0}đ" });
+            }
+
+            var discount = voucher.CalculateDiscount(subtotal);
+            var shippingFee = 35000m;
+            var total = subtotal + shippingFee - discount;
+
+            HttpContext.Session.SetString("SESSION_VOUCHER_CODE", voucher.Code);
+            HttpContext.Session.SetString("SESSION_VOUCHER_DISCOUNT", discount.ToString());
+
+            // Lấy danh sách vouchers có thể sử dụng
+            var allVouchers = await _voucherRepo.GetAllAsync();
+            var availableVouchers = (allVouchers ?? new List<Voucher>())
+                .Where(v => v.IsValid() && (!v.MinOrderAmount.HasValue || subtotal >= v.MinOrderAmount.Value))
+                .OrderByDescending(v => v.DiscountPercentage)
+                .Select(v => new
+                {
+                    code = v.Code,
+                    percent = v.DiscountPercentage?.ToString("0") ?? "0",
+                    max = v.MaxDiscountAmount.HasValue ? v.MaxDiscountAmount.Value.ToString("#,##0") + "đ" : "Không giới hạn",
+                    min = v.MinOrderAmount.HasValue ? v.MinOrderAmount.Value.ToString("#,##0") + "đ" : "0đ",
+                    hsd = v.EndDate.HasValue ? v.EndDate.Value.ToString("dd/MM/yyyy") : "Không xác định"
+                })
+                .ToList();
+
+            return Json(new
+            {
+                success = true,
+                message = $"Áp dụng voucher '{voucher.Code}' thành công. Giảm {discount:#,##0}đ.",
+                appliedCode = voucher.Code,
+                discount = discount,
+                discountFormatted = discount.ToString("#,##0"),
+                total = total,
+                totalFormatted = total.ToString("#,##0"),
+                subtotal = subtotal,
+                subtotalFormatted = subtotal.ToString("#,##0"),
+                availableVouchers = availableVouchers
+            });
+        }
+
+        // POST: /Checkout/RemoveVoucherAjax - Bỏ mã giảm giá qua AJAX
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RemoveVoucherAjax([FromBody] RemoveVoucherRequest request)
+        {
+            HttpContext.Session.Remove("SESSION_VOUCHER_CODE");
+            HttpContext.Session.Remove("SESSION_VOUCHER_DISCOUNT");
+
+            var cartId = request.CartId;
+            var selectedIds = request.SelectedIds;
+
+            // Tính subtotal
+            var ids = (selectedIds ?? string.Empty)
+                .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(s => Guid.TryParse(s, out var g) ? g : Guid.Empty)
+                .Where(g => g != Guid.Empty)
+                .ToArray();
+
+            var cartItems = await _cartDetailService.FindWithIncludesAsync(
+                cd => cd.CartId == cartId,
+                cd => cd.ProductDetail!
+            );
+            var selectedItems = (cartItems ?? Enumerable.Empty<CartDetail>())
+                .Where(ci => ids.Contains(ci.ProductDetailId) && ci.Quantity > 0)
+                .ToList();
+
+            decimal subtotal = 0m;
+            foreach (var ci in selectedItems)
+            {
+                var pd = ci.ProductDetail ?? await _productDetailService.GetByIdAsync(ci.ProductDetailId);
+                var price = pd?.Price ?? 0m;
+                subtotal += price * ci.Quantity;
+            }
+
+            var shippingFee = 35000m;
+            var total = subtotal + shippingFee;
+
+            // Lấy danh sách vouchers có thể sử dụng
+            var allVouchers = await _voucherRepo.GetAllAsync();
+            var availableVouchers = (allVouchers ?? new List<Voucher>())
+                .Where(v => v.IsValid() && (!v.MinOrderAmount.HasValue || subtotal >= v.MinOrderAmount.Value))
+                .OrderByDescending(v => v.DiscountPercentage)
+                .Select(v => new
+                {
+                    code = v.Code,
+                    percent = v.DiscountPercentage?.ToString("0") ?? "0",
+                    max = v.MaxDiscountAmount.HasValue ? v.MaxDiscountAmount.Value.ToString("#,##0") + "đ" : "Không giới hạn",
+                    min = v.MinOrderAmount.HasValue ? v.MinOrderAmount.Value.ToString("#,##0") + "đ" : "0đ",
+                    hsd = v.EndDate.HasValue ? v.EndDate.Value.ToString("dd/MM/yyyy") : "Không xác định"
+                })
+                .ToList();
+
+            return Json(new
+            {
+                success = true,
+                message = "Đã bỏ voucher",
+                discount = 0m,
+                discountFormatted = "0",
+                total = total,
+                totalFormatted = total.ToString("#,##0"),
+                subtotal = subtotal,
+                subtotalFormatted = subtotal.ToString("#,##0"),
+                availableVouchers = availableVouchers
+            });
+        }
+
+        public class ApplyVoucherRequest
+        {
+            public Guid CartId { get; set; }
+            public string? SelectedIds { get; set; }
+            public string? Code { get; set; }
+        }
+
+        public class RemoveVoucherRequest
+        {
+            public Guid CartId { get; set; }
+            public string? SelectedIds { get; set; }
+        }
+
         // POST: /Checkout/Submit
         [HttpPost]
         [ValidateAntiForgeryToken]
