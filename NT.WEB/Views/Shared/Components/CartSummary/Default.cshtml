@@ -3,39 +3,46 @@
     var count = Model?.Sum(i => i.Quantity) ?? 0;
     var cartId = ViewData["CartId"] as Guid?;
 }
-<div class="dropdown me-3">
-    <a class="text-muted position-relative btn-icon" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="Giỏ hàng">
-        <i class="fa fa-shopping-cart"></i>
-        @if (count > 0)
-        {
-            <span class="badge bg-danger badge-circle">@count</span>
-        }
-    </a>
-    <ul class="dropdown-menu dropdown-menu-end p-0" style="min-width: 360px;">
-        <li class="p-2 border-bottom fw-semibold">Giỏ hàng</li>
-        @if (Model != null && Model.Any())
-        {
-            foreach (var ci in Model)
-            {
-                var pd = ci.ProductDetail;
-                <li class="p-2 d-flex align-items-center gap-2 border-bottom">
-                    <img src="@(pd?.Product?.Thumbnail ?? "/images/product-placeholder.png")" style="width:48px;height:48px;object-fit:cover;border-radius:6px" alt="thumb" />
-                    <div class="flex-grow-1 small">
-                        <div class="fw-semibold">@(pd?.Product?.Name ?? "Sản phẩm")</div>
-                        <div class="text-muted">SL: @ci.Quantity</div>
-                    </div>
-                    <div class="small text-end" style="min-width:80px">
-                        @pd?.Price.ToString("#,##0")
-                    </div>
-                </li>
-            }
-            <li class="p-2 text-end">
-                <a class="btn btn-sm btn-primary" asp-controller="CartDetail" asp-action="Index" asp-route-cartId="@cartId">Xem giỏ hàng</a>
-            </li>
-        }
-        else
-        {
-            <li><div class="px-3 py-2 small text-muted">Giỏ hàng trống</div></li>
-        }
-    </ul>
-</div>
+<a asp-controller="CartDetail" asp-action="Index" asp-route-cartId="@cartId" 
+   class="btn btn-cart-header me-3 text-decoration-none" 
+   title="Xem giỏ hàng">
+    <i class="fa fa-shopping-cart me-1"></i>
+    @if (count > 0)
+    {
+        <span class="cart-count">@count sản phẩm</span>
+    }
+    else
+    {
+        <span class="cart-count">Giỏ hàng</span>
+    }
+</a>
+
+<style>
+    .btn-cart-header {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: linear-gradient(135deg, #00838f, #00bcd4);
+        color: white !important;
+        padding: 8px 16px;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 10px rgba(0, 131, 143, 0.3);
+    }
+    
+    .btn-cart-header:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 131, 143, 0.4);
+        background: linear-gradient(135deg, #006064, #00838f);
+        color: white !important;
+    }
+    
+    .btn-cart-header .cart-count {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 2px 10px;
+        border-radius: 15px;
+        font-size: 0.8rem;
+    }
+</style>
