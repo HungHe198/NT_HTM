@@ -12,8 +12,8 @@ using NT.DAL.ContextFile;
 namespace NT.DAL.Migrations
 {
     [DbContext(typeof(NTAppDbContext))]
-    [Migration("20251217042520_Hieupq_1")]
-    partial class Hieupq_1
+    [Migration("20251217071559_hieupq_10")]
+    partial class hieupq_10
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -79,7 +79,7 @@ namespace NT.DAL.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("1c323c98-2d0d-47e0-9840-39e13f3d36ad"),
+                            Id = new Guid("08197fa4-ca13-4258-aa84-c61e962e5579"),
                             Name = "NT Fishing",
                             Website = "https://ntfishing.example"
                         },
@@ -666,8 +666,8 @@ namespace NT.DAL.Migrations
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000001"),
-                            BrandId = new Guid("1c323c98-2d0d-47e0-9840-39e13f3d36ad"),
-                            CreatedDate = new DateTime(2025, 12, 17, 4, 25, 19, 626, DateTimeKind.Utc).AddTicks(9601),
+                            BrandId = new Guid("08197fa4-ca13-4258-aa84-c61e962e5579"),
+                            CreatedDate = new DateTime(2025, 12, 17, 7, 15, 59, 79, DateTimeKind.Utc).AddTicks(2840),
                             Name = "Cần câu đài mẫu 1",
                             ProductCode = "CD001",
                             ShortDescription = "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên",
@@ -678,7 +678,7 @@ namespace NT.DAL.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000002"),
                             BrandId = new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"),
-                            CreatedDate = new DateTime(2025, 12, 17, 4, 25, 19, 626, DateTimeKind.Utc).AddTicks(9611),
+                            CreatedDate = new DateTime(2025, 12, 17, 7, 15, 59, 79, DateTimeKind.Utc).AddTicks(2853),
                             Name = "Cần câu đài mẫu 2",
                             ProductCode = "CD002",
                             ShortDescription = "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên",
@@ -689,7 +689,7 @@ namespace NT.DAL.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000003"),
                             BrandId = new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"),
-                            CreatedDate = new DateTime(2025, 12, 17, 4, 25, 19, 626, DateTimeKind.Utc).AddTicks(9615),
+                            CreatedDate = new DateTime(2025, 12, 17, 7, 15, 59, 79, DateTimeKind.Utc).AddTicks(2859),
                             Name = "Cần câu đài mẫu 3",
                             ProductCode = "CD003",
                             ShortDescription = "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên",
@@ -700,7 +700,7 @@ namespace NT.DAL.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000004"),
                             BrandId = new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"),
-                            CreatedDate = new DateTime(2025, 12, 17, 4, 25, 19, 626, DateTimeKind.Utc).AddTicks(9629),
+                            CreatedDate = new DateTime(2025, 12, 17, 7, 15, 59, 79, DateTimeKind.Utc).AddTicks(2866),
                             Name = "Cần câu đài mẫu 4",
                             ProductCode = "CD004",
                             ShortDescription = "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên",
@@ -711,7 +711,7 @@ namespace NT.DAL.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000005"),
                             BrandId = new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"),
-                            CreatedDate = new DateTime(2025, 12, 17, 4, 25, 19, 626, DateTimeKind.Utc).AddTicks(9632),
+                            CreatedDate = new DateTime(2025, 12, 17, 7, 15, 59, 79, DateTimeKind.Utc).AddTicks(2870),
                             Name = "Cần câu đài mẫu 5",
                             ProductCode = "CD005",
                             ShortDescription = "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên",
@@ -722,7 +722,7 @@ namespace NT.DAL.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000006"),
                             BrandId = new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"),
-                            CreatedDate = new DateTime(2025, 12, 17, 4, 25, 19, 626, DateTimeKind.Utc).AddTicks(9638),
+                            CreatedDate = new DateTime(2025, 12, 17, 7, 15, 59, 79, DateTimeKind.Utc).AddTicks(2876),
                             Name = "Cần câu đài mẫu 6",
                             ProductCode = "CD006",
                             ShortDescription = "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên",
@@ -733,7 +733,7 @@ namespace NT.DAL.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000007"),
                             BrandId = new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"),
-                            CreatedDate = new DateTime(2025, 12, 17, 4, 25, 19, 626, DateTimeKind.Utc).AddTicks(9642),
+                            CreatedDate = new DateTime(2025, 12, 17, 7, 15, 59, 79, DateTimeKind.Utc).AddTicks(2880),
                             Name = "Cần câu đài mẫu 7",
                             ProductCode = "CD007",
                             ShortDescription = "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên",
@@ -743,8 +743,8 @@ namespace NT.DAL.Migrations
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000008"),
-                            BrandId = new Guid("1c323c98-2d0d-47e0-9840-39e13f3d36ad"),
-                            CreatedDate = new DateTime(2025, 12, 17, 4, 25, 19, 626, DateTimeKind.Utc).AddTicks(9645),
+                            BrandId = new Guid("08197fa4-ca13-4258-aa84-c61e962e5579"),
+                            CreatedDate = new DateTime(2025, 12, 17, 7, 15, 59, 79, DateTimeKind.Utc).AddTicks(2884),
                             Name = "Cần câu đài mẫu 8",
                             ProductCode = "CD008",
                             ShortDescription = "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên",
@@ -755,7 +755,7 @@ namespace NT.DAL.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000009"),
                             BrandId = new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"),
-                            CreatedDate = new DateTime(2025, 12, 17, 4, 25, 19, 626, DateTimeKind.Utc).AddTicks(9649),
+                            CreatedDate = new DateTime(2025, 12, 17, 7, 15, 59, 79, DateTimeKind.Utc).AddTicks(2888),
                             Name = "Cần câu đài mẫu 9",
                             ProductCode = "CD009",
                             ShortDescription = "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên",
@@ -765,8 +765,8 @@ namespace NT.DAL.Migrations
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000010"),
-                            BrandId = new Guid("1c323c98-2d0d-47e0-9840-39e13f3d36ad"),
-                            CreatedDate = new DateTime(2025, 12, 17, 4, 25, 19, 626, DateTimeKind.Utc).AddTicks(9655),
+                            BrandId = new Guid("08197fa4-ca13-4258-aa84-c61e962e5579"),
+                            CreatedDate = new DateTime(2025, 12, 17, 7, 15, 59, 79, DateTimeKind.Utc).AddTicks(2895),
                             Name = "Cần câu đài mẫu 10",
                             ProductCode = "CD010",
                             ShortDescription = "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên",
@@ -777,7 +777,7 @@ namespace NT.DAL.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000011"),
                             BrandId = new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"),
-                            CreatedDate = new DateTime(2025, 12, 17, 4, 25, 19, 626, DateTimeKind.Utc).AddTicks(9723),
+                            CreatedDate = new DateTime(2025, 12, 17, 7, 15, 59, 79, DateTimeKind.Utc).AddTicks(2900),
                             Name = "Cần câu đài mẫu 11",
                             ProductCode = "CD011",
                             ShortDescription = "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên",
@@ -788,7 +788,7 @@ namespace NT.DAL.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000012"),
                             BrandId = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
-                            CreatedDate = new DateTime(2025, 12, 17, 4, 25, 19, 626, DateTimeKind.Utc).AddTicks(9729),
+                            CreatedDate = new DateTime(2025, 12, 17, 7, 15, 59, 79, DateTimeKind.Utc).AddTicks(2916),
                             Name = "Cần câu đài mẫu 12",
                             ProductCode = "CD012",
                             ShortDescription = "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên",
@@ -799,7 +799,7 @@ namespace NT.DAL.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000013"),
                             BrandId = new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"),
-                            CreatedDate = new DateTime(2025, 12, 17, 4, 25, 19, 626, DateTimeKind.Utc).AddTicks(9733),
+                            CreatedDate = new DateTime(2025, 12, 17, 7, 15, 59, 79, DateTimeKind.Utc).AddTicks(2921),
                             Name = "Cần câu đài mẫu 13",
                             ProductCode = "CD013",
                             ShortDescription = "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên",
@@ -810,7 +810,7 @@ namespace NT.DAL.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000014"),
                             BrandId = new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"),
-                            CreatedDate = new DateTime(2025, 12, 17, 4, 25, 19, 626, DateTimeKind.Utc).AddTicks(9737),
+                            CreatedDate = new DateTime(2025, 12, 17, 7, 15, 59, 79, DateTimeKind.Utc).AddTicks(2927),
                             Name = "Cần câu đài mẫu 14",
                             ProductCode = "CD014",
                             ShortDescription = "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên",
@@ -821,7 +821,7 @@ namespace NT.DAL.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000015"),
                             BrandId = new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"),
-                            CreatedDate = new DateTime(2025, 12, 17, 4, 25, 19, 626, DateTimeKind.Utc).AddTicks(9740),
+                            CreatedDate = new DateTime(2025, 12, 17, 7, 15, 59, 79, DateTimeKind.Utc).AddTicks(2932),
                             Name = "Cần câu đài mẫu 15",
                             ProductCode = "CD015",
                             ShortDescription = "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên",
@@ -831,8 +831,8 @@ namespace NT.DAL.Migrations
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000016"),
-                            BrandId = new Guid("1c323c98-2d0d-47e0-9840-39e13f3d36ad"),
-                            CreatedDate = new DateTime(2025, 12, 17, 4, 25, 19, 626, DateTimeKind.Utc).AddTicks(9744),
+                            BrandId = new Guid("08197fa4-ca13-4258-aa84-c61e962e5579"),
+                            CreatedDate = new DateTime(2025, 12, 17, 7, 15, 59, 79, DateTimeKind.Utc).AddTicks(2936),
                             Name = "Cần câu đài mẫu 16",
                             ProductCode = "CD016",
                             ShortDescription = "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên",
@@ -843,7 +843,7 @@ namespace NT.DAL.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000017"),
                             BrandId = new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"),
-                            CreatedDate = new DateTime(2025, 12, 17, 4, 25, 19, 626, DateTimeKind.Utc).AddTicks(9748),
+                            CreatedDate = new DateTime(2025, 12, 17, 7, 15, 59, 79, DateTimeKind.Utc).AddTicks(2941),
                             Name = "Cần câu đài mẫu 17",
                             ProductCode = "CD017",
                             ShortDescription = "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên",
@@ -854,7 +854,7 @@ namespace NT.DAL.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000018"),
                             BrandId = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
-                            CreatedDate = new DateTime(2025, 12, 17, 4, 25, 19, 626, DateTimeKind.Utc).AddTicks(9753),
+                            CreatedDate = new DateTime(2025, 12, 17, 7, 15, 59, 79, DateTimeKind.Utc).AddTicks(2946),
                             Name = "Cần câu đài mẫu 18",
                             ProductCode = "CD018",
                             ShortDescription = "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên",
@@ -865,7 +865,7 @@ namespace NT.DAL.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000019"),
                             BrandId = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
-                            CreatedDate = new DateTime(2025, 12, 17, 4, 25, 19, 626, DateTimeKind.Utc).AddTicks(9757),
+                            CreatedDate = new DateTime(2025, 12, 17, 7, 15, 59, 79, DateTimeKind.Utc).AddTicks(2951),
                             Name = "Cần câu đài mẫu 19",
                             ProductCode = "CD019",
                             ShortDescription = "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên",
@@ -876,7 +876,7 @@ namespace NT.DAL.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000020"),
                             BrandId = new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"),
-                            CreatedDate = new DateTime(2025, 12, 17, 4, 25, 19, 626, DateTimeKind.Utc).AddTicks(9772),
+                            CreatedDate = new DateTime(2025, 12, 17, 7, 15, 59, 79, DateTimeKind.Utc).AddTicks(2957),
                             Name = "Cần câu đài mẫu 20",
                             ProductCode = "CD020",
                             ShortDescription = "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên",
@@ -887,7 +887,7 @@ namespace NT.DAL.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000021"),
                             BrandId = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
-                            CreatedDate = new DateTime(2025, 12, 17, 4, 25, 19, 626, DateTimeKind.Utc).AddTicks(9776),
+                            CreatedDate = new DateTime(2025, 12, 17, 7, 15, 59, 79, DateTimeKind.Utc).AddTicks(2962),
                             Name = "Cần câu đài mẫu 21",
                             ProductCode = "CD021",
                             ShortDescription = "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên",
@@ -898,7 +898,7 @@ namespace NT.DAL.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000022"),
                             BrandId = new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"),
-                            CreatedDate = new DateTime(2025, 12, 17, 4, 25, 19, 626, DateTimeKind.Utc).AddTicks(9779),
+                            CreatedDate = new DateTime(2025, 12, 17, 7, 15, 59, 79, DateTimeKind.Utc).AddTicks(2967),
                             Name = "Cần câu đài mẫu 22",
                             ProductCode = "CD022",
                             ShortDescription = "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên",
@@ -909,7 +909,7 @@ namespace NT.DAL.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000023"),
                             BrandId = new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"),
-                            CreatedDate = new DateTime(2025, 12, 17, 4, 25, 19, 626, DateTimeKind.Utc).AddTicks(9783),
+                            CreatedDate = new DateTime(2025, 12, 17, 7, 15, 59, 79, DateTimeKind.Utc).AddTicks(2971),
                             Name = "Cần câu đài mẫu 23",
                             ProductCode = "CD023",
                             ShortDescription = "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên",
@@ -920,7 +920,7 @@ namespace NT.DAL.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000024"),
                             BrandId = new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"),
-                            CreatedDate = new DateTime(2025, 12, 17, 4, 25, 19, 626, DateTimeKind.Utc).AddTicks(9786),
+                            CreatedDate = new DateTime(2025, 12, 17, 7, 15, 59, 79, DateTimeKind.Utc).AddTicks(2976),
                             Name = "Cần câu đài mẫu 24",
                             ProductCode = "CD024",
                             ShortDescription = "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên",
@@ -930,8 +930,8 @@ namespace NT.DAL.Migrations
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000025"),
-                            BrandId = new Guid("1c323c98-2d0d-47e0-9840-39e13f3d36ad"),
-                            CreatedDate = new DateTime(2025, 12, 17, 4, 25, 19, 626, DateTimeKind.Utc).AddTicks(9790),
+                            BrandId = new Guid("08197fa4-ca13-4258-aa84-c61e962e5579"),
+                            CreatedDate = new DateTime(2025, 12, 17, 7, 15, 59, 79, DateTimeKind.Utc).AddTicks(2982),
                             Name = "Cần câu đài mẫu 25",
                             ProductCode = "CD025",
                             ShortDescription = "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên",
@@ -942,7 +942,7 @@ namespace NT.DAL.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000026"),
                             BrandId = new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"),
-                            CreatedDate = new DateTime(2025, 12, 17, 4, 25, 19, 626, DateTimeKind.Utc).AddTicks(9793),
+                            CreatedDate = new DateTime(2025, 12, 17, 7, 15, 59, 79, DateTimeKind.Utc).AddTicks(2987),
                             Name = "Cần câu đài mẫu 26",
                             ProductCode = "CD026",
                             ShortDescription = "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên",
@@ -953,7 +953,7 @@ namespace NT.DAL.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000027"),
                             BrandId = new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"),
-                            CreatedDate = new DateTime(2025, 12, 17, 4, 25, 19, 626, DateTimeKind.Utc).AddTicks(9796),
+                            CreatedDate = new DateTime(2025, 12, 17, 7, 15, 59, 79, DateTimeKind.Utc).AddTicks(2991),
                             Name = "Cần câu đài mẫu 27",
                             ProductCode = "CD027",
                             ShortDescription = "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên",
@@ -964,7 +964,7 @@ namespace NT.DAL.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000028"),
                             BrandId = new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"),
-                            CreatedDate = new DateTime(2025, 12, 17, 4, 25, 19, 626, DateTimeKind.Utc).AddTicks(9802),
+                            CreatedDate = new DateTime(2025, 12, 17, 7, 15, 59, 79, DateTimeKind.Utc).AddTicks(2998),
                             Name = "Cần câu đài mẫu 28",
                             ProductCode = "CD028",
                             ShortDescription = "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên",
@@ -975,7 +975,7 @@ namespace NT.DAL.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000029"),
                             BrandId = new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"),
-                            CreatedDate = new DateTime(2025, 12, 17, 4, 25, 19, 626, DateTimeKind.Utc).AddTicks(9806),
+                            CreatedDate = new DateTime(2025, 12, 17, 7, 15, 59, 79, DateTimeKind.Utc).AddTicks(3010),
                             Name = "Cần câu đài mẫu 29",
                             ProductCode = "CD029",
                             ShortDescription = "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên",
@@ -986,7 +986,7 @@ namespace NT.DAL.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000030"),
                             BrandId = new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"),
-                            CreatedDate = new DateTime(2025, 12, 17, 4, 25, 19, 626, DateTimeKind.Utc).AddTicks(9809),
+                            CreatedDate = new DateTime(2025, 12, 17, 7, 15, 59, 79, DateTimeKind.Utc).AddTicks(3015),
                             Name = "Cần câu đài mẫu 30",
                             ProductCode = "CD030",
                             ShortDescription = "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên",
@@ -997,7 +997,7 @@ namespace NT.DAL.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000031"),
                             BrandId = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
-                            CreatedDate = new DateTime(2025, 12, 17, 4, 25, 19, 626, DateTimeKind.Utc).AddTicks(9813),
+                            CreatedDate = new DateTime(2025, 12, 17, 7, 15, 59, 79, DateTimeKind.Utc).AddTicks(3019),
                             Name = "Cần câu đài mẫu 31",
                             ProductCode = "CD031",
                             ShortDescription = "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên",
@@ -1007,8 +1007,8 @@ namespace NT.DAL.Migrations
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000032"),
-                            BrandId = new Guid("1c323c98-2d0d-47e0-9840-39e13f3d36ad"),
-                            CreatedDate = new DateTime(2025, 12, 17, 4, 25, 19, 626, DateTimeKind.Utc).AddTicks(9816),
+                            BrandId = new Guid("08197fa4-ca13-4258-aa84-c61e962e5579"),
+                            CreatedDate = new DateTime(2025, 12, 17, 7, 15, 59, 79, DateTimeKind.Utc).AddTicks(3024),
                             Name = "Cần câu đài mẫu 32",
                             ProductCode = "CD032",
                             ShortDescription = "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên",
@@ -1019,7 +1019,7 @@ namespace NT.DAL.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000033"),
                             BrandId = new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"),
-                            CreatedDate = new DateTime(2025, 12, 17, 4, 25, 19, 626, DateTimeKind.Utc).AddTicks(9820),
+                            CreatedDate = new DateTime(2025, 12, 17, 7, 15, 59, 79, DateTimeKind.Utc).AddTicks(3028),
                             Name = "Cần câu đài mẫu 33",
                             ProductCode = "CD033",
                             ShortDescription = "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên",
@@ -1030,7 +1030,7 @@ namespace NT.DAL.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000034"),
                             BrandId = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
-                            CreatedDate = new DateTime(2025, 12, 17, 4, 25, 19, 626, DateTimeKind.Utc).AddTicks(9825),
+                            CreatedDate = new DateTime(2025, 12, 17, 7, 15, 59, 79, DateTimeKind.Utc).AddTicks(3034),
                             Name = "Cần câu đài mẫu 34",
                             ProductCode = "CD034",
                             ShortDescription = "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên",
@@ -1041,7 +1041,7 @@ namespace NT.DAL.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000035"),
                             BrandId = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
-                            CreatedDate = new DateTime(2025, 12, 17, 4, 25, 19, 626, DateTimeKind.Utc).AddTicks(9829),
+                            CreatedDate = new DateTime(2025, 12, 17, 7, 15, 59, 79, DateTimeKind.Utc).AddTicks(3038),
                             Name = "Cần câu đài mẫu 35",
                             ProductCode = "CD035",
                             ShortDescription = "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên",
@@ -1052,7 +1052,7 @@ namespace NT.DAL.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000036"),
                             BrandId = new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"),
-                            CreatedDate = new DateTime(2025, 12, 17, 4, 25, 19, 626, DateTimeKind.Utc).AddTicks(9841),
+                            CreatedDate = new DateTime(2025, 12, 17, 7, 15, 59, 79, DateTimeKind.Utc).AddTicks(3044),
                             Name = "Cần câu đài mẫu 36",
                             ProductCode = "CD036",
                             ShortDescription = "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên",
@@ -1063,7 +1063,7 @@ namespace NT.DAL.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000037"),
                             BrandId = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
-                            CreatedDate = new DateTime(2025, 12, 17, 4, 25, 19, 626, DateTimeKind.Utc).AddTicks(9845),
+                            CreatedDate = new DateTime(2025, 12, 17, 7, 15, 59, 79, DateTimeKind.Utc).AddTicks(3049),
                             Name = "Cần câu đài mẫu 37",
                             ProductCode = "CD037",
                             ShortDescription = "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên",
@@ -1074,7 +1074,7 @@ namespace NT.DAL.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000038"),
                             BrandId = new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"),
-                            CreatedDate = new DateTime(2025, 12, 17, 4, 25, 19, 626, DateTimeKind.Utc).AddTicks(9848),
+                            CreatedDate = new DateTime(2025, 12, 17, 7, 15, 59, 79, DateTimeKind.Utc).AddTicks(3053),
                             Name = "Cần câu đài mẫu 38",
                             ProductCode = "CD038",
                             ShortDescription = "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên",
@@ -1085,7 +1085,7 @@ namespace NT.DAL.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000039"),
                             BrandId = new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"),
-                            CreatedDate = new DateTime(2025, 12, 17, 4, 25, 19, 626, DateTimeKind.Utc).AddTicks(9852),
+                            CreatedDate = new DateTime(2025, 12, 17, 7, 15, 59, 79, DateTimeKind.Utc).AddTicks(3058),
                             Name = "Cần câu đài mẫu 39",
                             ProductCode = "CD039",
                             ShortDescription = "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên",
@@ -1096,7 +1096,7 @@ namespace NT.DAL.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000040"),
                             BrandId = new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"),
-                            CreatedDate = new DateTime(2025, 12, 17, 4, 25, 19, 626, DateTimeKind.Utc).AddTicks(9856),
+                            CreatedDate = new DateTime(2025, 12, 17, 7, 15, 59, 79, DateTimeKind.Utc).AddTicks(3062),
                             Name = "Cần câu đài mẫu 40",
                             ProductCode = "CD040",
                             ShortDescription = "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên",
@@ -1107,7 +1107,7 @@ namespace NT.DAL.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000041"),
                             BrandId = new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"),
-                            CreatedDate = new DateTime(2025, 12, 17, 4, 25, 19, 626, DateTimeKind.Utc).AddTicks(9859),
+                            CreatedDate = new DateTime(2025, 12, 17, 7, 15, 59, 79, DateTimeKind.Utc).AddTicks(3067),
                             Name = "Cần câu đài mẫu 41",
                             ProductCode = "CD041",
                             ShortDescription = "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên",
@@ -1117,8 +1117,8 @@ namespace NT.DAL.Migrations
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000042"),
-                            BrandId = new Guid("1c323c98-2d0d-47e0-9840-39e13f3d36ad"),
-                            CreatedDate = new DateTime(2025, 12, 17, 4, 25, 19, 626, DateTimeKind.Utc).AddTicks(9862),
+                            BrandId = new Guid("08197fa4-ca13-4258-aa84-c61e962e5579"),
+                            CreatedDate = new DateTime(2025, 12, 17, 7, 15, 59, 79, DateTimeKind.Utc).AddTicks(3071),
                             Name = "Cần câu đài mẫu 42",
                             ProductCode = "CD042",
                             ShortDescription = "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên",
@@ -1129,7 +1129,7 @@ namespace NT.DAL.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000043"),
                             BrandId = new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"),
-                            CreatedDate = new DateTime(2025, 12, 17, 4, 25, 19, 626, DateTimeKind.Utc).AddTicks(9866),
+                            CreatedDate = new DateTime(2025, 12, 17, 7, 15, 59, 79, DateTimeKind.Utc).AddTicks(3076),
                             Name = "Cần câu đài mẫu 43",
                             ProductCode = "CD043",
                             ShortDescription = "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên",
@@ -1140,7 +1140,7 @@ namespace NT.DAL.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000044"),
                             BrandId = new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"),
-                            CreatedDate = new DateTime(2025, 12, 17, 4, 25, 19, 626, DateTimeKind.Utc).AddTicks(9872),
+                            CreatedDate = new DateTime(2025, 12, 17, 7, 15, 59, 79, DateTimeKind.Utc).AddTicks(3082),
                             Name = "Cần câu đài mẫu 44",
                             ProductCode = "CD044",
                             ShortDescription = "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên",
@@ -1151,7 +1151,7 @@ namespace NT.DAL.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000045"),
                             BrandId = new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"),
-                            CreatedDate = new DateTime(2025, 12, 17, 4, 25, 19, 626, DateTimeKind.Utc).AddTicks(9875),
+                            CreatedDate = new DateTime(2025, 12, 17, 7, 15, 59, 79, DateTimeKind.Utc).AddTicks(3092),
                             Name = "Cần câu đài mẫu 45",
                             ProductCode = "CD045",
                             ShortDescription = "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên",
@@ -1161,8 +1161,8 @@ namespace NT.DAL.Migrations
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000046"),
-                            BrandId = new Guid("1c323c98-2d0d-47e0-9840-39e13f3d36ad"),
-                            CreatedDate = new DateTime(2025, 12, 17, 4, 25, 19, 626, DateTimeKind.Utc).AddTicks(9879),
+                            BrandId = new Guid("08197fa4-ca13-4258-aa84-c61e962e5579"),
+                            CreatedDate = new DateTime(2025, 12, 17, 7, 15, 59, 79, DateTimeKind.Utc).AddTicks(3097),
                             Name = "Cần câu đài mẫu 46",
                             ProductCode = "CD046",
                             ShortDescription = "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên",
@@ -1172,8 +1172,8 @@ namespace NT.DAL.Migrations
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000047"),
-                            BrandId = new Guid("1c323c98-2d0d-47e0-9840-39e13f3d36ad"),
-                            CreatedDate = new DateTime(2025, 12, 17, 4, 25, 19, 626, DateTimeKind.Utc).AddTicks(9882),
+                            BrandId = new Guid("08197fa4-ca13-4258-aa84-c61e962e5579"),
+                            CreatedDate = new DateTime(2025, 12, 17, 7, 15, 59, 79, DateTimeKind.Utc).AddTicks(3102),
                             Name = "Cần câu đài mẫu 47",
                             ProductCode = "CD047",
                             ShortDescription = "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên",
@@ -1184,7 +1184,7 @@ namespace NT.DAL.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000048"),
                             BrandId = new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"),
-                            CreatedDate = new DateTime(2025, 12, 17, 4, 25, 19, 626, DateTimeKind.Utc).AddTicks(9885),
+                            CreatedDate = new DateTime(2025, 12, 17, 7, 15, 59, 79, DateTimeKind.Utc).AddTicks(3106),
                             Name = "Cần câu đài mẫu 48",
                             ProductCode = "CD048",
                             ShortDescription = "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên",
@@ -1195,7 +1195,7 @@ namespace NT.DAL.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000049"),
                             BrandId = new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"),
-                            CreatedDate = new DateTime(2025, 12, 17, 4, 25, 19, 626, DateTimeKind.Utc).AddTicks(9889),
+                            CreatedDate = new DateTime(2025, 12, 17, 7, 15, 59, 79, DateTimeKind.Utc).AddTicks(3111),
                             Name = "Cần câu đài mẫu 49",
                             ProductCode = "CD049",
                             ShortDescription = "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên",
@@ -1206,7 +1206,7 @@ namespace NT.DAL.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000050"),
                             BrandId = new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"),
-                            CreatedDate = new DateTime(2025, 12, 17, 4, 25, 19, 626, DateTimeKind.Utc).AddTicks(9893),
+                            CreatedDate = new DateTime(2025, 12, 17, 7, 15, 59, 79, DateTimeKind.Utc).AddTicks(3115),
                             Name = "Cần câu đài mẫu 50",
                             ProductCode = "CD050",
                             ShortDescription = "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên",
@@ -5238,7 +5238,7 @@ namespace NT.DAL.Migrations
                             Id = new Guid("11111111-2222-3333-4444-555555555555"),
                             Email = "admin@example.com",
                             Fullname = "System Administrator",
-                            PasswordHash = "AQAAAAIAAYagAAAAECzYPzYIvnewVsCg4b8jvYhVJgUb6oZ2W/DlftKbPeYQezzYGma3h8/iSI38lJcJGA==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEEZ/DyB/TZfWPlghg+LY1BpFAyOnhbW3O4A8v2R/Vnb9qpETq7F2BiJ2VO2G6+Vn/g==",
                             RoleId = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
                             Status = "Active",
                             Username = "admin"
@@ -5289,11 +5289,11 @@ namespace NT.DAL.Migrations
                             Id = new Guid("11111111-aaaa-bbbb-cccc-111111111111"),
                             Code = "WELCOME10",
                             DiscountPercentage = 10m,
-                            EndDate = new DateTime(2026, 1, 17, 11, 25, 19, 683, DateTimeKind.Local).AddTicks(4935),
+                            EndDate = new DateTime(2026, 1, 17, 14, 15, 59, 137, DateTimeKind.Local).AddTicks(1525),
                             MaxDiscountAmount = 50000m,
                             MaxUsage = 1000,
                             MinOrderAmount = 300000m,
-                            StartDate = new DateTime(2025, 12, 10, 11, 25, 19, 683, DateTimeKind.Local).AddTicks(4904),
+                            StartDate = new DateTime(2025, 12, 10, 14, 15, 59, 137, DateTimeKind.Local).AddTicks(1498),
                             UsageCount = 0
                         },
                         new
@@ -5301,11 +5301,11 @@ namespace NT.DAL.Migrations
                             Id = new Guid("22222222-aaaa-bbbb-cccc-222222222222"),
                             Code = "SAVE15",
                             DiscountPercentage = 15m,
-                            EndDate = new DateTime(2026, 2, 17, 11, 25, 19, 683, DateTimeKind.Local).AddTicks(4951),
+                            EndDate = new DateTime(2026, 2, 17, 14, 15, 59, 137, DateTimeKind.Local).AddTicks(1536),
                             MaxDiscountAmount = 100000m,
                             MaxUsage = 500,
                             MinOrderAmount = 500000m,
-                            StartDate = new DateTime(2025, 12, 14, 11, 25, 19, 683, DateTimeKind.Local).AddTicks(4950),
+                            StartDate = new DateTime(2025, 12, 14, 14, 15, 59, 137, DateTimeKind.Local).AddTicks(1534),
                             UsageCount = 0
                         },
                         new
@@ -5313,11 +5313,11 @@ namespace NT.DAL.Migrations
                             Id = new Guid("33333333-aaaa-bbbb-cccc-333333333333"),
                             Code = "BIGSALE25",
                             DiscountPercentage = 25m,
-                            EndDate = new DateTime(2026, 3, 17, 11, 25, 19, 683, DateTimeKind.Local).AddTicks(4956),
+                            EndDate = new DateTime(2026, 3, 17, 14, 15, 59, 137, DateTimeKind.Local).AddTicks(1540),
                             MaxDiscountAmount = 200000m,
                             MaxUsage = 300,
                             MinOrderAmount = 800000m,
-                            StartDate = new DateTime(2025, 12, 16, 11, 25, 19, 683, DateTimeKind.Local).AddTicks(4955),
+                            StartDate = new DateTime(2025, 12, 16, 14, 15, 59, 137, DateTimeKind.Local).AddTicks(1539),
                             UsageCount = 0
                         });
                 });
