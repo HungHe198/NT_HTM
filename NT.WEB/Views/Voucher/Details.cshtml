@@ -3,53 +3,105 @@
 @{
     ViewData["Title"] = "Chi tiết Voucher";
     var isValid = Model.IsValid();
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<h1>Chi tiết Voucher</h1>
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a asp-action="Index">Quản lý Voucher</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Chi tiết</li>
+                </ol>
+            </nav>
+            <h2><i class="fas fa-ticket-alt me-2"></i>Chi tiết Voucher</h2>
+        </div>
+        <div class="col-auto align-self-start">
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary btn-sm me-2"><i class="fas fa-edit me-1"></i> Sửa</a>
+            <a asp-action="Index" class="btn btn-outline-secondary btn-sm">Quay lại</a>
+        </div>
+    </div>
 
-<div class="card">
-    <div class="card-body">
-        <dl class="row">
-            <dt class="col-sm-3">Mã voucher</dt>
-            <dd class="col-sm-9"><strong>@Model.Code</strong></dd>
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Thông tin chi tiết</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4 text-muted">Mã voucher</dt>
+                        <dd class="col-sm-8"><strong class="fs-5">@Model.Code</strong></dd>
 
-            <dt class="col-sm-3">Phần trăm giảm giá</dt>
-            <dd class="col-sm-9">@(Model.DiscountPercentage?.ToString("N0") ?? "-")%</dd>
+                        <dt class="col-sm-4 text-muted">Phần trăm giảm</dt>
+                        <dd class="col-sm-8">@((Model.DiscountPercentage.HasValue) ? Model.DiscountPercentage.Value.ToString("N0") + "%" : "-")</dd>
 
-            <dt class="col-sm-3">Số tiền giảm tối đa</dt>
-            <dd class="col-sm-9">@(Model.MaxDiscountAmount?.ToString("N0") ?? "Không giới hạn")</dd>
+                        <dt class="col-sm-4 text-muted">Số tiền giảm tối đa</dt>
+                        <dd class="col-sm-8">@(Model.MaxDiscountAmount.HasValue ? string.Format("{0:N0}₫", Model.MaxDiscountAmount.Value) : "Không giới hạn")</dd>
 
-            <dt class="col-sm-3">Giá trị đơn hàng tối thiểu</dt>
-            <dd class="col-sm-9">@(Model.MinOrderAmount?.ToString("N0") ?? "Không yêu cầu")</dd>
+                        <dt class="col-sm-4 text-muted">Giá trị đơn hàng tối thiểu</dt>
+                        <dd class="col-sm-8">@(Model.MinOrderAmount.HasValue ? string.Format("{0:N0}₫", Model.MinOrderAmount.Value) : "Không yêu cầu")</dd>
 
-            <dt class="col-sm-3">Ngày bắt đầu</dt>
-            <dd class="col-sm-9">@(Model.StartDate?.ToString("dd/MM/yyyy HH:mm") ?? "Không giới hạn")</dd>
+                        <dt class="col-sm-4 text-muted">Ngày bắt đầu</dt>
+                        <dd class="col-sm-8">@(Model.StartDate?.ToString("dd/MM/yyyy HH:mm") ?? "Có hiệu lực ngay")</dd>
 
-            <dt class="col-sm-3">Ngày kết thúc</dt>
-            <dd class="col-sm-9">@(Model.EndDate?.ToString("dd/MM/yyyy HH:mm") ?? "Không giới hạn")</dd>
+                        <dt class="col-sm-4 text-muted">Ngày kết thúc</dt>
+                        <dd class="col-sm-8">@(Model.EndDate?.ToString("dd/MM/yyyy HH:mm") ?? "Không giới hạn")</dd>
 
-            <dt class="col-sm-3">Số lần đã sử dụng</dt>
-            <dd class="col-sm-9">@Model.UsageCount</dd>
+                        <dt class="col-sm-4 text-muted">Số lần đã sử dụng</dt>
+                        <dd class="col-sm-8">@Model.UsageCount</dd>
 
-            <dt class="col-sm-3">Giới hạn số sử dụng</dt>
-            <dd class="col-sm-9">@(Model.MaxUsage?.ToString() ?? "Không giới hạn")</dd>
+                        <dt class="col-sm-4 text-muted">Giới hạn số sử dụng</dt>
+                        <dd class="col-sm-8">@(Model.MaxUsage?.ToString() ?? "Không giới hạn")</dd>
 
-            <dt class="col-sm-3">Trạng thái</dt>
-            <dd class="col-sm-9">
-                @if (isValid)
-                {
-                    <span class="badge bg-success">Còn hiệu lực</span>
-                }
-                else
-                {
-                    <span class="badge bg-secondary">Hết hiệu lực</span>
-                }
-            </dd>
-        </dl>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow-sm sticky-top" style="top:20px;">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <div class="fs-4 fw-bold">@Model.Code</div>
+                        <div class="text-muted">Mã giảm giá</div>
+                    </div>
+
+                    <div class="mb-3">
+                        @if (isValid)
+                        {
+                            <span class="badge bg-success fs-6">Còn hiệu lực</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary fs-6">Hết hiệu lực</span>
+                        }
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-primary btn-sm w-100">Sửa voucher</a>
+                        <form asp-action="Delete" method="post" onsubmit="return confirm('Bạn có chắc muốn xóa voucher này?');" class="w-100">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@Model.Id" />
+                            <button type="submit" class="btn btn-outline-danger btn-sm w-100">Xóa voucher</button>
+                        </form>
+                    </div>
+
+                    <hr />
+
+                    <div class="text-start">
+                        <small class="text-muted">Tóm tắt</small>
+                        <ul class="list-unstyled mt-2 mb-0">
+                            <li><strong>Áp dụng từ:</strong> @(Model.StartDate?.ToString("dd/MM/yyyy") ?? "Ngay")</li>
+                            <li><strong>Đến:</strong> @(Model.EndDate?.ToString("dd/MM/yyyy") ?? "Không giới hạn")</li>
+                            <li><strong>Đã dùng:</strong> @Model.UsageCount</li>
+                            <li><strong>Giới hạn:</strong> @(Model.MaxUsage?.ToString() ?? "Không giới hạn")</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
-
-<p class="mt-3">
-    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-secondary">S?a</a>
-    <a asp-action="Index" class="btn btn-link">Quay l?i danh sách</a>
-</p>
