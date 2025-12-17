@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using NT.BLL.Interfaces;
@@ -288,6 +288,11 @@ namespace NT.WEB.Controllers
             await _repository.AddAsync(model);
             await _repository.SaveChangesAsync();
 
+            // Automatically create Customer record to ensure user can add to cart immediately
+            var customer = Customer.Create(model.Id);
+            await _customerRepository.AddAsync(customer);
+            await _customerRepository.SaveChangesAsync();
+
             // Generate 6-digit confirmation code and send email
             if (!string.IsNullOrWhiteSpace(model.Email))
             {
@@ -309,9 +314,13 @@ namespace NT.WEB.Controllers
                     TempData["Warning"] = "Đăng ký thành công nhưng gửi email mã xác nhận thất bại.";
                 }
             }
+            else
+            {
+                TempData["Success"] = "Đăng ký thành công. Vui lòng đăng nhập.";
+            }
 
-            // After creating User, redirect to CustomerController to create Customer profile
-            return RedirectToAction("Create", "Customer", new { userId = model.Id });
+            // Redirect to login page directly - Customer record already created
+            return RedirectToAction(nameof(Login));
         }
 
         public async Task<IActionResult> Edit(Guid id)
@@ -355,6 +364,108 @@ namespace NT.WEB.Controllers
             await _repository.DeleteAsync(id);
             await _repository.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
+        }
+
+        // Profile (GET) - Xem và chỉnh sửa thông tin cá nhân
+        [HttpGet]
+        public async Task<IActionResult> Profile()
+        {
+            // Lấy UserId từ claims
+            var userIdClaim = User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrWhiteSpace(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+            {
+                TempData["Error"] = "Vui lòng đăng nhập để xem thông tin cá nhân";
+                return RedirectToAction(nameof(Login));
+            }
+
+            var user = await _repository.GetByIdAsync(userId);
+            if (user == null)
+            {
+                TempData["Error"] = "Không tìm thấy thông tin tài khoản";
+                return RedirectToAction(nameof(Login));
+            }
+
+            // Tạo DTO với dữ liệu hiện tại
+            var dto = new NT.SHARED.DTOs.UpdateProfileDto
+            {
+                Fullname = user.Fullname,
+                PhoneNumber = user.PhoneNumber,
+                Email = user.Email
+            };
+
+            // Nếu là Customer, lấy thêm thông tin Customer
+            var customers = await _customerRepository.FindAsync(c => c.UserId == userId);
+            var customer = System.Linq.Enumerable.FirstOrDefault(customers);
+            if (customer != null)
+            {
+                dto.Address = customer.Address;
+                dto.DoB = customer.DoB;
+                dto.Gender = customer.Gender;
+            }
+
+            // Truyền Username để hiển thị (không cho sửa)
+            ViewBag.Username = user.Username;
+            ViewBag.IsCustomer = customer != null;
+
+            return View(dto);
+        }
+
+        // Profile (POST) - Cập nhật thông tin cá nhân
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Profile(NT.SHARED.DTOs.UpdateProfileDto dto)
+        {
+            // Lấy UserId từ claims
+            var userIdClaim = User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrWhiteSpace(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+            {
+                TempData["Error"] = "Vui lòng đăng nhập để cập nhật thông tin";
+                return RedirectToAction(nameof(Login));
+            }
+
+            var user = await _repository.GetByIdAsync(userId);
+            if (user == null)
+            {
+                TempData["Error"] = "Không tìm thấy thông tin tài khoản";
+                return RedirectToAction(nameof(Login));
+            }
+
+            // Kiểm tra Customer
+            var customers = await _customerRepository.FindAsync(c => c.UserId == userId);
+            var customer = System.Linq.Enumerable.FirstOrDefault(customers);
+
+            ViewBag.Username = user.Username;
+            ViewBag.IsCustomer = customer != null;
+
+            if (!ModelState.IsValid)
+            {
+                TempData["Error"] = "Dữ liệu không hợp lệ. Vui lòng kiểm tra lại.";
+                return View(dto);
+            }
+
+            // Cập nhật thông tin User (chỉ các trường được phép)
+            user.Fullname = dto.Fullname;
+            user.PhoneNumber = dto.PhoneNumber;
+            user.Email = dto.Email;
+            // Không thay đổi: Id, RoleId, Username, PasswordHash, Status
+
+            await _repository.UpdateAsync(user);
+            await _repository.SaveChangesAsync();
+
+            // Nếu là Customer, cập nhật thêm thông tin Customer
+            if (customer != null)
+            {
+                customer.Address = dto.Address;
+                customer.DoB = dto.DoB;
+                customer.Gender = dto.Gender;
+                // Không thay đổi: Id, UserId
+
+                await _customerRepository.UpdateAsync(customer);
+                await _customerRepository.SaveChangesAsync();
+            }
+
+            TempData["Success"] = "Cập nhật thông tin cá nhân thành công!";
+            return RedirectToAction(nameof(Profile));
         }
 
         // Logout (GET) to support link-based sign out from client layout

@@ -1,4 +1,5 @@
 @model NT.SHARED.Models.Order
+@using NT.SHARED.Helpers
 @{
     var isAdmin = User.IsInRole("Admin") || User.IsInRole("Employee");
     Layout = isAdmin ? "~/Views/Shared/_AdminLayout.cshtml" : "~/Views/Shared/_ClientLayout.cshtml";
@@ -21,6 +22,9 @@
     DateTime gmt7;
     try { gmt7 = TimeZoneInfo.ConvertTimeFromUtc(utc, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time")); }
     catch { gmt7 = utc.ToLocalTime(); }
+    
+    // Tạo mã đơn hàng ngắn gọn
+    var orderCode = OrderCodeHelper.ToShortCode(Model.Id);
 }
 
 <div class="container py-4">
@@ -47,7 +51,11 @@
            <div class="card-header bg-light d-flex align-items-center justify-content-between">
          <div>
     <h4 class="mb-0">Chi tiết đơn hàng</h4>
-   <small class="text-muted">Mã đơn: <strong>@Model.Id</strong></small>
+   <small class="text-muted">Mã đơn: <strong class="text-primary">@orderCode</strong></small>
+   @if (isAdmin)
+   {
+       <br/><small class="text-muted" style="font-size: 0.7rem;">ID: @Model.Id</small>
+   }
         </div>
       <span class="badge @statusBadge" style="font-size: 0.9rem; padding: 0.5rem 0.8rem;">@statusText</span>
             </div>

@@ -7,13 +7,23 @@
     var qVal = Context.Request.Query["q"].ToString();
     var brandVal = Context.Request.Query["brandId"].ToString();
     var categoryVal = Context.Request.Query["categoryId"].ToString();
+    
+    // Lấy giá trị đã validate từ Controller (nếu có), nếu không thì lấy từ query
+    var minPriceVal = ViewBag.ValidatedMinPrice?.ToString() ?? Context.Request.Query["minPrice"].ToString();
+    var maxPriceVal = ViewBag.ValidatedMaxPrice?.ToString() ?? Context.Request.Query["maxPrice"].ToString();
+    
+    // Lấy danh sách sản phẩm từ ViewBag
+    var matchedProducts = ViewBag.MatchedProducts as IEnumerable<dynamic> ?? Model ?? Enumerable.Empty<dynamic>();
+    var otherProducts = ViewBag.OtherProducts as IEnumerable<dynamic> ?? Enumerable.Empty<dynamic>();
+    var isPriceFiltering = ViewBag.IsPriceFiltering as bool? ?? false;
 
     var brands = await BrandService.GetAllAsync();
     var brandOptions = brands?.OrderBy(b => b.Name).ToList() ?? new List<Brand>();
 
     // Build category GUID options from product details
     var categoryIds = new HashSet<Guid>();
-    foreach (var p in Model ?? Enumerable.Empty<dynamic>())
+    var allProductsForCategory = matchedProducts.Concat(otherProducts);
+    foreach (var p in allProductsForCategory)
     {
         try
         {
@@ -40,7 +50,10 @@
         catch { }
     }
     var categoryOptions = categoryIds.OrderBy(x => x).ToList();
-    var productCount = (Model ?? Enumerable.Empty<dynamic>()).Count();
+    
+    var matchedCount = matchedProducts.Count();
+    var otherCount = otherProducts.Count();
+    var totalCount = matchedCount + otherCount;
 }
 
 @section Styles {
@@ -296,7 +309,57 @@
         color: #90a4ae;
     }
     
-    /* Responsive adjustments */
+    /* Section Header */
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #e0f7fa;
+    }
+    
+    .section-header h3 {
+        font-weight: 700;
+        color: #00838f;
+        margin: 0;
+        font-size: 1.25rem;
+    }
+    
+    .section-header .badge {
+        background: linear-gradient(135deg, #00838f, #00bcd4);
+        color: white;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+    
+    .section-other {
+        margin-top: 3rem;
+        padding-top: 2rem;
+        border-top: 3px dashed #e0e0e0;
+    }
+    
+    .section-other .section-header {
+        border-bottom-color: #ffecb3;
+    }
+    
+    .section-other .section-header h3 {
+        color: #f57c00;
+    }
+    
+    .section-other .section-header .badge {
+        background: linear-gradient(135deg, #ff9800, #ffb74d);
+    }
+    
+    .section-other .section-note {
+        color: #78909c;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+    
+        /* Responsive adjustments */
     @@media (max-width: 768px) {
         .page-header {
             padding: 1.5rem;
@@ -329,6 +392,22 @@
             font-size: 1rem;
         }
     }
+    
+    /* Price validation error */
+    .filter-input.is-invalid {
+        border-color: #dc3545 !important;
+    }
+    
+    .price-error {
+        color: #dc3545;
+        font-size: 0.8rem;
+        margin-top: 0.25rem;
+        display: none;
+    }
+    
+    .price-error.show {
+        display: block;
+    }
 </style>
 }
 
@@ -342,7 +421,7 @@
                     <p>Khám phá bộ sưu tập cần câu chất lượng cao</p>
                 </div>
                 <div class="product-count-badge">
-                    <i class="fas fa-box me-2"></i>@productCount sản phẩm
+                    <i class="fas fa-box me-2"></i>@totalCount sản phẩm
                 </div>
             </div>
         </div>
@@ -352,7 +431,17 @@
             <h5 class="filter-title">
                 <i class="fas fa-filter"></i> Bộ lọc tìm kiếm
             </h5>
-            <form method="get" asp-controller="Home" asp-action="GetAllProducts">
+            
+            @* Hiển thị thông báo warning nếu có *@
+            @if (TempData["Warning"] != null)
+            {
+                <div class="alert alert-warning alert-dismissible fade show mb-3" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>@TempData["Warning"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+            
+            <form method="get" asp-controller="Home" asp-action="GetAllProducts" id="filterForm" novalidate>
                 <div class="row g-3">
                     <div class="col-12 col-md-4">
                         <label for="q" class="filter-label">
@@ -392,22 +481,25 @@
                             <i class="fas fa-dollar-sign text-muted"></i> Giá từ
                         </label>
                         <input type="number" name="minPrice" id="minPrice" 
-                               value="@Context.Request.Query["minPrice"]" 
+                               value="@minPriceVal" 
                                class="form-control filter-input" 
                                min="0" step="1000" placeholder="0₫" />
+                        <div class="price-error" id="minPriceError"></div>
                     </div>
                     <div class="col-6 col-md-2">
                         <label for="maxPrice" class="filter-label">
                             <i class="fas fa-dollar-sign text-muted"></i> Giá đến
                         </label>
                         <input type="number" name="maxPrice" id="maxPrice" 
-                               value="@Context.Request.Query["maxPrice"]" 
+                               value="@maxPriceVal" 
                                class="form-control filter-input" 
                                min="0" step="1000" placeholder="∞" />
+                        <div class="price-error" id="maxPriceError"></div>
                     </div>
                     <div class="col-12">
+                        <div class="price-error" id="priceRangeError"></div>
                         <div class="d-flex gap-2 mt-2">
-                            <button type="submit" class="btn filter-btn filter-btn-primary">
+                            <button type="submit" class="btn filter-btn filter-btn-primary" id="submitBtn">
                                 <i class="fas fa-search me-2"></i>Tìm kiếm
                             </button>
                             <a class="btn filter-btn filter-btn-secondary" asp-controller="Home" asp-action="GetAllProducts">
@@ -420,10 +512,18 @@
         </div>
 
         <!-- Products Grid -->
-        @if (productCount > 0)
+        @if (matchedCount > 0)
         {
+            @if (isPriceFiltering)
+            {
+                <div class="section-header">
+                    <h3><i class="fas fa-check-circle me-2"></i>Sản phẩm phù hợp</h3>
+                    <span class="badge">@matchedCount sản phẩm</span>
+                </div>
+            }
+            
             <div class="products-grid">
-                @foreach (var p in Model ?? Enumerable.Empty<dynamic>())
+                @foreach (var p in matchedProducts)
                 {
                     <div class="product-card-item">
                         <div class="card-img-wrapper">
@@ -465,7 +565,15 @@
                 }
             </div>
         }
-        else
+        else if (isPriceFiltering)
+        {
+            <div class="empty-state">
+                <i class="fas fa-search"></i>
+                <h3>Không có sản phẩm phù hợp với khoảng giá</h3>
+                <p>Không tìm thấy sản phẩm nào trong khoảng giá bạn chọn</p>
+            </div>
+        }
+        else if (totalCount == 0)
         {
             <div class="empty-state">
                 <i class="fas fa-box-open"></i>
@@ -476,5 +584,186 @@
                 </a>
             </div>
         }
+        
+        <!-- Sản phẩm khác (Liên hệ hoặc ngoài khoảng giá) -->
+        @if (isPriceFiltering && otherCount > 0)
+        {
+            <div class="section-other">
+                <div class="section-header">
+                    <h3><i class="fas fa-info-circle me-2"></i>Sản phẩm khác</h3>
+                    <span class="badge">@otherCount sản phẩm</span>
+                </div>
+                <p class="section-note">
+                    <i class="fas fa-lightbulb me-1"></i>
+                    Các sản phẩm dưới đây có giá ngoài khoảng lọc hoặc cần liên hệ để biết giá
+                </p>
+                
+                <div class="products-grid">
+                    @foreach (var p in otherProducts)
+                    {
+                        <div class="product-card-item" style="opacity: 0.85;">
+                            <div class="card-img-wrapper">
+                                <a asp-controller="Product" asp-action="ProductDetailIndex" asp-route-id="@p.id" class="text-decoration-none">
+                                    <img src="@((p.thumbnail ?? "/images/product-placeholder.png"))" class="card-img-top" alt="@p.name" />
+                                </a>
+                                <a asp-controller="Product" asp-action="ProductDetailIndex" asp-route-id="@p.id" class="quick-view text-decoration-none">
+                                    <i class="fas fa-eye me-1"></i> Xem chi tiết
+                                </a>
+                            </div>
+                            <div class="card-body">
+                                <a asp-controller="Product" asp-action="ProductDetailIndex" asp-route-id="@p.id" class="text-decoration-none">
+                                    <div class="product-name">@p.name</div>
+                                </a>
+                                <div class="product-brand">
+                                    <i class="fas fa-tag"></i>
+                                    <span>@p.brandName</span>
+                                    @if (!string.IsNullOrEmpty((string)p.productCode))
+                                    {
+                                        <span class="product-code">@p.productCode</span>
+                                    }
+                                </div>
+                                <div class="product-price" style="color: #f57c00; -webkit-text-fill-color: #f57c00;">
+                                    @if (p.priceMin != null || p.priceMax != null)
+                                    {
+                                        @string.Format(System.Globalization.CultureInfo.GetCultureInfo("vi-VN"), "{0:C0}", p.priceMin ?? p.priceMax)
+                                        @if (p.priceMin != null && p.priceMax != null && p.priceMin != p.priceMax)
+                                        {
+                                            <text> - </text>@string.Format(System.Globalization.CultureInfo.GetCultureInfo("vi-VN"), "{0:C0}", p.priceMax)
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <i class="fas fa-phone-alt me-1"></i><text>Liên hệ</text>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
     </div>
 </div>
+
+@section Scripts {
+<script>
+(function() {
+    const form = document.getElementById('filterForm');
+    const minPriceInput = document.getElementById('minPrice');
+    const maxPriceInput = document.getElementById('maxPrice');
+    const minPriceError = document.getElementById('minPriceError');
+    const maxPriceError = document.getElementById('maxPriceError');
+    const priceRangeError = document.getElementById('priceRangeError');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    function clearErrors() {
+        minPriceInput.classList.remove('is-invalid');
+        maxPriceInput.classList.remove('is-invalid');
+        minPriceError.classList.remove('show');
+        maxPriceError.classList.remove('show');
+        priceRangeError.classList.remove('show');
+        minPriceError.textContent = '';
+        maxPriceError.textContent = '';
+        priceRangeError.textContent = '';
+    }
+    
+    function validatePrice() {
+        clearErrors();
+        let isValid = true;
+        
+        const minVal = minPriceInput.value.trim();
+        const maxVal = maxPriceInput.value.trim();
+        const minPrice = minVal ? parseFloat(minVal) : null;
+        const maxPrice = maxVal ? parseFloat(maxVal) : null;
+        
+        // Validate minPrice không được âm
+        if (minPrice !== null && minPrice < 0) {
+            minPriceInput.classList.add('is-invalid');
+            minPriceError.textContent = 'Giá không được âm';
+            minPriceError.classList.add('show');
+            isValid = false;
+        }
+        
+        // Validate maxPrice không được âm
+        if (maxPrice !== null && maxPrice < 0) {
+            maxPriceInput.classList.add('is-invalid');
+            maxPriceError.textContent = 'Giá không được âm';
+            maxPriceError.classList.add('show');
+            isValid = false;
+        }
+        
+        // Validate minPrice không được lớn hơn maxPrice
+        if (minPrice !== null && maxPrice !== null && minPrice > maxPrice) {
+            minPriceInput.classList.add('is-invalid');
+            maxPriceInput.classList.add('is-invalid');
+            priceRangeError.textContent = 'Giá tối thiểu không được lớn hơn giá tối đa';
+            priceRangeError.classList.add('show');
+            isValid = false;
+        }
+        
+        // Validate số quá lớn (tránh overflow)
+        const maxAllowed = 999999999999; // ~1 nghìn tỷ
+        if (minPrice !== null && minPrice > maxAllowed) {
+            minPriceInput.classList.add('is-invalid');
+            minPriceError.textContent = 'Giá quá lớn';
+            minPriceError.classList.add('show');
+            isValid = false;
+        }
+        
+        if (maxPrice !== null && maxPrice > maxAllowed) {
+            maxPriceInput.classList.add('is-invalid');
+            maxPriceError.textContent = 'Giá quá lớn';
+            maxPriceError.classList.add('show');
+            isValid = false;
+        }
+        
+        return isValid;
+    }
+    
+    // Validate khi nhập
+    minPriceInput.addEventListener('input', validatePrice);
+    maxPriceInput.addEventListener('input', validatePrice);
+    
+    // Validate khi blur (mất focus)
+    minPriceInput.addEventListener('blur', validatePrice);
+    maxPriceInput.addEventListener('blur', validatePrice);
+    
+    // Validate khi submit form
+    form.addEventListener('submit', function(e) {
+        if (!validatePrice()) {
+            e.preventDefault();
+            return false;
+        }
+        
+        // Tự động sửa giá trị âm thành 0 trước khi submit
+        if (minPriceInput.value && parseFloat(minPriceInput.value) < 0) {
+            minPriceInput.value = '0';
+        }
+        if (maxPriceInput.value && parseFloat(maxPriceInput.value) < 0) {
+            maxPriceInput.value = '';
+        }
+        
+        // Tự động hoán đổi nếu min > max
+        const min = parseFloat(minPriceInput.value) || 0;
+        const max = parseFloat(maxPriceInput.value) || Infinity;
+        if (min > max && maxPriceInput.value) {
+            const temp = minPriceInput.value;
+            minPriceInput.value = maxPriceInput.value;
+            maxPriceInput.value = temp;
+        }
+    });
+    
+    // Format số khi blur
+    function formatNumber(input) {
+        const val = input.value.trim();
+        if (val && !isNaN(val)) {
+            const num = Math.max(0, Math.floor(parseFloat(val)));
+            input.value = num;
+        }
+    }
+    
+    minPriceInput.addEventListener('blur', function() { formatNumber(this); });
+    maxPriceInput.addEventListener('blur', function() { formatNumber(this); });
+})();
+</script>
+}

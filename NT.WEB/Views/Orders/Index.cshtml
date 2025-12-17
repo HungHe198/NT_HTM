@@ -1,6 +1,8 @@
 @model IEnumerable<NT.SHARED.Models.Order>
+@using NT.SHARED.Helpers
 @{
     var isAdmin = User.IsInRole("Admin") || User.IsInRole("Employee");
+    var isCustomer = User.IsInRole("Customer");
     Layout = isAdmin ? "~/Views/Shared/_AdminLayout.cshtml" : "~/Views/Shared/_ClientLayout.cshtml";
     var orders = Model ?? Enumerable.Empty<NT.SHARED.Models.Order>();
     var totalCount = orders.Count();
@@ -10,6 +12,10 @@
     var countConfirmed = orders.Count(o => (o.Status ?? "0") == "1");
     var countShipping = orders.Count(o => (o.Status ?? "0") == "2");
     var countDone = orders.Count(o => (o.Status ?? "0") == "3");
+    
+    // Xác định action và controller phù hợp với role
+    var filterAction = isCustomer ? "My" : "Index";
+    var filterController = "Orders";
 }
 
 <div class="container py-4">
@@ -26,44 +32,46 @@
    <!-- Status Cards -->
             <div class="row g-2 mb-3">
             <div class="col-6 col-md-4 col-lg-2">
-               <a href="@Url.Action("Index", "Orders")" class="status-card status-all @(string.IsNullOrWhiteSpace(ViewBag.FilterStatus as string) ? "active" : "")">
+               <a href="@Url.Action(filterAction, filterController)" class="status-card status-all @(string.IsNullOrWhiteSpace(ViewBag.FilterStatus as string) ? "active" : "")">
         <div class="status-count">@countAll</div>
     <div class="status-label">Tất cả</div>
  </a>
             </div>
     <div class="col-6 col-md-4 col-lg-2">
-          <a href="@Url.Action("Index", "Orders", new { status = "0" })" class="status-card status-pending @(ViewBag.FilterStatus as string == "0" ? "active" : "")">
+          <a href="@Url.Action(filterAction, filterController, new { status = "0" })" class="status-card status-pending @(ViewBag.FilterStatus as string == "0" ? "active" : "")">
   <div class="status-count">@countPending</div>
              <div class="status-label">Chờ xác nhận</div>
            </a>
         </div>
     <div class="col-6 col-md-4 col-lg-2">
-        <a href="@Url.Action("Index", "Orders", new { status = "1" })" class="status-card status-confirmed @(ViewBag.FilterStatus as string == "1" ? "active" : "")">
+        <a href="@Url.Action(filterAction, filterController, new { status = "1" })" class="status-card status-confirmed @(ViewBag.FilterStatus as string == "1" ? "active" : "")">
        <div class="status-count">@countConfirmed</div>
       <div class="status-label">Đã xác nhận</div>
              </a>
   </div>
    <div class="col-6 col-md-4 col-lg-2">
-        <a href="@Url.Action("Index", "Orders", new { status = "2" })" class="status-card status-shipping @(ViewBag.FilterStatus as string == "2" ? "active" : "")">
+        <a href="@Url.Action(filterAction, filterController, new { status = "2" })" class="status-card status-shipping @(ViewBag.FilterStatus as string == "2" ? "active" : "")">
        <div class="status-count">@countShipping</div>
       <div class="status-label">Đang giao</div>
          </a>
          </div>
            <div class="col-6 col-md-4 col-lg-2">
-   <a href="@Url.Action("Index", "Orders", new { status = "3" })" class="status-card status-done @(ViewBag.FilterStatus as string == "3" ? "active" : "")">
+   <a href="@Url.Action(filterAction, filterController, new { status = "3" })" class="status-card status-done @(ViewBag.FilterStatus as string == "3" ? "active" : "")">
              <div class="status-count">@countDone</div>
    <div class="status-label">Thành công</div>
      </a>
           </div>
          <div class="col-6 col-md-4 col-lg-2">
-      <a href="@Url.Action("Index", "Orders", new { status = "-1" })" class="status-card status-cancelled @(ViewBag.FilterStatus as string == "-1" ? "active" : "")">
+      <a href="@Url.Action(filterAction, filterController, new { status = "-1" })" class="status-card status-cancelled @(ViewBag.FilterStatus as string == "-1" ? "active" : "")">
    <div class="status-count">@countCancelled</div>
  <div class="status-label">Đã hủy</div>
         </a>
 </div>
             </div>
 
-            <!-- Search -->
+            <!-- Search (chỉ hiện cho Admin/Employee) -->
+            @if (isAdmin)
+            {
      <div class="row g-2 mb-3">
               <div class="col-12 col-md-6">
       <div class="input-group">
@@ -72,6 +80,7 @@
  </div>
 </div>
       </div>
+            }
 
    <div class="table-responsive">
           <table class="table table-hover table-striped align-middle">
@@ -90,7 +99,9 @@
       @foreach (var o in orders)
       {
      <tr>
-  <td class="fw-semibold">@o.Id.ToString().Substring(0, 8)...</td>
+  <td class="fw-semibold">
+      <span class="order-code" title="@o.Id">@OrderCodeHelper.ToShortCode(o.Id)</span>
+  </td>
    <td class="text-muted small">@(o.Customer?.User?.Fullname ?? "N/A")</td>
         <td class="text-muted small">@(o.PhoneNumber ?? "N/A")</td>
           <td>
@@ -152,6 +163,18 @@ case "2": statusText = "Đang giao hàng"; badgeClass = "bg-primary"; break;
 </div>
 
 <style>
+    /* Order Code Style */
+    .order-code {
+        font-family: 'Consolas', 'Monaco', monospace;
+        background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+        color: #1565c0;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+        cursor: help;
+    }
+
     /* Status Cards */
     .status-card {
 display: block;
