@@ -1,0 +1,174 @@
+@model NT.SHARED.DTOs.UpdateProfileDto
+@{
+    ViewData["Title"] = "Thông tin cá nhân";
+    Layout = "~/Views/Shared/_ClientLayout.cshtml";
+    var username = ViewBag.Username as string ?? "";
+    var isCustomer = ViewBag.IsCustomer as bool? ?? false;
+}
+
+<div class="row justify-content-center py-4">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
+            <!-- Header -->
+            <div class="text-center py-4" style="background: linear-gradient(135deg, #00838f, #00bcd4);">
+                <i class="fas fa-user-circle text-white" style="font-size: 60px;"></i>
+                <h3 class="text-white mt-3 mb-0 fw-bold">Thông tin cá nhân</h3>
+                <p class="text-white-50 mb-0">Cập nhật thông tin tài khoản của bạn</p>
+            </div>
+
+            <div class="card-body p-4 p-md-5">
+                @if (TempData["Success"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fas fa-check-circle me-2"></i>@TempData["Success"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+                @if (TempData["Warning"] != null)
+                {
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2"></i>@TempData["Warning"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+                @if (TempData["Error"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-circle me-2"></i>@TempData["Error"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+
+                <form asp-action="Profile" asp-controller="Account" method="post">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <!-- Tên đăng nhập (readonly) -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">
+                            <i class="fas fa-user me-2 text-secondary"></i>Tên đăng nhập
+                        </label>
+                        <input type="text" class="form-control form-control-lg" value="@username" readonly disabled
+                               style="border-radius: 12px; border: 2px solid #e0e0e0; padding: 12px 16px; background-color: #f5f5f5;" />
+                        <small class="text-muted"><i class="fas fa-lock me-1"></i>Tên đăng nhập không thể thay đổi</small>
+                    </div>
+
+                    <div class="row">
+                        <!-- Họ và tên -->
+                        <div class="col-md-6 mb-4">
+                            <label asp-for="Fullname" class="form-label fw-semibold">
+                                <i class="fas fa-id-card me-2 text-primary"></i>Họ và tên <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="Fullname" class="form-control form-control-lg" 
+                                   placeholder="Nguyễn Văn A"
+                                   style="border-radius: 12px; border: 2px solid #e0e0e0; padding: 12px 16px;" />
+                            <span asp-validation-for="Fullname" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="col-md-6 mb-4">
+                            <label asp-for="Email" class="form-label fw-semibold">
+                                <i class="fas fa-envelope me-2 text-primary"></i>Email
+                            </label>
+                            <input asp-for="Email" type="email" class="form-control form-control-lg" 
+                                   placeholder="example@email.com"
+                                   style="border-radius: 12px; border: 2px solid #e0e0e0; padding: 12px 16px;" />
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- Số điện thoại -->
+                        <div class="col-md-6 mb-4">
+                            <label asp-for="PhoneNumber" class="form-label fw-semibold">
+                                <i class="fas fa-phone me-2 text-primary"></i>Số điện thoại
+                            </label>
+                            <input asp-for="PhoneNumber" class="form-control form-control-lg" 
+                                   placeholder="0901234567"
+                                   style="border-radius: 12px; border: 2px solid #e0e0e0; padding: 12px 16px;" />
+                            <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Giới tính (chỉ hiện nếu là Customer) -->
+                        @if (isCustomer)
+                        {
+                            <div class="col-md-6 mb-4">
+                                <label asp-for="Gender" class="form-label fw-semibold">
+                                    <i class="fas fa-venus-mars me-2 text-primary"></i>Giới tính
+                                </label>
+                                <select asp-for="Gender" class="form-select form-select-lg"
+                                        style="border-radius: 12px; border: 2px solid #e0e0e0; padding: 12px 16px;">
+                                    <option value="">-- Chọn giới tính --</option>
+                                    <option value="Nam">Nam</option>
+                                    <option value="Nữ">Nữ</option>
+                                    <option value="Khác">Khác</option>
+                                </select>
+                                <span asp-validation-for="Gender" class="text-danger small"></span>
+                            </div>
+                        }
+                    </div>
+
+                    @if (isCustomer)
+                    {
+                        <div class="row">
+                            <!-- Ngày sinh -->
+                            <div class="col-md-6 mb-4">
+                                <label asp-for="DoB" class="form-label fw-semibold">
+                                    <i class="fas fa-birthday-cake me-2 text-primary"></i>Ngày sinh
+                                </label>
+                                <input asp-for="DoB" type="date" class="form-control form-control-lg"
+                                       style="border-radius: 12px; border: 2px solid #e0e0e0; padding: 12px 16px;" />
+                                <span asp-validation-for="DoB" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Địa chỉ -->
+                            <div class="col-md-6 mb-4">
+                                <label asp-for="Address" class="form-label fw-semibold">
+                                    <i class="fas fa-map-marker-alt me-2 text-primary"></i>Địa chỉ
+                                </label>
+                                <input asp-for="Address" class="form-control form-control-lg" 
+                                       placeholder="Số nhà, đường, phường/xã..."
+                                       style="border-radius: 12px; border: 2px solid #e0e0e0; padding: 12px 16px;" />
+                                <span asp-validation-for="Address" class="text-danger small"></span>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Nút lưu -->
+                    <button type="submit" class="btn btn-lg w-100 text-white fw-bold mb-3" 
+                            style="background: linear-gradient(135deg, #00838f, #00bcd4); border: none; border-radius: 12px; padding: 14px;">
+                        <i class="fas fa-save me-2"></i>Lưu thay đổi
+                    </button>
+
+                    <div class="text-center mt-3">
+                        <a href="/" class="text-decoration-none" style="color: #00838f;">
+                            <i class="fas fa-arrow-left me-2"></i>Quay lại trang chủ
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Thông tin bổ sung -->
+        <div class="card border-0 shadow-sm mt-4" style="border-radius: 16px;">
+            <div class="card-body p-4">
+                <h5 class="fw-bold mb-3" style="color: #00838f;">
+                    <i class="fas fa-info-circle me-2"></i>Lưu ý
+                </h5>
+                <ul class="text-muted mb-0">
+                    <li>Tên đăng nhập không thể thay đổi sau khi đăng ký.</li>
+                    <li>Email được sử dụng để nhận thông báo và khôi phục mật khẩu.</li>
+                    <li>Số điện thoại được sử dụng để liên hệ khi giao hàng.</li>
+                    @if (isCustomer)
+                    {
+                        <li>Địa chỉ sẽ được sử dụng làm địa chỉ giao hàng mặc định.</li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

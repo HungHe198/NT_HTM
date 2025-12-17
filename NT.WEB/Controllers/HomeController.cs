@@ -76,6 +76,37 @@ namespace NT.WEB.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllProducts(string? q = null, Guid? brandId = null, Guid? categoryId = null, decimal? minPrice = null, decimal? maxPrice = null)
         {
+            // === PRICE VALIDATION ===
+            // Validate minPrice: không được âm
+            if (minPrice.HasValue && minPrice.Value < 0)
+            {
+                minPrice = 0;
+                TempData["Warning"] = "Giá tối thiểu không được âm, đã tự động điều chỉnh về 0.";
+            }
+
+            // Validate maxPrice: không được âm
+            if (maxPrice.HasValue && maxPrice.Value < 0)
+            {
+                maxPrice = null; // Bỏ qua giá trị âm
+                TempData["Warning"] = "Giá tối đa không được âm, đã bỏ qua bộ lọc này.";
+            }
+
+            // Validate: minPrice không được lớn hơn maxPrice
+            if (minPrice.HasValue && maxPrice.HasValue && minPrice.Value > maxPrice.Value)
+            {
+                // Hoán đổi giá trị
+                (minPrice, maxPrice) = (maxPrice, minPrice);
+                TempData["Warning"] = "Giá tối thiểu lớn hơn giá tối đa, đã tự động hoán đổi.";
+            }
+
+            // Lưu giá trị đã validate vào ViewBag để hiển thị lại trên form
+            ViewBag.ValidatedMinPrice = minPrice;
+            ViewBag.ValidatedMaxPrice = maxPrice;
+            
+            // Flag để biết có đang lọc giá hay không
+            bool isPriceFiltering = minPrice.HasValue || maxPrice.HasValue;
+            ViewBag.IsPriceFiltering = isPriceFiltering;
+
             var products = await _productService.GetAllAsync();
 
             if (brandId.HasValue && brandId.Value != Guid.Empty)
@@ -90,13 +121,16 @@ namespace NT.WEB.Controllers
                 ).ToList();
             }
 
-            var result = new List<object>();
+            var matchedProducts = new List<object>();    // Sản phẩm đạt yêu cầu lọc giá
+            var otherProducts = new List<object>();      // Sản phẩm còn lại (Liên hệ hoặc ngoài khoảng giá)
+
             foreach (var p in products)
             {
                 var brand = await _brandService.GetByIdAsync(p.BrandId);
-                var details = await _productDetailService.GetWithLookupsByProductIdAsync(p.Id) ?? Enumerable.Empty<NT.SHARED.Models.ProductDetail>();
+                var allDetails = await _productDetailService.GetWithLookupsByProductIdAsync(p.Id) ?? Enumerable.Empty<NT.SHARED.Models.ProductDetail>();
+                var details = allDetails.ToList();
 
-                // Filter by category if provided (assuming detail has Categories or CategoryId)
+                // Filter by category if provided
                 if (categoryId.HasValue && categoryId.Value != Guid.Empty)
                 {
                     details = details
@@ -104,7 +138,6 @@ namespace NT.WEB.Controllers
                         {
                             try
                             {
-                                // Try common shapes: d.CategoryId or d.Categories (collection of ids)
                                 Guid catId = (Guid)(d.GetType().GetProperty("CategoryId")?.GetValue(d) ?? Guid.Empty);
                                 if (catId != Guid.Empty) return catId == categoryId.Value;
                                 var cats = d.GetType().GetProperty("Categories")?.GetValue(d) as IEnumerable<Guid>;
@@ -115,59 +148,81 @@ namespace NT.WEB.Controllers
                         .ToList();
                 }
 
-                // Filter by price range if provided
-                if (minPrice.HasValue || maxPrice.HasValue)
+                // Lấy tất cả giá của sản phẩm (trước khi lọc)
+                var allPrices = details
+                    .Select(d => (decimal?)d.Price)
+                    .Where(v => v.HasValue)
+                    .Select(v => v!.Value)
+                    .ToList();
+
+                decimal? priceMin = allPrices.Count > 0 ? allPrices.Min() : null;
+                decimal? priceMax = allPrices.Count > 0 ? allPrices.Max() : null;
+
+                // Lấy thumbnail
+                var firstDetail = details.FirstOrDefault();
+                var images = firstDetail?.Images ?? new List<NT.SHARED.Models.ProductImage>();
+                var firstImg = images.FirstOrDefault();
+                var thumbnail = !string.IsNullOrWhiteSpace(p.Thumbnail) 
+                    ? p.Thumbnail 
+                    : (firstImg?.GetType().GetProperty("ImageUrl")?.GetValue(firstImg)?.ToString() ?? p.Thumbnail);
+
+                var productData = new
                 {
-                    details = details
-                        .Where(d =>
+                    id = p.Id,
+                    name = p.Name,
+                    productCode = p.ProductCode,
+                    brandName = brand?.Name,
+                    thumbnail,
+                    priceMin,
+                    priceMax
+                };
+
+                // Phân loại sản phẩm khi có lọc giá
+                if (isPriceFiltering)
+                {
+                    // Sản phẩm không có giá (Liên hệ) → vào danh sách "khác"
+                    if (!priceMin.HasValue && !priceMax.HasValue)
+                    {
+                        otherProducts.Add(productData);
+                    }
+                    else
+                    {
+                        // Kiểm tra có detail nào thỏa mãn điều kiện giá không
+                        bool hasMatchingPrice = details.Any(d =>
                         {
                             try
                             {
-                                decimal? price = (decimal?)d.GetType().GetProperty("Price")?.GetValue(d);
+                                decimal? price = (decimal?)d.Price;
                                 if (!price.HasValue) return false;
                                 if (minPrice.HasValue && price.Value < minPrice.Value) return false;
                                 if (maxPrice.HasValue && price.Value > maxPrice.Value) return false;
                                 return true;
                             }
                             catch { return false; }
-                        })
-                        .ToList();
-                }
+                        });
 
-                var firstDetail = details.FirstOrDefault();
-                var images = firstDetail?.Images ?? new List<NT.SHARED.Models.ProductImage>();
-                var firstImg = images.FirstOrDefault();
-
-                decimal? priceMin = null, priceMax = null;
-                try
-                {
-                    var prices = details
-                        .Select(d => (decimal?)d.Price)
-                        .Where(v => v.HasValue)
-                        .Select(v => v!.Value)
-                        .ToList();
-                    if (prices.Count > 0)
-                    {
-                        priceMin = prices.Min();
-                        priceMax = prices.Max();
+                        if (hasMatchingPrice)
+                        {
+                            matchedProducts.Add(productData);
+                        }
+                        else
+                        {
+                            otherProducts.Add(productData);
+                        }
                     }
                 }
-                catch { }
-
-                result.Add(new
+                else
                 {
-                    id = p.Id,
-                    name = p.Name,
-                    productCode = p.ProductCode,
-                    brandName = brand?.Name,
-                    thumbnail = !string.IsNullOrWhiteSpace(p.Thumbnail) ? p.Thumbnail : (firstImg?.GetType().GetProperty("ImageUrl")?.GetValue(firstImg)?.ToString() ?? p.Thumbnail),
-                    priceMin,
-                    priceMax
-                });
+                    // Không lọc giá → tất cả vào danh sách chính
+                    matchedProducts.Add(productData);
+                }
             }
 
+            ViewBag.MatchedProducts = matchedProducts;
+            ViewBag.OtherProducts = otherProducts;
+
             // Render a view instead of returning raw JSON
-            return View(result);
+            return View(matchedProducts);
         }
     }
 }
