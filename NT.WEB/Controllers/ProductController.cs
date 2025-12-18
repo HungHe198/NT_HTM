@@ -66,6 +66,11 @@ namespace NT.WEB.Controllers
             // ensure product has a thumbnail: pick first image from first active detail
             foreach (var p in model)
             {
+                // Ensure Brand is loaded so the view can display brand name
+                if ((p.Brand == null || string.IsNullOrWhiteSpace(p.Brand?.Name)) && p.BrandId != Guid.Empty)
+                {
+                    try { p.Brand = await _brandService.GetByIdAsync(p.BrandId); } catch { }
+                }
                 if (!string.IsNullOrWhiteSpace(p.Thumbnail)) continue;
                 try
                 {

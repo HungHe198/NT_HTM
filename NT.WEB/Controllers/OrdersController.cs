@@ -183,7 +183,10 @@ namespace NT.WEB.Controllers
             }
 
             // If the order was previously in a status that deducted inventory, restore for each item
-            if (previousStatus == "1" || previousStatus == "2" || previousStatus == "3")
+            // But skip restock when reason indicates seller-confirmed lost/damaged goods
+            var normalizedNote = (order.Note ?? string.Empty).ToLowerInvariant();
+            var isLostOrDamaged = normalizedNote.Contains("mất hàng") || normalizedNote.Contains("hỏng hàng");
+            if ((previousStatus == "1" || previousStatus == "2" || previousStatus == "3") && !isLostOrDamaged)
             {
                 var details = await _orderDetailRepo.FindAsync(d => d.OrderId == id);
                 foreach (var d in details ?? Array.Empty<OrderDetail>())
