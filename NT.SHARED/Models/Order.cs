@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
@@ -16,6 +16,10 @@ namespace NT.SHARED.Models
         public Guid PaymentMethodId { get; set; }
         [Display(Name = "Nhân viên tạo hóa đơn")]
         public Guid? CreatedByUserId { get; set; }
+        [Display(Name = "Nhân viên xác nhận đơn")]
+        public Guid? ConfirmedByUserId { get; set; }
+        [Display(Name = "Nhân viên bàn giao đơn")]
+        public Guid? HandoverByUserId { get; set; }
         [Display(Name = "Thời gian đơn hàng")]
         public DateTime CreatedTime { get; set; } = DateTime.UtcNow;
         [Display(Name = "Tổng tiền")]
