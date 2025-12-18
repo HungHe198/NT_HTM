@@ -12,19 +12,60 @@ namespace NT.WEB.Controllers
         private readonly CartDetailWebService _service;
         private readonly NT.BLL.Interfaces.IGenericRepository<Voucher> _voucherRepository;
         private readonly ProductDetailWebService _productDetailService;
+        private readonly CartWebService _cartService;
+        private readonly CustomerWebService _customerService;
 
-        public CartDetailController(CartDetailWebService service, NT.BLL.Interfaces.IGenericRepository<Voucher> voucherRepository, ProductDetailWebService productDetailService)
+        public CartDetailController(
+            CartDetailWebService service,
+            NT.BLL.Interfaces.IGenericRepository<Voucher> voucherRepository,
+            ProductDetailWebService productDetailService,
+            CartWebService cartService,
+            CustomerWebService customerService)
         {
             _service = service;
             _voucherRepository = voucherRepository;
             _productDetailService = productDetailService;
+            _cartService = cartService;
+            _customerService = customerService;
+        }
+
+        // Resolve current customer's cart (create if missing)
+        private async Task<Cart?> GetOrCreateCustomerCartAsync()
+        {
+            var userIdClaim = User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrWhiteSpace(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+            {
+                return null;
+            }
+
+            var customers = await _customerService.FindAsync(c => c.UserId == userId);
+            var customer = customers?.FirstOrDefault();
+            if (customer == null)
+            {
+                return null;
+            }
+
+            var carts = await _cartService.FindAsync(ct => ct.CustomerId == customer.Id);
+            var cart = carts?.FirstOrDefault();
+            if (cart != null) return cart;
+
+            var newCart = Cart.Create(customer.Id);
+            await _cartService.AddAsync(newCart);
+            await _cartService.SaveChangesAsync();
+            return newCart;
         }
 
         public async Task<IActionResult> Index(Guid cartId)
         {
             if (cartId == Guid.Empty)
             {
-                return NotFound();
+                // Try to resolve current user's cart if not provided
+                var cart = await GetOrCreateCustomerCartAsync();
+                if (cart == null)
+                {
+                    return NotFound();
+                }
+                cartId = cart.Id;
             }
 
             // Build DTO items from CartDetail for provided cartId
