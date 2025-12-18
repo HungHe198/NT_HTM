@@ -80,8 +80,8 @@
      </div>
     </div>
 
-       <!-- Cancel Reason (Admin only) -->
-            @if (isAdmin && status == "-1" && !string.IsNullOrWhiteSpace(Model?.Note))
+       <!-- Cancel Reason (visible to admin and customer when đã hủy) -->
+            @if (status == "-1" && !string.IsNullOrWhiteSpace(Model?.Note))
      {
     <div class="alert alert-danger mb-3" role="alert">
 <h6 class="alert-heading mb-2">Lý do hủy đơn</h6>
@@ -255,14 +255,41 @@
            <h5 class="mb-0">Hủy đơn hàng</h5>
             </div>
  <div class="card-body">
-    <p class="text-muted mb-3">Bạn có thể hủy đơn hàng này. Vui lòng nhập lý do hủy:</p>
+    <p class="text-muted mb-3">Bạn có thể hủy đơn hàng này. Vui lòng chọn lý do hủy:</p>
           <form asp-action="Cancel" asp-controller="Orders" method="post">
  @Html.AntiForgeryToken()
         <input type="hidden" name="id" value="@Model.Id" />
-      <div class="mb-2">
-        <textarea name="note" class="form-control" placeholder="Lý do hủy đơn (bắt buộc)" required rows="3"></textarea>
-  </div>
-     <button class="btn btn-danger w-100" type="submit">Xác nhận hủy đơn</button>
+        <div class="list-group mb-3">
+            <label class="list-group-item">
+                <input class="form-check-input me-2" type="radio" name="note" value="Tôi muốn thay đổi sản phẩm (kích thước, màu sắc, số lượng,...)" required>
+                Tôi muốn thay đổi sản phẩm (kích thước, màu sắc, số lượng,...)
+            </label>
+            <label class="list-group-item">
+                <input class="form-check-input me-2" type="radio" name="note" value="Tôi muốn cập nhật địa chỉ/sđt nhận hàng" required>
+                Tôi muốn cập nhật địa chỉ/sđt nhận hàng
+            </label>
+            <label class="list-group-item">
+                <input class="form-check-input me-2" type="radio" name="note" value="Tôi không có nhu cầu mua nữa" required>
+                Tôi không có nhu cầu mua nữa
+            </label>
+            <label class="list-group-item">
+                <input class="form-check-input me-2" type="radio" name="note" value="Người bán xác nhận gửi sai hàng" required>
+                Người bán xác nhận gửi sai hàng
+            </label>
+            <label class="list-group-item">
+                <input class="form-check-input me-2" type="radio" name="note" value="Người bán xác nhận mất hàng, hỏng hàng" required>
+                Người bán xác nhận mất hàng, hỏng hàng
+            </label>
+            <label class="list-group-item">
+                <input class="form-check-input me-2" type="radio" name="note" value="__OTHER__" required id="reasonOtherRadio">
+                Khác
+            </label>
+        </div>
+        <div class="mb-3" id="reasonOtherBox" style="display:none;">
+            <textarea class="form-control" id="reasonOtherText" placeholder="Nhập lý do khác" rows="3"></textarea>
+            <small class="text-muted">Nếu chọn "Khác", vui lòng nhập lý do ở đây.</small>
+        </div>
+     <button class="btn btn-danger w-100" type="submit" id="cancelSubmitBtn">Xác nhận hủy đơn</button>
    </form>
   </div>
    </div>
@@ -284,9 +311,30 @@
             <div class="modal-body">
                   <input type="hidden" name="id" value="@Model.Id" />
             <div class="mb-3">
-           <label for="cancelNote" class="form-label">Lý do hủy (bắt buộc)</label>
-         <textarea id="cancelNote" name="note" class="form-control" placeholder="Nhập lý do hủy đơn" required rows="4"></textarea>
-              </div>
+                <label class="form-label">Lý do hủy (bắt buộc)</label>
+                <div class="list-group">
+                    <label class="list-group-item">
+                        <input class="form-check-input me-2" type="radio" name="note" value="xác nhận mất hàng" required>
+                        Người bán xác nhận mất hàng
+                    </label>
+                    <label class="list-group-item">
+                        <input class="form-check-input me-2" type="radio" name="note" value=" xác nhận hỏng hàng" required>
+                        Người bán xác nhận hỏng hàng
+                    </label>
+                    <label class="list-group-item">
+                        <input class="form-check-input me-2" type="radio" name="note" value="Không liên lạc được khách" required>
+                        Không liên lạc được khách
+                    </label>
+                    <label class="list-group-item">
+                        <input class="form-check-input me-2" type="radio" name="note" value="__OTHER_ADMIN__" required id="adminOtherRadio">
+                        Khác
+                    </label>
+                </div>
+            </div>
+            <div class="mb-3" id="adminOtherBox" style="display:none;">
+                <textarea class="form-control" id="adminOtherText" placeholder="Nhập lý do khác" rows="3"></textarea>
+                <small class="text-muted">Nếu chọn "Khác", vui lòng nhập lý do ở đây.</small>
+            </div>
              </div>
 <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
@@ -340,3 +388,63 @@ border: 2px solid #fff;
         position: sticky !important;
     }
 </style>
+
+<script>
+    (function(){
+        const otherRadio = document.getElementById('reasonOtherRadio');
+        const otherBox = document.getElementById('reasonOtherBox');
+        const otherText = document.getElementById('reasonOtherText');
+        const form = otherRadio ? otherRadio.closest('form') : null;
+        if (!form) return;
+
+        form.addEventListener('change', function(e){
+            const selected = form.querySelector('input[name="note"]:checked');
+            if (!selected) return;
+            const isOther = selected && selected.value === '__OTHER__';
+            otherBox.style.display = isOther ? 'block' : 'none';
+        });
+
+        form.addEventListener('submit', function(e){
+            const selected = form.querySelector('input[name="note"]:checked');
+            if (!selected) return; // HTML required should handle
+            if (selected.value === '__OTHER__'){
+                const val = (otherText.value || '').trim();
+                if (!val){
+                    e.preventDefault();
+                    otherText.focus();
+                    return;
+                }
+                // Replace the radio value with custom text before submit
+                selected.value = val;
+            }
+        });
+    })();
+
+    // Admin cancel modal behavior
+    (function(){
+        const adminOtherRadio = document.getElementById('adminOtherRadio');
+        const adminOtherBox = document.getElementById('adminOtherBox');
+        const adminOtherText = document.getElementById('adminOtherText');
+        const modal = document.getElementById('cancelModal');
+        if (!modal) return;
+        const form = modal.querySelector('form');
+        if (!form) return;
+
+        form.addEventListener('change', function(){
+            const selected = form.querySelector('input[name="note"]:checked');
+            if (!selected) return;
+            const isOther = selected.value === '__OTHER_ADMIN__';
+            if (adminOtherBox) adminOtherBox.style.display = isOther ? 'block' : 'none';
+        });
+
+        form.addEventListener('submit', function(e){
+            const selected = form.querySelector('input[name="note"]:checked');
+            if (!selected) return;
+            if (selected.value === '__OTHER_ADMIN__'){
+                const val = (adminOtherText?.value || '').trim();
+                if (!val){ e.preventDefault(); adminOtherText?.focus(); return; }
+                selected.value = val;
+            }
+        });
+    })();
+</script>
