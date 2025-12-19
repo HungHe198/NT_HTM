@@ -18,6 +18,9 @@ namespace NT.SHARED.Configurations
             builder.Property(x => x.SeoTitle).HasMaxLength(200);
             builder.Property(x => x.SeoDescription).HasMaxLength(300);
             builder.HasOne(x => x.Brand).WithMany(b => b.Products).HasForeignKey(x => x.BrandId);
+
+            // Ensure mã sản phẩm là duy nhất
+            builder.HasIndex(x => x.ProductCode).IsUnique();
         }
     }
 }

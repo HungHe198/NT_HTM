@@ -55,6 +55,29 @@ namespace NT.WEB.Controllers
             _webHostEnvironment = webHostEnvironment ?? throw new ArgumentNullException(nameof(webHostEnvironment));
         }
 
+        private static bool IsDuplicateKey(Exception ex)
+        {
+            // SQL Server duplicate key error numbers: 2601 (unique index), 2627 (unique constraint)
+            var e = ex;
+            while (e != null)
+            {
+                if (e is Microsoft.Data.SqlClient.SqlException sqlEx && (sqlEx.Number == 2601 || sqlEx.Number == 2627))
+                    return true;
+                e = e.InnerException;
+            }
+            return false;
+        }
+
+        // AJAX: check if product code is available (for client-side validation)
+        [AcceptVerbs("Get", "Post")]
+        public async Task<IActionResult> IsProductCodeAvailable(string productCode, Guid? id)
+        {
+            var code = productCode?.Trim();
+            if (string.IsNullOrWhiteSpace(code)) return Json(true);
+            var exists = (await _productService.FindAsync(p => p.ProductCode.ToLower() == code.ToLower() && (!id.HasValue || p.Id != id.Value))).Any();
+            return Json(!exists);
+        }
+
         // GET: /Product
         [RequirePermission("Product", "Index")]
         public async Task<IActionResult> Index(string? q)
@@ -169,15 +192,29 @@ namespace NT.WEB.Controllers
             {
                 ModelState.AddModelError(nameof(model.BrandId), "Vui lòng chọn Thương hiệu.");
             }
-            //if (!ModelState.IsValid)
-            //{
-            //    // Log ModelState errors to help debugging
-            //    var errors = string.Join(" | ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
-            //    _logger.LogWarning("Create Product validation failed: {Errors}", errors);
-            //    // repopulate brand list when redisplaying form
-            //    ViewBag.BrandSelectList = new SelectList(await _brandService.GetAllAsync(), "Id", "Name");
-            //    return View(model);
-            //}
+
+            // Normalize & validate unique ProductCode
+            var code = model.ProductCode?.Trim();
+            if (!string.IsNullOrWhiteSpace(code))
+            {
+                model.ProductCode = code;
+                var lower = code.ToLower();
+                var exists = (await _productService.FindAsync(p => p.ProductCode.Trim().ToLower() == lower)).Any();
+                if (exists)
+                {
+                    ModelState.AddModelError(nameof(model.ProductCode), "Mã sản phẩm đã tồn tại");
+                }
+            }
+
+            if (!ModelState.IsValid)
+            {
+                // Log ModelState errors to help debugging
+                var errors = string.Join(" | ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
+                _logger.LogWarning("Create Product validation failed: {Errors}", errors);
+                // repopulate brand list when redisplaying form
+                ViewBag.BrandSelectList = new SelectList(await _brandService.GetAllAsync(), "Id", "Name", model.BrandId);
+                return View(model);
+            }
 
             try
             {
@@ -186,8 +223,16 @@ namespace NT.WEB.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to create product");
-                ModelState.AddModelError(string.Empty, "Đã xảy ra lỗi khi tạo sản phẩm. Vui lòng thử lại hoặc kiểm tra log.");
+                // map duplicate key to friendly message
+                if (IsDuplicateKey(ex))
+                {
+                    ModelState.AddModelError(nameof(model.ProductCode), "Mã sản phẩm đã tồn tại");
+                }
+                else
+                {
+                    _logger.LogError(ex, "Failed to create product");
+                    ModelState.AddModelError(string.Empty, "Đã xảy ra lỗi khi tạo sản phẩm. Vui lòng thử lại hoặc kiểm tra log.");
+                }
                 ViewBag.BrandSelectList = new SelectList(await _brandService.GetAllAsync(), "Id", "Name", model.BrandId);
                 return View(model);
             }
@@ -221,6 +266,19 @@ namespace NT.WEB.Controllers
             if (model.BrandId == Guid.Empty)
             {
                 ModelState.AddModelError(nameof(model.BrandId), "Vui lòng chọn Thương hiệu.");
+            }
+
+            // Normalize and validate unique ProductCode (exclude current product)
+            var code = model.ProductCode?.Trim();
+            if (!string.IsNullOrWhiteSpace(code))
+            {
+                model.ProductCode = code;
+                var lower = code.ToLower();
+                var exists = (await _productService.FindAsync(p => p.ProductCode.Trim().ToLower() == lower && p.Id != model.Id)).Any();
+                if (exists)
+                {
+                    ModelState.AddModelError(nameof(model.ProductCode), "Mã sản phẩm đã tồn tại");
+                }
             }
 
             if (!ModelState.IsValid)
