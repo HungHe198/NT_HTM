@@ -1101,13 +1101,53 @@
                 body: data.toString(),
                 credentials: 'same-origin'
             });
+            const loginUrl = `/Account/Login?msg=login_required&returnUrl=${encodeURIComponent(location.pathname + location.search)}`;
+            // Not authenticated or redirected to login
+            if (res.status === 401 || res.status === 403 || (res.redirected && res.url.includes('/Account/Login'))) {
+                window.location.href = loginUrl;
+                return;
+            }
             if (res.ok) {
-                location.reload();
+                // Server redirects to CartDetail; follow it
+                window.location.href = res.url || '/CartDetail';
             } else {
                 alert('Không thể thêm vào giỏ hàng. Vui lòng thử lại.');
             }
         } catch (e) {
             alert('Có lỗi xảy ra khi thêm vào giỏ hàng.');
+        }
+    });
+
+    // Buy Now: attempts to add to cart then redirects user to cart/checkout.
+    document.getElementById('buy-now').addEventListener('click', async () => {
+        const selected = findSelectedDetail();
+        if (!selected) {
+            alert('Vui lòng chọn độ dài và độ cứng có hàng.');
+            return;
+        }
+        const qty = Math.max(1, parseInt(document.getElementById('qty').value || '1'));
+        const data = new URLSearchParams();
+        data.append('productDetailId', selected.id);
+        data.append('quantity', qty);
+        try {
+            const res = await fetch('/Cart/Add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: data.toString(),
+                credentials: 'same-origin'
+            });
+            const loginUrl = `/Account/Login?msg=login_required&returnUrl=${encodeURIComponent(location.pathname + location.search)}`;
+            if (res.status === 401 || res.status === 403 || (res.redirected && res.url.includes('/Account/Login'))) {
+                window.location.href = loginUrl;
+                return;
+            }
+            if (res.ok) {
+                window.location.href = res.url || '/CartDetail';
+            } else {
+                alert('Không thể mua ngay lúc này. Vui lòng thử lại.');
+            }
+        } catch (e) {
+            alert('Có lỗi xảy ra khi mua ngay.');
         }
     });
 </script>
