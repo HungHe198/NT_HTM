@@ -937,6 +937,16 @@
     </div>
 </div>
 
+<!-- Toast Notification -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1060">
+    <div id="pd-toast" class="toast align-items-center text-white border-0" role="alert">
+        <div class="d-flex">
+            <div id="pd-toast-body" class="toast-body"></div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
 <script>
     const details = @Html.Raw(System.Text.Json.JsonSerializer.Serialize((details).Select(d => new {
@@ -1074,7 +1084,15 @@
 
     document.getElementById('qty-plus').addEventListener('click', () => {
         const qty = document.getElementById('qty');
-        qty.value = Math.max(1, parseInt(qty.value || '1') + 1);
+        const current = Math.max(1, parseInt(qty.value || '1'));
+        // If a variant is selected, cap by its stock
+        const selected = findSelectedDetail();
+        if (selected && current + 1 > Number(selected.stock)) {
+            alert(`Số lượng vượt quá tồn kho (${selected.stock}). Vui lòng giảm số lượng hoặc liên hệ shop.`);
+            qty.value = Number(selected.stock);
+            return;
+        }
+        qty.value = current + 1;
     });
 
     updateAvailability();
@@ -1087,10 +1105,14 @@
     document.getElementById('add-to-cart').addEventListener('click', async () => {
         const selected = findSelectedDetail();
         if (!selected) { 
-            alert('Vui lòng chọn độ dài và độ cứng có hàng.');
+            notify('danger', 'Vui lòng chọn độ dài và độ cứng có hàng.');
             return;
         }
         const qty = Math.max(1, parseInt(document.getElementById('qty').value || '1'));
+        if (qty > Number(selected.stock)) {
+            notify('warning', `Số lượng vượt quá tồn kho (${selected.stock}). Vui lòng giảm số lượng hoặc liên hệ shop.`);
+            return;
+        }
         const data = new URLSearchParams();
         data.append('productDetailId', selected.id);
         data.append('quantity', qty);
@@ -1111,10 +1133,10 @@
                 // Server redirects to CartDetail; follow it
                 window.location.href = res.url || '/CartDetail';
             } else {
-                alert('Không thể thêm vào giỏ hàng. Vui lòng thử lại.');
+                notify('danger', 'Không thể thêm vào giỏ hàng. Vui lòng thử lại.');
             }
         } catch (e) {
-            alert('Có lỗi xảy ra khi thêm vào giỏ hàng.');
+            notify('danger', 'Có lỗi xảy ra khi thêm vào giỏ hàng.');
         }
     });
 
@@ -1122,10 +1144,14 @@
     document.getElementById('buy-now').addEventListener('click', async () => {
         const selected = findSelectedDetail();
         if (!selected) {
-            alert('Vui lòng chọn độ dài và độ cứng có hàng.');
+            notify('danger', 'Vui lòng chọn độ dài và độ cứng có hàng.');
             return;
         }
         const qty = Math.max(1, parseInt(document.getElementById('qty').value || '1'));
+        if (qty > Number(selected.stock)) {
+            notify('warning', `Số lượng vượt quá tồn kho (${selected.stock}). Vui lòng giảm số lượng hoặc liên hệ shop.`);
+            return;
+        }
         const data = new URLSearchParams();
         data.append('productDetailId', selected.id);
         data.append('quantity', qty);
@@ -1144,11 +1170,21 @@
             if (res.ok) {
                 window.location.href = res.url || '/CartDetail';
             } else {
-                alert('Không thể mua ngay lúc này. Vui lòng thử lại.');
+                notify('danger', 'Không thể mua ngay lúc này. Vui lòng thử lại.');
             }
         } catch (e) {
-            alert('Có lỗi xảy ra khi mua ngay.');
+            notify('danger', 'Có lỗi xảy ra khi mua ngay.');
         }
     });
+
+    // Toast helper
+    function notify(type, message) {
+        const toast = document.getElementById('pd-toast');
+        const body = document.getElementById('pd-toast-body');
+        body.textContent = message;
+        toast.className = `toast align-items-center text-white border-0 bg-${type}`;
+        const bsToast = new bootstrap.Toast(toast);
+        bsToast.show();
+    }
 </script>
 }

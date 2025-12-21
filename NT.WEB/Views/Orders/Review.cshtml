@@ -143,19 +143,23 @@
              <h5 class="mb-0">Tóm tắt thanh toán</h5>
           </div>
          <div class="card-body">
-  <div class="d-flex justify-content-between mb-2">
-             <span class="text-muted">Tổng tiền hàng:</span>
-        <span>@Model.TotalAmount.ToString("#,##0")</span>
-   </div>
-     <div class="d-flex justify-content-between mb-3 pb-3 border-bottom">
-     <span class="text-muted">Chiết khấu:</span>
-      <span class="text-danger">-@((Model.TotalAmount - Model.FinalAmount).ToString("#,##0"))</span>
+            <div class="d-flex justify-content-between mb-2">
+                <span class="text-muted">Tạm tính:</span>
+                <span>@Model.TotalAmount.ToString("#,##0")</span>
+            </div>
+            <div class="d-flex justify-content-between mb-2">
+                <span class="text-muted"><i class="bi bi-truck me-1"></i>Vận chuyển:</span>
+                <span>@(35_000m.ToString("#,##0"))</span>
+            </div>
+            <div class="d-flex justify-content-between mb-3 pb-3 border-bottom" style="@(Model.DiscountAmount.HasValue && Model.DiscountAmount.Value > 0 ? string.Empty : "display:none;")">
+                <span class="text-muted"><i class="bi bi-ticket-perforated me-1"></i>Giảm giá voucher:</span>
+                <span class="text-success">-@((Model.DiscountAmount ?? 0m).ToString("#,##0"))</span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+                <span class="fw-semibold">Số tiền phải trả:</span>
+                <span class="fw-semibold" style="font-size: 1.3rem; color: #28a745;">@Model.FinalAmount.ToString("#,##0")</span>
+            </div>
          </div>
-  <div class="d-flex justify-content-between align-items-center">
-       <span class="fw-semibold">Số tiền phải trả:</span>
-              <span class="fw-semibold" style="font-size: 1.3rem; color: #28a745;">@Model.FinalAmount.ToString("#,##0")</span>
-    </div>
- </div>
      </div>
 
     <!-- Status Timeline -->
