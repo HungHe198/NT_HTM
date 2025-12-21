@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using NT.BLL.Interfaces;
 using NT.SHARED.DTOs;
 using NT.SHARED.Models;
@@ -27,8 +27,9 @@ namespace NT.WEB.Controllers
 
         public IActionResult Index(bool client = false)
         {
-            ViewBag.IsClient = client;
-            return View();
+            // No dedicated Login view under Views/Login.
+            // Redirect to the existing Account/Login view to avoid InvalidOperationException.
+            return RedirectToAction("Login", "Account", new { msg = (string?)null });
         }
 
         [HttpPost]

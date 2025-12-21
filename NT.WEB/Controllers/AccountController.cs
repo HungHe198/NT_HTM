@@ -30,6 +30,14 @@ namespace NT.WEB.Controllers
         public async Task<IActionResult> Index()
         {
             var items = await _repository.GetAllAsync();
+            // Ensure Role navigation is populated so the view can display role names
+            foreach (var u in items ?? Array.Empty<User>())
+            {
+                if (u.Role == null && u.RoleId != Guid.Empty)
+                {
+                    try { u.Role = await _roleRepository.GetByIdAsync(u.RoleId); } catch { }
+                }
+            }
             return View(items);
         }
 

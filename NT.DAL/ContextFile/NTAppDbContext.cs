@@ -28,7 +28,7 @@ namespace NT.DAL.ContextFile
             // Only configure if not already configured (by dependency injection)
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseSqlServer("Data Source=ASMS;Initial Catalog=NT_HTM;Integrated Security=True;Encrypt=True;Trust Server Certificate=True");
+                optionsBuilder.UseSqlServer("Data Source=PHẠM-TIẾN-DŨNG;Initial Catalog=IMG;Integrated Security=True;Encrypt=True;Trust Server Certificate=True");
             }
             base.OnConfiguring(optionsBuilder);
         }
