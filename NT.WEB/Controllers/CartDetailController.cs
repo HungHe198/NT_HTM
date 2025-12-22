@@ -137,6 +137,15 @@ namespace NT.WEB.Controllers
             if (cartId == Guid.Empty || productDetailId == Guid.Empty) return BadRequest();
             var item = (await _service.FindAsync(cd => cd.CartId == cartId && cd.ProductDetailId == productDetailId))?.FirstOrDefault();
             if (item is null) return NotFound();
+
+            // Kiểm tra số lượng tồn kho
+            var detail = await _productDetailService.GetByIdAsync(productDetailId);
+            if (detail != null && quantity > detail.StockQuantity)
+            {
+                TempData["Error"] = $"Số lượng yêu cầu ({quantity}) vượt quá số lượng tồn kho ({detail.StockQuantity}).";
+                return RedirectToAction(nameof(Index), new { cartId });
+            }
+
             item.Quantity = Math.Max(1, quantity);
             await _service.UpdateAsync(item);
             await _service.SaveChangesAsync();
@@ -162,12 +171,21 @@ namespace NT.WEB.Controllers
                     return Json(new { success = false, message = "Item not found" });
                 }
 
+                // Kiểm tra số lượng tồn kho
+                var productDetail = await _productDetailService.GetByIdAsync(productDetailId);
+                if (productDetail != null && quantity > productDetail.StockQuantity)
+                {
+                    return Json(new { 
+                        success = false, 
+                        message = $"Số lượng yêu cầu ({quantity}) vượt quá số lượng tồn kho ({productDetail.StockQuantity}).",
+                        maxStock = productDetail.StockQuantity
+                    });
+                }
+
                 item.Quantity = Math.Max(1, quantity);
                 await _service.UpdateAsync(item);
                 await _service.SaveChangesAsync();
 
-                // Get unit price for the product detail
-                var productDetail = await _productDetailService.GetByIdAsync(productDetailId);
                 var unitPrice = productDetail?.Price ?? 0;
 
                 // Calculate total items in cart
@@ -180,7 +198,8 @@ namespace NT.WEB.Controllers
                     quantity = item.Quantity,
                     unitPrice = unitPrice,
                     subtotal = unitPrice * item.Quantity,
-                    totalItems = totalItems
+                    totalItems = totalItems,
+                    maxStock = productDetail?.StockQuantity ?? 0
                 });
             }
             catch (Exception ex)

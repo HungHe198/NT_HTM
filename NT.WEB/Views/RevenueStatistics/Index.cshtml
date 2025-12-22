@@ -1,0 +1,471 @@
+@model NT.WEB.ViewModels.RevenueStatisticsViewModel
+@{
+    ViewData["Title"] = "Thống kê doanh thu";
+    var availableYears = ViewBag.AvailableYears as List<int> ?? new List<int> { DateTime.Now.Year };
+}
+
+<style>
+    .stat-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 15px;
+        color: white;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-card.green {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    }
+
+    .stat-card.orange {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+
+    .stat-card.blue {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+
+    .stat-card h5 {
+        font-size: 0.9rem;
+        opacity: 0.9;
+        margin-bottom: 5px;
+    }
+
+    .stat-card .value {
+        font-size: 1.8rem;
+        font-weight: bold;
+    }
+
+    .chart-container {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .chart-title {
+        color: #333;
+        font-weight: 600;
+        margin-bottom: 15px;
+        text-align: center;
+    }
+
+    .ros-circle {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: white;
+    }
+
+    .ros-positive {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    }
+
+    .ros-negative {
+        background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
+    }
+
+    .growth-positive {
+        color: #28a745;
+    }
+
+    .growth-negative {
+        color: #dc3545;
+    }
+
+    .table-stats {
+        font-size: 0.9rem;
+    }
+
+    .table-stats th {
+        background-color: #f8f9fa;
+    }
+
+    .filter-section {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .filter-section label {
+        font-weight: 600;
+        color: #0066cc;
+    }
+</style>
+
+<div class="container-fluid">
+    <!-- Bộ lọc -->
+    <div class="filter-section">
+        <form method="get" asp-action="Index" class="row g-3 align-items-end">
+            <div class="col-auto">
+                <label class="form-label text-primary">CHỌN THÁNG BC</label>
+                <div class="d-flex gap-2">
+                    <select name="month" class="form-select" style="width: 100px;">
+                        @for (int m = 1; m <= 12; m++)
+                        {
+                            <option value="@m" selected="@(Model.SelectedMonth == m)">T@m</option>
+                        }
+                    </select>
+                    <select name="year" class="form-select" style="width: 120px;">
+                        @foreach (var y in availableYears)
+                        {
+                            <option value="@y" selected="@(Model.SelectedYear == y)">Năm @y</option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-primary">Xem thống kê</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Row 1: Thống kê tổng quan -->
+    <div class="row">
+        <div class="col-md-2">
+            <div class="stat-card">
+                <h5>TỔNG DOANH THU</h5>
+                <div class="value">@Model.TotalRevenue.ToString("N0")₫</div>
+            </div>
+            <div class="stat-card green">
+                <h5>DOANH THU THÁNG HIỆN TẠI</h5>
+                <div class="value">@Model.CurrentMonthRevenue.ToString("N0")₫</div>
+            </div>
+            <div class="stat-card orange">
+                <h5>TỔNG ĐƠN HÀNG</h5>
+                <div class="value">@Model.TotalOrders.ToString("N0")</div>
+            </div>
+            <div class="stat-card blue">
+                <h5>ĐƠN HÀNG THÁNG HIỆN TẠI</h5>
+                <div class="value">@Model.CurrentMonthOrders.ToString("N0")</div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="chart-container" style="height: 350px;">
+                <h6 class="chart-title text-primary">DOANH THU THEO NHÓM SP</h6>
+                <canvas id="categoryRevenueChart"></canvas>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="chart-container" style="height: 350px;">
+                <h6 class="chart-title text-success">LỢI NHUẬN HĐKD THEO NHÓM SP</h6>
+                <canvas id="categoryProfitChart"></canvas>
+            </div>
+        </div>
+
+        <div class="col-md-2">
+            <div class="chart-container text-center" style="height: 165px;">
+                <h6 class="chart-title text-warning">TĂNG TRƯỞNG DOANH THU</h6>
+                <div class="@(Model.RevenueGrowthRate >= 0 ? "growth-positive" : "growth-negative")" style="font-size: 2rem; font-weight: bold;">
+                    @(Model.RevenueGrowthRate >= 0 ? "+" : "")@Model.RevenueGrowthRate%
+                </div>
+            </div>
+            <div class="chart-container text-center" style="height: 165px;">
+                <h6 class="chart-title text-info">ROS TOÀN CÔNG TY</h6>
+                <div class="ros-circle @(Model.ROS >= 0 ? "ros-positive" : "ros-negative")">
+                    @Model.ROS%
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Row 2: Biểu đồ theo tháng -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="chart-container" style="height: 350px;">
+                <h6 class="chart-title text-primary">DOANH THU 12 THÁNG GẦN NHẤT</h6>
+                <canvas id="monthlyRevenueChart"></canvas>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="chart-container" style="height: 350px;">
+                <h6 class="chart-title text-danger">TĂNG TRƯỞNG DOANH THU TỪNG THÁNG</h6>
+                <canvas id="monthlyGrowthChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Row 3: Doanh thu theo ngày và Top sản phẩm -->
+    <div class="row">
+        <div class="col-md-8">
+            <div class="chart-container" style="height: 350px;">
+                <h6 class="chart-title text-primary">DOANH THU THEO NGÀY TRONG THÁNG @Model.SelectedMonth/@Model.SelectedYear</h6>
+                <canvas id="dailyRevenueChart"></canvas>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="chart-container" style="max-height: 350px; overflow-y: auto;">
+                <h6 class="chart-title text-success">TOP SẢN PHẨM BÁN CHẠY</h6>
+                <table class="table table-sm table-stats">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Sản phẩm</th>
+                            <th>SL</th>
+                            <th>Doanh thu</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            int rank = 1;
+                        }
+                        @foreach (var item in Model.TopProducts)
+                        {
+                            <tr>
+                                <td>@rank</td>
+                                <td title="@item.ProductName">@(item.ProductName.Length > 20 ? item.ProductName.Substring(0, 20) + "..." : item.ProductName)</td>
+                                <td>@item.QuantitySold</td>
+                                <td>@item.Revenue.ToString("N0")₫</td>
+                            </tr>
+                            rank++;
+                        }
+                        @if (!Model.TopProducts.Any())
+                        {
+                            <tr>
+                                <td colspan="4" class="text-center">Không có dữ liệu</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Row 4: Sản phẩm doanh thu cao nhất mỗi ngày -->
+    <div class="row">
+        <div class="col-12">
+            <div class="chart-container" style="max-height: 400px; overflow-y: auto;">
+                <h6 class="chart-title text-warning">SẢN PHẨM DOANH THU CAO NHẤT MỖI NGÀY TRONG THÁNG @Model.SelectedMonth/@Model.SelectedYear</h6>
+                <table class="table table-sm table-striped table-stats">
+                    <thead>
+                        <tr>
+                            <th>Ngày</th>
+                            <th>Mã SP</th>
+                            <th>Tên sản phẩm</th>
+                            <th>Số lượng bán</th>
+                            <th>Doanh thu</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.DailyTopProducts)
+                        {
+                            <tr>
+                                <td>@item.DateLabel</td>
+                                <td>@item.ProductCode</td>
+                                <td title="@item.ProductName">@(item.ProductName.Length > 30 ? item.ProductName.Substring(0, 30) + "..." : item.ProductName)</td>
+                                <td>@item.QuantitySold</td>
+                                <td>@item.Revenue.ToString("N0")₫</td>
+                            </tr>
+                        }
+                        @if (!Model.DailyTopProducts.Any())
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center">Không có dữ liệu</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Dữ liệu từ Model
+        const categoryLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.RevenueByCategory.Select(x => x.CategoryName).ToList()));
+        const categoryRevenue = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.RevenueByCategory.Select(x => x.Revenue).ToList()));
+        const categoryProfit = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ProfitByCategory.Select(x => x.Profit).ToList()));
+        const categoryProfitLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ProfitByCategory.Select(x => x.CategoryName).ToList()));
+
+        const monthlyLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MonthlyRevenue.Select(x => x.Label).ToList()));
+        const monthlyRevenue = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MonthlyRevenue.Select(x => x.Revenue).ToList()));
+
+        const monthlyGrowthLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MonthlyGrowth.Select(x => x.Label).ToList()));
+        const monthlyGrowth = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MonthlyGrowth.Select(x => x.GrowthRate).ToList()));
+
+        const dailyLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.DailyRevenue.Select(x => x.Label).ToList()));
+        const dailyRevenue = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.DailyRevenue.Select(x => x.Revenue).ToList()));
+
+        // Màu sắc cho biểu đồ
+        const chartColors = [
+            'rgba(255, 193, 7, 0.8)',   // Vàng
+            'rgba(40, 167, 69, 0.8)',   // Xanh lá
+            'rgba(255, 87, 34, 0.8)',   // Cam
+            'rgba(156, 39, 176, 0.8)',  // Tím
+            'rgba(255, 152, 0, 0.8)',   // Cam nhạt
+            'rgba(0, 188, 212, 0.8)',   // Cyan
+            'rgba(233, 30, 99, 0.8)',   // Hồng
+            'rgba(63, 81, 181, 0.8)'    // Xanh dương
+        ];
+
+        // Biểu đồ doanh thu theo danh mục
+        new Chart(document.getElementById('categoryRevenueChart'), {
+            type: 'bar',
+            data: {
+                labels: categoryLabels,
+                datasets: [{
+                    label: 'Doanh thu (triệu)',
+                    data: categoryRevenue.map(v => v / 1000000),
+                    backgroundColor: chartColors,
+                    borderWidth: 0,
+                    borderRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Millions' }
+                    }
+                }
+            }
+        });
+
+        // Biểu đồ lợi nhuận theo danh mục
+        new Chart(document.getElementById('categoryProfitChart'), {
+            type: 'bar',
+            data: {
+                labels: categoryProfitLabels,
+                datasets: [{
+                    label: 'Lợi nhuận (triệu)',
+                    data: categoryProfit.map(v => v / 1000000),
+                    backgroundColor: chartColors,
+                    borderWidth: 0,
+                    borderRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Millions' }
+                    }
+                }
+            }
+        });
+
+        // Biểu đồ doanh thu 12 tháng
+        new Chart(document.getElementById('monthlyRevenueChart'), {
+            type: 'bar',
+            data: {
+                labels: monthlyLabels,
+                datasets: [{
+                    label: 'Doanh thu (triệu)',
+                    data: monthlyRevenue.map(v => v / 1000000),
+                    backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                    borderWidth: 0,
+                    borderRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Millions' }
+                    }
+                }
+            }
+        });
+
+        // Biểu đồ tăng trưởng theo tháng
+        new Chart(document.getElementById('monthlyGrowthChart'), {
+            type: 'line',
+            data: {
+                labels: monthlyGrowthLabels,
+                datasets: [{
+                    label: 'Tăng trưởng (%)',
+                    data: monthlyGrowth,
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    borderWidth: 2,
+                    fill: false,
+                    tension: 0.4,
+                    pointBackgroundColor: 'rgba(255, 99, 132, 1)',
+                    pointRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                return context.parsed.y + '%';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        title: { display: true, text: '%' }
+                    }
+                }
+            }
+        });
+
+        // Biểu đồ doanh thu theo ngày
+        new Chart(document.getElementById('dailyRevenueChart'), {
+            type: 'bar',
+            data: {
+                labels: dailyLabels,
+                datasets: [{
+                    label: 'Doanh thu (triệu)',
+                    data: dailyRevenue.map(v => v / 1000000),
+                    backgroundColor: 'rgba(75, 192, 192, 0.8)',
+                    borderWidth: 0,
+                    borderRadius: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Millions' }
+                    },
+                    x: {
+                        ticks: {
+                            maxRotation: 45,
+                            minRotation: 45
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+}

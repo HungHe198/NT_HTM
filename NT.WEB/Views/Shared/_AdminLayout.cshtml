@@ -87,8 +87,9 @@
                 <div class="fw-bold">Team 1 <span class="badge bg-light text-dark">Free</span></div>
             </div>
             <ul class="nav nav-pills flex-column mb-auto">
-                <li><a asp-controller="Admin" asp-action="Index" class="nav-link @isActive("Admin", "RevenueDaily")"><i class="fa fa-chart-line"></i>Thống kê</a></li>
-                <li><a asp-controller="Account" asp-action="Index" class="nav-link @isActive("Account", "Index")"><i class="fa fa-user"></i>Tài khoản</a></li>
+            <li><a asp-controller="Admin" asp-action="Index" class="nav-link @isActive("Admin", "RevenueDaily")"><i class="fa fa-chart-line"></i>Thống kê</a></li>
+            <li><a asp-controller="RevenueStatistics" asp-action="Index" class="nav-link @isActive("RevenueStatistics", "Index")"><i class="fa fa-chart-bar"></i>Thống kê doanh thu</a></li>
+            <li><a asp-controller="Account" asp-action="Index" class="nav-link @isActive("Account", "Index")"><i class="fa fa-user"></i>Tài khoản</a></li>
                 <li><a asp-controller="RolePermission" asp-action="Index" class="nav-link @isActive("RolePermission", "Index")"><i class="fa fa-user-shield"></i>Phân quyền</a></li>
                 <li><a asp-controller="Product" asp-action="Index" class="nav-link @isActive("Product", "Index")"><i class="fa fa-box"></i>Sản phẩm</a></li>
                 <li><a asp-controller="Orders" asp-action="Index" class="nav-link @isActive("Orders", "Index")"><i class="fa fa-receipt"></i>Đơn hàng</a></li>
