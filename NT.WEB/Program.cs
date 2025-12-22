@@ -65,6 +65,7 @@ builder.Services.AddScoped<VocherWebService>();
 builder.Services.AddScoped<OrdersWebService>();
 builder.Services.AddScoped<CustomerWebService>();
 builder.Services.AddScoped<AdminWebService>();
+builder.Services.AddScoped<RevenueStatisticsWebService>();
 // Password hasher for User
 builder.Services.AddScoped<Microsoft.AspNetCore.Identity.IPasswordHasher<NT.SHARED.Models.User>, Microsoft.AspNetCore.Identity.PasswordHasher<NT.SHARED.Models.User>>();
 // Simple email service

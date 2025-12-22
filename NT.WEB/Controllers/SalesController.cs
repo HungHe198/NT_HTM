@@ -256,11 +256,11 @@ d.Price,
         DiscountAmount = discount > 0 ? discount : null,
       FinalAmount = finalAmount,
              Status = "1", // Confirmed (đã xác nhận)
-            PhoneNumber = model.CustomerPhone,
-  ShippingAddress = model.ShippingAddress ?? string.Empty,
-   Note = model.Note,
- CreatedByUserId = GetCurrentUserId()
- };
+                        PhoneNumber = model.CustomerPhone,
+              ShippingAddress = model.ShippingAddress ?? string.Empty,
+               Note = model.Note,
+             ConfirmedByUserId = GetCurrentUserId() // Nhân viên xác nhận đơn (bán tại quầy)
+             };
 
       await _orderRepo.AddAsync(order);
    
@@ -326,7 +326,7 @@ public async Task<IActionResult> History(int days = 30)
       return Forbid();
 
          var from = DateTime.UtcNow.Date.AddDays(-days);
-      var orders = await _orderRepo.FindAsync(o => o.CreatedByUserId == userId && o.CreatedTime >= from);
+         var orders = await _orderRepo.FindAsync(o => o.ConfirmedByUserId == userId && o.CreatedTime >= from);
          var list = (orders ?? Array.Empty<Order>()).OrderByDescending(o => o.CreatedTime).ToList();
             ViewBag.Days = days;
             return View(list);

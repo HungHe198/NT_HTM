@@ -125,8 +125,18 @@ namespace NT.WEB.Controllers
             var detail = await _productDetailService.GetByIdAsync(productDetailId);
             if (detail is null) return NotFound();
 
-            // Persist to CartDetail
+            // Kiểm tra số lượng tồn kho
             var existingDb = (await _cartDetailService.FindAsync(cd => cd.CartId == cart.Id && cd.ProductDetailId == productDetailId))?.FirstOrDefault();
+            var currentQtyInCart = existingDb?.Quantity ?? 0;
+            var totalRequestedQty = currentQtyInCart + quantity;
+
+            if (totalRequestedQty > detail.StockQuantity)
+            {
+                TempData["Error"] = $"Số lượng yêu cầu ({totalRequestedQty}) vượt quá số lượng tồn kho ({detail.StockQuantity}). Hiện tại trong giỏ đã có {currentQtyInCart} sản phẩm.";
+                return Redirect($"/CartDetail?cartId={cart.Id}");
+            }
+
+            // Persist to CartDetail
             if (existingDb == null)
             {
                 var newItem = CartDetail.Create(cart.Id, productDetailId, quantity);
@@ -149,6 +159,15 @@ namespace NT.WEB.Controllers
             if (cart == null) return Forbid();
             var item = (await _cartDetailService.FindAsync(cd => cd.CartId == cart.Id && cd.ProductDetailId == productDetailId))?.FirstOrDefault();
             if (item is null) return NotFound();
+
+            // Kiểm tra số lượng tồn kho
+            var detail = await _productDetailService.GetByIdAsync(productDetailId);
+            if (detail != null && quantity > detail.StockQuantity)
+            {
+                TempData["Error"] = $"Số lượng yêu cầu ({quantity}) vượt quá số lượng tồn kho ({detail.StockQuantity}).";
+                return RedirectToAction(nameof(Index));
+            }
+
             item.Quantity = Math.Max(1, quantity);
             await _cartDetailService.UpdateAsync(item);
             await _cartDetailService.SaveChangesAsync();

@@ -453,6 +453,25 @@ namespace NT.WEB.Controllers
                 .ToList();
             if (!selectedItems.Any()) return BadRequest("Không có sản phẩm hợp lí");
 
+            // Kiểm tra số lượng tồn kho trước khi đặt hàng
+            var stockErrors = new List<string>();
+            foreach (var ci in selectedItems)
+            {
+                var pd = ci.ProductDetail ?? await _productDetailService.GetByIdAsync(ci.ProductDetailId);
+                if (pd == null) continue;
+                if (ci.Quantity > pd.StockQuantity)
+                {
+                    var productName = pd.Product?.Name ?? "Sản phẩm";
+                    stockErrors.Add($"'{productName}' chỉ còn {pd.StockQuantity} sản phẩm trong kho (bạn yêu cầu {ci.Quantity})");
+                }
+            }
+            if (stockErrors.Any())
+            {
+                TempData["Error"] = "Một số sản phẩm không đủ số lượng: " + string.Join("; ", stockErrors);
+                var sel = string.Join(',', selectedItems.Select(s => s.ProductDetailId));
+                return Redirect($"/Checkout/Start?cartId={cartId}&selected={sel}");
+            }
+
             // Ensure we have up-to-date ProductDetail for price calculation
             decimal subtotal = 0m;
             foreach (var ci in selectedItems)

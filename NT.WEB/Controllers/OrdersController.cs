@@ -125,6 +125,21 @@ namespace NT.WEB.Controllers
             var previousStatus = order.Status ?? "0";
             order.Status = status;
 
+            // Lưu thông tin người thực hiện hành động theo từng trạng thái
+            var currentUserId = GetCurrentUserId();
+            switch (status)
+            {
+                case "1": // Confirmed - Nhân viên xác nhận đơn
+                    order.ConfirmedByUserId = currentUserId;
+                    break;
+                case "2": // Shipping - Nhân viên bàn giao đơn
+                    order.HandoverByUserId = currentUserId;
+                    break;
+                case "3": // Delivered - Nhân viên xác nhận hoàn thành
+                    order.CompletedByUserId = currentUserId;
+                    break;
+            }
+
             // Inventory adjustment only on transition to Confirmed from non-confirmed states
             if (previousStatus != "1" && status == "1")
             {
@@ -149,6 +164,15 @@ namespace NT.WEB.Controllers
             return RedirectToAction(nameof(Review), new { id });
         }
 
+        /// <summary>
+        /// Lấy ID của user đang đăng nhập
+        /// </summary>
+        private Guid GetCurrentUserId()
+        {
+            var userIdClaim = User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            return Guid.TryParse(userIdClaim, out var userId) ? userId : Guid.Empty;
+        }
+
         // Cancel order with note (admin/employee/customer). Note is required on cancel.
         [Authorize(Roles = "Admin,Employee,Customer")]
         [HttpPost]
@@ -168,6 +192,7 @@ namespace NT.WEB.Controllers
             var previousStatus = order.Status ?? "0";
             order.Note = note; // hidden from customer during placement, only used for cancellation reason
             order.Status = "-1"; // canceled
+            order.CancelledByUserId = GetCurrentUserId(); // Lưu người hủy đơn
             await _orderRepo.UpdateAsync(order);
 
             // Hoàn trả UsageCount của voucher nếu đơn hàng có sử dụng voucher
