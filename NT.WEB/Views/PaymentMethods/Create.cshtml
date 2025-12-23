@@ -1,4 +1,5 @@
-﻿@{
+@using NT.SHARED.Models
+@{
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 <h2>Tạo phương thức thanh toán</h2>
@@ -14,6 +15,15 @@
     <div class="mb-2">
         <label class="form-label">Mô tả</label>
         <input type="text" name="description" class="form-control" />
+    </div>
+    <div class="mb-2">
+        <label class="form-label">Kênh bán hàng áp dụng</label>
+        <select name="channel" class="form-select" required>
+            <option value="@((int)SalesChannel.All)">Tất cả (Online & Offline)</option>
+            <option value="@((int)SalesChannel.Online)">Chỉ Online (COD)</option>
+            <option value="@((int)SalesChannel.Offline)">Chỉ Offline/POS (Tiền mặt, Chuyển khoản)</option>
+        </select>
+        <small class="text-muted">Online: COD - Thanh toán khi nhận hàng | Offline: Tiền mặt, Chuyển khoản tại quầy</small>
     </div>
     <button class="btn btn-primary" type="submit">Lưu</button>
     <a class="btn btn-secondary" asp-action="Index">Hủy</a>

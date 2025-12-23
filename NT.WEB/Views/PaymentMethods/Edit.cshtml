@@ -1,4 +1,5 @@
-﻿@model NT.SHARED.Models.PaymentMethod
+@model NT.SHARED.Models.PaymentMethod
+@using NT.SHARED.Models
 @{
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
@@ -16,6 +17,15 @@
     <div class="mb-2">
         <label asp-for="Description" class="form-label"></label>
         <input asp-for="Description" class="form-control" />
+    </div>
+    <div class="mb-2">
+        <label asp-for="Channel" class="form-label">Kênh bán hàng áp dụng</label>
+        <select asp-for="Channel" class="form-select" required>
+            <option value="@((int)SalesChannel.All)" selected="@(Model.Channel == SalesChannel.All)">Tất cả (Online & Offline)</option>
+            <option value="@((int)SalesChannel.Online)" selected="@(Model.Channel == SalesChannel.Online)">Chỉ Online (COD)</option>
+            <option value="@((int)SalesChannel.Offline)" selected="@(Model.Channel == SalesChannel.Offline)">Chỉ Offline/POS (Tiền mặt, Chuyển khoản)</option>
+        </select>
+        <small class="text-muted">Online: COD - Thanh toán khi nhận hàng | Offline: Tiền mặt, Chuyển khoản tại quầy</small>
     </div>
     <button class="btn btn-primary" type="submit">Lưu</button>
     <a class="btn btn-secondary" asp-action="Index">Hủy</a>

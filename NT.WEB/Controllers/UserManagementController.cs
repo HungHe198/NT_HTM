@@ -153,6 +153,15 @@ namespace NT.WEB.Controllers
             {
                 ModelState.AddModelError(nameof(model.Username), "Tên đăng nhập là bắt buộc");
             }
+            else
+            {
+                // đảm bảo username chỉ chứa ký tự hợp lệ
+                var unameRe = new System.Text.RegularExpressions.Regex("^[A-Za-z0-9._-]+$");
+                if (!unameRe.IsMatch(model.Username))
+                {
+                    ModelState.AddModelError(nameof(model.Username), "Tên đăng nhập phải viết liền, không dấu, không chứa khoảng trắng; chỉ dùng chữ/số/./_/-.");
+                }
+            }
 
             if (string.IsNullOrWhiteSpace(plainPassword))
             {
@@ -283,6 +292,16 @@ namespace NT.WEB.Controllers
             if (string.IsNullOrWhiteSpace(model.Fullname))
             {
                 ModelState.AddModelError(nameof(model.Fullname), "Họ và tên là bắt buộc");
+            }
+
+            // Validate username on edit as well (cannot contain spaces or diacritics)
+            if (!string.IsNullOrWhiteSpace(model.Username))
+            {
+                var unameRe = new System.Text.RegularExpressions.Regex("^[A-Za-z0-9._-]+$");
+                if (!unameRe.IsMatch(model.Username))
+                {
+                    ModelState.AddModelError(nameof(model.Username), "Tên đăng nhập phải viết liền, không dấu, không chứa khoảng trắng; chỉ dùng chữ/số/./_/-.");
+                }
             }
 
             if (model.RoleId == Guid.Empty)

@@ -8,6 +8,12 @@
 <h1>Chỉnh sửa chi tiết sản phẩm</h1>
 
 <form asp-action="EditDetail" method="post" enctype="multipart/form-data">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="All" class="text-danger mb-3"></div>
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
     <input type="hidden" asp-for="Id" />
     <input type="hidden" asp-for="ProductId" />
 
@@ -23,7 +29,7 @@
 
             <div class="form-group">
                 <label asp-for="StockQuantity">@Html.DisplayNameFor(m => m.StockQuantity)</label>
-                <input asp-for="StockQuantity" class="form-control" />
+                <input asp-for="StockQuantity" class="form-control" type="number" min="0" max="999999" />
                 <span asp-validation-for="StockQuantity" class="text-danger"></span>
             </div>
 
@@ -82,26 +88,31 @@
             <div class="form-group">
                 <label asp-for="Sections">@Html.DisplayNameFor(m => m.Sections)</label>
                 <input asp-for="Sections" class="form-control" />
+                <span asp-validation-for="Sections" class="text-danger"></span>
             </div>
 
             <div class="form-group">
                 <label asp-for="CollapsedLength">@Html.DisplayNameFor(m => m.CollapsedLength)</label>
                 <input asp-for="CollapsedLength" class="form-control" />
+                <span asp-validation-for="CollapsedLength" class="text-danger"></span>
             </div>
 
             <div class="form-group">
                 <label asp-for="Weight">@Html.DisplayNameFor(m => m.Weight)</label>
                 <input asp-for="Weight" class="form-control" />
+                <span asp-validation-for="Weight" class="text-danger"></span>
             </div>
 
             <div class="form-row">
                 <div class="form-group col-md-6">
                     <label asp-for="TipWeight">@Html.DisplayNameFor(m => m.TipWeight)</label>
                     <input asp-for="TipWeight" class="form-control" />
+                    <span asp-validation-for="TipWeight" class="text-danger"></span>
                 </div>
                 <div class="form-group col-md-6">
                     <label asp-for="ButtWeight">@Html.DisplayNameFor(m => m.ButtWeight)</label>
                     <input asp-for="ButtWeight" class="form-control" />
+                    <span asp-validation-for="ButtWeight" class="text-danger"></span>
                 </div>
             </div>
 
@@ -109,30 +120,36 @@
                 <div class="form-group col-md-4">
                     <label asp-for="TipDiameter">@Html.DisplayNameFor(m => m.TipDiameter)</label>
                     <input asp-for="TipDiameter" class="form-control" />
+                    <span asp-validation-for="TipDiameter" class="text-danger"></span>
                 </div>
                 <div class="form-group col-md-4">
                     <label asp-for="TopDiameter">@Html.DisplayNameFor(m => m.TopDiameter)</label>
                     <input asp-for="TopDiameter" class="form-control" />
+                    <span asp-validation-for="TopDiameter" class="text-danger"></span>
                 </div>
                 <div class="form-group col-md-4">
                     <label asp-for="ButtDiameter">@Html.DisplayNameFor(m => m.ButtDiameter)</label>
                     <input asp-for="ButtDiameter" class="form-control" />
+                    <span asp-validation-for="ButtDiameter" class="text-danger"></span>
                 </div>
             </div>
 
             <div class="form-group">
                 <label asp-for="BalancePoint">@Html.DisplayNameFor(m => m.BalancePoint)</label>
                 <input asp-for="BalancePoint" class="form-control" />
+                <span asp-validation-for="BalancePoint" class="text-danger"></span>
             </div>
 
             <div class="form-group">
                 <label asp-for="BalanceLoadPoint">@Html.DisplayNameFor(m => m.BalanceLoadPoint)</label>
                 <input asp-for="BalanceLoadPoint" class="form-control" />
+                <span asp-validation-for="BalanceLoadPoint" class="text-danger"></span>
             </div>
 
             <div class="form-group">
                 <label asp-for="BalanceLoadDescription">@Html.DisplayNameFor(m => m.BalanceLoadDescription)</label>
                 <textarea asp-for="BalanceLoadDescription" class="form-control"></textarea>
+                <span asp-validation-for="BalanceLoadDescription" class="text-danger"></span>
             </div>
         </div>
     </div>
@@ -145,26 +162,31 @@
             <div class="form-group">
                 <label asp-for="RecommendedLine">@Html.DisplayNameFor(m => m.RecommendedLine)</label>
                 <input asp-for="RecommendedLine" class="form-control" />
+                <span asp-validation-for="RecommendedLine" class="text-danger"></span>
             </div>
 
             <div class="form-group">
                 <label asp-for="RecommendedFishWeight">@Html.DisplayNameFor(m => m.RecommendedFishWeight)</label>
                 <input asp-for="RecommendedFishWeight" class="form-control" />
+                <span asp-validation-for="RecommendedFishWeight" class="text-danger"></span>
             </div>
 
             <div class="form-group">
                 <label asp-for="HandleType">@Html.DisplayNameFor(m => m.HandleType)</label>
                 <input asp-for="HandleType" class="form-control" />
+                <span asp-validation-for="HandleType" class="text-danger"></span>
             </div>
 
             <div class="form-group">
                 <label asp-for="JointType">@Html.DisplayNameFor(m => m.JointType)</label>
                 <input asp-for="JointType" class="form-control" />
+                <span asp-validation-for="JointType" class="text-danger"></span>
             </div>
 
             <div class="form-group">
                 <label asp-for="Warranty">@Html.DisplayNameFor(m => m.Warranty)</label>
                 <input asp-for="Warranty" class="form-control" />
+                <span asp-validation-for="Warranty" class="text-danger"></span>
             </div>
         </div>
 
@@ -178,11 +200,13 @@
             <div class="form-group">
                 <label asp-for="CostPrice">@Html.DisplayNameFor(m => m.CostPrice)</label>
                 <input asp-for="CostPrice" class="form-control" type="number" step="0.01" />
+                <span asp-validation-for="CostPrice" class="text-danger"></span>
             </div>
 
             <div class="form-group">
                 <label asp-for="LastImportDate">@Html.DisplayNameFor(m => m.LastImportDate)</label>
                 <input asp-for="LastImportDate" class="form-control" type="datetime-local" value="@(Model.LastImportDate?.ToString("yyyy-MM-ddTHH:mm") ?? DateTime.Now.ToString("yyyy-MM-ddTHH:mm"))" />
+                <span asp-validation-for="LastImportDate" class="text-danger"></span>
             </div>
 
             <div class="form-group form-check">
@@ -233,7 +257,43 @@
 </form>
 
 @section Scripts {
+    <partial name="_ValidationScriptsPartial" />
     <script>
+        // Render server-side ModelState errors inline next to fields (in case client validation misses)
+        (function(){
+            var serverErrors = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+                ViewData.ModelState.Where(kv => kv.Value?.Errors?.Count > 0)
+                    .ToDictionary(kv => kv.Key, kv => kv.Value.Errors.Select(e => e.ErrorMessage).ToArray())
+            ));
+
+            function showServerErrors(){
+                if(!serverErrors) return;
+                Object.keys(serverErrors).forEach(function(key){
+                    var messages = serverErrors[key];
+                    if(!messages || messages.length === 0) return;
+                    // find form elements by exact name or by suffix (for prefixed model binding)
+                    var selector = '[name="' + key + '"]';
+                    var el = document.querySelector(selector) || document.querySelector('[name$=".' + key + '"]');
+                    // If element found, append an error span after it
+                    if(el){
+                        // avoid duplicating
+                        var existing = el.parentNode.querySelector('.server-validation-' + key.replace(/[^a-z0-9_-]/gi,'_'));
+                        if(existing) return;
+                        var span = document.createElement('span');
+                        span.className = 'text-danger server-validation-' + key.replace(/[^a-z0-9_-]/gi,'_');
+                        span.style.display = 'block';
+                        span.style.marginTop = '0.25rem';
+                        span.textContent = messages.join(' | ');
+                        el.parentNode.appendChild(span);
+                    }
+                });
+            }
+
+            // run after DOM ready
+            if(document.readyState === 'loading'){
+                document.addEventListener('DOMContentLoaded', showServerErrors);
+            } else { showServerErrors(); }
+        })();
         document.getElementById('imageInput').addEventListener('change', function(e) {
             const container = document.getElementById('imagePreviewContainer');
             container.innerHTML = '';

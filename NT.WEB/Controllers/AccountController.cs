@@ -66,6 +66,12 @@ namespace NT.WEB.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(User model)
         {
+            // Validate username format server-side (must be alphanumeric, no spaces/diacritics)
+            if (string.IsNullOrWhiteSpace(model.Username) || !System.Text.RegularExpressions.Regex.IsMatch(model.Username, "^[A-Za-z0-9._-]+$"))
+            {
+                ModelState.AddModelError(nameof(model.Username), "Tên đăng nhập phải viết liền, không dấu, không chứa khoảng trắng; chỉ dùng chữ/số/./_/-.");
+            }
+
             if (!ModelState.IsValid)
             {
                 return View(model);
@@ -230,6 +236,14 @@ namespace NT.WEB.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> RegisterCustomer(User model)
         {
+            // Ensure username format
+            if (!string.IsNullOrWhiteSpace(model.Username))
+            {
+                if (!System.Text.RegularExpressions.Regex.IsMatch(model.Username, "^[A-Za-z0-9._-]+$"))
+                {
+                    ModelState.AddModelError(nameof(model.Username), "Tên đăng nhập phải viết liền, không dấu, không chứa khoảng trắng; chỉ dùng chữ/số/./_/-.");
+                }
+            }
             // Manual field-level validations to provide specific error messages
             if (string.IsNullOrWhiteSpace(model.Username))
             {
@@ -277,9 +291,22 @@ namespace NT.WEB.Controllers
             {
                 ModelState.AddModelError(nameof(model.PhoneNumber), "Số điện thoại là bắt buộc");
             }
-            else if (model.PhoneNumber.Length > 20)
+            else
             {
-                ModelState.AddModelError(nameof(model.PhoneNumber), "Số điện thoại không được vượt quá 20 ký tự");
+                var normalized = NormalizeVietnamPhone(model.PhoneNumber);
+                if (string.IsNullOrWhiteSpace(normalized) || !IsValidVietnamPhone(normalized))
+                {
+                    ModelState.AddModelError(nameof(model.PhoneNumber), "Số điện thoại không hợp lệ. Vui lòng nhập số di động Việt Nam (ví dụ: 0901234567 hoặc +84901234567)");
+                }
+                else if (normalized.Length > 20)
+                {
+                    ModelState.AddModelError(nameof(model.PhoneNumber), "Số điện thoại không được vượt quá 20 ký tự");
+                }
+                else
+                {
+                    // store normalized form (leading 0)
+                    model.PhoneNumber = normalized;
+                }
             }
 
             if (!ModelState.IsValid)
@@ -563,5 +590,28 @@ namespace NT.WEB.Controllers
             TempData["Success"] = "Đã đăng xuất";
             return RedirectToAction(nameof(Login));
         }
+
+        #region Phone helpers
+
+        private static string NormalizeVietnamPhone(string? input)
+        {
+            if (string.IsNullOrWhiteSpace(input)) return string.Empty;
+            var digits = System.Text.RegularExpressions.Regex.Replace(input, "\\D", "");
+            if (digits.StartsWith("84") && digits.Length == 11)
+            {
+                digits = "0" + digits.Substring(2);
+            }
+            return digits;
+        }
+
+        private static bool IsValidVietnamPhone(string phone)
+        {
+            if (string.IsNullOrWhiteSpace(phone)) return false;
+            // Expected normalized format: starts with 0 and 10 digits total for mobile (0XXXXXXXXX)
+            var vnPattern = new System.Text.RegularExpressions.Regex("^0(3|5|7|8|9)\\d{8}$");
+            return vnPattern.IsMatch(phone);
+        }
+
+        #endregion
     }
 }

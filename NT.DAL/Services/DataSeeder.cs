@@ -248,6 +248,35 @@ namespace NT.DAL.Services
                     MaxUsage = 300
                 }
             );
+
+            // Seed PaymentMethods
+            // COD - Chỉ dành cho bán Online
+            // Tiền mặt, Chuyển khoản - Chỉ dành cho bán Offline/POS
+            var paymentMethods = new List<PaymentMethod>
+            {
+                new PaymentMethod
+                {
+                    Id = Guid.Parse("11111111-1111-1111-1111-111111111001"),
+                    Name = "COD",
+                    Description = "Thanh toán khi nhận hàng (Cash On Delivery)",
+                    Channel = SalesChannel.Online
+                },
+                new PaymentMethod
+                {
+                    Id = Guid.Parse("11111111-1111-1111-1111-111111111002"),
+                    Name = "Tiền mặt",
+                    Description = "Thanh toán bằng tiền mặt tại cửa hàng",
+                    Channel = SalesChannel.Offline
+                },
+                new PaymentMethod
+                {
+                    Id = Guid.Parse("11111111-1111-1111-1111-111111111003"),
+                    Name = "Chuyển khoản",
+                    Description = "Thanh toán qua chuyển khoản ngân hàng",
+                    Channel = SalesChannel.Offline
+                }
+            };
+            modelBuilder.Entity<PaymentMethod>().HasData(paymentMethods);
         }
     }
 }

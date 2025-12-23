@@ -54,6 +54,26 @@ namespace NT.WEB.Controllers
                 return Redirect($"/CartDetail?cartId={cartId}");
             }
 
+            // Lấy thông tin khách hàng đang đăng nhập để điền mặc định vào form
+            var userIdClaim = User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            string defaultPhone = "";
+            string defaultAddress = "";
+            string defaultName = "";
+            if (!string.IsNullOrWhiteSpace(userIdClaim) && Guid.TryParse(userIdClaim, out var userId))
+            {
+                var customers = await _customerService.GetAllAsyncWithUser();
+                var customer = customers?.FirstOrDefault(c => c.UserId == userId);
+                if (customer != null)
+                {
+                    defaultPhone = customer.User?.PhoneNumber ?? "";
+                    defaultAddress = customer.Address ?? "";
+                    defaultName = customer.User?.Fullname ?? "";
+                }
+            }
+            ViewBag.DefaultPhone = defaultPhone;
+            ViewBag.DefaultAddress = defaultAddress;
+            ViewBag.DefaultName = defaultName;
+
             // Eager-load ProductDetail and lookups so selected items show full info
             var cartItems = await _cartDetailService.FindWithIncludesAsync(
                 cd => cd.CartId == cartId,
@@ -73,7 +93,11 @@ namespace NT.WEB.Controllers
             }
 
             var pm = await _paymentMethodRepo.GetAllAsync();
-            ViewBag.PaymentMethods = pm ?? new List<PaymentMethod>();
+            // Chỉ lấy phương thức thanh toán dành cho Online (COD)
+            var onlinePaymentMethods = (pm ?? new List<PaymentMethod>())
+                .Where(p => p.IsAvailableForOnline())
+                .ToList();
+            ViewBag.PaymentMethods = onlinePaymentMethods;
             ViewBag.CartId = cartId;
             ViewBag.SelectedIds = string.Join(',', selectedItems.Select(s => s.ProductDetailId));
 
@@ -423,7 +447,7 @@ namespace NT.WEB.Controllers
         // POST: /Checkout/Submit
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Submit(Guid cartId, string selectedIds, Guid paymentMethodId, string phoneNumber, string shippingAddress)
+        public async Task<IActionResult> Submit(Guid cartId, string selectedIds, Guid paymentMethodId, string receiverName, string phoneNumber, string shippingAddress)
         {
             if (cartId == Guid.Empty) return BadRequest();
             var userIdClaim = User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
@@ -516,6 +540,7 @@ namespace NT.WEB.Controllers
             }
             order.Status = "0";
             order.DiscountAmount = discount;
+            order.ReceiverName = receiverName?.Trim(); // Lưu tên người nhận
 
             // Nếu có voucher được áp dụng, tăng UsageCount và lưu VoucherId
             if (appliedVoucher != null)

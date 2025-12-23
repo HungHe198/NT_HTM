@@ -123,6 +123,43 @@ namespace NT.WEB.Controllers
             }
 
             var previousStatus = order.Status ?? "0";
+
+            // Kiểm tra tồn kho trước khi xác nhận đơn hàng (chuyển từ 0 sang 1)
+            // Điều này đảm bảo không xảy ra tình trạng xác nhận đơn online khi tồn kho đã bị trừ bởi đơn POS chờ
+            if (previousStatus != "1" && status == "1")
+            {
+                var details = await _orderDetailRepo.FindAsync(d => d.OrderId == id);
+                var insufficientStockItems = new System.Collections.Generic.List<string>();
+
+                foreach (var d in details ?? Array.Empty<OrderDetail>())
+                {
+                    var pd = await _productDetailRepo.GetByIdAsync(d.ProductDetailId);
+                    if (pd != null)
+                    {
+                        if (pd.StockQuantity < d.Quantity)
+                        {
+                            var productName = d.NameAtOrder ?? "Sản phẩm";
+                            var variantInfo = $"{d.LengthAtOrder ?? ""} - {d.HardnessAtOrder ?? ""} - {d.ColorAtOrder ?? ""}".Trim(' ', '-');
+                            if (!string.IsNullOrWhiteSpace(variantInfo))
+                            {
+                                productName += $" ({variantInfo})";
+                            }
+                            insufficientStockItems.Add($"• {productName}: Yêu cầu {d.Quantity}, Tồn kho còn {pd.StockQuantity}");
+                        }
+                    }
+                    else
+                    {
+                        insufficientStockItems.Add($"• {d.NameAtOrder ?? "Sản phẩm"}: Không tìm thấy sản phẩm trong hệ thống");
+                    }
+                }
+
+                if (insufficientStockItems.Any())
+                {
+                    TempData["Error"] = $"Không thể xác nhận đơn hàng do không đủ tồn kho:\n{string.Join("\n", insufficientStockItems)}";
+                    return RedirectToAction(nameof(Review), new { id });
+                }
+            }
+
             order.Status = status;
 
             // Lưu thông tin người thực hiện hành động theo từng trạng thái
@@ -149,10 +186,9 @@ namespace NT.WEB.Controllers
                     var pd = await _productDetailRepo.GetByIdAsync(d.ProductDetailId);
                     if (pd != null)
                     {
-                        // Decrease stock but not below zero, increase sold
-                        var newStock = Math.Max(0, pd.StockQuantity - d.Quantity);
-                        pd.StockQuantity = newStock;
-                        pd.SoldQuantity = pd.SoldQuantity + d.Quantity;
+                        // Decrease stock, increase sold
+                        pd.StockQuantity -= d.Quantity;
+                        pd.SoldQuantity += d.Quantity;
                         await _productDetailRepo.UpdateAsync(pd);
                     }
                 }
@@ -161,6 +197,7 @@ namespace NT.WEB.Controllers
             await _orderRepo.UpdateAsync(order);
             await _orderRepo.SaveChangesAsync();
             await _productDetailRepo.SaveChangesAsync();
+            TempData["Success"] = "Cập nhật trạng thái đơn hàng thành công.";
             return RedirectToAction(nameof(Review), new { id });
         }
 

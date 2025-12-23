@@ -32,7 +32,8 @@ namespace NT.WEB.Controllers
         private readonly CustomerWebService _customerService;
 
         // Status constants cho Order
-        private const string ORDER_STATUS_PENDING = "0";      // Đơn chờ (POS pending)
+        private const string ORDER_STATUS_POS_PENDING = "-2"; // Đơn chờ POS (đã trừ kho)
+        private const string ORDER_STATUS_PENDING = "0";      // Đơn online chờ xác nhận (chưa trừ kho)
         private const string ORDER_STATUS_CONFIRMED = "1";    // Đã xác nhận
         private const string ORDER_STATUS_SHIPPING = "2";     // Đang giao
         private const string ORDER_STATUS_COMPLETED = "3";    // Hoàn thành
@@ -75,12 +76,17 @@ namespace NT.WEB.Controllers
             // Chỉ lấy sản phẩm có hàng
             var activeProducts = products?.Where(p => p.Status == "1" || string.IsNullOrEmpty(p.Status)).ToList() ?? new List<Product>();
             
+            // Chỉ lấy phương thức thanh toán dành cho Offline/POS (Tiền mặt, Chuyển khoản)
+            var offlinePaymentMethods = (paymentMethods ?? new List<PaymentMethod>())
+                .Where(p => p.IsAvailableForOffline())
+                .ToList();
+            
             // Lấy các đơn hàng chờ (pending orders) của nhân viên hiện tại
             var currentUserId = GetCurrentUserId();
             var pendingOrders = await GetPendingOrdersAsync(currentUserId);
             
             ViewBag.Products = activeProducts;
-            ViewBag.PaymentMethods = paymentMethods?.ToList() ?? new List<PaymentMethod>();
+            ViewBag.PaymentMethods = offlinePaymentMethods;
             ViewBag.PendingOrders = pendingOrders;
             
             return View();
@@ -247,7 +253,7 @@ namespace NT.WEB.Controllers
         }
 
         /// <summary>
-        /// API: Tạo đơn hàng chờ (Pending Order) - trừ tồn kho ngay
+        /// API: Tạo đơn hàng chờ (Pending Order) - tồn kho đã được trừ khi thêm vào giỏ
         /// </summary>
         [HttpPost]
         public async Task<IActionResult> CreatePendingOrder([FromBody] CreatePendingOrderRequest request)
@@ -260,9 +266,10 @@ namespace NT.WEB.Controllers
                 decimal totalAmount = 0;
                 var orderDetails = new List<OrderDetail>();
 
-                // Kiểm tra và chuẩn bị chi tiết đơn hàng
+                // Kiểm tra và chuẩn bị chi tiết đơn hàng (KHÔNG trừ tồn kho vì đã trừ khi thêm vào giỏ)
                 foreach (var item in request.Items)
                 {
+                    // Lấy ProductDetail với navigation properties để hiển thị
                     var details = await _productDetailRepo.FindAsync(
                         d => d.Id == item.ProductDetailId,
                         d => d.Product!,
@@ -274,9 +281,6 @@ namespace NT.WEB.Controllers
 
                     if (detail == null)
                         return Json(new { success = false, message = "Sản phẩm không tồn tại" });
-
-                    if (detail.StockQuantity < item.Quantity)
-                        return Json(new { success = false, message = $"Sản phẩm '{detail.Product?.Name ?? "N/A"}' không đủ hàng (Còn: {detail.StockQuantity})" });
 
                     decimal itemTotal = detail.Price * item.Quantity;
                     totalAmount += itemTotal;
@@ -292,10 +296,6 @@ namespace NT.WEB.Controllers
                         HardnessAtOrder = detail.Hardness?.Name,
                         TotalPrice = itemTotal
                     });
-
-                    // TRỪA TỒN KHO NGAY
-                    detail.StockQuantity -= item.Quantity;
-                    await _productDetailRepo.UpdateAsync(detail);
                 }
 
                 // Lấy phương thức thanh toán mặc định (Tiền mặt) cho đơn chờ
@@ -316,7 +316,7 @@ namespace NT.WEB.Controllers
                     }
                 }
 
-                // Tạo đơn hàng chờ
+                // Tạo đơn hàng chờ POS (Status = -2, tồn kho đã được trừ khi thêm vào giỏ)
                 var order = new Order
                 {
                     CustomerId = customerId, // Null nếu là khách vãng lai
@@ -324,7 +324,7 @@ namespace NT.WEB.Controllers
                     CreatedTime = DateTime.UtcNow,
                     TotalAmount = totalAmount,
                     FinalAmount = totalAmount,
-                    Status = ORDER_STATUS_PENDING, // Đơn chờ
+                    Status = ORDER_STATUS_POS_PENDING, // Đơn chờ POS (đã trừ kho)
                     PhoneNumber = request.CustomerPhone ?? "Khách vãng lai",
                     ShippingAddress = request.CustomerAddress ?? "Bán tại quầy",
                     Note = $"[POS Pending] {request.CustomerName ?? "Khách vãng lai"} - Tạo lúc {DateTime.Now:HH:mm}",
@@ -339,10 +339,6 @@ namespace NT.WEB.Controllers
                     detail.OrderId = order.Id;
                     await _orderDetailRepo.AddAsync(detail);
                 }
-
-                await _orderRepo.SaveChangesAsync();
-                await _orderDetailRepo.SaveChangesAsync();
-                await _productDetailRepo.SaveChangesAsync();
 
                 return Json(new
                 {
@@ -391,7 +387,7 @@ namespace NT.WEB.Controllers
                 return Json(new { success = false, message = "ID đơn hàng không hợp lệ" });
 
             var order = await _orderRepo.GetByIdAsync(orderId);
-            if (order == null || order.Status != ORDER_STATUS_PENDING)
+            if (order == null || order.Status != ORDER_STATUS_POS_PENDING)
                 return Json(new { success = false, message = "Không tìm thấy đơn hàng chờ" });
 
             var details = await _orderDetailRepo.FindAsync(d => d.OrderId == orderId);
@@ -432,7 +428,7 @@ namespace NT.WEB.Controllers
                 return Json(new { success = false, message = "ID đơn hàng không hợp lệ" });
 
             var order = await _orderRepo.GetByIdAsync(request.OrderId);
-            if (order == null || order.Status != ORDER_STATUS_PENDING)
+            if (order == null || order.Status != ORDER_STATUS_POS_PENDING)
                 return Json(new { success = false, message = "Không tìm thấy đơn hàng chờ" });
 
             try
@@ -481,7 +477,7 @@ namespace NT.WEB.Controllers
                 return Json(new { success = false, message = "Vui lòng chọn phương thức thanh toán" });
 
             var order = await _orderRepo.GetByIdAsync(request.OrderId);
-            if (order == null || order.Status != ORDER_STATUS_PENDING)
+            if (order == null || order.Status != ORDER_STATUS_POS_PENDING)
                 return Json(new { success = false, message = "Không tìm thấy đơn hàng chờ" });
 
             try
@@ -558,6 +554,158 @@ namespace NT.WEB.Controllers
         }
 
         /// <summary>
+        /// API: Thêm sản phẩm vào giỏ POS - TRỪA TỒN KHO NGAY LẬP TỨC
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> AddToCartPOS([FromBody] AddToCartPOSRequest request)
+        {
+            if (request.ProductDetailId == Guid.Empty)
+                return Json(new { success = false, message = "Sản phẩm không hợp lệ" });
+
+            if (request.Quantity <= 0)
+                return Json(new { success = false, message = "Số lượng phải lớn hơn 0" });
+
+            try
+            {
+                var productDetail = await _productDetailRepo.GetByIdAsync(request.ProductDetailId);
+                if (productDetail == null)
+                    return Json(new { success = false, message = "Sản phẩm không tồn tại" });
+
+                if (productDetail.StockQuantity < request.Quantity)
+                    return Json(new { success = false, message = $"Không đủ hàng. Tồn kho còn: {productDetail.StockQuantity}" });
+
+                // TRỪA TỒN KHO NGAY
+                productDetail.StockQuantity -= request.Quantity;
+                await _productDetailRepo.UpdateAsync(productDetail);
+
+                return Json(new
+                {
+                    success = true,
+                    message = $"Đã trừ {request.Quantity} sản phẩm khỏi tồn kho",
+                    newStock = productDetail.StockQuantity
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Lỗi: {ex.Message}" });
+            }
+        }
+
+        /// <summary>
+        /// API: Xóa sản phẩm khỏi giỏ POS - HOÀN LẠI TỒN KHO
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> RemoveFromCartPOS([FromBody] RemoveFromCartPOSRequest request)
+        {
+            if (request.ProductDetailId == Guid.Empty)
+                return Json(new { success = false, message = "Sản phẩm không hợp lệ" });
+
+            if (request.Quantity <= 0)
+                return Json(new { success = false, message = "Số lượng phải lớn hơn 0" });
+
+            try
+            {
+                var productDetail = await _productDetailRepo.GetByIdAsync(request.ProductDetailId);
+                if (productDetail == null)
+                    return Json(new { success = false, message = "Sản phẩm không tồn tại" });
+
+                // HOÀN LẠI TỒN KHO
+                productDetail.StockQuantity += request.Quantity;
+                await _productDetailRepo.UpdateAsync(productDetail);
+
+                return Json(new
+                {
+                    success = true,
+                    message = $"Đã hoàn lại {request.Quantity} sản phẩm vào tồn kho",
+                    newStock = productDetail.StockQuantity
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Lỗi: {ex.Message}" });
+            }
+        }
+
+        /// <summary>
+        /// API: Cập nhật số lượng trong giỏ POS - điều chỉnh tồn kho theo chênh lệch
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> UpdateCartQuantityPOS([FromBody] UpdateCartQuantityPOSRequest request)
+        {
+            if (request.ProductDetailId == Guid.Empty)
+                return Json(new { success = false, message = "Sản phẩm không hợp lệ" });
+
+            try
+            {
+                var productDetail = await _productDetailRepo.GetByIdAsync(request.ProductDetailId);
+                if (productDetail == null)
+                    return Json(new { success = false, message = "Sản phẩm không tồn tại" });
+
+                int diff = request.NewQuantity - request.OldQuantity;
+
+                if (diff > 0)
+                {
+                    // Tăng số lượng -> trừ thêm tồn kho
+                    if (productDetail.StockQuantity < diff)
+                        return Json(new { success = false, message = $"Không đủ hàng. Tồn kho còn: {productDetail.StockQuantity}" });
+
+                    productDetail.StockQuantity -= diff;
+                }
+                else if (diff < 0)
+                {
+                    // Giảm số lượng -> hoàn lại tồn kho
+                    productDetail.StockQuantity += Math.Abs(diff);
+                }
+
+                await _productDetailRepo.UpdateAsync(productDetail);
+
+                return Json(new
+                {
+                    success = true,
+                    message = diff > 0 ? $"Đã trừ thêm {diff} sản phẩm" : $"Đã hoàn lại {Math.Abs(diff)} sản phẩm",
+                    newStock = productDetail.StockQuantity
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Lỗi: {ex.Message}" });
+            }
+        }
+
+        /// <summary>
+        /// API: Xóa toàn bộ giỏ hàng POS - hoàn lại tất cả tồn kho
+        /// Hỗ trợ cả [FromBody] và sendBeacon
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> ClearCartPOS([FromBody] ClearCartPOSRequest? request)
+        {
+            // Nếu request null, thử đọc từ Request.Body (cho sendBeacon)
+            if (request == null || request.Items == null || !request.Items.Any())
+            {
+                return Json(new { success = true, message = "Giỏ hàng đã trống" });
+            }
+
+            try
+            {
+                foreach (var item in request.Items)
+                {
+                    var productDetail = await _productDetailRepo.GetByIdAsync(item.ProductDetailId);
+                    if (productDetail != null)
+                    {
+                        productDetail.StockQuantity += item.Quantity;
+                        await _productDetailRepo.UpdateAsync(productDetail);
+                    }
+                }
+
+                return Json(new { success = true, message = "Đã hoàn lại tồn kho cho tất cả sản phẩm" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Lỗi: {ex.Message}" });
+            }
+        }
+
+        /// <summary>
         /// API: Kiểm tra và áp dụng voucher
         /// </summary>
         [HttpPost]
@@ -601,7 +749,7 @@ namespace NT.WEB.Controllers
         }
 
         /// <summary>
-        /// Tạo đơn hàng tại quầy (thanh toán ngay - không qua pending)
+        /// Tạo đơn hàng tại quầy (thanh toán ngay - tồn kho đã được trừ khi thêm vào giỏ)
         /// </summary>
         [HttpPost]
         [RequirePermission("Sales", "CreateOrder")]
@@ -635,7 +783,7 @@ namespace NT.WEB.Controllers
                     }
                 }
 
-                // Tính tổng tiền và chuẩn bị chi tiết đơn hàng
+                // Tính tổng tiền và chuẩn bị chi tiết đơn hàng (KHÔNG trừ tồn kho vì đã trừ khi thêm vào giỏ)
                 decimal totalAmount = 0;
                 var orderDetails = new List<OrderDetail>();
 
@@ -652,9 +800,6 @@ namespace NT.WEB.Controllers
 
                     if (detail == null)
                         return Json(new { success = false, message = "Sản phẩm không tồn tại" });
-
-                    if (detail.StockQuantity < item.Quantity)
-                        return Json(new { success = false, message = $"Sản phẩm '{detail.Product?.Name ?? "N/A"}' không đủ hàng (Còn: {detail.StockQuantity})" });
 
                     decimal itemTotal = detail.Price * item.Quantity;
                     totalAmount += itemTotal;
@@ -719,13 +864,12 @@ namespace NT.WEB.Controllers
 
                 await _orderRepo.AddAsync(order);
 
-                // Thêm chi tiết và cập nhật tồn kho
+                // Chỉ cập nhật SoldQuantity (tồn kho đã được trừ khi thêm vào giỏ)
                 foreach (var item in model.Items)
                 {
                     var detail = await _productDetailRepo.GetByIdAsync(item.ProductDetailId);
                     if (detail != null)
                     {
-                        detail.StockQuantity -= item.Quantity;
                         detail.SoldQuantity += item.Quantity;
                         await _productDetailRepo.UpdateAsync(detail);
                     }
@@ -835,7 +979,7 @@ namespace NT.WEB.Controllers
         {
             var allOrders = await _orderRepo.GetAllAsync();
             var pendingOrders = allOrders?
-                .Where(o => o.Status == ORDER_STATUS_PENDING && o.ConfirmedByUserId == userId)
+                .Where(o => o.Status == ORDER_STATUS_POS_PENDING && o.ConfirmedByUserId == userId)
                 .OrderByDescending(o => o.CreatedTime)
                 .ToList() ?? new List<Order>();
 
@@ -907,6 +1051,30 @@ namespace NT.WEB.Controllers
         public string? CustomerAddress { get; set; }
         public string? VoucherCode { get; set; }
         public Guid PaymentMethodId { get; set; }
+    }
+
+    public class AddToCartPOSRequest
+    {
+        public Guid ProductDetailId { get; set; }
+        public int Quantity { get; set; }
+    }
+
+    public class RemoveFromCartPOSRequest
+    {
+        public Guid ProductDetailId { get; set; }
+        public int Quantity { get; set; }
+    }
+
+    public class UpdateCartQuantityPOSRequest
+    {
+        public Guid ProductDetailId { get; set; }
+        public int OldQuantity { get; set; }
+        public int NewQuantity { get; set; }
+    }
+
+    public class ClearCartPOSRequest
+    {
+        public List<SalesOrderItem> Items { get; set; } = new();
     }
 
     #endregion

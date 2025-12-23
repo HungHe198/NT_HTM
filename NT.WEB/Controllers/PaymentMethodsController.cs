@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NT.SHARED.Models;
 using System;
@@ -46,11 +46,11 @@ namespace NT.WEB.Controllers
         // POST: /PaymentMethods/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(string name, string? description)
+        public async Task<IActionResult> Create(string name, string? description, SalesChannel channel = SalesChannel.All)
         {
             try
             {
-                var pm = PaymentMethod.Create(name, description);
+                var pm = PaymentMethod.Create(name, description, channel);
                 await _repo.AddAsync(pm);
                 await _repo.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));

@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using NT.BLL.Interfaces;
 using NT.SHARED.Models;
 using System.Threading.Tasks;
@@ -36,6 +36,12 @@ namespace NT.WEB.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Index(User model, bool client = false)
         {
+            // Server-side username format validation
+            if (string.IsNullOrWhiteSpace(model.Username) || !System.Text.RegularExpressions.Regex.IsMatch(model.Username, "^[A-Za-z0-9._-]+$"))
+            {
+                ModelState.AddModelError(nameof(model.Username), "Tên đăng nhập phải viết liền, không dấu, không chứa khoảng trắng; chỉ dùng chữ/số/./_/-.");
+            }
+
             if (!ModelState.IsValid)
             {
                 ViewBag.IsClient = client;

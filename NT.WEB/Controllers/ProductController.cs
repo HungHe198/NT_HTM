@@ -443,6 +443,8 @@ namespace NT.WEB.Controllers
             // Validate stock quantity
             if (model.StockQuantity < 0)
                 ModelState.AddModelError(nameof(model.StockQuantity), "Số lượng tồn kho không được âm");
+            if (model.StockQuantity > 999999)
+                ModelState.AddModelError(nameof(model.StockQuantity), "Số lượng tồn kho phải từ 0 đến 999,999");
 
             // Validate cost price
             if (model.CostPrice.HasValue && model.CostPrice < 0)
@@ -587,6 +589,8 @@ namespace NT.WEB.Controllers
             // Validate stock quantity
             if (model.StockQuantity < 0)
                 ModelState.AddModelError(nameof(model.StockQuantity), "Số lượng tồn kho không được âm");
+            if (model.StockQuantity > 999999)
+                ModelState.AddModelError(nameof(model.StockQuantity), "Số lượng tồn kho phải từ 0 đến 999,999");
 
             // Validate cost price
             if (model.CostPrice.HasValue && model.CostPrice < 0)

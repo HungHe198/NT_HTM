@@ -12,8 +12,9 @@
 
     <div class="mb-3">
         <label class="form-label">Tên đăng nhập</label>
-        <input asp-for="Username" class="form-control" />
+        <input asp-for="Username" class="form-control" pattern="^[A-Za-z0-9._-]+$" title="Tên đăng nhập phải viết liền, không dấu, không chứa khoảng trắng. Chỉ cho phép chữ, số, . _ -" />
         <span asp-validation-for="Username" class="text-danger"></span>
+        <span id="usernameClientError" class="text-danger" style="display:none;"></span>
     </div>
     <div class="mb-3">
         <label class="form-label">Họ và tên</label>
@@ -47,4 +48,35 @@
 
 @section Scripts{
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function(){
+            var form = document.currentScript && document.currentScript.ownerDocument ? null : null;
+            // attach to the form on this page
+            var regForm = document.querySelector('form[asp-action="Index"][asp-controller="Register"]') || document.querySelector('form');
+            if(!regForm) return;
+            var username = regForm.querySelector('[name="Username"][type!=hidden]');
+            var errSpan = document.getElementById('usernameClientError');
+            function validateUsername(){
+                if(!username) return true;
+                var val = username.value || '';
+                var re = /^[A-Za-z0-9._-]+$/;
+                if(!re.test(val)){
+                    errSpan.textContent = 'Tên đăng nhập phải viết liền, không dấu, không có khoảng trắng; chỉ dùng chữ/số/./_/-.';
+                    errSpan.style.display = 'block';
+                    return false;
+                }
+                errSpan.style.display = 'none';
+                return true;
+            }
+            if(username){
+                username.addEventListener('input', validateUsername);
+            }
+            regForm.addEventListener('submit', function(e){
+                if(!validateUsername()){
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            });
+        })();
+    </script>
 }

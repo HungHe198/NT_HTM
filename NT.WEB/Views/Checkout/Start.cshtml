@@ -11,6 +11,11 @@
     decimal total = (decimal)(ViewBag.Total ?? 0m);
     string? appliedCode = ViewBag.AppliedVoucherCode as string;
     var availableVouchers = ViewBag.AvailableVouchers as IEnumerable<NT.SHARED.Models.Voucher> ?? Enumerable.Empty<NT.SHARED.Models.Voucher>();
+    
+    // Thông tin mặc định của khách hàng đăng nhập
+    string defaultPhone = ViewBag.DefaultPhone as string ?? "";
+    string defaultAddress = ViewBag.DefaultAddress as string ?? "";
+    string defaultName = ViewBag.DefaultName as string ?? "";
 }
 
 <div class="checkout-page">
@@ -75,18 +80,22 @@
              <i class="fas fa-user me-2"></i>Thông tin người nhận
      </div>
           <div class="card-body-custom">
-         <form asp-action="Submit" asp-controller="Checkout" method="post" id="checkoutForm">
+        <form asp-action="Submit" asp-controller="Checkout" method="post" id="checkoutForm">
         @Html.AntiForgeryToken()
       <input type="hidden" name="cartId" value="@cartId" />
        <input type="hidden" name="selectedIds" value="@selectedIds" />
             
 <div class="mb-3">
+             <label class="form-label"><i class="fas fa-user me-1"></i>Tên người nhận</label>
+     <input type="text" name="receiverName" class="form-control" placeholder="Nhập tên người nhận..." value="@defaultName" required />
+              </div>
+<div class="mb-3">
              <label class="form-label"><i class="fas fa-phone me-1"></i>Số điện thoại</label>
-     <input type="text" name="phoneNumber" class="form-control" placeholder="Nhập số điện thoại..." required />
+     <input type="text" name="phoneNumber" class="form-control" placeholder="Nhập số điện thoại..." value="@defaultPhone" required />
               </div>
          <div class="mb-3">
          <label class="form-label"><i class="fas fa-map-marker-alt me-1"></i>Địa chỉ giao hàng</label>
-   <input type="text" name="shippingAddress" class="form-control" placeholder="Nhập địa chỉ giao hàng..." required />
+   <input type="text" name="shippingAddress" class="form-control" placeholder="Nhập địa chỉ giao hàng..." value="@defaultAddress" required />
              </div>
     <div class="mb-3">
        <label class="form-label"><i class="fas fa-credit-card me-1"></i>Phương thức thanh toán</label>
