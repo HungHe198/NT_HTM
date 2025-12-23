@@ -1,0 +1,274 @@
+@model IEnumerable<NT.SHARED.Models.User>
+
+@{
+    ViewData["Title"] = "Quản lý tài khoản";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var roles = ViewBag.Roles as IEnumerable<NT.SHARED.Models.Role> ?? Enumerable.Empty<NT.SHARED.Models.Role>();
+}
+
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col">
+            <h2><i class="fas fa-users-cog me-2"></i>Quản lý tài khoản</h2>
+            <p class="text-muted">Quản lý tất cả tài khoản người dùng trong hệ thống</p>
+        </div>
+        <div class="col-auto">
+            <a asp-action="Create" class="btn btn-primary">
+                <i class="fas fa-user-plus me-1"></i> Tạo tài khoản mới
+            </a>
+        </div>
+    </div>
+
+    <!-- Alerts -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>@TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>@TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Statistics Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-2">
+            <div class="card bg-primary text-white shadow-sm">
+                <div class="card-body text-center">
+                    <h3 class="mb-0">@ViewBag.TotalUsers</h3>
+                    <small>Tổng tài khoản</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-success text-white shadow-sm">
+                <div class="card-body text-center">
+                    <h3 class="mb-0">@ViewBag.ActiveUsers</h3>
+                    <small>Đang hoạt động</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-danger text-white shadow-sm">
+                <div class="card-body text-center">
+                    <h3 class="mb-0">@ViewBag.AdminCount</h3>
+                    <small>Admin</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-warning text-dark shadow-sm">
+                <div class="card-body text-center">
+                    <h3 class="mb-0">@ViewBag.EmployeeCount</h3>
+                    <small>Nhân viên</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-info text-white shadow-sm">
+                <div class="card-body text-center">
+                    <h3 class="mb-0">@ViewBag.CustomerCount</h3>
+                    <small>Khách hàng</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter & Search -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" asp-action="Index" class="row g-3">
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                        <input type="text" name="search" class="form-control" placeholder="Tìm theo tên, email, SĐT..." value="@ViewBag.Search" />
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select name="roleFilter" class="form-select">
+                        <option value="">-- Tất cả vai trò --</option>
+                        @foreach (var role in roles)
+                        {
+                            <option value="@role.Id" selected="@(ViewBag.RoleFilter == role.Id.ToString())">@role.Name</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select name="statusFilter" class="form-select">
+                        <option value="">-- Trạng thái --</option>
+                        <option value="1" selected="@(ViewBag.StatusFilter == "1")">Hoạt động</option>
+                        <option value="0" selected="@(ViewBag.StatusFilter == "0")">Vô hiệu</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-outline-primary me-2">
+                        <i class="fas fa-filter me-1"></i> Lọc
+                    </button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">
+                        <i class="fas fa-redo me-1"></i> Đặt lại
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- User Table -->
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="fas fa-list me-2"></i>Danh sách tài khoản (@Model.Count())</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 50px;">#</th>
+                            <th>Thông tin</th>
+                            <th>Email / SĐT</th>
+                            <th class="text-center">Vai trò</th>
+                            <th class="text-center">Trạng thái</th>
+                            <th class="text-center" style="width: 200px;">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-5">
+                                    <i class="fas fa-inbox fa-3x mb-3 d-block opacity-25"></i>
+                                    Không tìm thấy tài khoản nào
+                                </td>
+                            </tr>
+                        }
+                        @{ var index = 1; }
+                        @foreach (var user in Model)
+                        {
+                            var isActive = user.Status == "1" || user.Status == "Active";
+                            var roleBadgeClass = user.Role?.Name switch
+                            {
+                                "Admin" => "bg-danger",
+                                "Employee" => "bg-warning text-dark",
+                                "Customer" => "bg-info",
+                                _ => "bg-secondary"
+                            };
+                            <tr>
+                                <td class="text-muted">@(index++)</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-circle me-3" style="width: 45px; height: 45px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 1.1rem;">
+                                            @(string.IsNullOrEmpty(user.Fullname) ? "?" : user.Fullname[0].ToString().ToUpper())
+                                        </div>
+                                        <div>
+                                            <strong>@user.Fullname</strong>
+                                            <br />
+                                            <small class="text-muted"><i class="fas fa-user me-1"></i>@user.Username</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrWhiteSpace(user.Email))
+                                    {
+                                        <div><i class="fas fa-envelope me-1 text-muted"></i>@user.Email</div>
+                                    }
+                                    @if (!string.IsNullOrWhiteSpace(user.PhoneNumber))
+                                    {
+                                        <div><i class="fas fa-phone me-1 text-muted"></i>@user.PhoneNumber</div>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge @roleBadgeClass fs-6">
+                                        @if (user.Role?.Name == "Admin")
+                                        {
+                                            <i class="fas fa-crown me-1"></i>
+                                        }
+                                        else if (user.Role?.Name == "Employee")
+                                        {
+                                            <i class="fas fa-user-tie me-1"></i>
+                                        }
+                                        else
+                                        {
+                                            <i class="fas fa-user me-1"></i>
+                                        }
+                                        @(user.Role?.Name ?? "N/A")
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    @if (isActive)
+                                    {
+                                        <span class="badge bg-success"><i class="fas fa-check-circle me-1"></i>Hoạt động</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary"><i class="fas fa-ban me-1"></i>Vô hiệu</span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-group" role="group">
+                                        <a asp-action="Details" asp-route-id="@user.Id" class="btn btn-sm btn-outline-info" title="Chi tiết">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a asp-action="Edit" asp-route-id="@user.Id" class="btn btn-sm btn-outline-primary" title="Sửa">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <form asp-action="ToggleStatus" asp-route-id="@user.Id" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm @(isActive ? "btn-outline-warning" : "btn-outline-success")" 
+                                                    title="@(isActive ? "Vô hiệu hóa" : "Kích hoạt")"
+                                                    onclick="return confirm('@(isActive ? "Vô hiệu hóa" : "Kích hoạt") tài khoản này?')">
+                                                <i class="fas @(isActive ? "fa-ban" : "fa-check")"></i>
+                                            </button>
+                                        </form>
+                                        <a asp-action="Delete" asp-route-id="@user.Id" class="btn btn-sm btn-outline-danger" title="Xóa">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Legend -->
+    <div class="card shadow-sm mt-4">
+        <div class="card-header bg-light">
+            <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>Chú thích</h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <h6>Vai trò</h6>
+                    <ul class="list-unstyled">
+                        <li><span class="badge bg-danger me-2"><i class="fas fa-crown"></i> Admin</span> Quản trị viên - Full quyền</li>
+                        <li><span class="badge bg-warning text-dark me-2"><i class="fas fa-user-tie"></i> Employee</span> Nhân viên</li>
+                        <li><span class="badge bg-info me-2"><i class="fas fa-user"></i> Customer</span> Khách hàng</li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h6>Trạng thái</h6>
+                    <ul class="list-unstyled">
+                        <li><span class="badge bg-success me-2"><i class="fas fa-check-circle"></i> Hoạt động</span> Tài khoản đang hoạt động bình thường</li>
+                        <li><span class="badge bg-secondary me-2"><i class="fas fa-ban"></i> Vô hiệu</span> Tài khoản đã bị khóa</li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h6>Thao tác</h6>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-eye text-info me-2"></i> Xem chi tiết</li>
+                        <li><i class="fas fa-edit text-primary me-2"></i> Chỉnh sửa</li>
+                        <li><i class="fas fa-ban text-warning me-2"></i> / <i class="fas fa-check text-success me-2"></i> Thay đổi trạng thái</li>
+                        <li><i class="fas fa-trash text-danger me-2"></i> Xóa tài khoản</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

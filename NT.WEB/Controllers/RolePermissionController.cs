@@ -241,6 +241,157 @@ namespace NT.WEB.Controllers
 
             return RedirectToAction(nameof(Manage), new { id = roleId });
         }
+
+        /// <summary>
+        /// Danh sách các Resource mặc định cho Customer
+        /// Customer được phép: Home, Product (xem), Cart, Checkout, Orders (My), Account (Profile)
+        /// </summary>
+        private static readonly HashSet<string> CustomerDefaultResources = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "Home", "Product", "Cart", "CartDetail", "Checkout", "Orders", "Account"
+        };
+
+        /// <summary>
+        /// Danh sách các Action cụ thể cho Customer (chỉ cho phép những action này)
+        /// </summary>
+        private static readonly Dictionary<string, HashSet<string>> CustomerAllowedActions = new(StringComparer.OrdinalIgnoreCase)
+        {
+            { "Home", new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "Index", "GetAllProducts", "Privacy", "Contact", "Error", "AccessDenied" } },
+            { "Product", new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "ProductDetailIndex", "Suggest", "Details" } },
+            { "Cart", new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "Index", "Add", "UpdateQty", "Remove", "ApplyVoucher", "RemoveVoucher", "Details" } },
+            { "CartDetail", new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "Index", "UpdateQuantity", "Remove" } },
+            { "Checkout", new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "Start", "Submit", "ApplyVoucher", "RemoveVoucher", "ApplyVoucherAjax", "RemoveVoucherAjax" } },
+            { "Orders", new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "My", "Review", "Details", "Cancel" } },
+            { "Account", new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "Profile", "Login", "Logout", "RegisterCustomer", "Create" } }
+        };
+
+        /// <summary>
+        /// Danh sách các Resource mặc định cho Employee
+        /// Employee được phép: Tất cả của Customer + Sales, Orders (quản lý), Product (quản lý), Customer (quản lý), UserManagement
+        /// </summary>
+        private static readonly HashSet<string> EmployeeDefaultResources = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "Home", "Product", "Cart", "CartDetail", "Checkout", "Orders", "Account",
+            "Sales", "Customer", "ProductDetail", "Brand", "Category", "Color", "Length",
+            "Hardness", "Elasticity", "SurfaceFinish", "OriginCountry", "ProductImage", "Voucher", "PaymentMethod",
+            "UserManagement", "Employee"
+        };
+
+        /// <summary>
+        /// Gán quyền mặc định cho Customer
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AssignDefaultCustomerPermissions(Guid roleId)
+        {
+            if (roleId == Guid.Empty)
+            {
+                TempData["Error"] = "Role không hợp lệ";
+                return RedirectToAction(nameof(Index));
+            }
+
+            try
+            {
+                var allPermissions = await _permissionRepo.GetAllAsync();
+                var customerPermissionIds = allPermissions
+                    .Where(p => !string.IsNullOrWhiteSpace(p.Resource) && !string.IsNullOrWhiteSpace(p.Action))
+                    .Where(p =>
+                    {
+                        // Kiểm tra Resource có trong danh sách cho phép
+                        if (!CustomerDefaultResources.Contains(p.Resource!))
+                            return false;
+
+                        // Nếu có danh sách action cụ thể, kiểm tra action
+                        if (CustomerAllowedActions.TryGetValue(p.Resource!, out var allowedActions))
+                        {
+                            return allowedActions.Contains(p.Action!);
+                        }
+
+                        // Nếu không có danh sách action cụ thể, cho phép tất cả action của resource đó
+                        return true;
+                    })
+                    .Select(p => p.Id)
+                    .ToList();
+
+                await _rolePermissionService.UpdateRolePermissionsAsync(roleId, customerPermissionIds);
+                await _rolePermissionRepo.SaveChangesAsync();
+
+                TempData["Success"] = $"Đã gán {customerPermissionIds.Count} quyền mặc định cho Customer";
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Lỗi: {ex.Message}";
+            }
+
+            return RedirectToAction(nameof(Manage), new { id = roleId });
+        }
+
+        /// <summary>
+        /// Gán quyền mặc định cho Employee
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AssignDefaultEmployeePermissions(Guid roleId)
+        {
+            if (roleId == Guid.Empty)
+            {
+                TempData["Error"] = "Role không hợp lệ";
+                return RedirectToAction(nameof(Index));
+            }
+
+            try
+            {
+                var allPermissions = await _permissionRepo.GetAllAsync();
+                
+                // Employee được phép tất cả permissions của các resource trong danh sách
+                // NGOẠI TRỪ: Admin, RolePermission, Employee (quản lý nhân viên khác)
+                var excludedResources = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    "Admin", "RolePermission"
+                };
+
+                var employeePermissionIds = allPermissions
+                    .Where(p => !string.IsNullOrWhiteSpace(p.Resource))
+                    .Where(p => EmployeeDefaultResources.Contains(p.Resource!) || 
+                               (!excludedResources.Contains(p.Resource!)))
+                    .Where(p => !excludedResources.Contains(p.Resource!))
+                    .Select(p => p.Id)
+                    .ToList();
+
+                await _rolePermissionService.UpdateRolePermissionsAsync(roleId, employeePermissionIds);
+                await _rolePermissionRepo.SaveChangesAsync();
+
+                TempData["Success"] = $"Đã gán {employeePermissionIds.Count} quyền mặc định cho Employee";
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Lỗi: {ex.Message}";
+            }
+
+            return RedirectToAction(nameof(Manage), new { id = roleId });
+        }
+
+        /// <summary>
+        /// Xem danh sách quyền hiện tại của một Role (API)
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> GetRolePermissions(Guid roleId)
+        {
+            if (roleId == Guid.Empty)
+                return Json(new { success = false, message = "Role không hợp lệ" });
+
+            var permissions = await _rolePermissionService.GetPermissionsForRoleAsync(roleId);
+            var result = permissions.Select(p => new
+            {
+                p.Id,
+                p.Code,
+                p.Resource,
+                p.Action,
+                p.Description
+            }).ToList();
+
+            return Json(new { success = true, count = result.Count, permissions = result });
+        }
     }
 
     public class TogglePermissionRequest

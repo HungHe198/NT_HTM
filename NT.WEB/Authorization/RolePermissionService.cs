@@ -132,6 +132,9 @@ namespace NT.WEB.Authorization
                     await _rolePermissionRepo.AddAsync(rolePermission);
                 }
             }
+
+            // Đảm bảo lưu thay đổi
+            await _rolePermissionRepo.SaveChangesAsync();
         }
 
         /// <summary>
@@ -161,6 +164,12 @@ namespace NT.WEB.Authorization
                     await _permissionRepo.AddAsync(permission);
                     newCount++;
                 }
+            }
+
+            // Đảm bảo lưu thay đổi
+            if (newCount > 0)
+            {
+                await _permissionRepo.SaveChangesAsync();
             }
 
             return newCount;

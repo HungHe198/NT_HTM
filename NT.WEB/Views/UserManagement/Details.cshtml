@@ -1,0 +1,178 @@
+@model NT.SHARED.Models.User
+
+@{
+    ViewData["Title"] = "Chi tiết tài khoản";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var customer = ViewBag.Customer as NT.SHARED.Models.Customer;
+    var employee = ViewBag.Employee as NT.SHARED.Models.Employee;
+    var admin = ViewBag.Admin as NT.SHARED.Models.Admin;
+    var isActive = Model.Status == "1" || Model.Status == "Active";
+}
+
+<div class="container-fluid">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index">Quản lý tài khoản</a></li>
+            <li class="breadcrumb-item active" aria-current="page">@Model.Username</li>
+        </ol>
+    </nav>
+
+    <div class="row g-4">
+        <!-- Main Info -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-user me-2"></i>Thông tin tài khoản</h5>
+                    <span class="badge @(isActive ? "bg-success" : "bg-secondary") fs-6">
+                        @(isActive ? "Hoạt động" : "Vô hiệu")
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small">Tên đăng nhập</label>
+                            <p class="fs-5 fw-bold"><i class="fas fa-user me-2 text-primary"></i>@Model.Username</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small">Họ và tên</label>
+                            <p class="fs-5 fw-bold">@Model.Fullname</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small">Email</label>
+                            <p class="fs-5">
+                                @if (!string.IsNullOrWhiteSpace(Model.Email))
+                                {
+                                    <a href="mailto:@Model.Email"><i class="fas fa-envelope me-2 text-info"></i>@Model.Email</a>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Chưa cập nhật</span>
+                                }
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small">Số điện thoại</label>
+                            <p class="fs-5">
+                                @if (!string.IsNullOrWhiteSpace(Model.PhoneNumber))
+                                {
+                                    <a href="tel:@Model.PhoneNumber"><i class="fas fa-phone me-2 text-success"></i>@Model.PhoneNumber</a>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Chưa cập nhật</span>
+                                }
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small">Vai trò</label>
+                            <p>
+                                @{
+                                    var roleBadgeClass = Model.Role?.Name switch
+                                    {
+                                        "Admin" => "bg-danger",
+                                        "Employee" => "bg-warning text-dark",
+                                        "Customer" => "bg-info",
+                                        _ => "bg-secondary"
+                                    };
+                                }
+                                <span class="badge @roleBadgeClass fs-5">
+                                    @if (Model.Role?.Name == "Admin")
+                                    {
+                                        <i class="fas fa-crown me-1"></i>
+                                    }
+                                    @(Model.Role?.Name ?? "N/A")
+                                </span>
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small">Mã người dùng</label>
+                            <p><code class="fs-6">@Model.Id</code></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Customer Info -->
+            @if (customer != null)
+            {
+                <div class="card shadow-sm mt-4">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="fas fa-id-card me-2"></i>Thông tin khách hàng</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small">Địa chỉ</label>
+                                <p>@(customer.Address ?? "Chưa cập nhật")</p>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label text-muted small">Ngày sinh</label>
+                                <p>@(customer.DoB?.ToString("dd/MM/yyyy") ?? "Chưa cập nhật")</p>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label text-muted small">Giới tính</label>
+                                <p>@(customer.Gender ?? "Chưa cập nhật")</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Avatar & Quick Actions -->
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <div class="avatar-circle mx-auto mb-3" style="width: 120px; height: 120px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 3rem;">
+                        @(string.IsNullOrEmpty(Model.Fullname) ? "?" : Model.Fullname[0].ToString().ToUpper())
+                    </div>
+                    <h4>@Model.Fullname</h4>
+                    <p class="text-muted">@@@Model.Username</p>
+                    
+                    <hr />
+                    
+                    <div class="d-grid gap-2">
+                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
+                            <i class="fas fa-edit me-1"></i> Chỉnh sửa
+                        </a>
+                        <form asp-action="ToggleStatus" asp-route-id="@Model.Id" method="post">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn @(isActive ? "btn-warning" : "btn-success") w-100"
+                                    onclick="return confirm('@(isActive ? "Vô hiệu hóa" : "Kích hoạt") tài khoản này?')">
+                                <i class="fas @(isActive ? "fa-ban" : "fa-check") me-1"></i>
+                                @(isActive ? "Vô hiệu hóa" : "Kích hoạt")
+                            </button>
+                        </form>
+                        <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-outline-danger">
+                            <i class="fas fa-trash me-1"></i> Xóa tài khoản
+                        </a>
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-1"></i> Quay lại
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reset Password -->
+            <div class="card shadow-sm mt-4">
+                <div class="card-header bg-warning text-dark">
+                    <h6 class="mb-0"><i class="fas fa-key me-2"></i>Đặt lại mật khẩu</h6>
+                </div>
+                <div class="card-body">
+                    <form asp-action="ResetPassword" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        <div class="mb-3">
+                            <input type="password" name="newPassword" class="form-control" placeholder="Mật khẩu mới (tối thiểu 6 ký tự)" minlength="6" required />
+                        </div>
+                        <button type="submit" class="btn btn-warning w-100" onclick="return confirm('Đặt lại mật khẩu cho tài khoản này?')">
+                            <i class="fas fa-sync me-1"></i> Đặt lại mật khẩu
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -16,7 +16,27 @@
             </nav>
             <h2><i class="fas fa-user-shield me-2"></i>Phân quyền cho vai trò: <span class="text-primary">@Model.Role.Name</span></h2>
         </div>
-        <div class="col-auto">
+        <div class="col-auto d-flex flex-wrap gap-2">
+            @if (Model.Role.Name == "Customer")
+            {
+                <form asp-action="AssignDefaultCustomerPermissions" method="post" class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="roleId" value="@Model.Role.Id" />
+                    <button type="submit" class="btn btn-info" onclick="return confirm('Gán quyền MẶC ĐỊNH cho Customer?\n\nCustomer sẽ được phép:\n- Xem trang chủ, sản phẩm\n- Quản lý giỏ hàng\n- Đặt hàng, thanh toán\n- Xem đơn hàng của mình\n- Quản lý tài khoản cá nhân')">
+                        <i class="fas fa-user me-1"></i> Quyền mặc định Customer
+                    </button>
+                </form>
+            }
+            @if (Model.Role.Name == "Employee")
+            {
+                <form asp-action="AssignDefaultEmployeePermissions" method="post" class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="roleId" value="@Model.Role.Id" />
+                    <button type="submit" class="btn btn-warning" onclick="return confirm('Gán quyền MẶC ĐỊNH cho Employee?\n\nEmployee sẽ được phép:\n- Tất cả quyền của Customer\n- Bán hàng tại quầy (POS)\n- Quản lý đơn hàng\n- Quản lý sản phẩm, danh mục, thương hiệu\n- Quản lý khách hàng\n\nNGOẠI TRỪ:\n- Quản lý Admin\n- Phân quyền')">
+                        <i class="fas fa-user-tie me-1"></i> Quyền mặc định Employee
+                    </button>
+                </form>
+            }
             <form asp-action="AssignAllPermissions" method="post" class="d-inline">
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="roleId" value="@Model.Role.Id" />
@@ -24,7 +44,7 @@
                     <i class="fas fa-check-double me-1"></i> Gán tất cả
                 </button>
             </form>
-            <form asp-action="RemoveAllPermissions" method="post" class="d-inline ms-2">
+            <form asp-action="RemoveAllPermissions" method="post" class="d-inline">
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="roleId" value="@Model.Role.Id" />
                 <button type="submit" class="btn btn-danger" onclick="return confirm('Gỡ TẤT CẢ quyền khỏi role này?')">

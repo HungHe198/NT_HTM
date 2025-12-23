@@ -1,0 +1,100 @@
+@model NT.SHARED.Models.User
+
+@{
+    ViewData["Title"] = "Xóa tài khoản";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var isActive = Model.Status == "1" || Model.Status == "Active";
+}
+
+<div class="container-fluid">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index">Quản lý tài khoản</a></li>
+            <li class="breadcrumb-item"><a asp-action="Details" asp-route-id="@Model.Id">@Model.Username</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Xóa</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card shadow border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Xác nhận xóa tài khoản</h5>
+                </div>
+                <div class="card-body text-center">
+                    <div class="avatar-circle mx-auto mb-3" style="width: 100px; height: 100px; border-radius: 50%; background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 2.5rem;">
+                        <i class="fas fa-user-times"></i>
+                    </div>
+
+                    <h4 class="text-danger">Bạn có chắc chắn muốn xóa?</h4>
+                    <p class="text-muted">Hành động này không thể hoàn tác!</p>
+
+                    <hr />
+
+                    <div class="text-start">
+                        <table class="table table-borderless">
+                            <tr>
+                                <th class="text-muted" style="width: 150px;">Tên đăng nhập:</th>
+                                <td><strong>@Model.Username</strong></td>
+                            </tr>
+                            <tr>
+                                <th class="text-muted">Họ và tên:</th>
+                                <td>@Model.Fullname</td>
+                            </tr>
+                            <tr>
+                                <th class="text-muted">Email:</th>
+                                <td>@(Model.Email ?? "N/A")</td>
+                            </tr>
+                            <tr>
+                                <th class="text-muted">Vai trò:</th>
+                                <td>
+                                    @{
+                                        var roleBadgeClass = Model.Role?.Name switch
+                                        {
+                                            "Admin" => "bg-danger",
+                                            "Employee" => "bg-warning text-dark",
+                                            "Customer" => "bg-info",
+                                            _ => "bg-secondary"
+                                        };
+                                    }
+                                    <span class="badge @roleBadgeClass">@(Model.Role?.Name ?? "N/A")</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th class="text-muted">Trạng thái:</th>
+                                <td>
+                                    @if (isActive)
+                                    {
+                                        <span class="badge bg-success">Hoạt động</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Vô hiệu</span>
+                                    }
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <div class="alert alert-warning text-start">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Cảnh báo:</strong> Xóa tài khoản sẽ đồng thời xóa tất cả dữ liệu liên quan (thông tin khách hàng, nhân viên, admin nếu có).
+                    </div>
+                </div>
+                <div class="card-footer d-flex justify-content-between">
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-1"></i> Quay lại
+                    </a>
+                    <form asp-action="Delete" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash me-1"></i> Xác nhận xóa
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
