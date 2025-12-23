@@ -183,6 +183,26 @@ namespace NT.WEB.Controllers
                 }
             }
 
+            // Check phone number exists (nếu có nhập số điện thoại)
+            if (!string.IsNullOrWhiteSpace(model.PhoneNumber))
+            {
+                var phoneExists = await _userRepo.FindAsync(u => u.PhoneNumber == model.PhoneNumber.Trim());
+                if (phoneExists.Any())
+                {
+                    ModelState.AddModelError(nameof(model.PhoneNumber), "Số điện thoại đã được sử dụng bởi tài khoản khác");
+                }
+            }
+
+            // Check email exists (nếu có nhập email)
+            if (!string.IsNullOrWhiteSpace(model.Email))
+            {
+                var emailExists = await _userRepo.FindAsync(u => u.Email == model.Email.Trim());
+                if (emailExists.Any())
+                {
+                    ModelState.AddModelError(nameof(model.Email), "Email đã được sử dụng bởi tài khoản khác");
+                }
+            }
+
             if (!ModelState.IsValid)
             {
                 return View(model);
@@ -268,6 +288,26 @@ namespace NT.WEB.Controllers
             if (model.RoleId == Guid.Empty)
             {
                 ModelState.AddModelError(nameof(model.RoleId), "Vui lòng chọn vai trò");
+            }
+
+            // Check phone number exists (trừ user hiện tại)
+            if (!string.IsNullOrWhiteSpace(model.PhoneNumber))
+            {
+                var phoneExists = await _userRepo.FindAsync(u => u.PhoneNumber == model.PhoneNumber.Trim() && u.Id != id);
+                if (phoneExists.Any())
+                {
+                    ModelState.AddModelError(nameof(model.PhoneNumber), "Số điện thoại đã được sử dụng bởi tài khoản khác");
+                }
+            }
+
+            // Check email exists (trừ user hiện tại)
+            if (!string.IsNullOrWhiteSpace(model.Email))
+            {
+                var emailExists = await _userRepo.FindAsync(u => u.Email == model.Email.Trim() && u.Id != id);
+                if (emailExists.Any())
+                {
+                    ModelState.AddModelError(nameof(model.Email), "Email đã được sử dụng bởi tài khoản khác");
+                }
             }
 
             if (!ModelState.IsValid)

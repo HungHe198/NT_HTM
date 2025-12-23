@@ -184,19 +184,14 @@
     <h5>Kho và giá</h5>
 
     <div class="form-row">
-        <div class="form-group col-md-4">
-            <label asp-for="SoldQuantity">@Html.DisplayNameFor(m => m.SoldQuantity)</label>
-            <input asp-for="SoldQuantity" class="form-control" />
-            <span asp-validation-for="SoldQuantity" class="text-danger"></span>
-        </div>
-        <div class="form-group col-md-4">
+        <div class="form-group col-md-6">
             <label asp-for="CostPrice">@Html.DisplayNameFor(m => m.CostPrice)</label>
             <input asp-for="CostPrice" class="form-control" type="number" step="0.01" />
             <span asp-validation-for="CostPrice" class="text-danger"></span>
         </div>
-        <div class="form-group col-md-4">
+        <div class="form-group col-md-6">
             <label asp-for="LastImportDate">@Html.DisplayNameFor(m => m.LastImportDate)</label>
-            <input asp-for="LastImportDate" class="form-control" type="date" />
+            <input asp-for="LastImportDate" class="form-control" type="datetime-local" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
             <span asp-validation-for="LastImportDate" class="text-danger"></span>
         </div>
     </div>

@@ -79,6 +79,28 @@ namespace NT.WEB.Controllers
                 return View(model);
             }
 
+            // Check existing phone number
+            if (!string.IsNullOrWhiteSpace(model.PhoneNumber))
+            {
+                var phoneExists = await _repository.FindAsync(u => u.PhoneNumber == model.PhoneNumber.Trim());
+                if (phoneExists is not null && System.Linq.Enumerable.Any(phoneExists))
+                {
+                    ModelState.AddModelError(nameof(model.PhoneNumber), "Số điện thoại đã được sử dụng bởi tài khoản khác");
+                    return View(model);
+                }
+            }
+
+            // Check existing email
+            if (!string.IsNullOrWhiteSpace(model.Email))
+            {
+                var emailExists = await _repository.FindAsync(u => u.Email == model.Email.Trim());
+                if (emailExists is not null && System.Linq.Enumerable.Any(emailExists))
+                {
+                    ModelState.AddModelError(nameof(model.Email), "Email đã được sử dụng bởi tài khoản khác");
+                    return View(model);
+                }
+            }
+
             // Hash password (assume model.PasswordHash currently contains plain password)
             var plain = model.PasswordHash ?? string.Empty;
             model.PasswordHash = _passwordHasher.HashPassword(model, plain);
@@ -267,11 +289,30 @@ namespace NT.WEB.Controllers
                 return View(model);
             }
 
+            // Check existing username
             var existing = await _repository.FindAsync(u => u.Username == model.Username);
             if (existing is not null && System.Linq.Enumerable.Any(existing))
             {
                 ModelState.AddModelError(nameof(model.Username), "Tên đăng nhập đã tồn tại");
                 TempData["Error"] = "Tên đăng nhập đã tồn tại";
+                return View(model);
+            }
+
+            // Check existing phone number
+            var phoneExists = await _repository.FindAsync(u => u.PhoneNumber == model.PhoneNumber.Trim());
+            if (phoneExists is not null && System.Linq.Enumerable.Any(phoneExists))
+            {
+                ModelState.AddModelError(nameof(model.PhoneNumber), "Số điện thoại đã được sử dụng bởi tài khoản khác");
+                TempData["Error"] = "Số điện thoại đã được sử dụng bởi tài khoản khác";
+                return View(model);
+            }
+
+            // Check existing email
+            var emailExists = await _repository.FindAsync(u => u.Email == model.Email.Trim());
+            if (emailExists is not null && System.Linq.Enumerable.Any(emailExists))
+            {
+                ModelState.AddModelError(nameof(model.Email), "Email đã được sử dụng bởi tài khoản khác");
+                TempData["Error"] = "Email đã được sử dụng bởi tài khoản khác";
                 return View(model);
             }
 
@@ -449,6 +490,30 @@ namespace NT.WEB.Controllers
             {
                 TempData["Error"] = "Dữ liệu không hợp lệ. Vui lòng kiểm tra lại.";
                 return View(dto);
+            }
+
+            // Check phone number exists (trừ user hiện tại)
+            if (!string.IsNullOrWhiteSpace(dto.PhoneNumber))
+            {
+                var phoneExists = await _repository.FindAsync(u => u.PhoneNumber == dto.PhoneNumber.Trim() && u.Id != userId);
+                if (phoneExists is not null && System.Linq.Enumerable.Any(phoneExists))
+                {
+                    ModelState.AddModelError(nameof(dto.PhoneNumber), "Số điện thoại đã được sử dụng bởi tài khoản khác");
+                    TempData["Error"] = "Số điện thoại đã được sử dụng bởi tài khoản khác";
+                    return View(dto);
+                }
+            }
+
+            // Check email exists (trừ user hiện tại)
+            if (!string.IsNullOrWhiteSpace(dto.Email))
+            {
+                var emailExists = await _repository.FindAsync(u => u.Email == dto.Email.Trim() && u.Id != userId);
+                if (emailExists is not null && System.Linq.Enumerable.Any(emailExists))
+                {
+                    ModelState.AddModelError(nameof(dto.Email), "Email đã được sử dụng bởi tài khoản khác");
+                    TempData["Error"] = "Email đã được sử dụng bởi tài khoản khác";
+                    return View(dto);
+                }
             }
 
             // Cập nhật thông tin User (chỉ các trường được phép)

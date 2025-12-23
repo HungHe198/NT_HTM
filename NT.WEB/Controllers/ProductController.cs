@@ -216,6 +216,15 @@ namespace NT.WEB.Controllers
         {
             // prepare brand dropdown
             ViewBag.BrandSelectList = new SelectList(await _brandService.GetAllAsync(), "Id", "Name");
+            
+            // prepare lookup dropdowns for ProductDetail creation inline
+            ViewBag.LengthSelectList = new SelectList(await _lengthService.GetAllAsync(), "Id", "Name");
+            ViewBag.SurfaceFinishSelectList = new SelectList(await _surfaceFinishService.GetAllAsync(), "Id", "Name");
+            ViewBag.HardnessSelectList = new SelectList(await _hardnessService.GetAllAsync(), "Id", "Name");
+            ViewBag.ElasticitySelectList = new SelectList(await _elasticityService.GetAllAsync(), "Id", "Name");
+            ViewBag.OriginCountrySelectList = new SelectList(await _originCountryService.GetAllAsync(), "Id", "Name");
+            ViewBag.ColorSelectList = new SelectList(await _colorService.GetAllAsync(), "Id", "Name");
+            
             return View();
         }
 
@@ -411,15 +420,48 @@ namespace NT.WEB.Controllers
         {
             if (productId == Guid.Empty || model is null) return BadRequest();
 
+            // Validate required foreign keys
+            if (model.LengthId == Guid.Empty)
+                ModelState.AddModelError(nameof(model.LengthId), "Vui lòng chọn chiều dài cần");
+            if (model.SurfaceFinishId == Guid.Empty)
+                ModelState.AddModelError(nameof(model.SurfaceFinishId), "Vui lòng chọn hoàn thiện bề mặt");
+            if (model.HardnessId == Guid.Empty)
+                ModelState.AddModelError(nameof(model.HardnessId), "Vui lòng chọn độ cứng");
+            if (model.ElasticityId == Guid.Empty)
+                ModelState.AddModelError(nameof(model.ElasticityId), "Vui lòng chọn độ đàn hồi");
+            if (model.OriginCountryId == Guid.Empty)
+                ModelState.AddModelError(nameof(model.OriginCountryId), "Vui lòng chọn xuất xứ");
+            if (model.ColorId == Guid.Empty)
+                ModelState.AddModelError(nameof(model.ColorId), "Vui lòng chọn màu sắc");
+
+            // Validate price
+            if (model.Price < 0)
+                ModelState.AddModelError(nameof(model.Price), "Giá bán không được âm");
+            if (model.Price > 999999999999)
+                ModelState.AddModelError(nameof(model.Price), "Giá bán không được vượt quá 999,999,999,999 VNĐ");
+
+            // Validate stock quantity
+            if (model.StockQuantity < 0)
+                ModelState.AddModelError(nameof(model.StockQuantity), "Số lượng tồn kho không được âm");
+
+            // Validate cost price
+            if (model.CostPrice.HasValue && model.CostPrice < 0)
+                ModelState.AddModelError(nameof(model.CostPrice), "Giá vốn không được âm");
+            if (model.CostPrice.HasValue && model.CostPrice > model.Price)
+                _logger.LogWarning("CreateDetail: Giá vốn ({CostPrice}) lớn hơn giá bán ({Price})", model.CostPrice, model.Price);
+
             if (!ModelState.IsValid)
             {
+                var errors = string.Join(" | ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
+                _logger.LogWarning("CreateDetail validation failed: {Errors}", errors);
+                
                 ViewBag.ProductId = productId;
-                ViewBag.LengthSelectList = new SelectList(await _lengthService.GetAllAsync(), "Id", "Name");
-                ViewBag.SurfaceFinishSelectList = new SelectList(await _surfaceFinishService.GetAllAsync(), "Id", "Name");
-                ViewBag.HardnessSelectList = new SelectList(await _hardnessService.GetAllAsync(), "Id", "Name");
-                ViewBag.ElasticitySelectList = new SelectList(await _elasticityService.GetAllAsync(), "Id", "Name");
-                ViewBag.OriginCountrySelectList = new SelectList(await _originCountryService.GetAllAsync(), "Id", "Name");
-                ViewBag.ColorSelectList = new SelectList(await _colorService.GetAllAsync(), "Id", "Name");
+                ViewBag.LengthSelectList = new SelectList(await _lengthService.GetAllAsync(), "Id", "Name", model.LengthId);
+                ViewBag.SurfaceFinishSelectList = new SelectList(await _surfaceFinishService.GetAllAsync(), "Id", "Name", model.SurfaceFinishId);
+                ViewBag.HardnessSelectList = new SelectList(await _hardnessService.GetAllAsync(), "Id", "Name", model.HardnessId);
+                ViewBag.ElasticitySelectList = new SelectList(await _elasticityService.GetAllAsync(), "Id", "Name", model.ElasticityId);
+                ViewBag.OriginCountrySelectList = new SelectList(await _originCountryService.GetAllAsync(), "Id", "Name", model.OriginCountryId);
+                ViewBag.ColorSelectList = new SelectList(await _colorService.GetAllAsync(), "Id", "Name", model.ColorId);
                 return View("ProductDetailCreate", model);
             }
 
@@ -522,8 +564,41 @@ namespace NT.WEB.Controllers
         {
             if (id == Guid.Empty || model is null || id != model.Id) return BadRequest();
 
+            // Validate required foreign keys
+            if (model.LengthId == Guid.Empty)
+                ModelState.AddModelError(nameof(model.LengthId), "Vui lòng chọn chiều dài cần");
+            if (model.SurfaceFinishId == Guid.Empty)
+                ModelState.AddModelError(nameof(model.SurfaceFinishId), "Vui lòng chọn hoàn thiện bề mặt");
+            if (model.HardnessId == Guid.Empty)
+                ModelState.AddModelError(nameof(model.HardnessId), "Vui lòng chọn độ cứng");
+            if (model.ElasticityId == Guid.Empty)
+                ModelState.AddModelError(nameof(model.ElasticityId), "Vui lòng chọn độ đàn hồi");
+            if (model.OriginCountryId == Guid.Empty)
+                ModelState.AddModelError(nameof(model.OriginCountryId), "Vui lòng chọn xuất xứ");
+            if (model.ColorId == Guid.Empty)
+                ModelState.AddModelError(nameof(model.ColorId), "Vui lòng chọn màu sắc");
+
+            // Validate price
+            if (model.Price < 0)
+                ModelState.AddModelError(nameof(model.Price), "Giá bán không được âm");
+            if (model.Price > 999999999999)
+                ModelState.AddModelError(nameof(model.Price), "Giá bán không được vượt quá 999,999,999,999 VNĐ");
+
+            // Validate stock quantity
+            if (model.StockQuantity < 0)
+                ModelState.AddModelError(nameof(model.StockQuantity), "Số lượng tồn kho không được âm");
+
+            // Validate cost price
+            if (model.CostPrice.HasValue && model.CostPrice < 0)
+                ModelState.AddModelError(nameof(model.CostPrice), "Giá vốn không được âm");
+            if (model.CostPrice.HasValue && model.CostPrice > model.Price)
+                _logger.LogWarning("EditDetail: Giá vốn ({CostPrice}) lớn hơn giá bán ({Price}) cho ProductDetail {Id}", model.CostPrice, model.Price, id);
+
             if (!ModelState.IsValid)
             {
+                var errors = string.Join(" | ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
+                _logger.LogWarning("EditDetail validation failed for {ProductDetailId}: {Errors}", id, errors);
+                
                 var existingImages = await _productImageService.GetByProductDetailIdAsync(id);
                 ViewBag.ExistingImages = existingImages.ToList();
                 ViewBag.LengthSelectList = new SelectList(await _lengthService.GetAllAsync(), "Id", "Name", model.LengthId);
