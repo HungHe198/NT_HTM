@@ -248,8 +248,8 @@ height: 300px;
         <a href="@Url.Action("Index", "Sales")" class="btn btn-light btn-action w-100 mb-2">
 <i class="bi bi-shop"></i> Bán Tại Quầy
        </a>
-                <a href="@Url.Action("Index", "Customer")" class="btn btn-light btn-action w-100">
-                    <i class="bi bi-person-plus"></i> Khách Hàng
+                <a href="@Url.Action("Index", "UserManagement")" class="btn btn-light btn-action w-100">
+                    <i class="bi bi-person-plus"></i> Quản lí người dùng hệ thống
       </a>
             </div>
      </div>
@@ -341,6 +341,26 @@ height: 300px;
 
         <!-- ADMINS -->
  <div class="col-lg-3 col-md-6">
+            <!-- USER MANAGEMENT -->
+    <div class="col-lg-3 col-md-6">
+            <a href="@Url.Action("Index", "UserManagement")" class="card menu-card shadow-sm h-100">
+    <div class="card-body">
+            <div class="d-flex align-items-center gap-3 mb-3">
+           <div class="icon-box" style="background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%); color: white;">
+           <i class="bi bi-people-fill"></i>
+  </div>
+       <div>
+    <h6 class="card-title mb-1">Quản lý tài khoản</h6>
+  <p class="text-muted small mb-0">Quản lý user & vai trò</p>
+      </div>
+     </div>
+            <div class="text-end">
+      <small class="badge bg-light text-dark">Quản lý →</small>
+ </div>
+         </div>
+            </a>
+   </div>
+
             <a href="@Url.Action("Index", "Admin")" class="card menu-card shadow-sm h-100">
    <div class="card-body">
             <div class="d-flex align-items-center gap-3 mb-3">

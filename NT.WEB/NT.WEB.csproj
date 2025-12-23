@@ -18,4 +18,8 @@
     <ProjectReference Include="..\NT.BLL\NT.BLL.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\uploads\qr-code\" />
+  </ItemGroup>
+
 </Project>

@@ -36,6 +36,8 @@ namespace NT.SHARED.Models
         public string? Status { get; set; }
         [Display(Name = "Số điện thoại")]
         public string PhoneNumber { get; set; }
+        [Display(Name = "Tên người nhận")]
+        public string? ReceiverName { get; set; }
         [Display(Name = "Ðịa chỉ giao hàng")]
         public string ShippingAddress { get; set; }
         [Display(Name = "Ghi chú cho đơn hàng")]

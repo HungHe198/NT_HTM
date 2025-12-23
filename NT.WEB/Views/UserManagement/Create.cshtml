@@ -31,9 +31,10 @@
                                 <label asp-for="Username" class="form-label">Tên đăng nhập <span class="text-danger">*</span></label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-user"></i></span>
-                                    <input asp-for="Username" class="form-control" placeholder="Nhập tên đăng nhập" required />
+                                    <input asp-for="Username" class="form-control" placeholder="Nhập tên đăng nhập" required pattern="^[A-Za-z0-9._-]+$" title="Tên đăng nhập phải viết liền, không dấu, không chứa khoảng trắng. Chỉ cho phép chữ, số, . _ -" />
                                 </div>
                                 <span asp-validation-for="Username" class="text-danger small"></span>
+                                <span id="usernameClientError_um" class="text-danger small" style="display:none;"></span>
                             </div>
 
                             <!-- Password -->
@@ -128,4 +129,26 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function(){
+            var form = document.querySelector('form[asp-action="Create"][asp-controller="UserManagement"]') || document.querySelector('form');
+            if(!form) return;
+            var username = form.querySelector('[name="Username"]');
+            var errSpan = document.getElementById('usernameClientError_um');
+            function validateUsername(){
+                if(!username) return true;
+                var val = username.value || '';
+                var re = /^[A-Za-z0-9._-]+$/;
+                if(!re.test(val)){
+                    errSpan.textContent = 'Tên đăng nhập phải viết liền, không dấu, không có khoảng trắng; chỉ dùng chữ/số/./_/-.';
+                    errSpan.style.display = 'block';
+                    return false;
+                }
+                errSpan.style.display = 'none';
+                return true;
+            }
+            if(username){ username.addEventListener('input', validateUsername); }
+            form.addEventListener('submit', function(e){ if(!validateUsername()){ e.preventDefault(); e.stopPropagation(); } });
+        })();
+    </script>
 }

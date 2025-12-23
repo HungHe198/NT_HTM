@@ -12,7 +12,7 @@ using NT.DAL.ContextFile;
 namespace NT.DAL.Migrations
 {
     [DbContext(typeof(NTAppDbContext))]
-    [Migration("20251223151044_hunglvyeuvietlot")]
+    [Migration("20251223163307_hunglvyeuvietlot")]
     partial class hunglvyeuvietlot
     {
         /// <inheritdoc />
@@ -513,6 +513,9 @@ namespace NT.DAL.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("ReceiverName")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("ShippingAddress")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -622,6 +625,11 @@ namespace NT.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int>("Channel")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
                     b.Property<string>("Description")
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
@@ -634,6 +642,29 @@ namespace NT.DAL.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("PaymentMethod", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("11111111-1111-1111-1111-111111111001"),
+                            Channel = 1,
+                            Description = "Thanh toán khi nhận hàng (Cash On Delivery)",
+                            Name = "COD"
+                        },
+                        new
+                        {
+                            Id = new Guid("11111111-1111-1111-1111-111111111002"),
+                            Channel = 2,
+                            Description = "Thanh toán bằng tiền mặt tại cửa hàng",
+                            Name = "Tiền mặt"
+                        },
+                        new
+                        {
+                            Id = new Guid("11111111-1111-1111-1111-111111111003"),
+                            Channel = 2,
+                            Description = "Thanh toán qua chuyển khoản ngân hàng",
+                            Name = "Chuyển khoản"
+                        });
                 });
 
             modelBuilder.Entity("NT.SHARED.Models.Permission", b =>
@@ -2042,7 +2073,7 @@ namespace NT.DAL.Migrations
                             Id = new Guid("11111111-2222-3333-4444-555555555555"),
                             Email = "admin@example.com",
                             Fullname = "System Administrator",
-                            PasswordHash = "AQAAAAIAAYagAAAAEJOx3O2W7n1UosILLJjrEDgG/WYT46tkFyTYkO/gYyZNLidRItcSVIe4eezj0mkXzw==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEPk+sWyMqPT+g5jsL0BiBKxRF2N+Cpn1pGpnfoZgkq2bsbeH5RFDYAPHJyZXk/+APg==",
                             RoleId = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
                             Status = "Active",
                             Username = "admin"
@@ -2093,11 +2124,11 @@ namespace NT.DAL.Migrations
                             Id = new Guid("11111111-aaaa-bbbb-cccc-111111111111"),
                             Code = "WELCOME10",
                             DiscountPercentage = 10m,
-                            EndDate = new DateTime(2026, 1, 23, 22, 10, 43, 872, DateTimeKind.Local).AddTicks(7064),
+                            EndDate = new DateTime(2026, 1, 23, 23, 33, 7, 366, DateTimeKind.Local).AddTicks(7759),
                             MaxDiscountAmount = 50000m,
                             MaxUsage = 1000,
                             MinOrderAmount = 300000m,
-                            StartDate = new DateTime(2025, 12, 16, 22, 10, 43, 872, DateTimeKind.Local).AddTicks(7035),
+                            StartDate = new DateTime(2025, 12, 16, 23, 33, 7, 366, DateTimeKind.Local).AddTicks(7731),
                             UsageCount = 0
                         },
                         new
@@ -2105,11 +2136,11 @@ namespace NT.DAL.Migrations
                             Id = new Guid("22222222-aaaa-bbbb-cccc-222222222222"),
                             Code = "SAVE15",
                             DiscountPercentage = 15m,
-                            EndDate = new DateTime(2026, 2, 23, 22, 10, 43, 872, DateTimeKind.Local).AddTicks(7073),
+                            EndDate = new DateTime(2026, 2, 23, 23, 33, 7, 366, DateTimeKind.Local).AddTicks(7767),
                             MaxDiscountAmount = 100000m,
                             MaxUsage = 500,
                             MinOrderAmount = 500000m,
-                            StartDate = new DateTime(2025, 12, 20, 22, 10, 43, 872, DateTimeKind.Local).AddTicks(7072),
+                            StartDate = new DateTime(2025, 12, 20, 23, 33, 7, 366, DateTimeKind.Local).AddTicks(7767),
                             UsageCount = 0
                         },
                         new
@@ -2117,11 +2148,11 @@ namespace NT.DAL.Migrations
                             Id = new Guid("33333333-aaaa-bbbb-cccc-333333333333"),
                             Code = "BIGSALE25",
                             DiscountPercentage = 25m,
-                            EndDate = new DateTime(2026, 3, 23, 22, 10, 43, 872, DateTimeKind.Local).AddTicks(7076),
+                            EndDate = new DateTime(2026, 3, 23, 23, 33, 7, 366, DateTimeKind.Local).AddTicks(7771),
                             MaxDiscountAmount = 200000m,
                             MaxUsage = 300,
                             MinOrderAmount = 800000m,
-                            StartDate = new DateTime(2025, 12, 22, 22, 10, 43, 872, DateTimeKind.Local).AddTicks(7075),
+                            StartDate = new DateTime(2025, 12, 22, 23, 33, 7, 366, DateTimeKind.Local).AddTicks(7770),
                             UsageCount = 0
                         });
                 });

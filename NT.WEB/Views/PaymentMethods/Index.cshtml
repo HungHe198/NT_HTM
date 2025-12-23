@@ -1,4 +1,5 @@
-﻿@model IEnumerable<NT.SHARED.Models.PaymentMethod>
+@model IEnumerable<NT.SHARED.Models.PaymentMethod>
+@using NT.SHARED.Models
 @{
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
@@ -11,6 +12,7 @@
         <tr>
             <th>Tên</th>
             <th>Mô tả</th>
+            <th>Kênh bán hàng</th>
             <th></th>
         </tr>
     </thead>
@@ -20,6 +22,20 @@
         <tr>
             <td>@item.Name</td>
             <td>@item.Description</td>
+            <td>
+                @switch (item.Channel)
+                {
+                    case SalesChannel.Online:
+                        <span class="badge bg-info">Online (COD)</span>
+                        break;
+                    case SalesChannel.Offline:
+                        <span class="badge bg-warning text-dark">Offline/POS</span>
+                        break;
+                    default:
+                        <span class="badge bg-success">Tất cả</span>
+                        break;
+                }
+            </td>
             <td class="text-nowrap">
                 <a class="btn btn-sm btn-outline-secondary" asp-action="Details" asp-route-id="@item.Id">Xem</a>
                 <a class="btn btn-sm btn-outline-primary" asp-action="Edit" asp-route-id="@item.Id">Sửa</a>

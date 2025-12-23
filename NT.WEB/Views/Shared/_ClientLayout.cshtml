@@ -487,10 +487,224 @@ box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
         </div>
     </footer>
 
+    <!-- Support Chat Box -->
+    <div id="support-chatbox" class="support-chatbox">
+        <div class="chatbox-header" onclick="toggleChatbox()">
+            <i class="fas fa-headset"></i>
+            <span>Hỗ trợ khách hàng</span>
+            <i class="fas fa-chevron-down chatbox-toggle-icon"></i>
+        </div>
+        <div class="chatbox-body">
+            <div class="chatbox-content">
+                <div class="qr-section">
+                    <p class="qr-title"><i class="fas fa-qrcode me-2"></i>Quét QR để được hỗ trợ</p>
+                    <img src="~/uploads/qr-code/qr.jpg" alt="QR Code Hỗ trợ" class="qr-image" />
+                </div>
+                <div class="hotline-section">
+                    <p class="hotline-title"><i class="fas fa-phone-alt me-2"></i>Hotline hỗ trợ</p>
+                    <a href="tel:0383177504" class="hotline-btn">
+                        <i class="fas fa-phone-volume me-2"></i>
+                        <span>0383 177 504</span>
+                    </a>
+                    <p class="hotline-note">Bấm để gọi trực tiếp</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* Support Chatbox Styles */
+        .support-chatbox {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 320px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+            z-index: 9999;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .support-chatbox.collapsed .chatbox-body {
+            max-height: 0;
+            padding: 0;
+            opacity: 0;
+        }
+
+        .support-chatbox.collapsed .chatbox-toggle-icon {
+            transform: rotate(180deg);
+        }
+
+        .chatbox-header {
+            background: linear-gradient(135deg, #00838f 0%, #00bcd4 100%);
+            color: white;
+            padding: 15px 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .chatbox-header:hover {
+            background: linear-gradient(135deg, #006064 0%, #00acc1 100%);
+        }
+
+        .chatbox-header span {
+            flex-grow: 1;
+        }
+
+        .chatbox-toggle-icon {
+            transition: transform 0.3s ease;
+        }
+
+        .chatbox-body {
+            max-height: 400px;
+            padding: 20px;
+            opacity: 1;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .chatbox-content {
+            text-align: center;
+        }
+
+        .qr-section {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .qr-title {
+            color: #00838f;
+            font-weight: 600;
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+        }
+
+        .qr-image {
+            width: 180px;
+            height: 180px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border: 3px solid #e0f7fa;
+        }
+
+        .hotline-section {
+            text-align: center;
+        }
+
+        .hotline-title {
+            color: #00838f;
+            font-weight: 600;
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+        }
+
+        .hotline-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #4caf50 0%, #81c784 100%);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .hotline-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+            color: white;
+        }
+
+        .hotline-btn i {
+            animation: phoneRing 1s ease-in-out infinite;
+        }
+
+        @@keyframes phoneRing {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-10deg); }
+            50% { transform: rotate(10deg); }
+            75% { transform: rotate(-5deg); }
+        }
+
+        .hotline-note {
+            color: #78909c;
+            font-size: 0.85rem;
+            margin-top: 10px;
+            margin-bottom: 0;
+        }
+
+        /* Floating button when chatbox is fully collapsed/hidden */
+        .support-float-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #00838f 0%, #00bcd4 100%);
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(0, 131, 143, 0.4);
+            z-index: 9998;
+            transition: all 0.3s ease;
+            animation: pulse 2s infinite;
+        }
+
+        .support-float-btn:hover {
+            transform: scale(1.1);
+        }
+
+        @@keyframes pulse {
+            0% { box-shadow: 0 4px 20px rgba(0, 131, 143, 0.4); }
+            50% { box-shadow: 0 4px 30px rgba(0, 131, 143, 0.6), 0 0 0 10px rgba(0, 188, 212, 0.1); }
+            100% { box-shadow: 0 4px 20px rgba(0, 131, 143, 0.4); }
+        }
+
+        /* Mobile responsive */
+        @@media (max-width: 576px) {
+            .support-chatbox {
+                width: calc(100% - 40px);
+                right: 20px;
+                left: 20px;
+            }
+        }
+    </style>
+
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.4/dist/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script>
+        // Toggle Support Chatbox
+        function toggleChatbox() {
+            const chatbox = document.getElementById('support-chatbox');
+            if (chatbox) {
+                chatbox.classList.toggle('collapsed');
+            }
+        }
+
+        // Initialize chatbox as collapsed on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatbox = document.getElementById('support-chatbox');
+            if (chatbox) {
+                chatbox.classList.add('collapsed');
+            }
+        });
+
         (function(){
             const input = document.getElementById('client-search');
             const box = document.getElementById('client-suggest');
