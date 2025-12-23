@@ -1,0 +1,137 @@
+@model NT.SHARED.Models.User
+
+@{
+    ViewData["Title"] = "Chỉnh sửa tài khoản";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var roles = ViewBag.Roles as SelectList;
+    var isActive = Model.Status == "1" || Model.Status == "Active";
+}
+
+<div class="container-fluid">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index">Quản lý tài khoản</a></li>
+            <li class="breadcrumb-item"><a asp-action="Details" asp-route-id="@Model.Id">@Model.Username</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Chỉnh sửa</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-user-edit me-2"></i>Chỉnh sửa tài khoản: @Model.Username</h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Edit" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="Id" />
+                        <input type="hidden" asp-for="Username" />
+                        <input type="hidden" asp-for="PasswordHash" />
+
+                        <div class="row g-3">
+                            <!-- Username (readonly) -->
+                            <div class="col-md-6">
+                                <label class="form-label">Tên đăng nhập</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                    <input type="text" class="form-control" value="@Model.Username" readonly disabled />
+                                </div>
+                                <small class="text-muted">Không thể thay đổi tên đăng nhập</small>
+                            </div>
+
+                            <!-- Role -->
+                            <div class="col-md-6">
+                                <label asp-for="RoleId" class="form-label">Vai trò <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-user-tag"></i></span>
+                                    <select asp-for="RoleId" asp-items="@roles" class="form-select" required>
+                                        <option value="">-- Chọn vai trò --</option>
+                                    </select>
+                                </div>
+                                <span asp-validation-for="RoleId" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Fullname -->
+                            <div class="col-md-6">
+                                <label asp-for="Fullname" class="form-label">Họ và tên <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-id-card"></i></span>
+                                    <input asp-for="Fullname" class="form-control" placeholder="Nhập họ và tên" required />
+                                </div>
+                                <span asp-validation-for="Fullname" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Status -->
+                            <div class="col-md-6">
+                                <label asp-for="Status" class="form-label">Trạng thái</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-toggle-on"></i></span>
+                                    <select asp-for="Status" class="form-select">
+                                        <option value="1" selected="@(Model.Status == "1")">Hoạt động</option>
+                                        <option value="0" selected="@(Model.Status == "0")">Vô hiệu</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Email -->
+                            <div class="col-md-6">
+                                <label asp-for="Email" class="form-label">Email</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                    <input asp-for="Email" type="email" class="form-control" placeholder="example@email.com" />
+                                </div>
+                                <span asp-validation-for="Email" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Phone -->
+                            <div class="col-md-6">
+                                <label asp-for="PhoneNumber" class="form-label">Số điện thoại</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                                    <input asp-for="PhoneNumber" class="form-control" placeholder="0xxx xxx xxx" />
+                                </div>
+                                <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                            </div>
+
+                            <!-- New Password (optional) -->
+                            <div class="col-12">
+                                <hr />
+                                <h6 class="text-muted"><i class="fas fa-key me-2"></i>Đổi mật khẩu (để trống nếu không đổi)</h6>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Mật khẩu mới</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                    <input type="password" name="newPassword" class="form-control" placeholder="Để trống nếu không đổi" minlength="6" />
+                                </div>
+                                <small class="text-muted">Tối thiểu 6 ký tự</small>
+                            </div>
+                        </div>
+
+                        <hr class="my-4" />
+
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-outline-danger">
+                                <i class="fas fa-trash me-1"></i> Xóa tài khoản
+                            </a>
+                            <div class="d-flex gap-2">
+                                <a asp-action="Index" class="btn btn-secondary">
+                                    <i class="fas fa-times me-1"></i> Hủy
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-1"></i> Lưu thay đổi
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -72,17 +72,47 @@
                                     <span class="badge bg-info fs-6">@role.PermissionCount quyền</span>
                                 </td>
                                 <td class="text-center">
-                                    @if (role.Name != "Admin")
-                                    {
-                                        <a asp-action="Manage" asp-route-id="@role.Id" class="btn btn-sm btn-primary">
-                                            <i class="fas fa-cog me-1"></i> Phân quyền
-                                        </a>
-                                    }
-                                    else
+                                    @if (role.Name == "Admin")
                                     {
                                         <span class="text-muted">
                                             <i class="fas fa-crown me-1"></i> Không cần phân quyền
                                         </span>
+                                    }
+                                    else if (role.Name == "Customer")
+                                    {
+                                        <div class="btn-group" role="group">
+                                            <a asp-action="Manage" asp-route-id="@role.Id" class="btn btn-sm btn-primary">
+                                                <i class="fas fa-cog me-1"></i> Phân quyền
+                                            </a>
+                                            <form asp-action="AssignDefaultCustomerPermissions" method="post" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="roleId" value="@role.Id" />
+                                                <button type="submit" class="btn btn-sm btn-info" onclick="return confirm('Gán quyền MẶC ĐỊNH cho Customer?')" title="Gán quyền mặc định cho Customer">
+                                                    <i class="fas fa-magic"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    }
+                                    else if (role.Name == "Employee")
+                                    {
+                                        <div class="btn-group" role="group">
+                                            <a asp-action="Manage" asp-route-id="@role.Id" class="btn btn-sm btn-primary">
+                                                <i class="fas fa-cog me-1"></i> Phân quyền
+                                            </a>
+                                            <form asp-action="AssignDefaultEmployeePermissions" method="post" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="roleId" value="@role.Id" />
+                                                <button type="submit" class="btn btn-sm btn-warning" onclick="return confirm('Gán quyền MẶC ĐỊNH cho Employee?')" title="Gán quyền mặc định cho Employee">
+                                                    <i class="fas fa-magic"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <a asp-action="Manage" asp-route-id="@role.Id" class="btn btn-sm btn-primary">
+                                            <i class="fas fa-cog me-1"></i> Phân quyền
+                                        </a>
                                     }
                                 </td>
                             </tr>
@@ -99,7 +129,7 @@
         </div>
         <div class="card-body">
             <div class="row">
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <h6><i class="fas fa-cogs me-2"></i>Cách hoạt động</h6>
                     <ul>
                         <li>Mỗi <strong>Endpoint</strong> (Controller/Action) tương ứng với một <strong>Permission</strong></li>
@@ -108,12 +138,44 @@
                         <li><strong>Admin</strong> luôn có full quyền, không cần gán Permission</li>
                     </ul>
                 </div>
+                <div class="col-md-4">
+                    <h6><i class="fas fa-user me-2 text-info"></i>Quyền mặc định Customer</h6>
+                    <ul class="small">
+                        <li>Xem trang chủ, sản phẩm</li>
+                        <li>Quản lý giỏ hàng</li>
+                        <li>Đặt hàng, thanh toán</li>
+                        <li>Xem đơn hàng của mình</li>
+                        <li>Quản lý tài khoản cá nhân</li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h6><i class="fas fa-user-tie me-2 text-warning"></i>Quyền mặc định Employee</h6>
+                    <ul class="small">
+                        <li>Tất cả quyền của Customer</li>
+                        <li>Bán hàng tại quầy (POS)</li>
+                        <li>Quản lý đơn hàng</li>
+                        <li>Quản lý sản phẩm, danh mục</li>
+                        <li>Quản lý khách hàng</li>
+                        <li><em class="text-danger">Không có: Admin, Phân quyền</em></li>
+                    </ul>
+                </div>
+            </div>
+            <hr />
+            <div class="row">
                 <div class="col-md-6">
                     <h6><i class="fas fa-sync me-2"></i>Đồng bộ Permission</h6>
                     <ul>
                         <li>Click <strong>"Đồng bộ Permission"</strong> để quét tất cả Controller/Action</li>
                         <li>Hệ thống sẽ tự động tạo Permission mới cho các endpoint chưa có</li>
                         <li>Permission đã tồn tại sẽ không bị ảnh hưởng</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h6><i class="fas fa-magic me-2"></i>Gán quyền nhanh</h6>
+                    <ul>
+                        <li>Click nút <i class="fas fa-magic text-info"></i> để gán quyền mặc định cho Customer</li>
+                        <li>Click nút <i class="fas fa-magic text-warning"></i> để gán quyền mặc định cho Employee</li>
+                        <li>Hoặc vào <strong>"Phân quyền"</strong> để tùy chỉnh chi tiết</li>
                     </ul>
                 </div>
             </div>
