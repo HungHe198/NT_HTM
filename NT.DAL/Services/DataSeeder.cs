@@ -76,7 +76,7 @@ namespace NT.DAL.Services
                     Name = $"Cần câu đài mẫu {i}",
                     ShortDescription = "Cần câu đài chất lượng, phù hợp hỗ dịch vụ và tự nhiên",
                     Thumbnail = "/images/product-placeholder.png",
-                    Status = "Active",
+                    Status = NT.SHARED.Constants.ProductStatus.Active,
                     CreatedDate = DateTime.UtcNow
                 });
             }

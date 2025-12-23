@@ -1,4 +1,5 @@
 @model NT.SHARED.Models.Product
+@using NT.SHARED.Constants
 
 @{
     ViewBag.Title = "Sửa sản phẩm";
@@ -51,7 +52,10 @@
     </div>
     <div class="form-group">
         <label asp-for="Status">Trạng thái</label>
-        <input asp-for="Status" class="form-control" />
+        <select asp-for="Status" class="form-control">
+            <option value="@ProductStatus.Active" selected="@(Model.Status == ProductStatus.Active)">@ProductStatus.GetDisplayName(ProductStatus.Active)</option>
+            <option value="@ProductStatus.Inactive" selected="@(Model.Status == ProductStatus.Inactive)">@ProductStatus.GetDisplayName(ProductStatus.Inactive)</option>
+        </select>
         <span asp-validation-for="Status" class="text-danger"></span>
     </div>
     <button type="submit" class="btn btn-primary">Lưu</button>

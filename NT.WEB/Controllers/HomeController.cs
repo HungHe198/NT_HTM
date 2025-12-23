@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using NT.SHARED.Constants;
 using NT.WEB.Models;
 using System.Diagnostics;
 
@@ -27,11 +28,19 @@ namespace NT.WEB.Controllers
         {
             var clientLayoutItems = new List<dynamic>();
             var allProducts = await _productService.GetAllAsync();
-            foreach (var p in allProducts)
+            // Chỉ lấy sản phẩm có trạng thái hoạt động
+            var activeProducts = allProducts.Where(p => p.Status == ProductStatus.Active).ToList();
+            foreach (var p in activeProducts)
             {
                 var brand = await _brandService.GetByIdAsync(p.BrandId);
-                var details = await _productDetailService.GetWithLookupsByProductIdAsync(p.Id);
-                var firstDetail = details?.FirstOrDefault();
+                var allDetails = await _productDetailService.GetWithLookupsByProductIdAsync(p.Id);
+                // Chỉ lấy các biến thể có IsActive = true và StockQuantity > 0
+                var details = allDetails?.Where(d => d.IsActive && d.StockQuantity > 0).ToList();
+                
+                // Bỏ qua sản phẩm không có biến thể hoạt động
+                if (details == null || !details.Any()) continue;
+                
+                var firstDetail = details.FirstOrDefault();
                 var firstImg = firstDetail?.Images?.FirstOrDefault();
                 clientLayoutItems.Add(new
                 {
@@ -108,6 +117,9 @@ namespace NT.WEB.Controllers
             ViewBag.IsPriceFiltering = isPriceFiltering;
 
             var products = await _productService.GetAllAsync();
+            
+            // Chỉ lấy sản phẩm có trạng thái hoạt động
+            products = products.Where(p => p.Status == ProductStatus.Active).ToList();
 
             if (brandId.HasValue && brandId.Value != Guid.Empty)
                 products = products.Where(p => p.BrandId == brandId.Value).ToList();
@@ -127,8 +139,12 @@ namespace NT.WEB.Controllers
             foreach (var p in products)
             {
                 var brand = await _brandService.GetByIdAsync(p.BrandId);
-                var allDetails = await _productDetailService.GetWithLookupsByProductIdAsync(p.Id) ?? Enumerable.Empty<NT.SHARED.Models.ProductDetail>();
-                var details = allDetails.ToList();
+                var allDetailsRaw = await _productDetailService.GetWithLookupsByProductIdAsync(p.Id) ?? Enumerable.Empty<NT.SHARED.Models.ProductDetail>();
+                // Chỉ lấy các biến thể có IsActive = true và StockQuantity > 0
+                var details = allDetailsRaw.Where(d => d.IsActive && d.StockQuantity > 0).ToList();
+                
+                // Bỏ qua sản phẩm không có biến thể hoạt động
+                if (!details.Any()) continue;
 
                 // Filter by category if provided
                 if (categoryId.HasValue && categoryId.Value != Guid.Empty)
