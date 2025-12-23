@@ -912,7 +912,14 @@
             document.getElementById('pending-order-code').textContent = result.order.orderCode;
             document.getElementById('pending-customer-name').textContent = result.order.customerName;
             document.getElementById('pending-customer-phone').textContent = result.order.customerPhone;
-            document.getElementById('pending-order-total').textContent = Number(result.order.totalAmount).toLocaleString() + '₫';
+            // Set summary amounts so user sees the money when choosing to checkout this pending order
+            const pendingTotal = Number(result.order.totalAmount) || 0;
+            document.getElementById('pending-order-total').textContent = pendingTotal.toLocaleString() + '₫';
+
+            // Update POS summary on the right side to reflect this pending order (no voucher applied yet)
+            totalAmount = pendingTotal;
+            discountAmount = 0;
+            updateSummary();
 
             const tbody = document.getElementById('pending-order-items');
             tbody.innerHTML = result.items.map((item, idx) => `

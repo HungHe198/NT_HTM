@@ -113,7 +113,14 @@
                     <select name="month" class="form-select" style="width: 100px;">
                         @for (int m = 1; m <= 12; m++)
                         {
-                            <option value="@m" selected="@(Model.SelectedMonth == m)">T@m</option>
+                            if (Model.SelectedMonth == m)
+                            {
+                                <option value="@m" selected>Tháng @m</option>
+                            }
+                            else
+                            {
+                                <option value="@m">Tháng @m</option>
+                            }
                         }
                     </select>
                     <select name="year" class="form-select" style="width: 120px;">

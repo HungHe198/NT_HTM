@@ -36,21 +36,33 @@ namespace NT.WEB.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Index(LoginDto dto, bool client = false)
         {
-            if (!ModelState.IsValid) return View(dto);
+            if (!ModelState.IsValid)
+            {
+                // Redirect to the shared Account/Login view if model invalid to keep a single view location
+                return RedirectToAction("Login", "Account");
+            }
 
             var users = await _userRepo.FindAsync(u => u.Username == dto.Username);
             var user = System.Linq.Enumerable.FirstOrDefault(users);
             if (user == null)
             {
-                ModelState.AddModelError(string.Empty, "Tên đăng nhập hoặc mật khẩu không đúng");
-                return View(dto);
+                TempData["Error"] = "Tên đăng nhập hoặc mật khẩu không đúng";
+                return RedirectToAction("Login", "Account");
             }
 
             var verify = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, dto.Password);
             if (verify != PasswordVerificationResult.Success)
             {
-                ModelState.AddModelError(string.Empty, "Tên đăng nhập hoặc mật khẩu không đúng");
-                return View(dto);
+                TempData["Error"] = "Tên đăng nhập hoặc mật khẩu không đúng";
+                return RedirectToAction("Login", "Account");
+            }
+
+            // If user status indicates disabled, block login
+            var isActive = (user.Status == "1") || string.Equals(user.Status, "Active", StringComparison.OrdinalIgnoreCase);
+            if (!isActive)
+            {
+                TempData["Error"] = "Tài khoản này đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên.";
+                return RedirectToAction("Login", "Account");
             }
 
             // get role name
@@ -72,7 +84,7 @@ namespace NT.WEB.Controllers
             var principal = new ClaimsPrincipal(identity);
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
-            TempData["Success"] = "đăng nhập thành công.";
+            TempData["Success"] = "Đăng nhập thành công.";
 
             var rn = roleName?.ToLowerInvariant();
             if (rn == "admin" || rn == "employee")

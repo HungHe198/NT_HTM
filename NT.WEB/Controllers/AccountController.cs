@@ -185,6 +185,14 @@ namespace NT.WEB.Controllers
             var verify = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, dto.Password);
             if (verify == Microsoft.AspNetCore.Identity.PasswordVerificationResult.Success)
             {
+                // Block login if account status is not active
+                var isActive = (user.Status == "1") || string.Equals(user.Status, "Active", StringComparison.OrdinalIgnoreCase);
+                if (!isActive)
+                {
+                    ModelState.AddModelError(string.Empty, "Tài khoản này đã bị vô hiệu hóa");
+                    TempData["Error"] = "Tài khoản này đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên.";
+                    return View(dto);
+                }
                 // Resolve role name for correct role claim
                 string roleName = string.Empty;
                 try
