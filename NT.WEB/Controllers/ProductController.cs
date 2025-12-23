@@ -94,6 +94,15 @@ namespace NT.WEB.Controllers
                 {
                     try { p.Brand = await _brandService.GetByIdAsync(p.BrandId); } catch { }
                 }
+
+                // Ensure Status has a valid value (default to Active if null or invalid)
+                if (string.IsNullOrWhiteSpace(p.Status) || 
+                    (p.Status != NT.SHARED.Constants.ProductStatus.Active && 
+                     p.Status != NT.SHARED.Constants.ProductStatus.Inactive))
+                {
+                    p.Status = NT.SHARED.Constants.ProductStatus.Active;
+                }
+
                 if (!string.IsNullOrWhiteSpace(p.Thumbnail)) continue;
                 try
                 {
@@ -118,8 +127,33 @@ namespace NT.WEB.Controllers
             var product = await _productService.GetByIdAsync(id);
             if (product is null) return NotFound();
 
+            // Load Brand for the product
+            if (product.BrandId != Guid.Empty && product.Brand == null)
+            {
+                try { product.Brand = await _brandService.GetByIdAsync(product.BrandId); } catch { }
+            }
+
             var details = (await _productDetailService.GetWithLookupsByProductIdAsync(id)).ToList();
             ViewBag.ProductDetails = details;
+
+            // If product has no thumbnail, try to get from first product detail's images
+            if (string.IsNullOrWhiteSpace(product.Thumbnail) && details.Any())
+            {
+                var firstDetail = details.FirstOrDefault();
+                var firstImg = firstDetail?.Images?.FirstOrDefault();
+                if (firstImg != null && !string.IsNullOrWhiteSpace(firstImg.ImageUrl))
+                {
+                    product.Thumbnail = firstImg.ImageUrl;
+                }
+            }
+
+            // Ensure Status has a valid value (default to Active if null or invalid)
+            if (string.IsNullOrWhiteSpace(product.Status) || 
+                (product.Status != NT.SHARED.Constants.ProductStatus.Active && 
+                 product.Status != NT.SHARED.Constants.ProductStatus.Inactive))
+            {
+                product.Status = NT.SHARED.Constants.ProductStatus.Active;
+            }
 
             return View(product);
         }
@@ -132,13 +166,30 @@ namespace NT.WEB.Controllers
             var product = await _productService.GetByIdAsync(id);
             if (product is null) return NotFound();
 
+            // Kiểm tra sản phẩm có đang hoạt động không (Status = "1")
+            // Nếu sản phẩm không hoạt động, khách hàng không được phép xem
+            if (product.Status != NT.SHARED.Constants.ProductStatus.Active)
+            {
+                return NotFound();
+            }
+
             // Load Brand for the product
             if (product.BrandId != Guid.Empty)
             {
                 product.Brand = await _brandService.GetByIdAsync(product.BrandId);
             }
 
-            var details = (await _productDetailService.GetWithLookupsByProductIdAsync(id)).ToList();
+            var allDetails = (await _productDetailService.GetWithLookupsByProductIdAsync(id)).ToList();
+            
+            // Chỉ hiển thị các biến thể có IsActive = true và StockQuantity > 0
+            var details = allDetails.Where(d => d.IsActive && d.StockQuantity > 0).ToList();
+            
+            // Nếu không có biến thể hoạt động nào, trả về NotFound
+            if (!details.Any())
+            {
+                return NotFound();
+            }
+            
             var hardnessIds = details.Select(d => d.HardnessId).Distinct().ToList();
             var lengthIds = details.Select(d => d.LengthId).Distinct().ToList();
 

@@ -1,4 +1,5 @@
 @model NT.SHARED.Models.Product
+@using NT.SHARED.Constants
 
 @{
     ViewBag.Title = "Chi tiết sản phẩm";
@@ -65,7 +66,14 @@
       {
   <div class="col-12">
     <strong>Trạng thái:</strong> 
-              <span class="badge bg-success">@Model.Status</span>
+              @if(Model.Status == ProductStatus.Active)
+              {
+                  <span class="badge bg-success">@ProductStatus.GetDisplayName(Model.Status)</span>
+              }
+              else
+              {
+                  <span class="badge bg-danger">@ProductStatus.GetDisplayName(Model.Status)</span>
+              }
   </div>
    }
    </div>

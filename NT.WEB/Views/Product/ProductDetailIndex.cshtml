@@ -619,11 +619,11 @@
                             @foreach (var h in hardnessOptions)
                             {
                                 var countForH = details.Count(d => d.HardnessId == h.Id && d.StockQuantity > 0);
-                                var disabled = countForH == 0;
+                                var isDisabled = countForH == 0;
                                 <button type="button"
                                         class="btn option-btn hardness-btn"
                                         data-hardness-id="@h.Id"
-                                        disabled="@(disabled ? "disabled" : null)">
+                                        @(isDisabled ? "disabled" : "")>
                                     @h.Name
                                 </button>
                             }
@@ -637,11 +637,11 @@
                             @foreach (var l in lengthOptions)
                             {
                                 var countForL = details.Count(d => d.LengthId == l.Id && d.StockQuantity > 0);
-                                var disabled = countForL == 0;
+                                var isDisabled = countForL == 0;
                                 <button type="button"
                                         class="btn option-btn length-btn"
                                         data-length-id="@l.Id"
-                                        disabled="@(disabled ? "disabled" : null)">
+                                        @(isDisabled ? "disabled" : "")>
                                     @l.Name
                                 </button>
                             }
@@ -673,15 +673,6 @@
                         <i class="fas fa-bolt"></i> Mua ngay
                     </button>
                 </div>
-
-                <!-- Additional Info -->
-                @if (!string.IsNullOrWhiteSpace(product?.Status))
-                {
-                    <div class="d-flex align-items-center gap-2">
-                        <span class="text-muted"><i class="fas fa-check-circle me-1"></i>Trạng thái:</span>
-                        <span class="stock-badge in-stock">@product.Status</span>
-                    </div>
-                }
             </div>
         </div>
 
