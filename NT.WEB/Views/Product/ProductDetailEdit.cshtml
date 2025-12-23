@@ -169,10 +169,11 @@
         </div>
 
         <div class="col-md-6">
-            <div class="form-group">
-                <label asp-for="SoldQuantity">@Html.DisplayNameFor(m => m.SoldQuantity)</label>
-                <input asp-for="SoldQuantity" class="form-control" />
-            </div>
+            // <div class="form-group">
+            //     <label asp-for="SoldQuantity">@Html.DisplayNameFor(m => m.SoldQuantity)</label>
+            //     <input asp-for="SoldQuantity" class="form-control" readonly />
+            //     <small class="text-muted">Giá trị này được tự động tính từ các đơn hàng</small>
+            // </div>
 
             <div class="form-group">
                 <label asp-for="CostPrice">@Html.DisplayNameFor(m => m.CostPrice)</label>
@@ -181,7 +182,7 @@
 
             <div class="form-group">
                 <label asp-for="LastImportDate">@Html.DisplayNameFor(m => m.LastImportDate)</label>
-                <input asp-for="LastImportDate" class="form-control" type="date" />
+                <input asp-for="LastImportDate" class="form-control" type="datetime-local" value="@(Model.LastImportDate?.ToString("yyyy-MM-ddTHH:mm") ?? DateTime.Now.ToString("yyyy-MM-ddTHH:mm"))" />
             </div>
 
             <div class="form-group form-check">

@@ -1,26 +1,26 @@
 @{
-    ViewBag.Title = "Bán hàng tại quầy (POS)";
-    Layout = "~/Views/Shared/_ClientLayout.cshtml";
+    ViewData["Title"] = "Bán hàng tại quầy (POS)";
     var products = ViewBag.Products as List<NT.SHARED.Models.Product> ?? new();
     var paymentMethods = ViewBag.PaymentMethods as List<NT.SHARED.Models.PaymentMethod> ?? new();
+    var pendingOrders = ViewBag.PendingOrders as List<NT.SHARED.Models.Order> ?? new();
 }
 
 <style>
     .product-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-      gap: 12px;
-     max-height: 500px;
+        gap: 12px;
+        max-height: 500px;
         overflow-y: auto;
-  padding: 10px;
+        padding: 10px;
     }
 
     .product-card {
         border: 2px solid #e9ecef;
-   border-radius: 10px;
+        border-radius: 10px;
         padding: 12px;
         text-align: center;
-   cursor: pointer;
+        cursor: pointer;
         transition: all 0.3s ease;
         background: white;
     }
@@ -37,43 +37,99 @@
     }
 
     .product-name {
-     font-weight: 600;
-     font-size: 0.85rem;
+        font-weight: 600;
+        font-size: 0.85rem;
         margin: 8px 0 4px 0;
         display: -webkit-box;
-   -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
         overflow: hidden;
         color: #2c3e50;
     }
 
     .product-code {
         font-size: 0.75rem;
-      color: #7f8c8d;
+        color: #7f8c8d;
         margin-bottom: 4px;
     }
 
     .product-price {
-    font-weight: 700;
-  color: #667eea;
-    font-size: 0.9rem;
+        font-weight: 700;
+        color: #667eea;
+        font-size: 0.9rem;
+    }
+
+    /* Pending Orders Styles */
+    .pending-orders-container {
+        max-height: 200px;
+        overflow-y: auto;
+    }
+
+    .pending-order-card {
+        border: 2px solid #ffc107;
+        border-radius: 8px;
+        padding: 10px;
+        margin-bottom: 8px;
+        background: #fffbf0;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .pending-order-card:hover {
+        background: #fff3cd;
+        transform: scale(1.02);
+    }
+
+    .pending-order-card.active {
+        border-color: #28a745;
+        background: #d4edda;
+    }
+
+    .pending-order-time {
+        font-size: 0.75rem;
+        color: #6c757d;
+    }
+
+    /* Quick Create Customer Modal */
+    .customer-type-btn {
+        padding: 15px;
+        border: 2px solid #dee2e6;
+        border-radius: 10px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .customer-type-btn:hover {
+        border-color: #667eea;
+        background: #f8f9ff;
+    }
+
+    .customer-type-btn.active {
+        border-color: #667eea;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    }
+
+    .customer-type-btn i {
+        font-size: 2rem;
+        margin-bottom: 10px;
     }
 </style>
 
-<div class="container-fluid py-3">
+<div class="container-fluid">
     <div class="row g-3">
         <!-- LEFT: PRODUCT SEARCH & SELECTION -->
         <div class="col-lg-8">
      <div class="card shadow-sm">
            <div class="card-header bg-primary text-white fw-bold">
-           <i class="bi bi-search"></i> Tìm kiếm & Chọn sản phẩm
+           <i class="fas fa-search"></i> Tìm kiếm & Chọn sản phẩm
       </div>
      <div class="card-body">
   <!-- Search Products -->
      <div class="input-group input-group-lg mb-3">
  <input type="text" id="product-search" class="form-control" placeholder="Tìm tên hoặc mã sản phẩm...">
          <button class="btn btn-primary" onclick="searchProducts()">
-         <i class="bi bi-search"></i> Tìm
+         <i class="fas fa-search"></i> Tìm
      </button>
       </div>
 
@@ -122,7 +178,7 @@
 
         <!-- Add to Cart Button -->
           <button class="btn btn-success btn-lg w-100" onclick="addToCart()">
-        <i class="bi bi-cart-plus"></i> Thêm vào giỏ
+        <i class="fas fa-cart-plus"></i> Thêm vào giỏ
        </button>
  </div>
    </div>
@@ -130,7 +186,7 @@
      <!-- Cart Items Table -->
 <div class="card shadow-sm mt-3">
          <div class="card-header bg-info text-white fw-bold">
-   <i class="bi bi-cart3"></i> Giỏ hàng (<span id="cart-count">0</span> sản phẩm)
+   <i class="fas fa-shopping-cart"></i> Giỏ hàng (<span id="cart-count">0</span> sản phẩm)
              </div>
         <div class="card-body p-0">
      <div class="table-responsive">
@@ -159,44 +215,126 @@
 
     <!-- RIGHT: CUSTOMER & PAYMENT -->
         <div class="col-lg-4">
-      <!-- Customer Info -->
-          <div class="card shadow-sm mb-3">
-    <div class="card-header bg-warning text-dark fw-bold">
-      <i class="bi bi-person"></i> T thông tin khách hàng
-      </div>
-        <div class="card-body">
-      <div class="mb-3">
-        <label class="form-label fw-bold">Số điện thoại:</label>
-   <div class="input-group">
-  <input type="tel" id="customer-phone" class="form-control" placeholder="Nhập SĐT khách">
-      <button class="btn btn-outline-primary" onclick="searchCustomer()">
-      <i class="bi bi-search"></i>
-    </button>
-    </div>
-     </div>
+            <!-- Pending Orders Section -->
+            <div class="card shadow-sm mb-3">
+                <div class="card-header bg-warning text-dark fw-bold d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-clock"></i> Đơn hàng chờ (<span id="pending-count">@pendingOrders.Count</span>)</span>
+                    <button class="btn btn-sm btn-outline-dark" onclick="refreshPendingOrders()" title="Làm mới">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+                <div class="card-body p-2">
+                    <div class="pending-orders-container" id="pending-orders-list">
+                        @if (pendingOrders.Any())
+                        {
+                            @foreach (var order in pendingOrders)
+                            {
+                                var customerName = order.Note?.Replace("[POS Pending] ", "").Split(" - ").FirstOrDefault() ?? "Khách vãng lai";
+                                var orderCode = $"POS-{order.Id.ToString().Substring(0, 8).ToUpper()}";
+                                <div class="pending-order-card" onclick="loadPendingOrder('@order.Id')">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <strong class="text-primary">@orderCode</strong>
+                                            <div class="small">@customerName</div>
+                                            <div class="pending-order-time">@order.CreatedTime.ToLocalTime().ToString("HH:mm")</div>
+                                        </div>
+                                        <div class="text-end">
+                                            <div class="fw-bold text-danger">@order.TotalAmount.ToString("N0")₫</div>
+                                            <span class="badge bg-secondary">@(order.Details?.Count ?? 0) SP</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="text-center text-muted py-3" id="no-pending-orders">
+                                <i class="fas fa-inbox fa-2x mb-2"></i>
+                                <div>Không có đơn hàng chờ</div>
+                            </div>
+                        }
+                    </div>
+                    <div class="d-grid gap-2 mt-2">
+                        <button class="btn btn-warning btn-sm" onclick="saveToPending()" id="btn-save-pending" disabled>
+                            <i class="fas fa-pause-circle"></i> Lưu giỏ hàng chờ
+                        </button>
+                    </div>
+                </div>
+            </div>
 
-     <div class="mb-3">
-  <label class="form-label">Tên khách hàng:</label>
-    <input type="text" id="customer-name" class="form-control" readonly>
-       </div>
+            <!-- Customer Info -->
+            <div class="card shadow-sm mb-3">
+                <div class="card-header bg-info text-white fw-bold">
+                    <i class="fas fa-user"></i> Thông tin khách hàng
+                </div>
+                <div class="card-body">
+                    <!-- Customer Type Selection -->
+                    <div class="row mb-3" id="customer-type-selection">
+                        <div class="col-6">
+                            <div class="customer-type-btn" onclick="selectCustomerType('guest')" id="btn-guest">
+                                <i class="fas fa-user-slash text-secondary d-block"></i>
+                                <span class="fw-bold">Khách vãng lai</span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="customer-type-btn active" onclick="selectCustomerType('member')" id="btn-member">
+                                <i class="fas fa-user-check text-primary d-block"></i>
+                                <span class="fw-bold">Khách thành viên</span>
+                            </div>
+                        </div>
+                    </div>
 
-       <div class="mb-3">
-       <label class="form-label">Địa chỉ:</label>
-        <textarea id="customer-address" class="form-control" rows="2" readonly></textarea>
-        </div>
-           </div>
-         </div>
+                    <!-- Guest Customer Info (Hidden by default) -->
+                    <div id="guest-customer-section" style="display: none;">
+                        <div class="alert alert-secondary mb-2">
+                            <i class="fas fa-info-circle"></i> Khách vãng lai - Không cần thông tin
+                        </div>
+                        <button class="btn btn-outline-primary btn-sm w-100" onclick="showQuickCreateModal()">
+                            <i class="fas fa-user-plus"></i> Tạo tài khoản cho khách
+                        </button>
+                    </div>
+
+                    <!-- Member Customer Info -->
+                    <div id="member-customer-section">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Số điện thoại:</label>
+                            <div class="input-group">
+                                <input type="tel" id="customer-phone" class="form-control" placeholder="Nhập SĐT khách">
+                                <button class="btn btn-outline-primary" onclick="searchCustomer()">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                                <button class="btn btn-outline-success" onclick="showQuickCreateModal()" title="Tạo khách hàng mới">
+                                    <i class="fas fa-user-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Tên khách hàng:</label>
+                            <input type="text" id="customer-name" class="form-control" readonly>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Địa chỉ:</label>
+                            <textarea id="customer-address" class="form-control" rows="2" readonly></textarea>
+                        </div>
+                    </div>
+
+                    <input type="hidden" id="customer-id" value="">
+                    <input type="hidden" id="customer-type" value="member">
+                </div>
+            </div>
 
           <!-- Voucher -->
  <div class="card shadow-sm mb-3">
  <div class="card-header bg-success text-white fw-bold">
-   <i class="bi bi-ticket-perforated"></i> Mã giảm giá
+   <i class="fas fa-ticket-alt"></i> Mã giảm giá
        </div>
      <div class="card-body">
          <div class="input-group mb-2">
    <input type="text" id="voucher-code" class="form-control" placeholder="Nhập mã giảm giá">
      <button class="btn btn-outline-success" onclick="applyVoucher()">
-    <i class="bi bi-check"></i>
+    <i class="fas fa-check"></i>
      </button>
            </div>
   <small id="voucher-message" class="text-muted"></small>
@@ -206,7 +344,7 @@
       <!-- Payment Method -->
    <div class="card shadow-sm mb-3">
         <div class="card-header bg-danger text-white fw-bold">
-      <i class="bi bi-credit-card"></i> Phương thức thanh toán
+      <i class="fas fa-credit-card"></i> Phương thức thanh toán
       </div>
            <div class="card-body">
            <select id="payment-method" class="form-select">
@@ -222,7 +360,7 @@
   <!-- Order Summary -->
       <div class="card shadow-sm mb-3">
    <div class="card-header bg-dark text-white fw-bold">
-          <i class="bi bi-calculator"></i> Tóm tắt
+          <i class="fas fa-calculator"></i> Tóm tắt
       </div>
       <div class="card-body">
     <div class="row mb-2">
@@ -242,20 +380,322 @@
      <textarea id="order-note" class="form-control mt-3" rows="2" placeholder="Ghi chú đơn hàng (tùy chọn)"></textarea>
 
    <button class="btn btn-primary btn-lg w-100 mt-3" onclick="createOrder()">
-         <i class="bi bi-check-circle"></i> Tạo đơn hàng
+         <i class="fas fa-check-circle"></i> Tạo đơn hàng
    </button>
     </div>
 </div>
 
         <!-- Quick Actions -->
-    <div class="d-grid gap-2">
- <a href="@Url.Action("History", "Sales")" class="btn btn-info">
-       <i class="bi bi-clock-history"></i> Lịch sử bán hàng
-     </a>
-      <button class="btn btn-warning" onclick="clearCart()">
-     <i class="bi bi-trash"></i> Xóa giỏ hàng
-  </button>
-      </div>
+                    <div class="d-grid gap-2">
+                        <a href="@Url.Action("History", "Sales")" class="btn btn-info">
+                            <i class="fas fa-history"></i> Lịch sử bán hàng
+                        </a>
+                        <button class="btn btn-warning" onclick="clearCart()">
+                            <i class="fas fa-trash"></i> Xóa giỏ hàng
+                        </button>
+                        <button class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#helpModal">
+                            <i class="fas fa-question-circle"></i> Hướng dẫn sử dụng
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Help/Guide Modal -->
+        <div class="modal fade" id="helpModal" tabindex="-1">
+            <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header bg-info text-white">
+                        <h5 class="modal-title"><i class="fas fa-question-circle"></i> Hướng dẫn sử dụng POS</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Section 1: Tạo tài khoản nhanh -->
+                        <div class="card mb-3 border-success">
+                            <div class="card-header bg-success text-white">
+                                <h6 class="mb-0"><i class="fas fa-user-plus"></i> 1. TẠO TÀI KHOẢN KHÁCH HÀNG NHANH</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-info">
+                                    <strong><i class="fas fa-info-circle"></i> Chức năng:</strong> Tạo tài khoản đăng nhập cho khách hàng ngay tại quầy
+                                </div>
+                        
+                                <h6 class="text-primary">Các bước thực hiện:</h6>
+                                <ol class="mb-3">
+                                    <li><strong>Chọn "Khách thành viên"</strong> ở phần Thông tin khách hàng</li>
+                                    <li>Nhấn nút <span class="badge bg-success"><i class="fas fa-user-plus"></i></span> bên cạnh ô số điện thoại</li>
+                                    <li>Điền thông tin:
+                                        <ul>
+                                            <li><strong>Số điện thoại (*)</strong>: Bắt buộc, không trùng với tài khoản đã có</li>
+                                            <li><strong>Họ tên (*)</strong>: Bắt buộc</li>
+                                            <li><strong>Email</strong>: Tùy chọn</li>
+                                            <li><strong>Địa chỉ</strong>: Tùy chọn</li>
+                                        </ul>
+                                    </li>
+                                    <li>Nhấn <strong>"Tạo tài khoản"</strong></li>
+                                </ol>
+                        
+                                <div class="alert alert-warning">
+                                    <strong><i class="fas fa-key"></i> Mật khẩu mặc định:</strong> Số điện thoại của khách hàng<br>
+                                    <strong><i class="fas fa-user"></i> Tên đăng nhập:</strong> <code>kh_[số điện thoại]</code> (VD: kh_0912345678)
+                                </div>
+                        
+                                <h6 class="text-danger">Các lỗi thường gặp:</h6>
+                                <table class="table table-sm table-bordered">
+                                    <thead class="table-light">
+                                        <tr><th>Lỗi</th><th>Nguyên nhân</th><th>Cách khắc phục</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code>Số điện thoại đã được sử dụng</code></td>
+                                            <td>Khách đã có tài khoản</td>
+                                            <td>Tìm bằng SĐT và chọn khách thay vì tạo mới</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>Không tìm thấy vai trò Customer</code></td>
+                                            <td>Database chưa có Role "Customer"</td>
+                                            <td>Liên hệ Admin thêm Role Customer vào hệ thống</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>Lỗi khi tạo tài khoản</code></td>
+                                            <td>Lỗi kết nối hoặc validation</td>
+                                            <td>Kiểm tra F12 > Console để xem chi tiết lỗi</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                
+                        <!-- Section 2: Lưu hóa đơn chờ -->
+                        <div class="card mb-3 border-warning">
+                            <div class="card-header bg-warning text-dark">
+                                <h6 class="mb-0"><i class="fas fa-pause-circle"></i> 2. LƯU HÓA ĐƠN CHỜ (PENDING ORDER)</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-info">
+                                    <strong><i class="fas fa-info-circle"></i> Chức năng:</strong> Lưu tạm đơn hàng khi khách chưa thanh toán ngay (VD: khách đi lấy tiền, chờ người nhà...)
+                                </div>
+                        
+                                <div class="alert alert-danger">
+                                    <strong><i class="fas fa-exclamation-triangle"></i> QUAN TRỌNG:</strong> Khi lưu đơn chờ, <strong>TỒN KHO SẼ BỊ TRỪ NGAY</strong> để tránh bán trùng sản phẩm!
+                                </div>
+                        
+                                <h6 class="text-primary">Các bước thực hiện:</h6>
+                                <ol class="mb-3">
+                                    <li>Thêm sản phẩm vào giỏ hàng như bình thường</li>
+                                    <li>Chọn thông tin khách hàng (Khách vãng lai hoặc Khách thành viên)</li>
+                                    <li>Nhấn nút <span class="badge bg-warning text-dark"><i class="fas fa-pause-circle"></i> Lưu giỏ hàng chờ</span></li>
+                                    <li>Xác nhận khi hệ thống hỏi</li>
+                                </ol>
+                        
+                                <h6 class="text-primary">Thanh toán đơn chờ:</h6>
+                                <ol class="mb-3">
+                                    <li>Click vào đơn hàng chờ ở danh sách bên phải</li>
+                                    <li>Xem chi tiết đơn hàng trong popup</li>
+                                    <li>Nhấn <strong>"Thanh toán đơn này"</strong></li>
+                                    <li>Chọn phương thức thanh toán</li>
+                                    <li>Nhấn <strong>"Tạo đơn hàng"</strong> để hoàn tất</li>
+                                </ol>
+                        
+                                <h6 class="text-primary">Hủy đơn chờ (hoàn tồn kho):</h6>
+                                <ol class="mb-3">
+                                    <li>Click vào đơn hàng chờ</li>
+                                    <li>Nhấn <span class="badge bg-danger"><i class="fas fa-times"></i> Hủy đơn (hoàn kho)</span></li>
+                                    <li>Xác nhận hủy - tồn kho sẽ được hoàn lại</li>
+                                </ol>
+                        
+                                <h6 class="text-danger">Các lỗi thường gặp:</h6>
+                                <table class="table table-sm table-bordered">
+                                    <thead class="table-light">
+                                        <tr><th>Lỗi</th><th>Nguyên nhân</th><th>Cách khắc phục</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code>Giỏ hàng trống</code></td>
+                                            <td>Chưa thêm sản phẩm</td>
+                                            <td>Thêm ít nhất 1 sản phẩm vào giỏ</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>Sản phẩm không đủ hàng</code></td>
+                                            <td>Tồn kho không đủ</td>
+                                            <td>Giảm số lượng hoặc chọn sản phẩm khác</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>Không tìm thấy đơn hàng chờ</code></td>
+                                            <td>Đơn đã bị hủy hoặc hoàn thành</td>
+                                            <td>Làm mới danh sách đơn chờ</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Nút "Lưu giỏ hàng chờ" bị mờ</td>
+                                            <td>Giỏ hàng trống</td>
+                                            <td>Thêm sản phẩm vào giỏ</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                
+                        <!-- Section 3: Quy trình bán hàng -->
+                        <div class="card mb-3 border-primary">
+                            <div class="card-header bg-primary text-white">
+                                <h6 class="mb-0"><i class="fas fa-cash-register"></i> 3. QUY TRÌNH BÁN HÀNG TIÊU CHUẨN</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6 class="text-success"><i class="fas fa-bolt"></i> Thanh toán ngay:</h6>
+                                        <ol>
+                                            <li>Tìm và chọn sản phẩm</li>
+                                            <li>Chọn biến thể (size, màu...)</li>
+                                            <li>Nhập số lượng</li>
+                                            <li>Nhấn "Thêm vào giỏ"</li>
+                                            <li>Chọn khách hàng (hoặc Khách vãng lai)</li>
+                                            <li>Nhập mã giảm giá (nếu có)</li>
+                                            <li>Chọn phương thức thanh toán</li>
+                                            <li>Nhấn "Tạo đơn hàng"</li>
+                                            <li>In hóa đơn</li>
+                                        </ol>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6 class="text-warning"><i class="fas fa-clock"></i> Lưu chờ thanh toán sau:</h6>
+                                        <ol>
+                                            <li>Tìm và chọn sản phẩm</li>
+                                            <li>Chọn biến thể, số lượng</li>
+                                            <li>Thêm vào giỏ</li>
+                                            <li>Chọn khách hàng</li>
+                                            <li>Nhấn "Lưu giỏ hàng chờ"</li>
+                                            <li class="text-muted">--- Khi khách quay lại ---</li>
+                                            <li>Click vào đơn chờ</li>
+                                            <li>Nhấn "Thanh toán đơn này"</li>
+                                            <li>Chọn PTTT, nhấn "Tạo đơn hàng"</li>
+                                        </ol>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                
+                        <!-- Section 4: Debug -->
+                        <div class="card border-secondary">
+                            <div class="card-header bg-secondary text-white">
+                                <h6 class="mb-0"><i class="fas fa-bug"></i> 4. GỠ LỖI (DEBUG)</h6>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>Khi gặp lỗi, làm theo các bước sau:</strong></p>
+                                <ol>
+                                    <li>Nhấn <kbd>F12</kbd> để mở Developer Tools</li>
+                                    <li>Chọn tab <strong>Console</strong></li>
+                                    <li>Thực hiện lại thao tác bị lỗi</li>
+                                    <li>Xem thông báo lỗi màu đỏ trong Console</li>
+                                    <li>Chọn tab <strong>Network</strong> và xem các request có trạng thái <span class="badge bg-danger">400</span> hoặc <span class="badge bg-danger">500</span></li>
+                                    <li>Click vào request lỗi → xem tab <strong>Response</strong> để biết chi tiết</li>
+                                </ol>
+                        
+                                <div class="alert alert-secondary">
+                                    <strong>Các API endpoint của POS:</strong><br>
+                                    <code>POST /Sales/QuickCreateCustomer</code> - Tạo tài khoản nhanh<br>
+                                    <code>POST /Sales/CreatePendingOrder</code> - Lưu đơn chờ<br>
+                                    <code>POST /Sales/CompletePendingOrder</code> - Thanh toán đơn chờ<br>
+                                    <code>POST /Sales/CancelPendingOrder</code> - Hủy đơn chờ<br>
+                                    <code>POST /Sales/CreateOrder</code> - Tạo đơn hàng trực tiếp<br>
+                                    <code>GET /Sales/SearchCustomer?phone=xxx</code> - Tìm khách hàng<br>
+                                    <code>GET /Sales/GetPendingOrders</code> - Lấy danh sách đơn chờ
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+<!-- Quick Create Customer Modal -->
+<div class="modal fade" id="quickCreateModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title"><i class="fas fa-user-plus"></i> Tạo tài khoản khách hàng</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Số điện thoại <span class="text-danger">*</span></label>
+                    <input type="tel" id="new-customer-phone" class="form-control" placeholder="VD: 0912345678">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Họ tên <span class="text-danger">*</span></label>
+                    <input type="text" id="new-customer-name" class="form-control" placeholder="Nhập họ tên khách hàng">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Email (tùy chọn)</label>
+                    <input type="email" id="new-customer-email" class="form-control" placeholder="email@example.com">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Địa chỉ (tùy chọn)</label>
+                    <textarea id="new-customer-address" class="form-control" rows="2" placeholder="Nhập địa chỉ"></textarea>
+                </div>
+                <div class="alert alert-info small mb-0">
+                    <i class="fas fa-info-circle"></i> Mật khẩu mặc định sẽ là số điện thoại của khách hàng.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-success" onclick="quickCreateCustomer()">
+                    <i class="fas fa-check"></i> Tạo tài khoản
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Pending Order Detail Modal -->
+<div class="modal fade" id="pendingOrderModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title"><i class="fas fa-clock"></i> Chi tiết đơn hàng chờ: <span id="pending-order-code"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>Khách hàng:</strong> <span id="pending-customer-name"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>SĐT:</strong> <span id="pending-customer-phone"></span>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th>STT</th>
+                                <th>Sản phẩm</th>
+                                <th>Loại</th>
+                                <th>Đơn giá</th>
+                                <th>SL</th>
+                                <th>Tổng</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pending-order-items"></tbody>
+                        <tfoot>
+                            <tr class="table-warning">
+                                <td colspan="5" class="text-end fw-bold">Tổng cộng:</td>
+                                <td class="fw-bold text-danger" id="pending-order-total"></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" onclick="cancelPendingOrder()">
+                    <i class="fas fa-times"></i> Hủy đơn (hoàn kho)
+                </button>
+                <button type="button" class="btn btn-primary" onclick="checkoutPendingOrder()">
+                    <i class="fas fa-cash-register"></i> Thanh toán đơn này
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -275,131 +715,451 @@
     let cart = [];
     let selectedVariants = {};
     let totalAmount = 0;
-  let discountAmount = 0;
+    let discountAmount = 0;
     let customerData = null;
     let selectedProductId = null;
+    let currentPendingOrderId = null;
+    let isEditingPendingOrder = false;
 
-    // Search products
-    async function searchProducts() {
-        const q = document.getElementById('product-search').value.trim();
-      if (!q) {
-       document.getElementById('product-suggestions').style.display = 'none';
-         document.getElementById('products-grid-section').style.display = 'block';
-  return;
-    }
+    // ===== CUSTOMER TYPE HANDLING =====
+    function selectCustomerType(type) {
+        document.getElementById('customer-type').value = type;
+        document.getElementById('btn-guest').classList.toggle('active', type === 'guest');
+        document.getElementById('btn-member').classList.toggle('active', type === 'member');
+        document.getElementById('guest-customer-section').style.display = type === 'guest' ? 'block' : 'none';
+        document.getElementById('member-customer-section').style.display = type === 'member' ? 'block' : 'none';
 
-   try {
-       const res = await fetch(`/Sales/SearchProducts?q=${encodeURIComponent(q)}`);
-       
-   if (!res.ok) {
-       showToast('Lỗi khi tìm kiếm sản phẩm', 'danger');
-      return;
-   }
-
-const products = await res.json();
-
-    if (!Array.isArray(products)) {
-       showToast('Dữ liệu trả về không hợp lệ', 'danger');
-       console.error('Invalid response:', products);
-    return;
-    }
-
-    const box = document.getElementById('product-suggestions');
-     if (products.length === 0) {
-        box.innerHTML = '<div class="list-group-item">Không tìm thấy sản phẩm nào</div>';
-       box.style.display = 'block';
-    document.getElementById('products-grid-section').style.display = 'none';
-      return;
-   }
-
-   box.style.display = 'block';
-    document.getElementById('products-grid-section').style.display = 'none';
-
-     box.innerHTML = products.map(p => `
-        <a href="javascript:void(0)" class="list-group-item list-group-item-action" 
-     onclick="selectProduct('${p.Id}', '${p.Name.replace(/'/g, "\\'")}')">
-  <div class="d-flex justify-content-between">
-          <strong>${p.Name}</strong>
-        <code class="text-muted small">${p.ProductCode}</code>
-   </div>
-    </a>
-  `).join('');
-
-   showToast(`Tìm thấy ${products.length} sản phẩm`, 'info');
-    } catch (error) {
-       console.error('Search error:', error);
-    showToast('Lỗi khi tìm kiếm: ' + error.message, 'danger');
-   }
-    }
-
- // Select product from grid
- function selectProductFromGrid(productId, productName, element) {
-     // Remove active class from all cards
-        document.querySelectorAll('.product-card').forEach(el => {
-   el.classList.remove('active');
-       });
-     // Add active class to clicked card
-    element.classList.add('active');
- selectProduct(productId, productName);
-    }
-
-// Select product and load variants
-    async function selectProduct(productId, productName) {
-        selectedProductId = productId;
-   document.getElementById('product-search').value = productName;
-    document.getElementById('product-suggestions').style.display = 'none';
-   document.getElementById('products-grid-section').style.display = 'none';
-
-        try {
-            const res = await fetch(`/Sales/GetProductVariants?productId=${productId}`);
-   
-       if (!res.ok) {
-        showToast('Lỗi khi lấy biến thể sản phẩm', 'danger');
-    return;
-   }
-            
-     const variants = await res.json();
-
-    if (!Array.isArray(variants) || variants.length === 0) {
-       showToast('Sản phẩm này không có biến thể hoặc hết hàng', 'warning');
-     document.getElementById('variant-select').innerHTML = '<option value="">-- Chọn biến thể --</option>';
-        return;
-    }
-
-            const select = document.getElementById('variant-select');
-     select.innerHTML = '<option value="">-- Chọn biến thể --</option>' + variants.map(v => {
-        const variantDisplay = `${v.length || 'N/A'} - ${v.hardness || 'N/A'} - ${v.color || 'N/A'} (${v.StockQuantity || 0} cái) - ${(v.Price || 0).toLocaleString()}₫`;
-        return `<option value="${v.Id}" data-price="${v.Price}" data-stock="${v.StockQuantity}">
-       ${variantDisplay}
-        </option>`;
-    }).join('');
-
- selectedVariants = {};
-    
-    showToast(`Đã tải ${variants.length} biến thể`, 'info');
-   } catch (error) {
-            console.error('Error:', error);
-     showToast('Lỗi khi tải biến thể sản phẩm', 'danger');
-  }
-    }
-
-    function updateSelectedVariant() {
-     const select = document.getElementById('variant-select');
-   const option = select.options[select.selectedIndex];
-        if (option.value) {
-      selectedVariants[selectedProductId] = {
-     variantId: option.value,
-     price: parseFloat(option.dataset.price) || 0,
- stock: parseInt(option.dataset.stock) || 0
-  };
-  // Cập nhật max cho input số lượng dựa trên tồn kho
-  const qtyInput = document.getElementById('qty-input');
-  qtyInput.max = selectedVariants[selectedProductId].stock;
-  qtyInput.value = 1;
+        if (type === 'guest') {
+            customerData = {
+                id: null,
+                name: 'Khách vãng lai',
+                phone: 'Khách vãng lai',
+                address: 'Bán tại quầy'
+            };
+            document.getElementById('customer-id').value = '';
+        } else {
+            customerData = null;
+            document.getElementById('customer-id').value = '';
+            document.getElementById('customer-name').value = '';
+            document.getElementById('customer-address').value = '';
         }
     }
 
-function increaseQty() {
+    // ===== QUICK CREATE CUSTOMER =====
+    function showQuickCreateModal() {
+        const phoneFromInput = document.getElementById('customer-phone')?.value || '';
+        document.getElementById('new-customer-phone').value = phoneFromInput;
+        document.getElementById('new-customer-name').value = '';
+        document.getElementById('new-customer-email').value = '';
+        document.getElementById('new-customer-address').value = '';
+        new bootstrap.Modal(document.getElementById('quickCreateModal')).show();
+    }
+
+    async function quickCreateCustomer() {
+        const phone = document.getElementById('new-customer-phone').value.trim();
+        const name = document.getElementById('new-customer-name').value.trim();
+        const email = document.getElementById('new-customer-email').value.trim();
+        const address = document.getElementById('new-customer-address').value.trim();
+
+        if (!phone) {
+            showToast('Vui lòng nhập số điện thoại', 'warning');
+            return;
+        }
+        if (!name) {
+            showToast('Vui lòng nhập họ tên', 'warning');
+            return;
+        }
+
+        try {
+            const res = await fetch('/Sales/QuickCreateCustomer', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    phoneNumber: phone,
+                    fullname: name,
+                    email: email || null,
+                    address: address || null
+                })
+            });
+            const result = await res.json();
+
+            if (result.success) {
+                showToast(result.message, 'success');
+                bootstrap.Modal.getInstance(document.getElementById('quickCreateModal')).hide();
+
+                // Auto fill customer info
+                customerData = result.customer;
+                document.getElementById('customer-id').value = result.customer.id;
+                document.getElementById('customer-phone').value = result.customer.phone;
+                document.getElementById('customer-name').value = result.customer.name;
+                document.getElementById('customer-address').value = result.customer.address || '';
+
+                // Switch to member type
+                selectCustomerType('member');
+            } else {
+                showToast(result.message, 'danger');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showToast('Lỗi khi tạo tài khoản: ' + error.message, 'danger');
+        }
+    }
+
+    // ===== PENDING ORDERS =====
+    async function refreshPendingOrders() {
+        try {
+            const res = await fetch('/Sales/GetPendingOrders');
+            const orders = await res.json();
+
+            const container = document.getElementById('pending-orders-list');
+            document.getElementById('pending-count').textContent = orders.length;
+
+            if (orders.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center text-muted py-3" id="no-pending-orders">
+                        <i class="fas fa-inbox fa-2x mb-2"></i>
+                        <div>Không có đơn hàng chờ</div>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = orders.map(o => `
+                <div class="pending-order-card" onclick="loadPendingOrder('${o.id}')">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong class="text-primary">${o.orderCode}</strong>
+                            <div class="small">${o.customerName}</div>
+                            <div class="pending-order-time">${o.createdTime}</div>
+                        </div>
+                        <div class="text-end">
+                            <div class="fw-bold text-danger">${Number(o.totalAmount).toLocaleString()}₫</div>
+                            <span class="badge bg-secondary">${o.itemCount} SP</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            showToast('Đã làm mới danh sách đơn chờ', 'info');
+        } catch (error) {
+            console.error('Error:', error);
+            showToast('Lỗi khi tải đơn hàng chờ', 'danger');
+        }
+    }
+
+    async function saveToPending() {
+        if (cart.length === 0) {
+            showToast('Giỏ hàng trống', 'warning');
+            return;
+        }
+
+        const customerType = document.getElementById('customer-type').value;
+        let customerName = 'Khách vãng lai';
+        let customerId = null;
+        let customerPhone = 'Khách vãng lai';
+        let customerAddress = 'Bán tại quầy';
+
+        if (customerType === 'member' && customerData) {
+            customerId = customerData.id || null;
+            customerName = customerData.name || 'Khách hàng';
+            customerPhone = customerData.phone || '';
+            customerAddress = customerData.address || '';
+        }
+
+        if (!confirm(`Lưu giỏ hàng thành đơn chờ?\n\nKhách: ${customerName}\nSố SP: ${cart.length}\nTổng: ${Number(totalAmount).toLocaleString()}₫\n\n⚠️ Tồn kho sẽ được trừ ngay!`)) {
+            return;
+        }
+
+        try {
+            const res = await fetch('/Sales/CreatePendingOrder', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    customerId: customerId,
+                    customerPhone: customerPhone,
+                    customerName: customerName,
+                    customerAddress: customerAddress,
+                    items: cart.map(c => ({ productDetailId: c.productDetailId, quantity: c.quantity }))
+                })
+            });
+            const result = await res.json();
+
+            if (result.success) {
+                showToast(`Đã lưu đơn chờ: ${result.orderCode}`, 'success');
+                clearCartInternal();
+                refreshPendingOrders();
+            } else {
+                showToast(result.message, 'danger');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showToast('Lỗi khi lưu đơn chờ: ' + error.message, 'danger');
+        }
+    }
+
+    async function loadPendingOrder(orderId) {
+        try {
+            const res = await fetch(`/Sales/GetPendingOrderDetails?orderId=${orderId}`);
+            const result = await res.json();
+
+            if (!result.success) {
+                showToast(result.message, 'danger');
+                return;
+            }
+
+            currentPendingOrderId = orderId;
+
+            // Show modal with order details
+            document.getElementById('pending-order-code').textContent = result.order.orderCode;
+            document.getElementById('pending-customer-name').textContent = result.order.customerName;
+            document.getElementById('pending-customer-phone').textContent = result.order.customerPhone;
+            document.getElementById('pending-order-total').textContent = Number(result.order.totalAmount).toLocaleString() + '₫';
+
+            const tbody = document.getElementById('pending-order-items');
+            tbody.innerHTML = result.items.map((item, idx) => `
+                <tr>
+                    <td>${idx + 1}</td>
+                    <td>${item.productName}</td>
+                    <td><small class="text-muted">${item.variantText}</small></td>
+                    <td>${Number(item.price).toLocaleString()}₫</td>
+                    <td>${item.quantity}</td>
+                    <td class="fw-bold">${Number(item.total).toLocaleString()}₫</td>
+                </tr>
+            `).join('');
+
+            new bootstrap.Modal(document.getElementById('pendingOrderModal')).show();
+        } catch (error) {
+            console.error('Error:', error);
+            showToast('Lỗi khi tải chi tiết đơn chờ', 'danger');
+        }
+    }
+
+    async function cancelPendingOrder() {
+        if (!currentPendingOrderId) return;
+
+        if (!confirm('Bạn có chắc muốn hủy đơn hàng chờ này?\n\n⚠️ Tồn kho sẽ được hoàn lại.')) {
+            return;
+        }
+
+        try {
+            const res = await fetch('/Sales/CancelPendingOrder', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ orderId: currentPendingOrderId })
+            });
+            const result = await res.json();
+
+            if (result.success) {
+                showToast(result.message, 'success');
+                bootstrap.Modal.getInstance(document.getElementById('pendingOrderModal')).hide();
+                currentPendingOrderId = null;
+                refreshPendingOrders();
+            } else {
+                showToast(result.message, 'danger');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showToast('Lỗi khi hủy đơn: ' + error.message, 'danger');
+        }
+    }
+
+    function checkoutPendingOrder() {
+        if (!currentPendingOrderId) return;
+
+        // Close modal
+        bootstrap.Modal.getInstance(document.getElementById('pendingOrderModal')).hide();
+
+        // Set editing mode
+        isEditingPendingOrder = true;
+
+        // Show message
+        showToast('Vui lòng chọn phương thức thanh toán và nhập voucher (nếu có)', 'info');
+
+        // Scroll to payment section
+        document.getElementById('payment-method').scrollIntoView({ behavior: 'smooth' });
+        document.getElementById('payment-method').focus();
+    }
+
+    async function completePendingOrderPayment() {
+        if (!currentPendingOrderId) {
+            showToast('Không tìm thấy đơn hàng chờ', 'danger');
+            return;
+        }
+
+        const paymentMethod = document.getElementById('payment-method').value;
+        if (!paymentMethod) {
+            showToast('Vui lòng chọn phương thức thanh toán', 'warning');
+            document.getElementById('payment-method').focus();
+            return;
+        }
+
+        const customerType = document.getElementById('customer-type').value;
+        let customerId = null;
+        let customerName = 'Khách vãng lai';
+        let customerPhone = 'Khách vãng lai';
+        let customerAddress = 'Bán tại quầy';
+
+        if (customerType === 'member' && customerData) {
+            customerId = customerData.id || null;
+            customerName = customerData.name || 'Khách hàng';
+            customerPhone = customerData.phone || '';
+            customerAddress = customerData.address || '';
+        }
+
+        try {
+            const res = await fetch('/Sales/CompletePendingOrder', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    orderId: currentPendingOrderId,
+                    customerId: customerId,
+                    customerPhone: customerPhone,
+                    customerName: customerName,
+                    customerAddress: customerAddress,
+                    voucherCode: document.getElementById('voucher-code').value.trim(),
+                    paymentMethodId: paymentMethod
+                })
+            });
+            const result = await res.json();
+
+            if (result.success) {
+                showToast('Thanh toán thành công!', 'success');
+                isEditingPendingOrder = false;
+                currentPendingOrderId = null;
+                clearCartInternal();
+                refreshPendingOrders();
+
+                // Redirect to print receipt
+                setTimeout(() => {
+                    window.location.href = `/Sales/PrintReceipt?orderId=${result.orderId}`;
+                }, 1500);
+            } else {
+                showToast(result.message, 'danger');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showToast('Lỗi khi thanh toán: ' + error.message, 'danger');
+        }
+    }
+
+    // ===== SEARCH PRODUCTS =====
+    async function searchProducts() {
+        const q = document.getElementById('product-search').value.trim();
+        if (!q) {
+            document.getElementById('product-suggestions').style.display = 'none';
+            document.getElementById('products-grid-section').style.display = 'block';
+            return;
+        }
+
+        try {
+            const res = await fetch(`/Sales/SearchProducts?q=${encodeURIComponent(q)}`);
+
+            if (!res.ok) {
+                showToast('Lỗi khi tìm kiếm sản phẩm', 'danger');
+                return;
+            }
+
+            const products = await res.json();
+
+            if (!Array.isArray(products)) {
+                showToast('Dữ liệu trả về không hợp lệ', 'danger');
+                console.error('Invalid response:', products);
+                return;
+            }
+
+            const box = document.getElementById('product-suggestions');
+            if (products.length === 0) {
+                box.innerHTML = '<div class="list-group-item text-muted">Không tìm thấy sản phẩm nào</div>';
+                box.style.display = 'block';
+                document.getElementById('products-grid-section').style.display = 'none';
+                return;
+            }
+
+            box.style.display = 'block';
+            document.getElementById('products-grid-section').style.display = 'none';
+
+            box.innerHTML = products.map(p => `
+                <a href="javascript:void(0)" class="list-group-item list-group-item-action" 
+                    onclick="selectProduct('${p.id}', '${(p.name || '').replace(/'/g, "\\'")}')">
+                    <div class="d-flex justify-content-between">
+                        <strong>${p.name}</strong>
+                        <code class="text-muted small">${p.productCode || ''}</code>
+                    </div>
+                </a>
+            `).join('');
+
+            showToast(`Tìm thấy ${products.length} sản phẩm`, 'info');
+        } catch (error) {
+            console.error('Search error:', error);
+            showToast('Lỗi khi tìm kiếm: ' + error.message, 'danger');
+        }
+    }
+
+    // Select product from grid
+    function selectProductFromGrid(productId, productName, element) {
+        // Remove active class from all cards
+        document.querySelectorAll('.product-card').forEach(el => {
+            el.classList.remove('active');
+        });
+        // Add active class to clicked card
+        element.classList.add('active');
+        selectProduct(productId, productName);
+    }
+
+    // Select product and load variants
+    async function selectProduct(productId, productName) {
+        selectedProductId = productId;
+        document.getElementById('product-search').value = productName;
+        document.getElementById('product-suggestions').style.display = 'none';
+        document.getElementById('products-grid-section').style.display = 'none';
+
+        try {
+            const res = await fetch(`/Sales/GetProductVariants?productId=${productId}`);
+
+            if (!res.ok) {
+                showToast('Lỗi khi lấy biến thể sản phẩm', 'danger');
+                return;
+            }
+
+            const variants = await res.json();
+
+            if (!Array.isArray(variants) || variants.length === 0) {
+                showToast('Sản phẩm này không có biến thể hoặc hết hàng', 'warning');
+                document.getElementById('variant-select').innerHTML = '<option value="">-- Không có biến thể --</option>';
+                return;
+            }
+
+            const select = document.getElementById('variant-select');
+            select.innerHTML = '<option value="">-- Chọn biến thể --</option>' + variants.map(v => {
+                const variantDisplay = `${v.length || 'N/A'} - ${v.hardness || 'N/A'} - ${v.color || 'N/A'} (Kho: ${v.stockQuantity || 0}) - ${(v.price || 0).toLocaleString()}₫`;
+                return `<option value="${v.id}" data-price="${v.price}" data-stock="${v.stockQuantity}">${variantDisplay}</option>`;
+            }).join('');
+
+            selectedVariants = {};
+
+            showToast(`Đã tải ${variants.length} biến thể`, 'info');
+        } catch (error) {
+            console.error('Error:', error);
+            showToast('Lỗi khi tải biến thể sản phẩm', 'danger');
+        }
+    }
+
+    function updateSelectedVariant() {
+        const select = document.getElementById('variant-select');
+        const option = select.options[select.selectedIndex];
+        if (option.value) {
+            selectedVariants[selectedProductId] = {
+                variantId: option.value,
+                price: parseFloat(option.dataset.price) || 0,
+                stock: parseInt(option.dataset.stock) || 0
+            };
+            // Cập nhật max cho input số lượng dựa trên tồn kho
+            const qtyInput = document.getElementById('qty-input');
+            qtyInput.max = selectedVariants[selectedProductId].stock;
+            qtyInput.value = 1;
+        }
+    }
+
+    function increaseQty() {
         const qty = document.getElementById('qty-input');
         const maxStock = parseInt(qty.max) || 999999;
         const newQty = parseInt(qty.value || 1) + 1;
@@ -415,12 +1175,12 @@ function increaseQty() {
         qty.value = Math.max(1, parseInt(qty.value || 1) - 1);
     }
 
-  // Add to cart
+    // Add to cart
     function addToCart() {
-  const select = document.getElementById('variant-select');
-   if (!select.value) {
-       showToast('Vui lòng chọn biến thể sản phẩm', 'warning');
-        return;
+        const select = document.getElementById('variant-select');
+        if (!select.value) {
+            showToast('Vui lòng chọn biến thể sản phẩm', 'warning');
+            return;
         }
 
         const qty = parseInt(document.getElementById('qty-input').value) || 1;
@@ -449,207 +1209,298 @@ function increaseQty() {
             return;
         }
 
-  const item = {
-     productDetailId: select.value,
+        const item = {
+            productDetailId: select.value,
             productName: productName,
-     variantText: option.text,
-     price: parseFloat(option.dataset.price),
-      quantity: qty,
-      maxStock: maxStock
-   };
+            variantText: option.text,
+            price: parseFloat(option.dataset.price),
+            quantity: qty,
+            maxStock: maxStock
+        };
 
         cart.push(item);
-    updateCart();
-   clearProductForm();
-      showToast(`Đã thêm ${item.productName}`, 'success');
+        updateCart();
+        clearProductForm();
+        showToast(`Đã thêm ${item.productName}`, 'success');
     }
 
     function removeFromCart(index) {
-   cart.splice(index, 1);
-     updateCart();
-  }
+        cart.splice(index, 1);
+        updateCart();
+    }
 
     function updateCart() {
-  const tbody = document.getElementById('cart-items');
+        const tbody = document.getElementById('cart-items');
+        const btnSavePending = document.getElementById('btn-save-pending');
+        
         if (cart.length === 0) {
- tbody.innerHTML = '<tr id="empty-cart"><td colspan="7" class="text-center py-3 text-muted">Giỏ hàng trống</td></tr>';
-      document.getElementById('cart-count').textContent = '0';
-          totalAmount = 0;
-        updateSummary();
-       return;
+            tbody.innerHTML = '<tr id="empty-cart"><td colspan="7" class="text-center py-3 text-muted">Giỏ hàng trống</td></tr>';
+            document.getElementById('cart-count').textContent = '0';
+            totalAmount = 0;
+            btnSavePending.disabled = true;
+            updateSummary();
+            return;
         }
 
+        btnSavePending.disabled = false;
         document.getElementById('empty-cart')?.remove();
-   totalAmount = 0;
+        totalAmount = 0;
         tbody.innerHTML = cart.map((item, idx) => {
             const itemTotal = item.price * item.quantity;
-   totalAmount += itemTotal;
-    return `
-         <tr>
-    <td>${idx + 1}</td>
-   <td>${item.productName}</td>
-          <td><small>${item.variantText}</small></td>
- <td>${Number(item.price).toLocaleString()}₫</td>
-    <td><input type="number" class="form-control form-control-sm" style="width: 60px" value="${item.quantity}" 
-onchange="updateItemQty(${idx}, this.value)"></td>
-    <td><strong>${Number(itemTotal).toLocaleString()}₫</strong></td>
-            <td>
-          <button class="btn btn-sm btn-danger" onclick="removeFromCart(${idx})">
-   <i class="bi bi-trash"></i>
-        </button>
-         </td>
-         </tr>
-    `;
-   }).join('');
+            totalAmount += itemTotal;
+            return `
+                <tr>
+                    <td>${idx + 1}</td>
+                    <td>${item.productName}</td>
+                    <td><small class="text-muted">${item.variantText}</small></td>
+                    <td>${Number(item.price).toLocaleString()}₫</td>
+                    <td>
+                        <input type="number" class="form-control form-control-sm text-center" style="width: 70px" 
+                            value="${item.quantity}" min="1" max="${item.maxStock}"
+                            onchange="updateItemQty(${idx}, this.value)">
+                    </td>
+                    <td><strong class="text-primary">${Number(itemTotal).toLocaleString()}₫</strong></td>
+                    <td>
+                        <button class="btn btn-sm btn-danger" onclick="removeFromCart(${idx})" title="Xóa">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
 
-document.getElementById('cart-count').textContent = cart.length;
-   updateSummary();
+        document.getElementById('cart-count').textContent = cart.length;
+        updateSummary();
     }
 
     function updateItemQty(index, newQty) {
- newQty = Math.max(1, parseInt(newQty) || 1);
+        newQty = Math.max(1, parseInt(newQty) || 1);
         const maxStock = cart[index].maxStock || 999999;
         if (newQty > maxStock) {
             showToast(`Số lượng tối đa là ${maxStock}`, 'warning');
             newQty = maxStock;
         }
         cart[index].quantity = newQty;
-   updateCart();
+        updateCart();
     }
 
     function clearProductForm() {
- document.getElementById('product-search').value = '';
+        document.getElementById('product-search').value = '';
         document.getElementById('qty-input').value = '1';
+        document.getElementById('qty-input').max = '';
         document.getElementById('variant-select').innerHTML = '<option value="">-- Chọn biến thể --</option>';
         document.getElementById('products-grid-section').style.display = 'block';
         document.getElementById('product-suggestions').style.display = 'none';
-     selectedProductId = null;
-  }
+        // Remove active from product cards
+        document.querySelectorAll('.product-card').forEach(el => el.classList.remove('active'));
+        selectedProductId = null;
+    }
 
     // Customer search
     async function searchCustomer() {
-    const phone = document.getElementById('customer-phone').value;
-     if (!phone) {
-   showToast('Nhập số điện thoại', 'warning');
-  return;
+        const phone = document.getElementById('customer-phone').value.trim();
+        if (!phone) {
+            showToast('Vui lòng nhập số điện thoại', 'warning');
+            return;
         }
 
-      const res = await fetch(`/Sales/SearchCustomer?phone=${encodeURIComponent(phone)}`);
-        const customer = await res.json();
+        try {
+            const res = await fetch(`/Sales/SearchCustomer?phone=${encodeURIComponent(phone)}`);
+            const customer = await res.json();
 
-      if (customer) {
-   customerData = customer;
-   document.getElementById('customer-name').value = customer.name || '';
-document.getElementById('customer-address').value = customer.address || '';
- } else {
-    showToast('Khách hàng không tồn tại', 'danger');
-   document.getElementById('customer-name').value = '';
-   document.getElementById('customer-address').value = '';
-    }
+            if (customer && customer.id) {
+                customerData = customer;
+                document.getElementById('customer-id').value = customer.id;
+                document.getElementById('customer-name').value = customer.name || '';
+                document.getElementById('customer-address').value = customer.address || '';
+                showToast(`Tìm thấy khách hàng: ${customer.name}`, 'success');
+            } else {
+                customerData = null;
+                document.getElementById('customer-id').value = '';
+                document.getElementById('customer-name').value = '';
+                document.getElementById('customer-address').value = '';
+                showToast('Không tìm thấy khách hàng. Bạn có thể tạo tài khoản mới hoặc chọn Khách vãng lai.', 'warning');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showToast('Lỗi khi tìm khách hàng', 'danger');
+        }
     }
 
     // Apply voucher
-async function applyVoucher() {
-      const code = document.getElementById('voucher-code').value;
-  if (!code || totalAmount === 0) {
-       showToast('Nhập mã và có sản phẩm trong giỏ', 'warning');
-    return;
-   }
+    async function applyVoucher() {
+        const code = document.getElementById('voucher-code').value.trim();
+        if (!code) {
+            showToast('Vui lòng nhập mã giảm giá', 'warning');
+            return;
+        }
+        if (totalAmount === 0 && !isEditingPendingOrder) {
+            showToast('Vui lòng thêm sản phẩm vào giỏ hàng trước', 'warning');
+            return;
+        }
 
-     const res = await fetch('/Sales/ValidateVoucher', {
-            method: 'POST',
-       headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ voucherCode: code, totalAmount: totalAmount })
-      });
-   const result = await res.json();
+        try {
+            const res = await fetch('/Sales/ValidateVoucher', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ voucherCode: code, totalAmount: totalAmount })
+            });
+            const result = await res.json();
 
-        if (result.success) {
-   discountAmount = result.discount;
-    document.getElementById('voucher-message').textContent = `Giảm giá: ${Number(result.discount).toLocaleString()}₫`;
-    updateSummary();
-    showToast('Áp dụng mã thành công', 'success');
-        } else {
-         document.getElementById('voucher-message').textContent = result.message;
-       showToast(result.message, 'danger');
-}
+            if (result.success) {
+                discountAmount = result.discount;
+                document.getElementById('voucher-message').innerHTML = `<span class="text-success"><i class="fas fa-check-circle"></i> Giảm: ${Number(result.discount).toLocaleString()}₫</span>`;
+                updateSummary();
+                showToast('Áp dụng mã giảm giá thành công', 'success');
+            } else {
+                discountAmount = 0;
+                document.getElementById('voucher-message').innerHTML = `<span class="text-danger"><i class="fas fa-times-circle"></i> ${result.message}</span>`;
+                updateSummary();
+                showToast(result.message, 'danger');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showToast('Lỗi khi áp dụng mã giảm giá', 'danger');
+        }
     }
 
     function updateSummary() {
         const total = totalAmount;
         const discount = discountAmount;
-        const final = total - discount;
+        const final = Math.max(0, total - discount);
 
         document.getElementById('total-amount').textContent = Number(total).toLocaleString() + '₫';
-        document.getElementById('discount-amount').textContent = Number(discount).toLocaleString() + '₫';
+        document.getElementById('discount-amount').textContent = '-' + Number(discount).toLocaleString() + '₫';
         document.getElementById('final-amount').textContent = Number(final).toLocaleString() + '₫';
     }
 
     // Create order
     async function createOrder() {
-        if (!customerData?.Id) {
-          showToast('Chọn khách hàng', 'warning');
-         return;
+        // If editing pending order, use completePendingOrderPayment
+        if (isEditingPendingOrder && currentPendingOrderId) {
+            await completePendingOrderPayment();
+            return;
+        }
+
+        // Validate customer
+        const customerType = document.getElementById('customer-type').value;
+        if (customerType === 'member' && (!customerData || !customerData.id)) {
+            showToast('Vui lòng tìm và chọn khách hàng hoặc chọn "Khách vãng lai"', 'warning');
+            document.getElementById('customer-phone').focus();
+            return;
         }
         if (cart.length === 0) {
-   showToast('Giỏ hàng trống', 'warning');
-        return;
-   }
-    if (!document.getElementById('payment-method').value) {
-    showToast('Chọn phương thức thanh toán', 'warning');
-       return;
+            showToast('Giỏ hàng trống', 'warning');
+            return;
+        }
+        const paymentMethod = document.getElementById('payment-method').value;
+        if (!paymentMethod) {
+            showToast('Vui lòng chọn phương thức thanh toán', 'warning');
+            document.getElementById('payment-method').focus();
+            return;
         }
 
-      const payload = {
-            customerPhone: document.getElementById('customer-phone').value,
-     shippingAddress: document.getElementById('customer-address').value,
-     voucherCode: document.getElementById('voucher-code').value,
-     paymentMethodId: document.getElementById('payment-method').value,
-   note: document.getElementById('order-note').value,
- items: cart.map(c => ({ productDetailId: c.productDetailId, quantity: c.quantity }))
+        // Confirm
+        const finalAmt = totalAmount - discountAmount;
+        const custName = customerData?.name || 'Khách vãng lai';
+        if (!confirm(`Xác nhận tạo đơn hàng?\n\nThành tiền: ${Number(finalAmt).toLocaleString()}₫\nKhách hàng: ${custName}`)) {
+            return;
+        }
+
+        const payload = {
+            customerPhone: customerType === 'guest' ? 'Khách vãng lai' : document.getElementById('customer-phone').value.trim(),
+            shippingAddress: customerType === 'guest' ? 'Bán tại quầy' : document.getElementById('customer-address').value,
+            voucherCode: document.getElementById('voucher-code').value.trim(),
+            paymentMethodId: paymentMethod,
+            note: document.getElementById('order-note').value,
+            items: cart.map(c => ({ productDetailId: c.productDetailId, quantity: c.quantity }))
         };
 
-        const res = await fetch('/Sales/CreateOrder', {
-    method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-     body: JSON.stringify(payload)
-        });
-   const result = await res.json();
+        try {
+            const res = await fetch('/Sales/CreateOrder', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const result = await res.json();
 
- if (result.success) {
-        showToast('Tạo đơn hàng thành công!', 'success');
-    setTimeout(() => {
-         window.location.href = `/Sales/PrintReceipt?orderId=${result.orderId}`;
-     }, 1500);
-        } else {
-    showToast(result.message, 'danger');
+            if (result.success) {
+                showToast('Tạo đơn hàng thành công!', 'success');
+                // Reset form
+                clearCartInternal();
+                
+                // Redirect to print receipt after 1.5s
+                setTimeout(() => {
+                    window.location.href = `/Sales/PrintReceipt?orderId=${result.orderId}`;
+                }, 1500);
+            } else {
+                showToast(result.message || 'Lỗi khi tạo đơn hàng', 'danger');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showToast('Lỗi khi tạo đơn hàng: ' + error.message, 'danger');
         }
+    }
+
+    function clearCartInternal() {
+        cart = [];
+        customerData = null;
+        discountAmount = 0;
+        totalAmount = 0;
+        isEditingPendingOrder = false;
+        currentPendingOrderId = null;
+        updateCart();
+        document.getElementById('customer-phone').value = '';
+        document.getElementById('customer-name').value = '';
+        document.getElementById('customer-address').value = '';
+        document.getElementById('customer-id').value = '';
+        document.getElementById('voucher-code').value = '';
+        document.getElementById('voucher-message').innerHTML = '';
+        document.getElementById('order-note').value = '';
+        document.getElementById('payment-method').selectedIndex = 0;
+        selectCustomerType('member');
     }
 
     function clearCart() {
-        if (confirm('Bạn có chắc muốn xóa giỏ hàng?')) {
-    cart = [];
-         totalAmount = 0;
-       discountAmount = 0;
-      updateCart();
-  }
+        if (cart.length === 0) {
+            showToast('Giỏ hàng đang trống', 'info');
+            return;
+        }
+        if (confirm('Bạn có chắc muốn xóa toàn bộ giỏ hàng?')) {
+            cart = [];
+            totalAmount = 0;
+            discountAmount = 0;
+            document.getElementById('voucher-code').value = '';
+            document.getElementById('voucher-message').innerHTML = '';
+            updateCart();
+            showToast('Đã xóa giỏ hàng', 'success');
+        }
     }
 
     function showToast(message, type = 'info') {
-   const toast = document.getElementById('toast');
+        const toast = document.getElementById('toast');
         const body = document.getElementById('toast-body');
-     body.textContent = message;
- toast.className = `toast align-items-center text-white border-0 bg-${type}`;
-        const bsToast = new bootstrap.Toast(toast);
+        body.textContent = message;
+        toast.className = `toast align-items-center text-white border-0 bg-${type}`;
+        const bsToast = new bootstrap.Toast(toast, { delay: 3000 });
         bsToast.show();
     }
 
-    // Auto-search on input
+    // Auto-search on Enter key
     document.getElementById('product-search')?.addEventListener('keyup', (e) => {
-  if (e.key === 'Enter') searchProducts();
+        if (e.key === 'Enter') searchProducts();
     });
 
     document.getElementById('customer-phone')?.addEventListener('keyup', (e) => {
-  if (e.key === 'Enter') searchCustomer();
+        if (e.key === 'Enter') searchCustomer();
     });
+
+    document.getElementById('voucher-code')?.addEventListener('keyup', (e) => {
+        if (e.key === 'Enter') applyVoucher();
+    });
+
+    // Initialize
+    updateCart();
+    selectCustomerType('member'); // Default to member customer
 </script>
 }

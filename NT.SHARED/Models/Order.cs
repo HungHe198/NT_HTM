@@ -9,7 +9,7 @@ namespace NT.SHARED.Models
     {
         public Guid Id { get; set; } = Guid.NewGuid();
         [Display(Name = "Tên khách hàng")]
-        public Guid CustomerId { get; set; }
+        public Guid? CustomerId { get; set; } // Nullable để hỗ trợ khách vãng lai tại POS
         [Display(Name = "mã giảm giá")]
         public Guid? VoucherId { get; set; }
         [Display(Name = "Phương thức thanh toán")]
@@ -42,9 +42,9 @@ namespace NT.SHARED.Models
         public string? Note { get; set; }
 
         public Order() { }
-        public static Order Create(Guid customerId, Guid paymentMethodId, decimal totalAmount, decimal finalAmount, string phoneNumber, string shippingAddress)
+        public static Order Create(Guid? customerId, Guid paymentMethodId, decimal totalAmount, decimal finalAmount, string phoneNumber, string shippingAddress)
         {
-            if (customerId == Guid.Empty) throw new ArgumentException("Vui lòng đăng nhập lại để thực hiện chứcc nãng này (104)!");
+            // CustomerId có thể null cho khách vãng lai tại POS
             if (paymentMethodId == Guid.Empty) throw new ArgumentException("Vui lòng chọn phương thức thanh toán!");
 
             if (string.IsNullOrWhiteSpace(phoneNumber)) throw new ArgumentException("Vui lòng nhập số điện thoại!");
