@@ -2,15 +2,20 @@
 
 <h2>Sửa danh mục sản phẩm</h2>
 <form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="ProductId" />
+    <input type="hidden" asp-for="CategoryId" />
     <div class="form-group">
-        <label asp-for="ProductId">Mã sản phẩm</label>
-        <input asp-for="ProductId" class="form-control" readonly />
+        <label>Sản phẩm</label>
+        <p class="form-control-plaintext">@Model.Product?.Name ?? @Model.ProductId.ToString()</p>
     </div>
     <div class="form-group">
-        <label asp-for="CategoryId">Mã danh mục</label>
-        <input asp-for="CategoryId" class="form-control" readonly />
+        <label>Danh mục</label>
+        <p class="form-control-plaintext">@Model.Category?.Name ?? @Model.CategoryId.ToString()</p>
     </div>
     <button type="submit" class="btn btn-primary">Lưu</button>
     <a asp-action="Index" class="btn btn-secondary">Hủy</a>
 </form>
 
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
