@@ -48,7 +48,8 @@
    <thead>
      <tr>
      <th>Tên sản phẩm</th>
-         <th>Thuộc tính</th>
+         <th>Mã SP</th>
+        <th>Thuộc tính</th>
          <th class="text-end">Đơn giá</th>
           <th class="text-center">SL</th>
      <th class="text-end">Tạm tính</th>
@@ -60,6 +61,7 @@
            dynamic it = item;
       <tr>
         <td class="product-name">@it.Name</td>
+        <td class="text-nowrap"><code class="text-muted">@it.ProductCode</code></td>
   <td><span class="badge bg-light text-dark">Dài: @it.Length</span> <span class="badge bg-light text-dark">Cứng: @it.Hardness</span></td>
    <td class="text-end">@string.Format("{0:#,##0}", it.Price)₫</td>
    <td class="text-center"><span class="qty-badge">@it.Quantity</span></td>

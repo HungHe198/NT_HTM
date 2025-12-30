@@ -77,6 +77,18 @@
        <div class="fw-semibold">@Model.ShippingAddress</div>
             </div>
    </div>
+           @* Voucher code display *@
+          @if (Model.Voucher != null || Model.VoucherId.HasValue)
+          {
+              <div class="row mt-3">
+                  <div class="col-12">
+                      <label class="text-muted small">Mã giảm giá</label>
+                      <div class="fw-semibold">
+                          @((Model.Voucher != null) ? Model.Voucher.Code : "-")
+                      </div>
+                  </div>
+              </div>
+          }
      </div>
     </div>
 
@@ -110,7 +122,12 @@
         @foreach (var d in details)
   {
         <tr>
-      <td class="fw-semibold">@(d.NameAtOrder ?? d.ProductDetail?.Product?.Name ?? "N/A")</td>
+      <td class="fw-semibold">@(d.NameAtOrder ?? d.ProductDetail?.Product?.Name ?? "N/A")
+          @if (!string.IsNullOrWhiteSpace(d.ProductCodeAtOrder ?? d.ProductDetail?.Product?.ProductCode))
+          {
+              <div><small class="text-muted">Mã: <code>@(d.ProductCodeAtOrder ?? d.ProductDetail?.Product?.ProductCode)</code></small></div>
+          }
+      </td>
         <td>
      <small class="text-muted">
                 @if (!string.IsNullOrWhiteSpace(d.LengthAtOrder ?? d.ProductDetail?.Length?.Name))

@@ -464,18 +464,7 @@
                             }
                         </select>
                     </div>
-                    <div class="col-6 col-md-2">
-                        <label for="categoryId" class="filter-label">
-                            <i class="fas fa-list text-muted"></i> Danh mục
-                        </label>
-                        <select name="categoryId" id="categoryId" class="form-select filter-input">
-                            <option value="">-- Tất cả --</option>
-                            @foreach (var gid in categoryOptions)
-                            {
-                                <option value="@gid" selected="@(categoryVal == gid.ToString())">@gid</option>
-                            }
-                        </select>
-                    </div>
+                  
                     <div class="col-6 col-md-2">
                         <label for="minPrice" class="filter-label">
                             <i class="fas fa-dollar-sign text-muted"></i> Giá từ

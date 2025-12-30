@@ -64,7 +64,13 @@
                                     {
                                         <tr>
                                             <td>@index</td>
-                                            <td><strong>@(detail.NameAtOrder ?? "N/A")</strong></td>
+                                            <td>
+                                                <strong>@(detail.NameAtOrder ?? "N/A")</strong>
+                                                @if(!string.IsNullOrWhiteSpace(detail.ProductCodeAtOrder))
+                                                {
+                                                    <div><small class="text-muted">Mã: <code>@detail.ProductCodeAtOrder</code></small></div>
+                                                }
+                                            </td>
                                             <td>
                                                 <small class="text-muted">
                                                     @{

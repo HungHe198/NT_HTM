@@ -220,7 +220,14 @@ data-bs-toggle="modal" data-bs-target="#detailModal-@d.Id"
                 <tr><td class="text-muted">Giá bán</td><td class="fw-semibold text-danger">@d.Price.ToString("#,##0")₫</td></tr>
           <tr><td class="text-muted">Tồn kho</td><td class="fw-semibold">@d.StockQuantity</td></tr>
    <tr><td class="text-muted">Đã bán</td><td class="fw-semibold">@d.SoldQuantity</td></tr>
-                 <tr><td class="text-muted">Trạng thái</td><td><span class="badge @(d.IsActive ? "bg-success" : "bg-secondary")">@(d.IsActive ? "Kích hoạt" : "Vô hiệu")</span></td></tr>
+                <tr>
+                    <td class="text-muted">Trạng thái</td>
+                    <td>
+                        <span class="badge @(d.StockQuantity > 0 ? "bg-success" : "bg-danger")">
+                            @(d.StockQuantity > 0 ? "Còn hàng" : "Hết hàng")
+                        </span>
+                    </td>
+                </tr>
    </table>
            </div>
             <div class="col-md-6">
