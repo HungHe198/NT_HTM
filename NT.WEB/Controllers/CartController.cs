@@ -73,6 +73,7 @@ namespace NT.WEB.Controllers
                     items.Add(new CartItemDto
                     {
                         ProductDetailId = ci.ProductDetailId,
+                        ProductCode = pd.Product?.ProductCode,
                         ProductName = pd.Product?.Name ?? "Sản phẩm",
                         Thumbnail = pd.Product?.Thumbnail,
                         LengthName = pd.Length?.Name,
@@ -278,6 +279,7 @@ namespace NT.WEB.Controllers
                     items.Add(new CartItemDto
                     {
                         ProductDetailId = ci.ProductDetailId,
+                        ProductCode = pd.Product?.ProductCode,
                         ProductName = pd.Product?.Name ?? "Sản phẩm",
                         Thumbnail = pd.Product?.Thumbnail,
                         LengthName = pd.Length?.Name,
@@ -308,6 +310,25 @@ namespace NT.WEB.Controllers
         }
 
         public IActionResult Create() => View();
+
+        // Create a new empty cart for the current customer (new invoice)
+        [HttpPost]
+        public async Task<IActionResult> NewCart()
+        {
+            var userIdClaim = User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrWhiteSpace(userIdClaim)) return Forbid();
+            if (!Guid.TryParse(userIdClaim, out var userId)) return Forbid();
+
+            var customers = await _customerService.FindAsync(c => c.UserId == userId);
+            var customer = customers?.FirstOrDefault();
+            if (customer == null) return Forbid();
+
+            var newCart = Cart.Create(customer.Id);
+            await _service.AddAsync(newCart);
+            await _service.SaveChangesAsync();
+
+            return Redirect($"/CartDetail?cartId={newCart.Id}");
+        }
 
         [HttpPost]
         [ValidateAntiForgeryToken]

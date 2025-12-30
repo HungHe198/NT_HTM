@@ -30,13 +30,27 @@ namespace NT.WEB.Controllers
 
         
         [Authorize(Roles = "Admin,Employee")]
-        public async Task<IActionResult> Index(string? status, string? q)
+        public async Task<IActionResult> Index(string? status, string? q, string? type, DateTime? fromDate, DateTime? toDate)
         {
             // Include Customer and nested User so that the view can show customer name
             var orders = await _orderRepo.FindAsync(o => true,
                                                     o => o.Customer!,
                                                     o => o.Customer!.User!);
             var list = orders ?? Array.Empty<Order>();
+            // Support splitting between POS (bán tại quầy) and Online orders
+            // POS orders are created by SalesController and contain notes like "Bán hàng tại quầy" or "[POS Pending]"
+            if (!string.IsNullOrWhiteSpace(type))
+            {
+                var t = type.Trim().ToLowerInvariant();
+                if (t == "pos")
+                {
+                    list = list.Where(o => !string.IsNullOrWhiteSpace(o.Note) && (o.Note.Contains("Bán hàng tại quầy") || o.Note.Contains("[POS Pending]"))).ToList();
+                }
+                else if (t == "online")
+                {
+                    list = list.Where(o => string.IsNullOrWhiteSpace(o.Note) || (!o.Note.Contains("Bán hàng tại quầy") && !o.Note.Contains("[POS Pending]"))).ToList();
+                }
+            }
             if (!string.IsNullOrWhiteSpace(status))
             {
                 list = list.Where(o => string.Equals(o.Status, status, StringComparison.Ordinal)).ToList();
@@ -50,8 +64,66 @@ namespace NT.WEB.Controllers
                     (!string.IsNullOrWhiteSpace(o.Customer?.User?.PhoneNumber) && o.Customer!.User!.PhoneNumber!.ToLowerInvariant().Contains(query))
                 ).ToList();
             }
+            ViewBag.FilterType = type;
             ViewBag.FilterStatus = status;
             ViewBag.Query = q;
+            ViewBag.FromDate = fromDate;
+            ViewBag.ToDate = toDate;
+
+            // Apply date filter (user picks local dates in GMT+7)
+            if (fromDate.HasValue || toDate.HasValue)
+            {
+                try
+                {
+                    var tz = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+                    DateTime? utcFrom = null, utcTo = null;
+                    if (fromDate.HasValue)
+                    {
+                        var localStart = fromDate.Value.Date; // 00:00 local
+                        utcFrom = TimeZoneInfo.ConvertTimeToUtc(localStart, tz);
+                    }
+                    if (toDate.HasValue)
+                    {
+                        var localEnd = toDate.Value.Date.AddDays(1); // exclusive upper bound
+                        utcTo = TimeZoneInfo.ConvertTimeToUtc(localEnd, tz);
+                    }
+
+                    if (utcFrom.HasValue)
+                    {
+                        list = list.Where(o => o.CreatedTime >= utcFrom.Value).ToList();
+                    }
+                    if (utcTo.HasValue)
+                    {
+                        list = list.Where(o => o.CreatedTime < utcTo.Value).ToList();
+                    }
+                }
+                catch
+                {
+                    // ignore timezone conversion errors
+                }
+            }
+            // Nếu một số đơn có phone nhưng không tham chiếu Customer, thử map bằng phone để hiển thị tên khách
+            try
+            {
+                var customers = await _customerService.GetAllAsyncWithUser();
+                var phoneMap = (customers ?? Array.Empty<NT.SHARED.Models.Customer>())
+                    .Where(c => c.User?.PhoneNumber != null)
+                    .ToDictionary(c => NormalizePhone(c.User!.PhoneNumber!), c => c);
+
+                foreach (var o in list)
+                {
+                    if ((o.Customer == null || o.CustomerId == null || o.CustomerId == Guid.Empty) && !string.IsNullOrWhiteSpace(o.PhoneNumber))
+                    {
+                        var p = NormalizePhone(o.PhoneNumber);
+                        if (phoneMap.TryGetValue(p, out var found))
+                        {
+                            o.Customer = found;
+                        }
+                    }
+                }
+            }
+            catch { /* ignore mapping errors */ }
+
             return View(list);
         }
 
@@ -84,8 +156,20 @@ namespace NT.WEB.Controllers
             var orders = await _orderRepo.FindAsync(o => o.Id == id);
             var order = orders?.FirstOrDefault();
             if (order == null) return NotFound();
+            // If this order was created by POS flow, show POS invoice view instead of online Review
+            var note = order.Note ?? string.Empty;
+            if (note.IndexOf("POS", StringComparison.OrdinalIgnoreCase) >= 0 || note.IndexOf("Bán hàng tại quầy", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return RedirectToAction("PrintReceipt", "Sales", new { orderId = id });
+            }
             var details = await _orderDetailRepo.FindAsync(d => d.OrderId == id);
             ViewBag.Details = details ?? Array.Empty<OrderDetail>();
+            // Load Voucher info so view can display voucher code
+            if (order.VoucherId.HasValue)
+            {
+                var vouchers = await _voucherRepo.FindAsync(v => v.Id == order.VoucherId.Value);
+                order.Voucher = vouchers?.FirstOrDefault();
+            }
             // Map status code to localized display text for the Review page
             var st = order.Status ?? "0";
             string statusText = st switch
@@ -208,6 +292,15 @@ namespace NT.WEB.Controllers
         {
             var userIdClaim = User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             return Guid.TryParse(userIdClaim, out var userId) ? userId : Guid.Empty;
+        }
+
+        private static string NormalizePhone(string phone)
+        {
+            if (string.IsNullOrWhiteSpace(phone)) return string.Empty;
+            var digits = System.Text.RegularExpressions.Regex.Replace(phone, "\\D", "");
+            if (digits.StartsWith("84") && digits.Length == 11)
+                digits = "0" + digits.Substring(2);
+            return digits;
         }
 
         // Cancel order with note (admin/employee/customer). Note is required on cancel.

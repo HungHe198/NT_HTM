@@ -8,6 +8,12 @@
 <h1>Tạo chi tiết sản phẩm</h1>
 
 <form asp-action="CreateDetail" method="post" enctype="multipart/form-data">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="All" class="text-danger mb-3"></div>
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
     <input type="hidden" name="productId" value="@productId" />
 
     <div class="form-group">

@@ -1,8 +1,11 @@
+@using System
+@using System.Linq
+@using System.Collections.Generic
 @{
     ViewData["Title"] = "Bán hàng tại quầy (POS)";
-    var products = ViewBag.Products as List<NT.SHARED.Models.Product> ?? new();
-    var paymentMethods = ViewBag.PaymentMethods as List<NT.SHARED.Models.PaymentMethod> ?? new();
-    var pendingOrders = ViewBag.PendingOrders as List<NT.SHARED.Models.Order> ?? new();
+    var products = ViewBag.Products as List<NT.SHARED.Models.Product> ?? new List<NT.SHARED.Models.Product>();
+    var paymentMethods = ViewBag.PaymentMethods as List<NT.SHARED.Models.PaymentMethod> ?? new List<NT.SHARED.Models.PaymentMethod>();
+    var pendingOrders = ViewBag.PendingOrders as List<NT.SHARED.Models.Order> ?? new List<NT.SHARED.Models.Order>();
 }
 
 <style>
@@ -138,24 +141,30 @@
 
      <!-- Products Grid (Initial View) -->
          <div id="products-grid-section">
-          <label class="fw-bold text-muted small mb-2 d-block">Sản phẩm phổ biến:</label>
+          <label class="fw-bold text-muted small mb-2 d-block">Sản phẩm:</label>
    <div class="product-grid" id="products-grid">
-             @if (products.Any())
-     {
-     @foreach (var product in products.Take(20))
-    {
-             <div class="product-card" onclick="selectProductFromGrid('@product.Id', '@product.Name.Replace("'", "\\'")', this)">
-           <div class="product-code">@product.ProductCode</div>
-    <div class="product-name">@product.Name</div>
-        <div class="product-price">Chọn</div>
-         </div>
-    }
-    }
-      else
-      {
-      <div class="alert alert-warning w-100 mb-0">Chưa có sản phẩm nào. Vui lòng thêm sản phẩm.</div>
-  }
-      </div>
+        @{ 
+            if (products.Any())
+            {
+                foreach (var product in products.Take(20))
+                {
+                    <text>
+                        <div class="product-card" onclick="selectProductFromGrid('@product.Id', '@product.Name.Replace("'", "\\'")', this)">
+                            <div class="product-code">@product.ProductCode</div>
+                            <div class="product-name">@product.Name</div>
+                            <div class="product-price">Chọn</div>
+                        </div>
+                    </text>
+                }
+            }
+            else
+            {
+                <text>
+                    <div class="alert alert-warning w-100 mb-0">Chưa có sản phẩm nào. Vui lòng thêm sản phẩm.</div>
+                </text>
+            }
+        }
+    </div>
         </div>
 
           <!-- Variants Select -->
@@ -180,10 +189,28 @@
           <button class="btn btn-success btn-lg w-100" onclick="addToCart()">
         <i class="fas fa-cart-plus"></i> Thêm vào giỏ
        </button>
+       
+       <div class="form-check form-switch mt-2">
+           <input class="form-check-input" type="checkbox" id="add-for-customer-toggle">
+           <label class="form-check-label" for="add-for-customer-toggle">Thêm cho khách khác (tạo/ghép đơn chờ)</label>
+       </div>
+
+       <div id="add-for-customer-panel" style="display:none;">
+           <div class="input-group mb-2 mt-2">
+               <input type="text" id="target-customer-phone" class="form-control" placeholder="SĐT khách nhận">
+               <button class="btn btn-outline-primary" type="button" onclick="searchTargetCustomer()"><i class="fas fa-search"></i></button>
+               <button class="btn btn-outline-success" type="button" onclick="showQuickCreateModal()" title="Tạo khách hàng mới"><i class="fas fa-user-plus"></i></button>
+           </div>
+           <input type="hidden" id="target-customer-id" value="">
+           <input type="text" id="target-customer-name" class="form-control mb-2" placeholder="Tên khách nhận" readonly>
+       </div>
  </div>
    </div>
 
-     <!-- Cart Items Table -->
+     <!-- Invoice Tabs -->
+    <div id="invoice-tabs" class="mb-2"></div>
+
+    <!-- Cart Items Table -->
 <div class="card shadow-sm mt-3">
          <div class="card-header bg-info text-white fw-bold">
    <i class="fas fa-shopping-cart"></i> Giỏ hàng (<span id="cart-count">0</span> sản phẩm)
@@ -216,51 +243,8 @@
     <!-- RIGHT: CUSTOMER & PAYMENT -->
         <div class="col-lg-4">
             <!-- Pending Orders Section -->
-            <div class="card shadow-sm mb-3">
-                <div class="card-header bg-warning text-dark fw-bold d-flex justify-content-between align-items-center">
-                    <span><i class="fas fa-clock"></i> Đơn hàng chờ (<span id="pending-count">@pendingOrders.Count</span>)</span>
-                    <button class="btn btn-sm btn-outline-dark" onclick="refreshPendingOrders()" title="Làm mới">
-                        <i class="fas fa-sync-alt"></i>
-                    </button>
-                </div>
-                <div class="card-body p-2">
-                    <div class="pending-orders-container" id="pending-orders-list">
-                        @if (pendingOrders.Any())
-                        {
-                            @foreach (var order in pendingOrders)
-                            {
-                                var customerName = order.Note?.Replace("[POS Pending] ", "").Split(" - ").FirstOrDefault() ?? "Khách vãng lai";
-                                var orderCode = $"POS-{order.Id.ToString().Substring(0, 8).ToUpper()}";
-                                <div class="pending-order-card" onclick="loadPendingOrder('@order.Id')">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <strong class="text-primary">@orderCode</strong>
-                                            <div class="small">@customerName</div>
-                                            <div class="pending-order-time">@order.CreatedTime.ToLocalTime().ToString("HH:mm")</div>
-                                        </div>
-                                        <div class="text-end">
-                                            <div class="fw-bold text-danger">@order.TotalAmount.ToString("N0")₫</div>
-                                            <span class="badge bg-secondary">@(order.Details?.Count ?? 0) SP</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            }
-                        }
-                        else
-                        {
-                            <div class="text-center text-muted py-3" id="no-pending-orders">
-                                <i class="fas fa-inbox fa-2x mb-2"></i>
-                                <div>Không có đơn hàng chờ</div>
-                            </div>
-                        }
-                    </div>
-                    <div class="d-grid gap-2 mt-2">
-                        <button class="btn btn-warning btn-sm" onclick="saveToPending()" id="btn-save-pending" disabled>
-                            <i class="fas fa-pause-circle"></i> Lưu giỏ hàng chờ
-                        </button>
-                    </div>
-                </div>
-            </div>
+          
+          
 
             <!-- Customer Info -->
             <div class="card shadow-sm mb-3">
@@ -297,9 +281,9 @@
                     <!-- Member Customer Info -->
                     <div id="member-customer-section">
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Số điện thoại:</label>
+                            <label class="form-label fw-bold">Số điện thoại / Tên:</label>
                             <div class="input-group">
-                                <input type="tel" id="customer-phone" class="form-control" placeholder="Nhập SĐT khách">
+                                <input type="text" id="customer-phone" class="form-control" placeholder="Nhập SĐT hoặc tên khách">
                                 <button class="btn btn-outline-primary" onclick="searchCustomer()">
                                     <i class="fas fa-search"></i>
                                 </button>
@@ -326,20 +310,31 @@
             </div>
 
           <!-- Voucher -->
- <div class="card shadow-sm mb-3">
- <div class="card-header bg-success text-white fw-bold">
-   <i class="fas fa-ticket-alt"></i> Mã giảm giá
-       </div>
-     <div class="card-body">
-         <div class="input-group mb-2">
-   <input type="text" id="voucher-code" class="form-control" placeholder="Nhập mã giảm giá">
-     <button class="btn btn-outline-success" onclick="applyVoucher()">
-    <i class="fas fa-check"></i>
-     </button>
-           </div>
-  <small id="voucher-message" class="text-muted"></small>
-          </div>
-       </div>
+    <div class="card shadow-sm mb-3">
+        <div class="card-header bg-success text-white fw-bold">
+            <i class="fas fa-ticket-alt"></i> Mã giảm giá
+        </div>
+        <div class="card-body">
+            <div class="input-group mb-2">
+                <input list="voucher-list" type="text" id="voucher-code" class="form-control" placeholder="Nhập mã giảm giá hoặc chọn từ danh sách">
+                <button class="btn btn-outline-success" onclick="applyVoucher()">
+                    <i class="fas fa-check"></i>
+                </button>
+            </div>
+            <small id="voucher-message" class="text-muted"></small>
+
+            @* Datalist cung cấp lựa chọn mã giống phần Online *@
+            <datalist id="voucher-list">
+                @{
+                    var available = ViewBag.AvailableVouchers as IEnumerable<NT.SHARED.Models.Voucher> ?? Enumerable.Empty<NT.SHARED.Models.Voucher>();
+                    foreach (var v in available)
+                    {
+                        <option value="@v.Code">@v.Code - @((v.DiscountPercentage.HasValue) ? v.DiscountPercentage.Value + "%" : "")</option>
+                    }
+                }
+            </datalist>
+        </div>
+    </div>
 
       <!-- Payment Method -->
    <div class="card shadow-sm mb-3">
@@ -711,7 +706,31 @@
 </div>
 
 @section Scripts {
-<script>
+    <script>
+        // --- UI: Add for customer toggle handlers & helper ---
+        document.getElementById('add-for-customer-toggle')?.addEventListener('change', function (e) {
+            const panel = document.getElementById('add-for-customer-panel');
+            if (!panel) return;
+            panel.style.display = this.checked ? 'block' : 'none';
+        });
+
+        async function searchTargetCustomer() {
+            const q = document.getElementById('target-customer-phone').value.trim();
+            if (!q) { showToast('Vui lòng nhập SĐT hoặc tên khách', 'warning'); return; }
+            try {
+                const res = await fetch(`/Sales/SearchCustomer?q=${encodeURIComponent(q)}`);
+                const customer = await res.json();
+                if (customer && customer.id) {
+                    document.getElementById('target-customer-id').value = customer.id;
+                    document.getElementById('target-customer-name').value = customer.name || '';
+                    showToast('Đã chọn khách: ' + (customer.name || customer.phone), 'success');
+                } else {
+                    document.getElementById('target-customer-id').value = '';
+                    document.getElementById('target-customer-name').value = '';
+                    showToast('Không tìm thấy khách', 'warning');
+                }
+            } catch (err) { console.error(err); showToast('Lỗi khi tìm khách', 'danger'); }
+        }
     let cart = [];
     let selectedVariants = {};
     let totalAmount = 0;
@@ -796,6 +815,11 @@
 
                 // Switch to member type
                 selectCustomerType('member');
+                // Save customer to current invoice
+                if (invoices[activeInvoiceIndex]) {
+                    invoices[activeInvoiceIndex].customerData = customerData;
+                    try { saveDraft(); } catch (e) { }
+                }
             } else {
                 showToast(result.message, 'danger');
             }
@@ -1021,8 +1045,9 @@
                     customerId: customerId,
                     customerPhone: customerPhone,
                     customerName: customerName,
-                    customerAddress: customerAddress,
+                customerAddress: customerAddress,
                     voucherCode: document.getElementById('voucher-code').value.trim(),
+                voucherCode: document.getElementById('voucher-code').value.trim(),
                     paymentMethodId: paymentMethod
                 })
             });
@@ -1205,12 +1230,7 @@
         const existingIndex = cart.findIndex(c => c.productDetailId === select.value);
         if (existingIndex >= 0) {
             const totalQty = cart[existingIndex].quantity + qty;
-            if (totalQty > maxStock) {
-                showToast(`Tổng số lượng (${totalQty}) vượt quá tồn kho (${maxStock}). Trong giỏ đã có ${cart[existingIndex].quantity} sản phẩm.`, 'danger');
-                return;
-            }
-            
-            // Gọi API trừ tồn kho cho số lượng thêm
+            // Don't rely solely on client-side cached maxStock (can be stale) - call server and let it validate
             try {
                 const res = await fetch('/Sales/AddToCartPOS', {
                     method: 'POST',
@@ -1222,9 +1242,13 @@
                     showToast(result.message, 'danger');
                     return;
                 }
-                
+
+                // update cart with server-validated quantities
                 cart[existingIndex].quantity = totalQty;
-                cart[existingIndex].maxStock = result.newStock + totalQty; // Cập nhật maxStock mới
+                // result.newStock is remaining stock after subtraction; restore original stock
+                const original = (result.newStock != null ? (result.newStock) + totalQty : cart[existingIndex].maxStock || totalQty);
+                cart[existingIndex].maxStock = original;
+                cart[existingIndex].originalStock = original; // store for beacon restore
                 updateCart();
                 clearProductForm();
                 showToast(`Đã cập nhật số lượng ${productName} (Tồn kho còn: ${result.newStock})`, 'success');
@@ -1235,8 +1259,40 @@
             return;
         }
 
-        // Gọi API trừ tồn kho cho sản phẩm mới
+        // detect whether adding for another customer
+        const addForOther = document.getElementById('add-for-customer-toggle')?.checked;
+
         try {
+            if (addForOther) {
+                // call server endpoint to create/append pending order for that customer
+                const payload = {
+                    productDetailId: select.value,
+                    quantity: qty,
+                    customerId: document.getElementById('target-customer-id')?.value || null,
+                    customerPhone: document.getElementById('target-customer-phone')?.value || null,
+                    customerAddress: document.getElementById('target-customer-name')?.value || null,
+                    customerName: document.getElementById('target-customer-name')?.value || null
+                };
+
+                const res = await fetch('/Sales/AddToCartForCustomer', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await res.json();
+                if (!result.success) {
+                    showToast(result.message, 'danger');
+                    return;
+                }
+
+                // update client cart view to reflect change (optional - show pending order info briefly)
+                showToast(result.message || 'Đã thêm vào giỏ của khách', 'success');
+                clearProductForm();
+                refreshPendingOrders();
+                return;
+            }
+
+            // existing behavior: call AddToCartPOS
             const res = await fetch('/Sales/AddToCartPOS', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -1254,7 +1310,8 @@
                 variantText: option.text,
                 price: parseFloat(option.dataset.price),
                 quantity: qty,
-                maxStock: result.newStock + qty // Lưu tổng stock ban đầu
+                maxStock: result.newStock + qty, // Lưu tổng stock ban đầu
+                originalStock: (result.newStock != null ? result.newStock + qty : null)
             };
 
             cart.push(item);
@@ -1286,6 +1343,7 @@
 
             cart.splice(index, 1);
             updateCart();
+            try { saveDraft(); } catch (e) { /* ignore */ }
             showToast(`Đã xóa sản phẩm và hoàn lại tồn kho`, 'success');
         } catch (error) {
             console.error('Error:', error);
@@ -1301,12 +1359,12 @@
             tbody.innerHTML = '<tr id="empty-cart"><td colspan="7" class="text-center py-3 text-muted">Giỏ hàng trống</td></tr>';
             document.getElementById('cart-count').textContent = '0';
             totalAmount = 0;
-            btnSavePending.disabled = true;
+            if (btnSavePending) btnSavePending.disabled = true;
             updateSummary();
             return;
         }
 
-        btnSavePending.disabled = false;
+        if (btnSavePending) btnSavePending.disabled = false;
         document.getElementById('empty-cart')?.remove();
         totalAmount = 0;
         tbody.innerHTML = cart.map((item, idx) => {
@@ -1396,23 +1454,30 @@
 
     // Customer search
     async function searchCustomer() {
-        const phone = document.getElementById('customer-phone').value.trim();
-        if (!phone) {
-            showToast('Vui lòng nhập số điện thoại', 'warning');
+        const q = document.getElementById('customer-phone').value.trim();
+        if (!q) {
+            showToast('Vui lòng nhập SĐT hoặc tên khách', 'warning');
             return;
         }
 
         try {
-            const res = await fetch(`/Sales/SearchCustomer?phone=${encodeURIComponent(phone)}`);
+            const res = await fetch(`/Sales/SearchCustomer?q=${encodeURIComponent(q)}`);
             const customer = await res.json();
 
             if (customer && customer.id) {
                 customerData = customer;
                 document.getElementById('customer-id').value = customer.id;
+                document.getElementById('customer-phone').value = customer.phone || '';
                 document.getElementById('customer-name').value = customer.name || '';
                 document.getElementById('customer-address').value = customer.address || '';
                 showToast(`Tìm thấy khách hàng: ${customer.name}`, 'success');
+                // assign to current invoice
+                if (invoices[activeInvoiceIndex]) {
+                    invoices[activeInvoiceIndex].customerData = customerData;
+                    try { saveDraft(); } catch (e) { }
+                }
             } else {
+                // nếu không tìm thấy, giữ nguyên input và cho phép tạo mới
                 customerData = null;
                 document.getElementById('customer-id').value = '';
                 document.getElementById('customer-name').value = '';
@@ -1558,6 +1623,12 @@
         document.getElementById('order-note').value = '';
         document.getElementById('payment-method').selectedIndex = 0;
         selectCustomerType('member');
+        try { localStorage.removeItem('pos_draft'); } catch (e) { /* ignore */ }
+    }
+
+    // helper to include originalStock when sending beacon/clear
+    function getBeaconItems() {
+        return cart.map(c => ({ productDetailId: c.productDetailId, quantity: c.quantity, originalStock: c.originalStock ?? c.maxStock ?? null }));
     }
 
     // Clear cart with restore stock (dùng khi hủy bỏ, đóng trang...)
@@ -1638,22 +1709,239 @@
         if (e.key === 'Enter') applyVoucher();
     });
 
-    // Cảnh báo khi đóng trang nếu giỏ hàng có sản phẩm
+    // Save draft locally instead of restoring stock when user leaves
+    function saveDraft() {
+        try {
+            // serialize only necessary invoice fields to avoid storing functions/DOM references
+            const serializableInvoices = (invoices || [{ id: 1, name: 'Hóa đơn 1', cart: [] }]).map(i => ({
+                id: i?.id ?? null,
+                name: i?.name ?? null,
+                cart: Array.isArray(i?.cart) ? i.cart : [],
+                customerData: i?.customerData ?? null
+            }));
+
+            const draft = {
+                invoices: serializableInvoices,
+                activeInvoiceIndex: Number.isFinite(activeInvoiceIndex) ? activeInvoiceIndex : 0,
+                customerData: customerData || null,
+                currentPendingOrderId: currentPendingOrderId || null,
+                isEditingPendingOrder: !!isEditingPendingOrder,
+                totalAmount: totalAmount || 0,
+                discountAmount: discountAmount || 0,
+                voucherCode: document.getElementById('voucher-code')?.value || ''
+            };
+            localStorage.setItem('pos_draft', JSON.stringify(draft));
+            console.debug('POS draft saved');
+        } catch (err) {
+            console.error('Failed to save POS draft', err);
+        }
+    }
+
+    // Expose saveDraft for other actions
+    window.posSaveDraft = saveDraft;
+
+    function loadDraft() {
+        try {
+            const raw = localStorage.getItem('pos_draft');
+            if (!raw) return false;
+            const draft = JSON.parse(raw);
+            if (draft && Array.isArray(draft.invoices)) {
+                // restore invoices and active index
+                invoices.length = 0;
+                draft.invoices.forEach(inv => invoices.push(inv));
+                activeInvoiceIndex = Math.max(0, Math.min((draft.activeInvoiceIndex || 0), invoices.length - 1));
+                // restore cart from active invoice
+                cart = (invoices[activeInvoiceIndex] && invoices[activeInvoiceIndex].cart) ? invoices[activeInvoiceIndex].cart : [];
+            }
+            if (draft.customerData) {
+                customerData = draft.customerData;
+                document.getElementById('customer-id').value = customerData.id || '';
+                document.getElementById('customer-phone').value = customerData.phone || '';
+                document.getElementById('customer-name').value = customerData.name || '';
+                document.getElementById('customer-address').value = customerData.address || '';
+            }
+            currentPendingOrderId = draft.currentPendingOrderId || null;
+            isEditingPendingOrder = !!draft.isEditingPendingOrder;
+            totalAmount = draft.totalAmount || 0;
+            discountAmount = draft.discountAmount || 0;
+            if (document.getElementById('voucher-code')) document.getElementById('voucher-code').value = draft.voucherCode || '';
+            console.debug('POS draft loaded');
+            return true;
+        } catch (err) {
+            console.error('Failed to load POS draft', err);
+            return false;
+        }
+    }
+
+    // beforeunload: save draft locally when user leaves so invoice is not lost
     window.addEventListener('beforeunload', function (e) {
         if (cart.length > 0) {
-            // Gọi API hoàn lại tồn kho (sync để đảm bảo chạy trước khi đóng)
-            navigator.sendBeacon('/Sales/ClearCartPOS', JSON.stringify({
-                items: cart.map(c => ({ productDetailId: c.productDetailId, quantity: c.quantity }))
-            }));
-            
-            e.preventDefault();
-            e.returnValue = 'Bạn có sản phẩm trong giỏ hàng. Nếu rời trang, tồn kho sẽ được hoàn lại.';
-            return e.returnValue;
+            saveDraft();
+            // Do not block unload; just save silently
         }
     });
 
+    // pagehide: also save draft (more reliable on mobile / modern browsers)
+    window.addEventListener('pagehide', function () {
+        if (cart.length > 0) saveDraft();
+    });
+
+    // --- Invoice tabs manager (syncs with updateCart) ---
+    const invoices = [{ id: 1, name: 'Hóa đơn 1', cart: [], customerData: null }];
+    let activeInvoiceIndex = 0;
+
+    function renderInvoiceTabs() {
+        const container = document.getElementById('invoice-tabs');
+        if (!container) return;
+        container.innerHTML = '';
+        invoices.forEach((inv, idx) => {
+            const wrapper = document.createElement('span');
+            wrapper.className = 'me-1';
+
+            const btn = document.createElement('button');
+            btn.className = 'btn btn-sm ' + (idx === activeInvoiceIndex ? 'btn-primary' : 'btn-outline-primary');
+            btn.textContent = inv.name;
+            btn.onclick = () => { switchInvoice(idx); };
+            wrapper.appendChild(btn);
+
+            // delete invoice small button
+            const del = document.createElement('button');
+            del.className = 'btn btn-sm btn-outline-danger ms-1';
+            del.title = 'Xóa hóa đơn';
+            del.innerHTML = '<i class="fas fa-times"></i>';
+            del.onclick = (e) => { e.stopPropagation(); deleteInvoice(idx); };
+            wrapper.appendChild(del);
+
+            container.appendChild(wrapper);
+        });
+        const add = document.createElement('button');
+        add.className = 'btn btn-sm btn-success';
+        add.innerHTML = '<i class="fas fa-plus"></i>';
+        add.title = 'Tạo hóa đơn mới';
+        add.onclick = createInvoice;
+        container.appendChild(add);
+    }
+
+    function createInvoice() {
+        const id = invoices.length + 1;
+        invoices.push({ id: id, name: `Hóa đơn ${id}`, cart: [] });
+        switchInvoice(invoices.length - 1);
+        renderInvoiceTabs();
+        try { saveDraft(); } catch (e) { /* ignore */ }
+        showToast('Đã tạo hóa đơn mới: Hóa đơn ' + id, 'success');
+    }
+
+    function deleteInvoice(index) {
+        if (index < 0 || index >= invoices.length) return;
+        const inv = invoices[index];
+        const hasItems = inv && Array.isArray(inv.cart) && inv.cart.length > 0;
+        if (hasItems) {
+            if (!confirm('Hóa đơn đang có sản phẩm. Bạn có chắc muốn xóa?\n\n⚠️ Tồn kho sẽ được hoàn lại khi xóa.')) return;
+        }
+
+        // If deleting active invoice, remove and adjust active index
+        invoices.splice(index, 1);
+        if (invoices.length === 0) {
+            invoices.push({ id: 1, name: 'Hóa đơn 1', cart: [] });
+            activeInvoiceIndex = 0;
+         }
+         else {
+            // Choose nearest previous tab if available
+            if (activeInvoiceIndex >= invoices.length) activeInvoiceIndex = invoices.length - 1;
+            activeInvoiceIndex = Math.max(0, activeInvoiceIndex);
+        }
+
+        // If deleted invoice had items, inform server to restore stock for those items
+        if (hasItems) {
+            try {
+                fetch('/Sales/ClearCartPOS', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ items: inv.cart.map(c => ({ productDetailId: c.productDetailId, quantity: c.quantity })) })
+                }).catch(() => { /* ignore errors */ });
+            } catch (e) { /* ignore */ }
+        }
+
+        // Clear customer association for deleted invoice and persist immediately
+        inv.customerData = null;
+        try { saveDraft(); } catch (e) { /* ignore */ }
+
+        // If only default empty invoice remains, remove draft so deleted tabs are not restored
+        try {
+            if (invoices.length === 1 && Array.isArray(invoices[0].cart) && invoices[0].cart.length === 0) {
+                localStorage.removeItem('pos_draft');
+            }
+        } catch (e) { /* ignore */ }
+
+        renderInvoiceTabs();
+        switchInvoice(activeInvoiceIndex);
+        try { saveDraft(); } catch (e) { /* ignore */ }
+        showToast('Đã xóa hóa đơn', 'success');
+    }
+
+    function switchInvoice(index) {
+        activeInvoiceIndex = index;
+        if (invoices[activeInvoiceIndex]) {
+            cart = invoices[activeInvoiceIndex].cart || [];
+            // restore customer data for this invoice
+            customerData = invoices[activeInvoiceIndex].customerData || null;
+        } else {
+            cart = [];
+            customerData = null;
+        }
+        // update customer UI to reflect current invoice
+        if (customerData && customerData.id) {
+            document.getElementById('customer-id').value = customerData.id || '';
+            document.getElementById('customer-phone').value = customerData.phone || '';
+            document.getElementById('customer-name').value = customerData.name || '';
+            document.getElementById('customer-address').value = customerData.address || '';
+            selectCustomerType('member');
+        } else if (customerData && customerData.name === 'Khách vãng lai') {
+            // guest
+            selectCustomerType('guest');
+            document.getElementById('customer-id').value = '';
+            document.getElementById('customer-phone').value = '';
+            document.getElementById('customer-name').value = '';
+            document.getElementById('customer-address').value = '';
+        } else {
+            // no customer assigned
+            customerData = null;
+            document.getElementById('customer-id').value = '';
+            document.getElementById('customer-phone').value = '';
+            document.getElementById('customer-name').value = '';
+            document.getElementById('customer-address').value = '';
+            selectCustomerType('member');
+        }
+        updateCart();
+        renderInvoiceTabs();
+    }
+
+    // Wrap updateCart to also persist into invoices array
+    (function attachInvoiceSync() {
+        // wait until updateCart is defined (it is a function declaration in this script)
+        if (typeof updateCart === 'function') {
+            const _orig = updateCart;
+            updateCart = function () {
+                _orig();
+                if (invoices[activeInvoiceIndex]) invoices[activeInvoiceIndex].cart = cart;
+            };
+        }
+    })();
+
     // Initialize
-    updateCart();
-    selectCustomerType('member'); // Default to member customer
-</script>
+    // Try load draft first (if exists) to restore invoice state when user previously left
+    renderInvoiceTabs();
+    const restored = loadDraft();
+    if (!restored) {
+        updateCart();
+        selectCustomerType('member'); // Default to member customer
+    } else {
+        // if restored, re-render tabs and cart
+        renderInvoiceTabs();
+        updateCart();
+        // ensure UI customer type matches restored customerData
+        if (customerData && customerData.id) selectCustomerType('member');
+        else selectCustomerType('guest');
+    }
+    </script>
 }

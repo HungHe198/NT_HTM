@@ -2070,7 +2070,7 @@ namespace NT.DAL.Migrations
                             Id = new Guid("11111111-2222-3333-4444-555555555555"),
                             Email = "admin@example.com",
                             Fullname = "System Administrator",
-                            PasswordHash = "AQAAAAIAAYagAAAAEPjuqXMlvCaJmc4YLo7g2p9FgshwcSmVpRRabIN6frnE77Zhmf8jFUFXjb5ikN8seg==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEBFRTblDEvqbhoObIwddhAmjtw8bVaxxSQhs5qWlNTnPKxf9OtYhiwfp4uNr/hbWwQ==",
                             RoleId = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
                             Status = "Active",
                             Username = "admin"
@@ -2121,11 +2121,11 @@ namespace NT.DAL.Migrations
                             Id = new Guid("11111111-aaaa-bbbb-cccc-111111111111"),
                             Code = "WELCOME10",
                             DiscountPercentage = 10m,
-                            EndDate = new DateTime(2026, 1, 24, 8, 38, 47, 574, DateTimeKind.Local).AddTicks(8196),
+                            EndDate = new DateTime(2026, 1, 24, 8, 43, 40, 669, DateTimeKind.Local).AddTicks(2410),
                             MaxDiscountAmount = 50000m,
                             MaxUsage = 1000,
                             MinOrderAmount = 300000m,
-                            StartDate = new DateTime(2025, 12, 17, 8, 38, 47, 574, DateTimeKind.Local).AddTicks(8174),
+                            StartDate = new DateTime(2025, 12, 17, 8, 43, 40, 669, DateTimeKind.Local).AddTicks(2384),
                             UsageCount = 0
                         },
                         new
@@ -2133,11 +2133,11 @@ namespace NT.DAL.Migrations
                             Id = new Guid("22222222-aaaa-bbbb-cccc-222222222222"),
                             Code = "SAVE15",
                             DiscountPercentage = 15m,
-                            EndDate = new DateTime(2026, 2, 24, 8, 38, 47, 574, DateTimeKind.Local).AddTicks(8206),
+                            EndDate = new DateTime(2026, 2, 24, 8, 43, 40, 669, DateTimeKind.Local).AddTicks(2421),
                             MaxDiscountAmount = 100000m,
                             MaxUsage = 500,
                             MinOrderAmount = 500000m,
-                            StartDate = new DateTime(2025, 12, 21, 8, 38, 47, 574, DateTimeKind.Local).AddTicks(8205),
+                            StartDate = new DateTime(2025, 12, 21, 8, 43, 40, 669, DateTimeKind.Local).AddTicks(2420),
                             UsageCount = 0
                         },
                         new
@@ -2145,11 +2145,11 @@ namespace NT.DAL.Migrations
                             Id = new Guid("33333333-aaaa-bbbb-cccc-333333333333"),
                             Code = "BIGSALE25",
                             DiscountPercentage = 25m,
-                            EndDate = new DateTime(2026, 3, 24, 8, 38, 47, 574, DateTimeKind.Local).AddTicks(8210),
+                            EndDate = new DateTime(2026, 3, 24, 8, 43, 40, 669, DateTimeKind.Local).AddTicks(2424),
                             MaxDiscountAmount = 200000m,
                             MaxUsage = 300,
                             MinOrderAmount = 800000m,
-                            StartDate = new DateTime(2025, 12, 23, 8, 38, 47, 574, DateTimeKind.Local).AddTicks(8210),
+                            StartDate = new DateTime(2025, 12, 23, 8, 43, 40, 669, DateTimeKind.Local).AddTicks(2424),
                             UsageCount = 0
                         });
                 });

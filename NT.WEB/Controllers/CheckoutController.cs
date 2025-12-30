@@ -112,6 +112,7 @@ namespace NT.WEB.Controllers
                 vm.Add(new
                 {
                     ProductDetailId = ci.ProductDetailId,
+                    ProductCode = pd.Product?.ProductCode,
                     Name = pd.Product?.Name ?? "Sản phẩm",
                     Price = pd.Price,
                     Quantity = ci.Quantity,
@@ -558,12 +559,12 @@ namespace NT.WEB.Controllers
             await _orderRepo.AddAsync(order);
             await _orderRepo.SaveChangesAsync();
 
-            foreach (var ci in selectedItems)
-            {
-                var pd = ci.ProductDetail ?? await _productDetailService.GetByIdAsync(ci.ProductDetailId);
-                if (pd == null) continue;
-                var od = OrderDetail.Create(order.Id, ci.ProductDetailId, ci.Quantity, pd.Price);
-                od.NameAtOrder = pd.Product?.Name;
+                foreach (var ci in selectedItems)
+                {
+                    var pd = ci.ProductDetail ?? await _productDetailService.GetByIdAsync(ci.ProductDetailId);
+                    if (pd == null) continue;
+                    var od = OrderDetail.Create(order.Id, ci.ProductDetailId, ci.Quantity, pd.Price, pd.Product?.ProductCode);
+                    od.NameAtOrder = pd.Product?.Name;
                 od.LengthAtOrder = pd.Length?.Name;
                 od.HardnessAtOrder = pd.Hardness?.Name;
                 od.ColorAtOrder = pd.Color?.Name;

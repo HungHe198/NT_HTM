@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace NT.DAL.Migrations
 {
     /// <inheritdoc />
-    public partial class lan1 : Migration
+    public partial class Final : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -538,6 +538,7 @@ namespace NT.DAL.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     OrderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ProductDetailId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ProductCodeAtOrder = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     NameAtOrder = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Quantity = table.Column<int>(type: "int", nullable: false),
                     UnitPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
@@ -675,9 +676,9 @@ namespace NT.DAL.Migrations
                 columns: new[] { "Id", "Code", "DiscountPercentage", "EndDate", "MaxDiscountAmount", "MaxUsage", "MinOrderAmount", "StartDate" },
                 values: new object[,]
                 {
-                    { new Guid("11111111-aaaa-bbbb-cccc-111111111111"), "WELCOME10", 10m, new DateTime(2026, 1, 24, 8, 38, 47, 574, DateTimeKind.Local).AddTicks(8196), 50000m, 1000, 300000m, new DateTime(2025, 12, 17, 8, 38, 47, 574, DateTimeKind.Local).AddTicks(8174) },
-                    { new Guid("22222222-aaaa-bbbb-cccc-222222222222"), "SAVE15", 15m, new DateTime(2026, 2, 24, 8, 38, 47, 574, DateTimeKind.Local).AddTicks(8206), 100000m, 500, 500000m, new DateTime(2025, 12, 21, 8, 38, 47, 574, DateTimeKind.Local).AddTicks(8205) },
-                    { new Guid("33333333-aaaa-bbbb-cccc-333333333333"), "BIGSALE25", 25m, new DateTime(2026, 3, 24, 8, 38, 47, 574, DateTimeKind.Local).AddTicks(8210), 200000m, 300, 800000m, new DateTime(2025, 12, 23, 8, 38, 47, 574, DateTimeKind.Local).AddTicks(8210) }
+                    { new Guid("11111111-aaaa-bbbb-cccc-111111111111"), "WELCOME10", 10m, new DateTime(2026, 1, 24, 8, 43, 40, 669, DateTimeKind.Local).AddTicks(2410), 50000m, 1000, 300000m, new DateTime(2025, 12, 17, 8, 43, 40, 669, DateTimeKind.Local).AddTicks(2384) },
+                    { new Guid("22222222-aaaa-bbbb-cccc-222222222222"), "SAVE15", 15m, new DateTime(2026, 2, 24, 8, 43, 40, 669, DateTimeKind.Local).AddTicks(2421), 100000m, 500, 500000m, new DateTime(2025, 12, 21, 8, 43, 40, 669, DateTimeKind.Local).AddTicks(2420) },
+                    { new Guid("33333333-aaaa-bbbb-cccc-333333333333"), "BIGSALE25", 25m, new DateTime(2026, 3, 24, 8, 43, 40, 669, DateTimeKind.Local).AddTicks(2424), 200000m, 300, 800000m, new DateTime(2025, 12, 23, 8, 43, 40, 669, DateTimeKind.Local).AddTicks(2424) }
                 });
 
             migrationBuilder.InsertData(
@@ -702,7 +703,7 @@ namespace NT.DAL.Migrations
             migrationBuilder.InsertData(
                 table: "User",
                 columns: new[] { "Id", "Email", "Fullname", "PasswordHash", "PhoneNumber", "RoleId", "Status", "Username" },
-                values: new object[] { new Guid("11111111-2222-3333-4444-555555555555"), "admin@example.com", "System Administrator", "AQAAAAIAAYagAAAAEPjuqXMlvCaJmc4YLo7g2p9FgshwcSmVpRRabIN6frnE77Zhmf8jFUFXjb5ikN8seg==", null, new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), "Active", "admin" });
+                values: new object[] { new Guid("11111111-2222-3333-4444-555555555555"), "admin@example.com", "System Administrator", "AQAAAAIAAYagAAAAEBFRTblDEvqbhoObIwddhAmjtw8bVaxxSQhs5qWlNTnPKxf9OtYhiwfp4uNr/hbWwQ==", null, new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), "Active", "admin" });
 
             migrationBuilder.InsertData(
                 table: "Admin",

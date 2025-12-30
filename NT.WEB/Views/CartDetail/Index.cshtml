@@ -568,6 +568,10 @@
                                                                  class="product-img" />
                                                             <div class="product-details">
                                                                 <h6>@(string.IsNullOrWhiteSpace(item.ProductName) ? "Sản phẩm" : item.ProductName)</h6>
+                                                                @if (!string.IsNullOrWhiteSpace(item.ProductCode))
+                                                                {
+                                                                    <div><small class="text-muted">Mã: <code>@item.ProductCode</code></small></div>
+                                                                }
                                                                 <div class="variant-info">
                                                                     <span class="variant-badge">
                                                                         <i class="fas fa-ruler me-1"></i>@(string.IsNullOrWhiteSpace(item.LengthName) ? "N/A" : item.LengthName)

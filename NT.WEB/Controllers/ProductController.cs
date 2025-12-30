@@ -467,6 +467,24 @@ namespace NT.WEB.Controllers
                 return View("ProductDetailCreate", model);
             }
 
+            // Prevent duplicate variant (same Length + Hardness + Color for the same product)
+            var existingSame = (await _productDetailService.FindAsync(pd => pd.ProductId == productId
+                                                                               && pd.LengthId == model.LengthId
+                                                                               && pd.HardnessId == model.HardnessId
+                                                                               && pd.ColorId == model.ColorId)).FirstOrDefault();
+            if (existingSame != null)
+            {
+                ModelState.AddModelError(string.Empty, "Biến thể giống đã tồn tại");
+                ViewBag.ProductId = productId;
+                ViewBag.LengthSelectList = new SelectList(await _lengthService.GetAllAsync(), "Id", "Name", model.LengthId);
+                ViewBag.SurfaceFinishSelectList = new SelectList(await _surfaceFinishService.GetAllAsync(), "Id", "Name", model.SurfaceFinishId);
+                ViewBag.HardnessSelectList = new SelectList(await _hardnessService.GetAllAsync(), "Id", "Name", model.HardnessId);
+                ViewBag.ElasticitySelectList = new SelectList(await _elasticityService.GetAllAsync(), "Id", "Name", model.ElasticityId);
+                ViewBag.OriginCountrySelectList = new SelectList(await _originCountryService.GetAllAsync(), "Id", "Name", model.OriginCountryId);
+                ViewBag.ColorSelectList = new SelectList(await _colorService.GetAllAsync(), "Id", "Name", model.ColorId);
+                return View("ProductDetailCreate", model);
+            }
+
             // ensure FK - use Id properties from model
             var detail = ProductDetail.Create(productId,
                 model.LengthId,
@@ -499,39 +517,58 @@ namespace NT.WEB.Controllers
             detail.CostPrice = model.CostPrice;
             detail.LastImportDate = model.LastImportDate;
 
-            await _productDetailService.AddAsync(detail);
-            await _productDetailService.SaveChangesAsync();
-
-            // Handle image uploads
-            if (images != null && images.Count > 0)
+            try
             {
-                var uploadPath = Path.Combine(_webHostEnvironment.WebRootPath, "uploads", "product-details", detail.Id.ToString());
-                if (!Directory.Exists(uploadPath))
-                {
-                    Directory.CreateDirectory(uploadPath);
-                }
+                await _productDetailService.AddAsync(detail);
+                await _productDetailService.SaveChangesAsync();
 
-                foreach (var file in images)
+                // Handle image uploads
+                if (images != null && images.Count > 0)
                 {
-                    if (file.Length > 0)
+                    var uploadPath = Path.Combine(_webHostEnvironment.WebRootPath, "uploads", "product-details", detail.Id.ToString());
+                    if (!Directory.Exists(uploadPath))
                     {
-                        var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
-                        var filePath = Path.Combine(uploadPath, fileName);
-
-                        using (var stream = new FileStream(filePath, FileMode.Create))
-                        {
-                            await file.CopyToAsync(stream);
-                        }
-
-                        var imageUrl = $"/uploads/product-details/{detail.Id}/{fileName}";
-                        var productImage = ProductImage.Create(detail.Id, imageUrl);
-                        await _productImageService.AddAsync(productImage);
+                        Directory.CreateDirectory(uploadPath);
                     }
-                }
-                await _productImageService.SaveChangesAsync();
-            }
 
-            return RedirectToAction(nameof(Details), new { id = productId });
+                    foreach (var file in images)
+                    {
+                        if (file.Length > 0)
+                        {
+                            var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
+                            var filePath = Path.Combine(uploadPath, fileName);
+
+                            using (var stream = new FileStream(filePath, FileMode.Create))
+                            {
+                                await file.CopyToAsync(stream);
+                            }
+
+                            var imageUrl = $"/uploads/product-details/{detail.Id}/{fileName}";
+                            var productImage = ProductImage.Create(detail.Id, imageUrl);
+                            await _productImageService.AddAsync(productImage);
+                        }
+                    }
+                    await _productImageService.SaveChangesAsync();
+                }
+
+                return RedirectToAction(nameof(Details), new { id = productId });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to create product detail for product {ProductId}", productId);
+                TempData["Error"] = "Không thể thêm biến thể. Vui lòng thử lại hoặc kiểm tra log.";
+
+                // repopulate select lists before returning view
+                ViewBag.ProductId = productId;
+                ViewBag.LengthSelectList = new SelectList(await _lengthService.GetAllAsync(), "Id", "Name", model.LengthId);
+                ViewBag.SurfaceFinishSelectList = new SelectList(await _surfaceFinishService.GetAllAsync(), "Id", "Name", model.SurfaceFinishId);
+                ViewBag.HardnessSelectList = new SelectList(await _hardnessService.GetAllAsync(), "Id", "Name", model.HardnessId);
+                ViewBag.ElasticitySelectList = new SelectList(await _elasticityService.GetAllAsync(), "Id", "Name", model.ElasticityId);
+                ViewBag.OriginCountrySelectList = new SelectList(await _originCountryService.GetAllAsync(), "Id", "Name", model.OriginCountryId);
+                ViewBag.ColorSelectList = new SelectList(await _colorService.GetAllAsync(), "Id", "Name", model.ColorId);
+
+                return View("ProductDetailCreate", model);
+            }
         }
 
         // GET: /Product/EditDetail/{id}
@@ -603,6 +640,26 @@ namespace NT.WEB.Controllers
                 var errors = string.Join(" | ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
                 _logger.LogWarning("EditDetail validation failed for {ProductDetailId}: {Errors}", id, errors);
                 
+                var existingImages = await _productImageService.GetByProductDetailIdAsync(id);
+                ViewBag.ExistingImages = existingImages.ToList();
+                ViewBag.LengthSelectList = new SelectList(await _lengthService.GetAllAsync(), "Id", "Name", model.LengthId);
+                ViewBag.SurfaceFinishSelectList = new SelectList(await _surfaceFinishService.GetAllAsync(), "Id", "Name", model.SurfaceFinishId);
+                ViewBag.HardnessSelectList = new SelectList(await _hardnessService.GetAllAsync(), "Id", "Name", model.HardnessId);
+                ViewBag.ElasticitySelectList = new SelectList(await _elasticityService.GetAllAsync(), "Id", "Name", model.ElasticityId);
+                ViewBag.OriginCountrySelectList = new SelectList(await _originCountryService.GetAllAsync(), "Id", "Name", model.OriginCountryId);
+                ViewBag.ColorSelectList = new SelectList(await _colorService.GetAllAsync(), "Id", "Name", model.ColorId);
+                return View("ProductDetailEdit", model);
+            }
+
+            // Prevent duplicate variant on edit: same Length + Hardness + Color for the same product (exclude self)
+            var dup = (await _productDetailService.FindAsync(pd => pd.ProductId == model.ProductId
+                                                                    && pd.LengthId == model.LengthId
+                                                                    && pd.HardnessId == model.HardnessId
+                                                                    && pd.ColorId == model.ColorId
+                                                                    && pd.Id != model.Id)).FirstOrDefault();
+            if (dup != null)
+            {
+                ModelState.AddModelError(string.Empty, "Biến thể giống đã tồn tại");
                 var existingImages = await _productImageService.GetByProductDetailIdAsync(id);
                 ViewBag.ExistingImages = existingImages.ToList();
                 ViewBag.LengthSelectList = new SelectList(await _lengthService.GetAllAsync(), "Id", "Name", model.LengthId);

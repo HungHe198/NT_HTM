@@ -1,0 +1,6 @@
+<Project>
+  <PropertyGroup>
+    <!-- Ensure C# language features like interpolated strings are available -->
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+</Project>

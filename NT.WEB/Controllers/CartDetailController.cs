@@ -90,6 +90,7 @@ namespace NT.WEB.Controllers
                 items.Add(new CartItemDto
                 {
                     ProductDetailId = ci.ProductDetailId,
+                    ProductCode = pd.Product?.ProductCode,
                     ProductName = pd.Product?.Name ?? "S?n ph?m",
                     Thumbnail = pd.Product?.Thumbnail,
                     LengthName = pd.Length?.Name,

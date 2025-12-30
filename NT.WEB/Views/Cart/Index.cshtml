@@ -1,4 +1,4 @@
-﻿@using NT.WEB.DTO
+@using NT.WEB.DTO
 @model IEnumerable<CartItemDto>
 @{
     Layout = "~/Views/Shared/_ClientLayout.cshtml";
@@ -12,57 +12,48 @@
 <h2>Giỏ hàng</h2>
 <div class="row">
     <div class="col-md-8">
-        @if (!Model.Any())
-        {
-            <div>Giỏ hàng trống.</div>
-        }
-        else
-        {
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Sản phẩm</th>
-                        <th>Giá</th>
-                        <th>Số lượng</th>
-                        <th>Tạm tính</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                @foreach (var item in Model)
-                {
-                    <tr>
-                        <td>
-                            <div class="d-flex align-items-center gap-2">
-                                <img src="@(item.Thumbnail ?? "/images/product-placeholder.png")" alt="@item.ProductName" style="width:60px;height:60px;object-fit:cover" />
-                                <div>
-                                    <div>@item.ProductName</div>
-                                    <small class="text-muted">Độ dài: @item.LengthName, Độ cứng: @item.HardnessName</small>
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <i class="fas fa-shopping-cart"></i> Giỏ hàng (<span id="cart-count">@Model.Count()</span> sản phẩm)
+            </div>
+            <div class="card-body p-0">
+                <div id="cart-list">
+                    @if (!Model.Any())
+                    {
+                        <div class="p-4 text-center text-muted">Giỏ hàng trống</div>
+                    }
+                    else
+                    {
+                        <ul class="list-group list-group-flush">
+                        @foreach (var item in Model)
+                        {
+                            <li class="list-group-item d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center">
+                                    <div class="me-3">@item.ProductCode</div>
+                                    <div>
+                                        <div class="fw-bold">@item.ProductName</div>
+                                        <small class="text-muted">@item.LengthName @(" / ") @item.HardnessName</small>
+                                    </div>
                                 </div>
-                            </div>
-                        </td>
-                        <td class="text-nowrap">@item.UnitPrice.ToString("#,##0")</td>
-                        <td>
-                            <form asp-action="UpdateQty" asp-controller="Cart" method="post" class="d-inline-flex align-items-center gap-1">
-                                <input type="hidden" name="productDetailId" value="@item.ProductDetailId" />
-                                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="var i=this.nextElementSibling; i.value=Math.max(1, parseInt(i.value||'1')-1); this.form.submit();">-</button>
-                                <input type="number" name="quantity" value="@item.Quantity" min="1" class="form-control form-control-sm" style="width:60px" />
-                                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="var i=this.previousElementSibling; i.value=Math.max(1, parseInt(i.value||'1')+1); this.form.submit();">+</button>
-                                <button class="btn btn-secondary btn-sm" type="submit">Cập nhật</button>
-                            </form>
-                        </td>
-                        <td class="text-nowrap">@string.Format("{0:#,##0}", item.UnitPrice * item.Quantity)</td>
-                        <td>
-                            <form asp-action="Remove" asp-controller="Cart" method="post">
-                                <input type="hidden" name="productDetailId" value="@item.ProductDetailId" />
-                                <button class="btn btn-link text-danger" type="submit">Xóa</button>
-                            </form>
-                        </td>
-                    </tr>
-                }
-                </tbody>
-            </table>
-        }
+                                <div class="text-end" style="min-width:300px">
+                                    <div class="d-flex align-items-center justify-content-end gap-2">
+                                        <div style="width:120px" class="text-end">@item.UnitPrice.ToString("#,##0")</div>
+                                        <div>
+                                            <input type="number" class="form-control form-control-sm text-center" value="@item.Quantity" min="1" style="width:80px" onchange="updateQtyClient('@item.ProductDetailId', this.value)" />
+                                        </div>
+                                        <div style="width:120px" class="fw-bold text-primary text-end">@string.Format("{0:#,##0}", item.UnitPrice * item.Quantity)</div>
+                                        <div>
+                                            <button class="btn btn-sm btn-link text-danger" onclick="removeFromCartClient('@item.ProductDetailId')">🗑</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        }
+                        </ul>
+                    }
+                </div>
+            </div>
+        </div>
         <div class="d-flex gap-2">
             <a class="btn btn-outline-secondary" asp-controller="Home" asp-action="Index">Tiếp tục xem sản phẩm</a>
             <button class="btn btn-secondary" disabled>Cập nhật giỏ hàng</button>
@@ -103,8 +94,33 @@
                 }
                 <hr />
                 <div class="d-flex justify-content-between"><span>Tổng</span> <strong>@total.ToString("#,##0")</strong></div>
-                <button class="btn btn-warning w-100 mt-2" disabled>Tiến hành thanh toán</button>
+                <div class="d-grid gap-2">
+                    <form method="post" action="/Cart/NewCart">
+                        <button type="submit" class="btn btn-primary">Tạo hóa đơn mới</button>
+                    </form>
+                    <a class="btn btn-outline-secondary" asp-controller="Home" asp-action="Index">Tiếp tục xem sản phẩm</a>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    async function updateQtyClient(productDetailId, qty) {
+        qty = parseInt(qty) || 1;
+        await fetch('/Cart/UpdateQty', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ productDetailId: productDetailId, quantity: qty })
+        });
+        location.reload();
+    }
+
+    async function removeFromCartClient(productDetailId) {
+        if (!confirm('Xác nhận xóa sản phẩm khỏi giỏ?')) return;
+        await fetch('/Cart/Remove', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ productDetailId: productDetailId })
+        });
+        location.reload();
+    }
+</script>

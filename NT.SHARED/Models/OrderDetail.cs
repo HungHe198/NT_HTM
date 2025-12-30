@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace NT.SHARED.Models
@@ -10,6 +10,8 @@ namespace NT.SHARED.Models
         public Guid OrderId { get; set; }
         [Display(Name = "Chi tiết sản phẩm")]
         public Guid ProductDetailId { get; set; }
+        [Display(Name = "Mã sản phẩm (tại thời điểm đặt)")]
+        public string? ProductCodeAtOrder { get; set; }
         [Display(Name = "Tên sản phẩm tại thời điểm đặt")]
         public string? NameAtOrder { get; set; }
         [Display(Name = "Số lượng")]
@@ -27,11 +29,11 @@ namespace NT.SHARED.Models
         public decimal TotalPrice { get; set; }
 
         public OrderDetail() { }
-        public static OrderDetail Create(Guid orderId, Guid productDetailId, int quantity, decimal unitPrice)
+        public static OrderDetail Create(Guid orderId, Guid productDetailId, int quantity, decimal unitPrice, string? productCodeAtOrder = null)
         {
             if (orderId == Guid.Empty || productDetailId == Guid.Empty) throw new ArgumentException("Id đơn hàng hoặc id chi tiết sản phẩm không hợp lệ");
             if (quantity <= 0) throw new ArgumentException("Số lượng phải lớn hơn 0");
-            return new OrderDetail { OrderId = orderId, ProductDetailId = productDetailId, Quantity = quantity, UnitPrice = unitPrice, TotalPrice = quantity * unitPrice };
+            return new OrderDetail { OrderId = orderId, ProductDetailId = productDetailId, Quantity = quantity, UnitPrice = unitPrice, TotalPrice = quantity * unitPrice, ProductCodeAtOrder = productCodeAtOrder };
         }
 
         public Order? Order { get; set; }   
