@@ -717,14 +717,22 @@ box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
             const hide = () => { box.style.display='none'; box.innerHTML=''; };
             const show = items => {
                 if(!items || items.length===0){ hide(); return; }
-                box.innerHTML = items.map(i => `
+                box.innerHTML = items.map(i => {
+                    const stockBadge = i.isInStock 
+                        ? '' 
+                        : '<span class="badge bg-danger ms-2" style="font-size: 0.7rem;">Hết hàng</span>';
+                    const priceDisplay = i.isInStock 
+                        ? `<span class="suggest-price">${i.priceMin ? currency(i.priceMin) : 'Liên hệ'}${i.priceMax && i.priceMin !== i.priceMax ? ' - ' + currency(i.priceMax) : ''}</span>`
+                        : '<span class="suggest-price text-danger">Tạm hết hàng</span>';
+                    return `
                     <a href="/Product/ProductDetailIndex/${i.id}" class="suggest-item">
-                        <img src="${i.thumbnail || '/images/product-placeholder.png'}" class="suggest-img" alt="thumb"/>
+                        <img src="${i.thumbnail || '/images/product-placeholder.png'}" class="suggest-img" alt="thumb" style="${!i.isInStock ? 'opacity: 0.6;' : ''}"/>
                         <div class="suggest-info">
-                            <h6>${i.name}</h6>
-                            <span class="suggest-price">${i.priceMin ? currency(i.priceMin) : 'Liên hệ'}${i.priceMax && i.priceMin !== i.priceMax ? ' - ' + currency(i.priceMax) : ''}</span>
+                            <h6>${i.name}${stockBadge}</h6>
+                            ${priceDisplay}
                         </div>
-                    </a>`).join('');
+                    </a>`;
+                }).join('');
                 box.style.display='block';
             };
             input.addEventListener('input', function(){

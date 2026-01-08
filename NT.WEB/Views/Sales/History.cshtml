@@ -118,13 +118,14 @@
                                                 "3" => "badge bg-success",
                                                 _ => "badge bg-secondary"
                                             };
+                                            // Với đơn hàng POS (bán tại quầy), hiển thị "Hoàn thành" thay vì "Giao thành công"
                                             string statusText = order.Status switch
                                             {
                                                 "-1" => "Đã hủy",
                                                 "0" => "Chờ xác nhận",
                                                 "1" => "Đã xác nhận",
                                                 "2" => "Đang giao",
-                                                "3" => "Giao thành công",
+                                                "3" => "Hoàn thành",
                                                 _ => "Không rõ"
                                             };
                                         }

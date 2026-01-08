@@ -1607,12 +1607,20 @@
 
     // Clear cart internal (không hoàn lại tồn kho - dùng sau khi tạo đơn thành công)
     function clearCartInternal() {
+        // Xóa cart và customer data của hóa đơn hiện tại
         cart = [];
         customerData = null;
         discountAmount = 0;
         totalAmount = 0;
         isEditingPendingOrder = false;
         currentPendingOrderId = null;
+        
+        // Cập nhật hóa đơn hiện tại trong danh sách invoices
+        if (invoices[activeInvoiceIndex]) {
+            invoices[activeInvoiceIndex].cart = [];
+            invoices[activeInvoiceIndex].customerData = null;
+        }
+        
         updateCart();
         document.getElementById('customer-phone').value = '';
         document.getElementById('customer-name').value = '';
@@ -1623,7 +1631,17 @@
         document.getElementById('order-note').value = '';
         document.getElementById('payment-method').selectedIndex = 0;
         selectCustomerType('member');
-        try { localStorage.removeItem('pos_draft'); } catch (e) { /* ignore */ }
+        
+        // Lưu lại draft với các hóa đơn còn lại (không xóa toàn bộ localStorage)
+        // Chỉ xóa localStorage nếu tất cả hóa đơn đều trống
+        try {
+            const hasNonEmptyInvoice = invoices.some(inv => inv && Array.isArray(inv.cart) && inv.cart.length > 0);
+            if (hasNonEmptyInvoice) {
+                saveDraft(); // Lưu lại các hóa đơn còn sản phẩm
+            } else {
+                localStorage.removeItem('pos_draft'); // Xóa nếu tất cả trống
+            }
+        } catch (e) { /* ignore */ }
     }
 
     // helper to include originalStock when sending beacon/clear
