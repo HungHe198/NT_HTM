@@ -3,6 +3,7 @@
 
 @{
     ViewBag.Title = "Quản lý sản phẩm";
+    var productStockQuantities = ViewBag.ProductStockQuantities as Dictionary<Guid, int> ?? new Dictionary<Guid, int>();
 }
 
 <div class="container-fluid py-4">
@@ -143,13 +144,17 @@
      <span class="badge bg-light text-dark">@(p.Brand?.Name ?? "N/A")</span>
               </td>
    <td>
-     @if(p.Status == ProductStatus.Active)
+     @{
+         var stockQty = productStockQuantities.ContainsKey(p.Id) ? productStockQuantities[p.Id] : 0;
+         var isInStock = ProductStatus.IsInStock(stockQty);
+     }
+     @if(isInStock)
      {
-         <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>@ProductStatus.GetDisplayName(ProductStatus.Active)</span>
+         <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>@ProductStatus.GetStockDisplayName(stockQty) (@stockQty)</span>
      }
      else
      {
-         <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i>@ProductStatus.GetDisplayName(ProductStatus.Inactive)</span>
+         <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i>@ProductStatus.GetStockDisplayName(stockQty)</span>
      }
    </td>
    <td>

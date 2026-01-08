@@ -1,0 +1,209 @@
+@{
+    Layout = "~/Views/Shared/_ClientLayout.cshtml";
+    var product = ViewBag.Product as NT.SHARED.Models.Product;
+}
+
+@section Styles {
+<style>
+    .out-of-stock-page {
+        min-height: 60vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .out-of-stock-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        max-width: 600px;
+        width: 100%;
+    }
+    
+    .out-of-stock-header {
+        background: linear-gradient(135deg, #e53935, #ff5252);
+        color: white;
+        padding: 2rem;
+        text-align: center;
+    }
+    
+    .out-of-stock-header i {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.9;
+    }
+    
+    .out-of-stock-header h1 {
+        font-weight: 700;
+        font-size: 1.75rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .out-of-stock-body {
+        padding: 2rem;
+        text-align: center;
+    }
+    
+    .product-info {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        padding: 1.5rem;
+        background: #f5f5f5;
+        border-radius: 16px;
+        margin-bottom: 1.5rem;
+    }
+    
+    .product-info img {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .product-info-text {
+        text-align: left;
+        flex: 1;
+    }
+    
+    .product-info-text h3 {
+        font-weight: 700;
+        color: #263238;
+        margin-bottom: 0.5rem;
+        font-size: 1.1rem;
+    }
+    
+    .product-info-text .product-code {
+        background: #e0f7fa;
+        color: #00838f;
+        padding: 4px 10px;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        display: inline-block;
+        margin-bottom: 0.5rem;
+    }
+    
+    .product-info-text .brand-name {
+        color: #78909c;
+        font-size: 0.9rem;
+    }
+    
+    .out-of-stock-message {
+        color: #546e7a;
+        font-size: 1rem;
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    .btn-back {
+        background: linear-gradient(135deg, #00838f, #00bcd4);
+        border: none;
+        color: white;
+        padding: 12px 28px;
+        border-radius: 25px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+    
+    .btn-back:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 131, 143, 0.4);
+        color: white;
+    }
+    
+    .btn-all-products {
+        background: white;
+        border: 2px solid #00838f;
+        color: #00838f;
+        padding: 12px 28px;
+        border-radius: 25px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+    
+    .btn-all-products:hover {
+        background: #e0f7fa;
+        color: #00838f;
+    }
+    
+    .contact-info {
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #e0e0e0;
+    }
+    
+    .contact-info p {
+        color: #78909c;
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .contact-info a {
+        color: #00838f;
+        font-weight: 600;
+        text-decoration: none;
+    }
+    
+    .contact-info a:hover {
+        text-decoration: underline;
+    }
+</style>
+}
+
+<div class="out-of-stock-page">
+    <div class="out-of-stock-card">
+        <div class="out-of-stock-header">
+            <i class="fas fa-box-open"></i>
+            <h1>Sản phẩm tạm hết hàng</h1>
+            <p>Rất tiếc, sản phẩm này hiện không còn hàng</p>
+        </div>
+        
+        <div class="out-of-stock-body">
+            @if (product != null)
+            {
+                <div class="product-info">
+                    <img src="@(product.Thumbnail ?? "/images/product-placeholder.png")" alt="@product.Name" />
+                    <div class="product-info-text">
+                        <span class="product-code">@product.ProductCode</span>
+                        <h3>@product.Name</h3>
+                        @if (product.Brand != null)
+                        {
+                            <span class="brand-name"><i class="fas fa-tag me-1"></i>@product.Brand.Name</span>
+                        }
+                    </div>
+                </div>
+            }
+            
+            <p class="out-of-stock-message">
+                <i class="fas fa-info-circle me-2"></i>
+                Sản phẩm này hiện đang tạm hết hàng. Vui lòng quay lại sau hoặc liên hệ với chúng tôi để được tư vấn các sản phẩm tương tự.
+            </p>
+            
+            <div class="action-buttons">
+                <a href="javascript:history.back()" class="btn-back">
+                    <i class="fas fa-arrow-left me-2"></i>Quay lại
+                </a>
+                <a asp-controller="Home" asp-action="GetAllProducts" class="btn-all-products">
+                    <i class="fas fa-th-large me-2"></i>Xem sản phẩm khác
+                </a>
+            </div>
+            
+            <div class="contact-info">
+                <p><i class="fas fa-phone-alt me-2"></i>Liên hệ đặt hàng trước: <a href="tel:0383177504">0383 177 504</a></p>
+                <p><i class="fas fa-envelope me-2"></i>Hoặc gửi email: <a href="mailto:support@ntfishing.com">support@ntfishing.com</a></p>
+            </div>
+        </div>
+    </div>
+</div>

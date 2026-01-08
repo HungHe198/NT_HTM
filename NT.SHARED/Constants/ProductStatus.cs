@@ -32,5 +32,18 @@ namespace NT.SHARED.Constants
         /// Kiểm tra sản phẩm có đang hoạt động không
         /// </summary>
         public static bool IsActive(string? status) => status == Active;
+
+        /// <summary>
+        /// Lấy tên hiển thị trạng thái tồn kho dựa trên số lượng
+        /// </summary>
+        public static string GetStockDisplayName(int totalStock)
+        {
+            return totalStock > 0 ? "Còn hàng" : "Hết hàng";
+        }
+
+        /// <summary>
+        /// Kiểm tra sản phẩm còn hàng hay không
+        /// </summary>
+        public static bool IsInStock(int totalStock) => totalStock > 0;
     }
 }

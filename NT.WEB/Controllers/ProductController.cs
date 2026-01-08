@@ -86,6 +86,9 @@ namespace NT.WEB.Controllers
                 ? await _productService.GetAllAsync()
                 : await _productService.SearchByNameAsync(q);
 
+            // Dictionary để lưu tổng số lượng tồn kho của từng sản phẩm
+            var productStockQuantities = new Dictionary<Guid, int>();
+
             // ensure product has a thumbnail: pick first image from first active detail
             foreach (var p in model)
             {
@@ -103,19 +106,30 @@ namespace NT.WEB.Controllers
                     p.Status = NT.SHARED.Constants.ProductStatus.Active;
                 }
 
-                if (!string.IsNullOrWhiteSpace(p.Thumbnail)) continue;
+                // Tính tổng số lượng tồn kho từ các biến thể
                 try
                 {
                     var details = await _productDetailService.GetWithLookupsByProductIdAsync(p.Id);
-                    var firstDetail = details.FirstOrDefault();
-                    var firstImg = firstDetail?.Images?.FirstOrDefault();
-                    if (firstImg != null && !string.IsNullOrWhiteSpace(firstImg.ImageUrl))
+                    var totalStock = details.Where(d => d.IsActive).Sum(d => d.StockQuantity);
+                    productStockQuantities[p.Id] = totalStock;
+
+                    if (string.IsNullOrWhiteSpace(p.Thumbnail))
                     {
-                        p.Thumbnail = firstImg.ImageUrl;
+                        var firstDetail = details.FirstOrDefault();
+                        var firstImg = firstDetail?.Images?.FirstOrDefault();
+                        if (firstImg != null && !string.IsNullOrWhiteSpace(firstImg.ImageUrl))
+                        {
+                            p.Thumbnail = firstImg.ImageUrl;
+                        }
                     }
                 }
-                catch { }
+                catch
+                {
+                    productStockQuantities[p.Id] = 0;
+                }
             }
+
+            ViewBag.ProductStockQuantities = productStockQuantities;
             return View(model);
         }
 
@@ -184,10 +198,11 @@ namespace NT.WEB.Controllers
             // Chỉ hiển thị các biến thể có IsActive = true và StockQuantity > 0
             var details = allDetails.Where(d => d.IsActive && d.StockQuantity > 0).ToList();
             
-            // Nếu không có biến thể hoạt động nào, trả về NotFound
+            // Nếu không có biến thể hoạt động nào, hiển thị trang thông báo hết hàng
             if (!details.Any())
             {
-                return NotFound();
+                ViewBag.Product = product;
+                return View("OutOfStock");
             }
             
             var hardnessIds = details.Select(d => d.HardnessId).Distinct().ToList();
@@ -755,18 +770,23 @@ namespace NT.WEB.Controllers
             foreach (var p in items)
             {
                 decimal? min = null, max = null;
+                int totalStock = 0;
                 try
                 {
                     var details = await _productDetailService.GetByProductIdAsync(p.Id);
                     foreach (var d in details)
                     {
+                        if (d.IsActive)
+                        {
+                            totalStock += d.StockQuantity;
+                        }
                         if (min == null || d.Price < min) min = d.Price;
                         if (max == null || d.Price > max) max = d.Price;
                     }
                 }
                 catch { }
 
-                list.Add(new { p.Id, p.Name, p.ProductCode, p.Thumbnail, priceMin = min, priceMax = max });
+                list.Add(new { p.Id, p.Name, p.ProductCode, p.Thumbnail, priceMin = min, priceMax = max, totalStock, isInStock = totalStock > 0 });
             }
 
             return Json(list);
