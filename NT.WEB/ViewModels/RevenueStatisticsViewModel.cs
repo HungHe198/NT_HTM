@@ -59,6 +59,26 @@ namespace NT.WEB.ViewModels
         public List<CategoryProfitItem> ProfitByCategory { get; set; } = new();
 
         /// <summary>
+        /// Doanh thu bán hàng tại quầy (POS) theo tháng
+        /// </summary>
+        public List<ChannelRevenueItem> POSRevenue { get; set; } = new();
+
+        /// <summary>
+        /// Doanh thu bán hàng Online theo tháng
+        /// </summary>
+        public List<ChannelRevenueItem> OnlineRevenue { get; set; } = new();
+
+        /// <summary>
+        /// Tổng doanh thu POS trong tháng đang chọn
+        /// </summary>
+        public decimal CurrentMonthPOSRevenue { get; set; }
+
+        /// <summary>
+        /// Tổng doanh thu Online trong tháng đang chọn
+        /// </summary>
+        public decimal CurrentMonthOnlineRevenue { get; set; }
+
+        /// <summary>
         /// Doanh thu theo tháng (12 tháng gần nhất)
         /// </summary>
         public List<MonthlyRevenueItem> MonthlyRevenue { get; set; } = new();
@@ -163,5 +183,17 @@ namespace NT.WEB.ViewModels
         public string ProductCode { get; set; } = string.Empty;
         public int QuantitySold { get; set; }
         public decimal Revenue { get; set; }
+    }
+
+    /// <summary>
+    /// Doanh thu theo kênh bán hàng (POS/Online) theo tháng
+    /// </summary>
+    public class ChannelRevenueItem
+    {
+        public int Year { get; set; }
+        public int Month { get; set; }
+        public string Label { get; set; } = string.Empty;
+        public decimal Revenue { get; set; }
+        public int OrderCount { get; set; }
     }
 }

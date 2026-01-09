@@ -124,6 +124,9 @@ namespace NT.WEB.Controllers
             }
             catch { /* ignore mapping errors */ }
 
+            // Sắp xếp: hóa đơn cũ nhất ở trên, mới nhất ở dưới
+            list = list.OrderBy(o => o.CreatedTime).ToList();
+
             return View(list);
         }
 
@@ -144,6 +147,10 @@ namespace NT.WEB.Controllers
             {
                 list = list.Where(o => string.Equals(o.Status, status, StringComparison.Ordinal)).ToList();
             }
+            
+            // Sắp xếp: hóa đơn cũ nhất ở trên, mới nhất ở dưới
+            list = list.OrderBy(o => o.CreatedTime).ToList();
+            
             ViewBag.FilterStatus = status;
             return View("Index", list);
         }
