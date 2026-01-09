@@ -6,7 +6,12 @@
 
 <h1>Danh sách độ đàn hồi</h1>
 
-<p><a asp-action="Create" class="btn btn-primary">Thêm mới</a></p>
+<p>
+    <a asp-controller="Product" asp-action="Index" class="btn btn-secondary me-2">
+        <i class="bi bi-arrow-left"></i> Quay lại quản lý sản phẩm
+    </a>
+    <a asp-action="Create" class="btn btn-primary">Thêm mới</a>
+</p>
 
 <table class="table">
     <thead><tr><th>Tên</th><th>Mô tả</th><th>Thao tác</th></tr></thead>

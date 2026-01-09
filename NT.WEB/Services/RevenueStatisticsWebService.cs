@@ -84,6 +84,15 @@ namespace NT.WEB.Services
             // Lợi nhuận theo danh mục
             model.ProfitByCategory = await GetProfitByCategoryAsync(year, month);
 
+            // Doanh thu theo kênh bán hàng (POS và Online) 12 tháng gần nhất
+            var (posRevenue, onlineRevenue) = GetRevenueByChannel(ordersList, year, month);
+            model.POSRevenue = posRevenue;
+            model.OnlineRevenue = onlineRevenue;
+
+            // Tổng doanh thu POS và Online trong tháng đang chọn
+            model.CurrentMonthPOSRevenue = posRevenue.LastOrDefault()?.Revenue ?? 0;
+            model.CurrentMonthOnlineRevenue = onlineRevenue.LastOrDefault()?.Revenue ?? 0;
+
             // Doanh thu 12 tháng gần nhất
             model.MonthlyRevenue = GetMonthlyRevenue(ordersList, year, month);
 
@@ -285,6 +294,58 @@ namespace NT.WEB.Services
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Doanh thu theo kênh bán hàng (POS và Online) 12 tháng gần nhất
+        /// POS: Đơn hàng có Note chứa "Bán hàng tại quầy" hoặc "POS"
+        /// Online: Đơn hàng không có Note hoặc Note không chứa "Bán hàng tại quầy" và "POS"
+        /// </summary>
+        private (List<ChannelRevenueItem> posRevenue, List<ChannelRevenueItem> onlineRevenue) GetRevenueByChannel(List<Order> orders, int year, int month)
+        {
+            var posResult = new List<ChannelRevenueItem>();
+            var onlineResult = new List<ChannelRevenueItem>();
+
+            for (int i = 11; i >= 0; i--)
+            {
+                var targetDate = new DateTime(year, month, 1).AddMonths(-i);
+                var monthOrders = orders
+                    .Where(o => o.CreatedTime.Year == targetDate.Year && o.CreatedTime.Month == targetDate.Month)
+                    .ToList();
+
+                // Phân loại đơn hàng POS và Online
+                var posOrders = monthOrders
+                    .Where(o => !string.IsNullOrWhiteSpace(o.Note) && 
+                               (o.Note.Contains("Bán hàng tại quầy", StringComparison.OrdinalIgnoreCase) || 
+                                o.Note.Contains("POS", StringComparison.OrdinalIgnoreCase)))
+                    .ToList();
+
+                var onlineOrders = monthOrders
+                    .Where(o => string.IsNullOrWhiteSpace(o.Note) || 
+                               (!o.Note.Contains("Bán hàng tại quầy", StringComparison.OrdinalIgnoreCase) && 
+                                !o.Note.Contains("POS", StringComparison.OrdinalIgnoreCase)))
+                    .ToList();
+
+                posResult.Add(new ChannelRevenueItem
+                {
+                    Year = targetDate.Year,
+                    Month = targetDate.Month,
+                    Label = $"T{targetDate.Month:D2}",
+                    Revenue = posOrders.Sum(o => o.FinalAmount),
+                    OrderCount = posOrders.Count
+                });
+
+                onlineResult.Add(new ChannelRevenueItem
+                {
+                    Year = targetDate.Year,
+                    Month = targetDate.Month,
+                    Label = $"T{targetDate.Month:D2}",
+                    Revenue = onlineOrders.Sum(o => o.FinalAmount),
+                    OrderCount = onlineOrders.Count
+                });
+            }
+
+            return (posResult, onlineResult);
         }
 
         /// <summary>

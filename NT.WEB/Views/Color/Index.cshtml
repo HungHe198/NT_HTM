@@ -6,7 +6,12 @@
 
 <h1>Màu sắc</h1>
 
-<p><a asp-action="Create" class="btn btn-primary">Tạo mới</a></p>
+<p>
+    <a asp-controller="Product" asp-action="Index" class="btn btn-secondary me-2">
+        <i class="bi bi-arrow-left"></i> Quay lại quản lý sản phẩm
+    </a>
+    <a asp-action="Create" class="btn btn-primary">Tạo mới</a>
+</p>
 
 <table class="table">
     <thead><tr><th>Tên</th><th>Mã màu</th><th></th></tr></thead>
