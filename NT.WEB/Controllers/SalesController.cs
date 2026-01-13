@@ -215,7 +215,7 @@ namespace NT.WEB.Controllers
         }
 
         /// <summary>
-        /// API: Tìm kiếm sản phẩm theo tên/mã
+        /// API: Tìm kiếm sản phẩm theo tên/mã (chỉ sản phẩm đang hoạt động)
         /// </summary>
         [HttpGet]
         public async Task<IActionResult> SearchProducts(string q)
@@ -228,6 +228,8 @@ namespace NT.WEB.Controllers
             q = q.ToLower().Trim();
             var products = await _productRepo.GetAllAsync();
             var filtered = (products ?? Enumerable.Empty<Product>())
+                // Chỉ lấy sản phẩm đang hoạt động (Status = "1" hoặc null/empty)
+                .Where(p => NT.SHARED.Constants.ProductStatus.IsActive(p.Status) || string.IsNullOrEmpty(p.Status))
                 .Where(p => !string.IsNullOrEmpty(p.Name) &&
                     (p.Name.ToLower().Contains(q) || 
                      (!string.IsNullOrEmpty(p.ProductCode) && p.ProductCode.ToLower().Contains(q))))
@@ -240,11 +242,21 @@ namespace NT.WEB.Controllers
 
         /// <summary>
         /// API: Lấy biến thể sản phẩm (ProductDetail) theo ProductId
+        /// Chỉ trả về biến thể nếu sản phẩm đang hoạt động
         /// </summary>
         [HttpGet]
         public async Task<IActionResult> GetProductVariants(Guid productId)
         {
             if (productId == Guid.Empty) return Json(new List<object>());
+
+            // Kiểm tra sản phẩm có đang hoạt động không
+            var product = await _productRepo.GetByIdAsync(productId);
+            if (product == null)
+                return Json(new List<object>());
+            
+            // Nếu sản phẩm ngừng bán, không cho phép mua
+            if (!NT.SHARED.Constants.ProductStatus.IsActive(product.Status) && !string.IsNullOrEmpty(product.Status))
+                return Json(new List<object>());
 
             // Load ProductDetails với các navigation properties
             var details = await _productDetailRepo.FindAsync(

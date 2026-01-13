@@ -1753,6 +1753,31 @@
         if (e.key === 'Enter') applyVoucher();
     });
 
+    // Tự động áp dụng voucher khi chọn từ datalist
+    document.getElementById('voucher-code')?.addEventListener('change', (e) => {
+        const code = e.target.value.trim();
+        if (code) {
+            applyVoucher();
+        }
+    });
+
+    // Cũng lắng nghe sự kiện input để bắt khi chọn từ datalist
+    document.getElementById('voucher-code')?.addEventListener('input', (e) => {
+        const code = e.target.value.trim();
+        // Kiểm tra xem giá trị có khớp với một option trong datalist không
+        const datalist = document.getElementById('voucher-list');
+        if (datalist) {
+            const options = datalist.querySelectorAll('option');
+            for (const option of options) {
+                if (option.value === code) {
+                    // Đã chọn một mã từ danh sách - tự động áp dụng
+                    applyVoucher();
+                    break;
+                }
+            }
+        }
+    });
+
     // Save draft locally instead of restoring stock when user leaves
     function saveDraft() {
         try {
@@ -1933,6 +1958,20 @@
             cart = [];
             customerData = null;
         }
+        
+        // Reset mã giảm giá khi chuyển hóa đơn
+        discountAmount = 0;
+        document.getElementById('voucher-code').value = '';
+        document.getElementById('voucher-message').innerHTML = '';
+        
+        // Reset ghi chú và phương thức thanh toán
+        document.getElementById('order-note').value = '';
+        document.getElementById('payment-method').selectedIndex = 0;
+        
+        // Reset trạng thái pending order
+        isEditingPendingOrder = false;
+        currentPendingOrderId = null;
+        
         // update customer UI to reflect current invoice
         if (customerData && customerData.id) {
             document.getElementById('customer-id').value = customerData.id || '';

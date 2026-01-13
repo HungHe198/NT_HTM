@@ -159,17 +159,18 @@
         </div>
 
         <div class="col-md-4">
-            <div class="chart-container" style="height: 350px;">
-                <h6 class="chart-title text-primary">DOANH THU THEO NHÓM SP</h6>
+             <div class="chart-container" style="height: 350px;">
+                <h6 class="chart-title text-primary"></h6>
                 <canvas id="categoryRevenueChart"></canvas>
             </div>
+           
         </div>
 
         <div class="col-md-4">
-            <div class="chart-container" style="height: 350px;">
-                <h6 class="chart-title text-success">LỢI NHUẬN HĐKD THEO NHÓM SP</h6>
+             <div class="chart-container" style="height: 350px;">
+                <h6 class="chart-title text-success"></h6>
                 <canvas id="categoryProfitChart"></canvas>
-            </div>
+             </div>
         </div>
 
         <div class="col-md-2">
@@ -179,12 +180,7 @@
                     @(Model.RevenueGrowthRate >= 0 ? "+" : "")@Model.RevenueGrowthRate%
                 </div>
             </div>
-            <div class="chart-container text-center" style="height: 165px;">
-                <h6 class="chart-title text-info">ROS TOÀN CÔNG TY</h6>
-                <div class="ros-circle @(Model.ROS >= 0 ? "ros-positive" : "ros-negative")">
-                    @Model.ROS%
-                </div>
-            </div>
+           
         </div>
     </div>
 

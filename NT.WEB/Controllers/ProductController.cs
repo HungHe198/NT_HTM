@@ -174,11 +174,9 @@ namespace NT.WEB.Controllers
             if (product is null) return NotFound();
 
             // Kiểm tra sản phẩm có đang hoạt động không (Status = "1")
-            // Nếu sản phẩm không hoạt động, khách hàng không được phép xem
-            if (product.Status != NT.SHARED.Constants.ProductStatus.Active)
-            {
-                return NotFound();
-            }
+            // Nếu sản phẩm ngừng bán, vẫn hiển thị trang nhưng với thông báo "Ngừng bán"
+            bool isDiscontinued = !NT.SHARED.Constants.ProductStatus.IsActive(product.Status) && !string.IsNullOrEmpty(product.Status);
+            ViewBag.IsDiscontinued = isDiscontinued;
 
             // Load Brand for the product
             if (product.BrandId != Guid.Empty)
@@ -188,15 +186,32 @@ namespace NT.WEB.Controllers
 
             var allDetails = (await _productDetailService.GetWithLookupsByProductIdAsync(id)).ToList();
             
-            // Chỉ hiển thị các biến thể có IsActive = true và StockQuantity > 0
-            var details = allDetails.Where(d => d.IsActive && d.StockQuantity > 0).ToList();
+            // Nếu sản phẩm ngừng bán, vẫn hiển thị thông tin nhưng không cho mua
+            bool isOutOfStock = false;
+            List<NT.SHARED.Models.ProductDetail> details;
             
-            // Nếu không có biến thể hoạt động nào, vẫn hiển thị sản phẩm nhưng đánh dấu hết hàng
-            bool isOutOfStock = !details.Any();
-            ViewBag.IsOutOfStock = isOutOfStock;
+            if (isDiscontinued)
+            {
+                // Sản phẩm ngừng bán - hiển thị tất cả biến thể nhưng đánh dấu không thể mua
+                details = allDetails.Where(d => d.IsActive).ToList();
+                if (!details.Any())
+                {
+                    details = allDetails.Take(1).ToList();
+                }
+            }
+            else
+            {
+                // Chỉ hiển thị các biến thể có IsActive = true và StockQuantity > 0
+                details = allDetails.Where(d => d.IsActive && d.StockQuantity > 0).ToList();
+                
+                // Nếu không có biến thể hoạt động nào, vẫn hiển thị sản phẩm nhưng đánh dấu hết hàng
+                isOutOfStock = !details.Any();
+            }
             
-            // Nếu hết hàng, vẫn lấy tất cả details để hiển thị thông tin sản phẩm (nhưng không cho mua)
-            if (isOutOfStock)
+            ViewBag.IsOutOfStock = isOutOfStock || isDiscontinued;
+            
+            // Nếu hết hàng (và không phải ngừng bán), vẫn lấy tất cả details để hiển thị thông tin sản phẩm (nhưng không cho mua)
+            if (isOutOfStock && !isDiscontinued)
             {
                 details = allDetails.Where(d => d.IsActive).ToList();
                 // Nếu không có biến thể nào cả, vẫn hiển thị thông tin sản phẩm cơ bản
@@ -483,14 +498,13 @@ namespace NT.WEB.Controllers
                 return View("ProductDetailCreate", model);
             }
 
-            // Prevent duplicate variant (same Length + Hardness + Color for the same product)
+            // Prevent duplicate variant (same Length + Hardness for the same product)
             var existingSame = (await _productDetailService.FindAsync(pd => pd.ProductId == productId
                                                                                && pd.LengthId == model.LengthId
-                                                                               && pd.HardnessId == model.HardnessId
-                                                                               && pd.ColorId == model.ColorId)).FirstOrDefault();
+                                                                               && pd.HardnessId == model.HardnessId)).FirstOrDefault();
             if (existingSame != null)
             {
-                ModelState.AddModelError(string.Empty, "Biến thể giống đã tồn tại");
+                ModelState.AddModelError(string.Empty, "Đã tồn tại biến thể có cùng Chiều dài và Độ cứng. Vui lòng chọn thông số khác.");
                 ViewBag.ProductId = productId;
                 ViewBag.LengthSelectList = new SelectList(await _lengthService.GetAllAsync(), "Id", "Name", model.LengthId);
                 ViewBag.SurfaceFinishSelectList = new SelectList(await _surfaceFinishService.GetAllAsync(), "Id", "Name", model.SurfaceFinishId);
@@ -667,15 +681,14 @@ namespace NT.WEB.Controllers
                 return View("ProductDetailEdit", model);
             }
 
-            // Prevent duplicate variant on edit: same Length + Hardness + Color for the same product (exclude self)
+            // Prevent duplicate variant on edit: same Length + Hardness for the same product (exclude self)
             var dup = (await _productDetailService.FindAsync(pd => pd.ProductId == model.ProductId
                                                                     && pd.LengthId == model.LengthId
                                                                     && pd.HardnessId == model.HardnessId
-                                                                    && pd.ColorId == model.ColorId
                                                                     && pd.Id != model.Id)).FirstOrDefault();
             if (dup != null)
             {
-                ModelState.AddModelError(string.Empty, "Biến thể giống đã tồn tại");
+                ModelState.AddModelError(string.Empty, "Đã tồn tại biến thể có cùng Chiều dài và Độ cứng. Vui lòng chọn thông số khác.");
                 var existingImages = await _productImageService.GetByProductDetailIdAsync(id);
                 ViewBag.ExistingImages = existingImages.ToList();
                 ViewBag.LengthSelectList = new SelectList(await _lengthService.GetAllAsync(), "Id", "Name", model.LengthId);
@@ -771,6 +784,7 @@ namespace NT.WEB.Controllers
             foreach (var p in items)
             {
                 decimal? min = null, max = null;
+                int totalStock = 0;
                 try
                 {
                     var details = await _productDetailService.GetByProductIdAsync(p.Id);
@@ -778,11 +792,12 @@ namespace NT.WEB.Controllers
                     {
                         if (min == null || d.Price < min) min = d.Price;
                         if (max == null || d.Price > max) max = d.Price;
+                        totalStock += d.StockQuantity;
                     }
                 }
                 catch { }
 
-                list.Add(new { p.Id, p.Name, p.ProductCode, p.Thumbnail, priceMin = min, priceMax = max });
+                list.Add(new { p.Id, p.Name, p.ProductCode, p.Thumbnail, priceMin = min, priceMax = max, status = p.Status, totalStock });
             }
 
             return Json(list);
