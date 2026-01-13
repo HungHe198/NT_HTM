@@ -158,25 +158,20 @@
             </div>
         </div>
 
-            <div class="col-md-4">
-                <div class="chart-container" style="height: 350px;">
-                    <h6 class="chart-title text-primary">DOANH THU BÁN HÀNG TẠI QUẦY (POS)</h6>
-                    <div class="text-center mb-2">
-                        <span class="badge bg-primary">Tháng @Model.SelectedMonth: @Model.CurrentMonthPOSRevenue.ToString("N0")₫</span>
-                    </div>
-                    <canvas id="posRevenueChart"></canvas>
-                </div>
+        <div class="col-md-4">
+             <div class="chart-container" style="height: 350px;">
+                <h6 class="chart-title text-primary"></h6>
+                <canvas id="categoryRevenueChart"></canvas>
             </div>
+           
+        </div>
 
-            <div class="col-md-4">
-                <div class="chart-container" style="height: 350px;">
-                    <h6 class="chart-title text-success">DOANH THU BÁN HÀNG ONLINE</h6>
-                    <div class="text-center mb-2">
-                        <span class="badge bg-success">Tháng @Model.SelectedMonth: @Model.CurrentMonthOnlineRevenue.ToString("N0")₫</span>
-                    </div>
-                    <canvas id="onlineRevenueChart"></canvas>
-                </div>
-            </div>
+        <div class="col-md-4">
+             <div class="chart-container" style="height: 350px;">
+                <h6 class="chart-title text-success"></h6>
+                <canvas id="categoryProfitChart"></canvas>
+             </div>
+        </div>
 
         <div class="col-md-2">
             <div class="chart-container text-center" style="height: 165px;">
@@ -185,7 +180,7 @@
                     @(Model.RevenueGrowthRate >= 0 ? "+" : "")@Model.RevenueGrowthRate%
                 </div>
             </div>
-          
+           
         </div>
     </div>
 
@@ -291,107 +286,90 @@
 </div>
 
 @section Scripts {
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    // Dữ liệu từ Model
-    const posRevenueLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.POSRevenue.Select(x => x.Label).ToList()));
-    const posRevenueData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.POSRevenue.Select(x => x.Revenue).ToList()));
-        
-    const onlineRevenueLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.OnlineRevenue.Select(x => x.Label).ToList()));
-    const onlineRevenueData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.OnlineRevenue.Select(x => x.Revenue).ToList()));
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Dữ liệu từ Model
+        const categoryLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.RevenueByCategory.Select(x => x.CategoryName).ToList()));
+        const categoryRevenue = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.RevenueByCategory.Select(x => x.Revenue).ToList()));
+        const categoryProfit = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ProfitByCategory.Select(x => x.Profit).ToList()));
+        const categoryProfitLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ProfitByCategory.Select(x => x.CategoryName).ToList()));
 
-    const monthlyLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MonthlyRevenue.Select(x => x.Label).ToList()));
-    const monthlyRevenue = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MonthlyRevenue.Select(x => x.Revenue).ToList()));
+        const monthlyLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MonthlyRevenue.Select(x => x.Label).ToList()));
+        const monthlyRevenue = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MonthlyRevenue.Select(x => x.Revenue).ToList()));
 
-    const monthlyGrowthLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MonthlyGrowth.Select(x => x.Label).ToList()));
-    const monthlyGrowth = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MonthlyGrowth.Select(x => x.GrowthRate).ToList()));
+        const monthlyGrowthLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MonthlyGrowth.Select(x => x.Label).ToList()));
+        const monthlyGrowth = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MonthlyGrowth.Select(x => x.GrowthRate).ToList()));
 
-    const dailyLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.DailyRevenue.Select(x => x.Label).ToList()));
-    const dailyRevenue = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.DailyRevenue.Select(x => x.Revenue).ToList()));
+        const dailyLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.DailyRevenue.Select(x => x.Label).ToList()));
+        const dailyRevenue = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.DailyRevenue.Select(x => x.Revenue).ToList()));
 
-    // Màu sắc cho biểu đồ
-    const chartColors = [
-        'rgba(255, 193, 7, 0.8)',   // Vàng
-        'rgba(40, 167, 69, 0.8)',   // Xanh lá
-        'rgba(255, 87, 34, 0.8)',   // Cam
-        'rgba(156, 39, 176, 0.8)',  // Tím
-        'rgba(255, 152, 0, 0.8)',   // Cam nhạt
-        'rgba(0, 188, 212, 0.8)',   // Cyan
-        'rgba(233, 30, 99, 0.8)',   // Hồng
-        'rgba(63, 81, 181, 0.8)'    // Xanh dương
-    ];
+        // Màu sắc cho biểu đồ
+        const chartColors = [
+            'rgba(255, 193, 7, 0.8)',   // Vàng
+            'rgba(40, 167, 69, 0.8)',   // Xanh lá
+            'rgba(255, 87, 34, 0.8)',   // Cam
+            'rgba(156, 39, 176, 0.8)',  // Tím
+            'rgba(255, 152, 0, 0.8)',   // Cam nhạt
+            'rgba(0, 188, 212, 0.8)',   // Cyan
+            'rgba(233, 30, 99, 0.8)',   // Hồng
+            'rgba(63, 81, 181, 0.8)'    // Xanh dương
+        ];
 
-    // Biểu đồ doanh thu POS (bán hàng tại quầy)
-    new Chart(document.getElementById('posRevenueChart'), {
-        type: 'bar',
-        data: {
-            labels: posRevenueLabels,
-            datasets: [{
-                label: 'Doanh thu POS (triệu)',
-                data: posRevenueData.map(v => v / 1000000),
-                backgroundColor: 'rgba(54, 162, 235, 0.8)',
-                borderColor: 'rgba(54, 162, 235, 1)',
-                borderWidth: 1,
-                borderRadius: 5
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            return context.parsed.y.toFixed(2) + ' triệu';
-                        }
+        // Biểu đồ doanh thu theo danh mục
+        new Chart(document.getElementById('categoryRevenueChart'), {
+            type: 'bar',
+            data: {
+                labels: categoryLabels,
+                datasets: [{
+                    label: 'Doanh thu (triệu)',
+                    data: categoryRevenue.map(v => v / 1000000),
+                    backgroundColor: chartColors,
+                    borderWidth: 0,
+                    borderRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Millions' }
                     }
                 }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    title: { display: true, text: 'Triệu VNĐ' }
-                }
             }
-        }
-    });
+        });
 
-    // Biểu đồ doanh thu Online
-    new Chart(document.getElementById('onlineRevenueChart'), {
-        type: 'bar',
-        data: {
-            labels: onlineRevenueLabels,
-            datasets: [{
-                label: 'Doanh thu Online (triệu)',
-                data: onlineRevenueData.map(v => v / 1000000),
-                backgroundColor: 'rgba(40, 167, 69, 0.8)',
-                borderColor: 'rgba(40, 167, 69, 1)',
-                borderWidth: 1,
-                borderRadius: 5
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            return context.parsed.y.toFixed(2) + ' triệu';
-                        }
+        // Biểu đồ lợi nhuận theo danh mục
+        new Chart(document.getElementById('categoryProfitChart'), {
+            type: 'bar',
+            data: {
+                labels: categoryProfitLabels,
+                datasets: [{
+                    label: 'Lợi nhuận (triệu)',
+                    data: categoryProfit.map(v => v / 1000000),
+                    backgroundColor: chartColors,
+                    borderWidth: 0,
+                    borderRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Millions' }
                     }
                 }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    title: { display: true, text: 'Triệu VNĐ' }
-                }
             }
-        }
-    });
+        });
 
         // Biểu đồ doanh thu 12 tháng
         new Chart(document.getElementById('monthlyRevenueChart'), {

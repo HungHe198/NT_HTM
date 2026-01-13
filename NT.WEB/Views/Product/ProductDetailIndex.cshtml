@@ -6,6 +6,7 @@
     var hardnessOptions = ViewBag.HardnessOptions as IEnumerable<NT.SHARED.Models.Hardness> ?? Enumerable.Empty<NT.SHARED.Models.Hardness>();
     var lengthOptions = ViewBag.LengthOptions as IEnumerable<NT.SHARED.Models.Length> ?? Enumerable.Empty<NT.SHARED.Models.Length>();
     var isOutOfStock = ViewBag.IsOutOfStock as bool? ?? false;
+    var isDiscontinued = ViewBag.IsDiscontinued as bool? ?? false;
     
     var allVariantImages = new List<(Guid detailId, string imageUrl)>();
     foreach (var d in details)
@@ -592,9 +593,20 @@
                         <p class="text-muted lead mb-3">@product.ShortDescription</p>
                     }
 
-                    <!-- Thông báo hết hàng -->
-                    @if (isOutOfStock)
+                    <!-- Thông báo ngừng bán hoặc hết hàng -->
+                    @if (isDiscontinued)
                     {
+                        <div class="alert alert-warning d-flex align-items-center mb-3" role="alert" style="border-radius: 12px; background: linear-gradient(135deg, #fff3e0, #ffe0b2); border: none;">
+                            <i class="fas fa-ban fa-2x me-3" style="color: #e65100;"></i>
+                            <div>
+                                <h5 class="alert-heading mb-1" style="color: #e65100;">Sản phẩm ngừng bán</h5>
+                                <p class="mb-0" style="color: #f57c00;">Rất tiếc, sản phẩm này hiện đã ngừng kinh doanh. Vui lòng chọn sản phẩm khác hoặc liên hệ shop để được tư vấn.</p>
+                            </div>
+                        </div>
+                    }
+                    else if (isOutOfStock)
+                    {
+                        <!-- Thông báo hết hàng - chỉ hiển thị khi không phải ngừng bán -->
                         <div class="alert alert-danger d-flex align-items-center mb-3" role="alert" style="border-radius: 12px;">
                             <i class="fas fa-exclamation-circle fa-2x me-3"></i>
                             <div>
@@ -620,7 +632,7 @@
                 </div>
 
                 <!-- Variant Selection Card -->
-                @if (!isOutOfStock)
+                @if (!isOutOfStock && !isDiscontinued)
                 {
                 <div class="variant-card">
                     <h5 class="variant-card-title">
@@ -688,6 +700,22 @@
                         <i class="fas fa-bolt"></i> Mua ngay
                     </button>
                 </div>
+                }
+                else if (isDiscontinued)
+                {
+                    <!-- Thông báo và nút liên hệ khi ngừng bán -->
+                    <div class="variant-card">
+                        <div class="text-center py-4">
+                            <i class="fas fa-store-slash fa-4x text-muted mb-3"></i>
+                            <h5 class="text-muted">Sản phẩm ngừng bán</h5>
+                            <p class="text-muted mb-4">Sản phẩm này đã ngừng kinh doanh. Vui lòng xem các sản phẩm khác hoặc liên hệ chúng tôi để được tư vấn.</p>
+                            <div class="d-grid gap-2 d-sm-flex justify-content-center">
+                                <a href="/" class="btn btn-outline-primary action-btn">
+                                    <i class="fas fa-home"></i> Về trang chủ
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                 }
                 else
                 {
@@ -986,6 +1014,7 @@
     const detailImagesMap = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(detailImages.ToDictionary(kv => kv.Key.ToString(), kv => kv.Value)));
     const productThumbnail = '@Html.Raw((product?.Thumbnail ?? "/images/product-placeholder.png").Replace("'", "\\'"))';
     const isOutOfStock = @(isOutOfStock ? "true" : "false");
+    const isDiscontinued = @(isDiscontinued ? "true" : "false");
 
     function openLightbox(imageSrc) {
         document.getElementById('lightboxImage').src = imageSrc;
@@ -1026,8 +1055,8 @@
         }
     }
 
-    // Chỉ khởi tạo các chức năng chọn biến thể nếu không hết hàng
-    if (!isOutOfStock) {
+    // Chỉ khởi tạo các chức năng chọn biến thể nếu không hết hàng và không ngừng bán
+    if (!isOutOfStock && !isDiscontinued) {
         let selectedHardnessId = null;
         let selectedLengthId = null;
 
