@@ -87,6 +87,7 @@ namespace NT.WEB.Controllers
                 : await _productService.SearchByNameAsync(q);
 
             // ensure product has a thumbnail: pick first image from first active detail
+            // also load ProductDetails to calculate total stock
             foreach (var p in model)
             {
                 // Ensure Brand is loaded so the view can display brand name
@@ -103,15 +104,21 @@ namespace NT.WEB.Controllers
                     p.Status = NT.SHARED.Constants.ProductStatus.Active;
                 }
 
-                if (!string.IsNullOrWhiteSpace(p.Thumbnail)) continue;
+                // Load ProductDetails for stock calculation and thumbnail
                 try
                 {
                     var details = await _productDetailService.GetWithLookupsByProductIdAsync(p.Id);
-                    var firstDetail = details.FirstOrDefault();
-                    var firstImg = firstDetail?.Images?.FirstOrDefault();
-                    if (firstImg != null && !string.IsNullOrWhiteSpace(firstImg.ImageUrl))
+                    p.ProductDetails = details.ToList();
+                    
+                    // Set thumbnail from first detail's image if not already set
+                    if (string.IsNullOrWhiteSpace(p.Thumbnail))
                     {
-                        p.Thumbnail = firstImg.ImageUrl;
+                        var firstDetail = details.FirstOrDefault();
+                        var firstImg = firstDetail?.Images?.FirstOrDefault();
+                        if (firstImg != null && !string.IsNullOrWhiteSpace(firstImg.ImageUrl))
+                        {
+                            p.Thumbnail = firstImg.ImageUrl;
+                        }
                     }
                 }
                 catch { }
@@ -184,10 +191,19 @@ namespace NT.WEB.Controllers
             // Chỉ hiển thị các biến thể có IsActive = true và StockQuantity > 0
             var details = allDetails.Where(d => d.IsActive && d.StockQuantity > 0).ToList();
             
-            // Nếu không có biến thể hoạt động nào, trả về NotFound
-            if (!details.Any())
+            // Nếu không có biến thể hoạt động nào, vẫn hiển thị sản phẩm nhưng đánh dấu hết hàng
+            bool isOutOfStock = !details.Any();
+            ViewBag.IsOutOfStock = isOutOfStock;
+            
+            // Nếu hết hàng, vẫn lấy tất cả details để hiển thị thông tin sản phẩm (nhưng không cho mua)
+            if (isOutOfStock)
             {
-                return NotFound();
+                details = allDetails.Where(d => d.IsActive).ToList();
+                // Nếu không có biến thể nào cả, vẫn hiển thị thông tin sản phẩm cơ bản
+                if (!details.Any())
+                {
+                    details = allDetails.Take(1).ToList(); // Lấy ít nhất 1 để hiển thị thông tin
+                }
             }
             
             var hardnessIds = details.Select(d => d.HardnessId).Distinct().ToList();
