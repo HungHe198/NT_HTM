@@ -102,7 +102,7 @@ namespace NT.WEB.Controllers
                     // ignore timezone conversion errors
                 }
             }
-            // Nếu một số đơn có phone nhưng không tham chiếu Customer, thử map bằng phone để hiển thị tên khách
+            // Map customer info for orders without proper reference
             try
             {
                 var customers = await _customerService.GetAllAsyncWithUser();
@@ -124,7 +124,7 @@ namespace NT.WEB.Controllers
             }
             catch { /* ignore mapping errors */ }
 
-            // Sắp xếp: hóa đơn cũ nhất ở trên, mới nhất ở dưới
+            // Sắp xếp theo thời gian tạo: đơn cũ nhất lên trên, đơn mới nhất ở dưới
             list = list.OrderBy(o => o.CreatedTime).ToList();
 
             return View(list);
@@ -147,10 +147,6 @@ namespace NT.WEB.Controllers
             {
                 list = list.Where(o => string.Equals(o.Status, status, StringComparison.Ordinal)).ToList();
             }
-            
-            // Sắp xếp: hóa đơn cũ nhất ở trên, mới nhất ở dưới
-            list = list.OrderBy(o => o.CreatedTime).ToList();
-            
             ViewBag.FilterStatus = status;
             return View("Index", list);
         }

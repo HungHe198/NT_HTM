@@ -125,6 +125,14 @@ namespace NT.WEB.Controllers
             if (cart == null) return Forbid();
             var detail = await _productDetailService.GetByIdAsync(productDetailId);
             if (detail is null) return NotFound();
+            
+            // Kiểm tra sản phẩm có đang hoạt động không (Status = "1")
+            // Nếu sản phẩm ngừng bán, không cho phép thêm vào giỏ hàng
+            if (detail.Product != null && !NT.SHARED.Constants.ProductStatus.IsActive(detail.Product.Status) && !string.IsNullOrEmpty(detail.Product.Status))
+            {
+                TempData["Error"] = "Sản phẩm này đã ngừng bán và không thể thêm vào giỏ hàng.";
+                return Redirect($"/CartDetail?cartId={cart.Id}");
+            }
 
             // Kiểm tra số lượng tồn kho
             var existingDb = (await _cartDetailService.FindAsync(cd => cd.CartId == cart.Id && cd.ProductDetailId == productDetailId))?.FirstOrDefault();
