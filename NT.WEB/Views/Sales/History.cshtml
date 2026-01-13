@@ -109,6 +109,7 @@
                                     <td>@(order.PaymentMethod?.Name ?? "N/A")</td>
                                     <td>
                                         @{
+                                            // Đơn hàng POS (bán tại quầy) - sử dụng trạng thái phù hợp
                                             string statusBadge = order.Status switch
                                             {
                                                 "-1" => "badge bg-danger",
@@ -118,13 +119,12 @@
                                                 "3" => "badge bg-success",
                                                 _ => "badge bg-secondary"
                                             };
-                                            // Với đơn hàng POS (bán tại quầy), hiển thị "Hoàn thành" thay vì "Giao thành công"
                                             string statusText = order.Status switch
                                             {
                                                 "-1" => "Đã hủy",
-                                                "0" => "Chờ xác nhận",
+                                                "0" => "Chờ thanh toán",
                                                 "1" => "Đã xác nhận",
-                                                "2" => "Đang giao",
+                                                "2" => "Đang xử lý",
                                                 "3" => "Hoàn thành",
                                                 _ => "Không rõ"
                                             };

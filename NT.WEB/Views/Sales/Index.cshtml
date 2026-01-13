@@ -187,13 +187,10 @@
 
         <!-- Add to Cart Button -->
           <button class="btn btn-success btn-lg w-100" onclick="addToCart()">
-        <i class="fas fa-cart-plus"></i> Thêm Sản Phẩm
+        <i class="fas fa-cart-plus"></i> Thêm vào giỏ
        </button>
        
-       <div class="form-check form-switch mt-2">
-           <input class="form-check-input" type="checkbox" id="add-for-customer-toggle">
-           <label class="form-check-label" for="add-for-customer-toggle">Thêm cho khách khác (tạo/ghép đơn chờ)</label>
-       </div>
+      
 
        <div id="add-for-customer-panel" style="display:none;">
            <div class="input-group mb-2 mt-2">
@@ -213,7 +210,7 @@
     <!-- Cart Items Table -->
 <div class="card shadow-sm mt-3">
          <div class="card-header bg-info text-white fw-bold">
-    (<span id="cart-count">0</span> sản phẩm)
+   <i class="fas fa-shopping-cart"></i> Giỏ hàng (<span id="cart-count">0</span> sản phẩm)
              </div>
         <div class="card-body p-0">
      <div class="table-responsive">
@@ -1060,6 +1057,9 @@
                 clearCartInternal();
                 refreshPendingOrders();
 
+                // Lưu draft ngay trước khi redirect để các hóa đơn khác không bị mất
+                try { saveDraft(); } catch (e) { /* ignore */ }
+
                 // Redirect to print receipt
                 setTimeout(() => {
                     window.location.href = `/Sales/PrintReceipt?orderId=${result.orderId}`;
@@ -1589,8 +1589,11 @@
 
             if (result.success) {
                 showToast('Tạo đơn hàng thành công!', 'success');
-                // Reset form
+                // Reset form - xóa hóa đơn hiện tại và giữ lại các hóa đơn khác
                 clearCartInternal();
+                
+                // Lưu draft ngay trước khi redirect để các hóa đơn khác không bị mất
+                try { saveDraft(); } catch (e) { /* ignore */ }
                 
                 // Redirect to print receipt after 1.5s
                 setTimeout(() => {
@@ -1606,42 +1609,65 @@
     }
 
     // Clear cart internal (không hoàn lại tồn kho - dùng sau khi tạo đơn thành công)
+    // CHỈ XÓA HÓA ĐƠN HIỆN TẠI, GIỮ LẠI CÁC HÓA ĐƠN KHÁC
     function clearCartInternal() {
-        // Xóa cart và customer data của hóa đơn hiện tại
-        cart = [];
-        customerData = null;
+        // Xóa hóa đơn hiện tại
+        if (invoices.length > 1) {
+            // Có nhiều hóa đơn - chỉ xóa hóa đơn hiện tại
+            invoices.splice(activeInvoiceIndex, 1);
+            
+            // Điều chỉnh active index
+            if (activeInvoiceIndex >= invoices.length) {
+                activeInvoiceIndex = invoices.length - 1;
+            }
+            
+            // Chuyển sang hóa đơn còn lại
+            cart = invoices[activeInvoiceIndex]?.cart || [];
+            customerData = invoices[activeInvoiceIndex]?.customerData || null;
+        } else {
+            // Chỉ có 1 hóa đơn - reset về trạng thái ban đầu
+            invoices[0] = { id: 1, name: 'Hóa đơn 1', cart: [], customerData: null };
+            cart = [];
+            customerData = null;
+            activeInvoiceIndex = 0;
+        }
+        
         discountAmount = 0;
         totalAmount = 0;
         isEditingPendingOrder = false;
         currentPendingOrderId = null;
         
-        // Cập nhật hóa đơn hiện tại trong danh sách invoices
-        if (invoices[activeInvoiceIndex]) {
-            invoices[activeInvoiceIndex].cart = [];
-            invoices[activeInvoiceIndex].customerData = null;
+        updateCart();
+        renderInvoiceTabs();
+        
+        // Cập nhật UI customer từ hóa đơn mới active
+        if (customerData && customerData.id) {
+            document.getElementById('customer-id').value = customerData.id || '';
+            document.getElementById('customer-phone').value = customerData.phone || '';
+            document.getElementById('customer-name').value = customerData.name || '';
+            document.getElementById('customer-address').value = customerData.address || '';
+            selectCustomerType('member');
+        } else if (customerData && customerData.name === 'Khách vãng lai') {
+            selectCustomerType('guest');
+            document.getElementById('customer-id').value = '';
+            document.getElementById('customer-phone').value = '';
+            document.getElementById('customer-name').value = '';
+            document.getElementById('customer-address').value = '';
+        } else {
+            document.getElementById('customer-phone').value = '';
+            document.getElementById('customer-name').value = '';
+            document.getElementById('customer-address').value = '';
+            document.getElementById('customer-id').value = '';
+            selectCustomerType('member');
         }
         
-        updateCart();
-        document.getElementById('customer-phone').value = '';
-        document.getElementById('customer-name').value = '';
-        document.getElementById('customer-address').value = '';
-        document.getElementById('customer-id').value = '';
         document.getElementById('voucher-code').value = '';
         document.getElementById('voucher-message').innerHTML = '';
         document.getElementById('order-note').value = '';
         document.getElementById('payment-method').selectedIndex = 0;
-        selectCustomerType('member');
         
-        // Lưu lại draft với các hóa đơn còn lại (không xóa toàn bộ localStorage)
-        // Chỉ xóa localStorage nếu tất cả hóa đơn đều trống
-        try {
-            const hasNonEmptyInvoice = invoices.some(inv => inv && Array.isArray(inv.cart) && inv.cart.length > 0);
-            if (hasNonEmptyInvoice) {
-                saveDraft(); // Lưu lại các hóa đơn còn sản phẩm
-            } else {
-                localStorage.removeItem('pos_draft'); // Xóa nếu tất cả trống
-            }
-        } catch (e) { /* ignore */ }
+        // Lưu draft với các hóa đơn còn lại
+        try { saveDraft(); } catch (e) { /* ignore */ }
     }
 
     // helper to include originalStock when sending beacon/clear

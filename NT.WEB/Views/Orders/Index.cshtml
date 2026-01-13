@@ -120,13 +120,21 @@
           <td>
         @{
    var st = o.Status ?? "0"; string statusText; string badgeClass;
+   // Kiểm tra xem đơn hàng là POS hay Online dựa vào Note
+   var isPosOrder = !string.IsNullOrWhiteSpace(o.Note) && 
+                    (o.Note.Contains("POS", StringComparison.OrdinalIgnoreCase) || 
+                     o.Note.Contains("Bán hàng tại quầy", StringComparison.OrdinalIgnoreCase));
    switch (st)
       {
        case "-1": statusText = "Đã hủy"; badgeClass = "bg-danger"; break;
 case "0": statusText = "Chờ xác nhận"; badgeClass = "bg-warning text-dark"; break;
         case "1": statusText = "Đã xác nhận"; badgeClass = "bg-info text-dark"; break;
 case "2": statusText = "Đang giao hàng"; badgeClass = "bg-primary"; break;
-        case "3": statusText = "Giao thành công"; badgeClass = "bg-success"; break;
+        case "3": 
+            // Đơn POS hiển thị "Hoàn thành", đơn Online hiển thị "Giao thành công"
+            statusText = isPosOrder ? "Hoàn thành" : "Giao thành công"; 
+            badgeClass = "bg-success"; 
+            break;
     default: statusText = "Không rõ"; badgeClass = "bg-secondary"; break;
         }
               }

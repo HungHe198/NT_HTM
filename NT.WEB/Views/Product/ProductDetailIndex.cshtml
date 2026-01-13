@@ -5,6 +5,7 @@
     var detailImages = ViewBag.DetailImages as Dictionary<Guid, List<string>> ?? new Dictionary<Guid, List<string>>();
     var hardnessOptions = ViewBag.HardnessOptions as IEnumerable<NT.SHARED.Models.Hardness> ?? Enumerable.Empty<NT.SHARED.Models.Hardness>();
     var lengthOptions = ViewBag.LengthOptions as IEnumerable<NT.SHARED.Models.Length> ?? Enumerable.Empty<NT.SHARED.Models.Length>();
+    var isOutOfStock = ViewBag.IsOutOfStock as bool? ?? false;
     
     var allVariantImages = new List<(Guid detailId, string imageUrl)>();
     foreach (var d in details)
@@ -591,6 +592,18 @@
                         <p class="text-muted lead mb-3">@product.ShortDescription</p>
                     }
 
+                    <!-- Thông báo hết hàng -->
+                    @if (isOutOfStock)
+                    {
+                        <div class="alert alert-danger d-flex align-items-center mb-3" role="alert" style="border-radius: 12px;">
+                            <i class="fas fa-exclamation-circle fa-2x me-3"></i>
+                            <div>
+                                <h5 class="alert-heading mb-1">Sản phẩm tạm hết hàng</h5>
+                                <p class="mb-0">Rất tiếc, sản phẩm này hiện đang hết hàng. Vui lòng quay lại sau hoặc liên hệ shop để đặt trước.</p>
+                            </div>
+                        </div>
+                    }
+
                     <!-- Price Range -->
                     @if (details.Any())
                     {
@@ -607,6 +620,8 @@
                 </div>
 
                 <!-- Variant Selection Card -->
+                @if (!isOutOfStock)
+                {
                 <div class="variant-card">
                     <h5 class="variant-card-title">
                         <i class="fas fa-sliders-h"></i> Chọn thông số
@@ -673,6 +688,26 @@
                         <i class="fas fa-bolt"></i> Mua ngay
                     </button>
                 </div>
+                }
+                else
+                {
+                    <!-- Thông báo và nút liên hệ khi hết hàng -->
+                    <div class="variant-card">
+                        <div class="text-center py-4">
+                            <i class="fas fa-box-open fa-4x text-muted mb-3"></i>
+                            <h5 class="text-muted">Sản phẩm tạm hết hàng</h5>
+                            <p class="text-muted mb-4">Vui lòng liên hệ với chúng tôi để đặt trước hoặc quay lại sau.</p>
+                            <div class="d-grid gap-2 d-sm-flex justify-content-center">
+                                <a href="/" class="btn btn-outline-primary action-btn">
+                                    <i class="fas fa-home"></i> Về trang chủ
+                                </a>
+                                <a href="tel:0901234567" class="btn btn-success action-btn">
+                                    <i class="fas fa-phone"></i> Liên hệ đặt hàng
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                }
             </div>
         </div>
 
@@ -950,6 +985,7 @@
 
     const detailImagesMap = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(detailImages.ToDictionary(kv => kv.Key.ToString(), kv => kv.Value)));
     const productThumbnail = '@Html.Raw((product?.Thumbnail ?? "/images/product-placeholder.png").Replace("'", "\\'"))';
+    const isOutOfStock = @(isOutOfStock ? "true" : "false");
 
     function openLightbox(imageSrc) {
         document.getElementById('lightboxImage').src = imageSrc;
@@ -990,183 +1026,186 @@
         }
     }
 
-    let selectedHardnessId = null;
-    let selectedLengthId = null;
+    // Chỉ khởi tạo các chức năng chọn biến thể nếu không hết hàng
+    if (!isOutOfStock) {
+        let selectedHardnessId = null;
+        let selectedLengthId = null;
 
-    const hardnessButtons = document.querySelectorAll('.hardness-btn');
-    const lengthButtons = document.querySelectorAll('.length-btn');
-    const summaryEl = document.getElementById('selection-summary');
+        const hardnessButtons = document.querySelectorAll('.hardness-btn');
+        const lengthButtons = document.querySelectorAll('.length-btn');
+        const summaryEl = document.getElementById('selection-summary');
 
-    function setActive(btns, idAttr, id) {
-        btns.forEach(b => {
-            const isActive = id && b.getAttribute(idAttr) === id;
-            b.classList.toggle('btn-primary', isActive);
-        });
-    }
-
-    function updateAvailability() {
-        let validDetails = details.filter(d => d.stock > 0);
-        if (selectedHardnessId) {
-            validDetails = validDetails.filter(d => d.hardnessId === selectedHardnessId);
-        }
-        if (selectedLengthId) {
-            validDetails = validDetails.filter(d => d.lengthId === selectedLengthId);
+        function setActive(btns, idAttr, id) {
+            btns.forEach(b => {
+                const isActive = id && b.getAttribute(idAttr) === id;
+                b.classList.toggle('btn-primary', isActive);
+            });
         }
 
-        const validHardnessIds = new Set(validDetails.map(d => d.hardnessId));
-        const validLengthIds = new Set(validDetails.map(d => d.lengthId));
+        function updateAvailability() {
+            let validDetails = details.filter(d => d.stock > 0);
+            if (selectedHardnessId) {
+                validDetails = validDetails.filter(d => d.hardnessId === selectedHardnessId);
+            }
+            if (selectedLengthId) {
+                validDetails = validDetails.filter(d => d.lengthId === selectedLengthId);
+            }
 
-        hardnessButtons.forEach(b => {
-            const id = b.getAttribute('data-hardness-id');
-            const hasStock = details.some(d => d.hardnessId === id && d.stock > 0);
-            b.disabled = !hasStock || (selectedLengthId && !validHardnessIds.has(id));
-        });
+            const validHardnessIds = new Set(validDetails.map(d => d.hardnessId));
+            const validLengthIds = new Set(validDetails.map(d => d.lengthId));
 
-        lengthButtons.forEach(b => {
-            const id = b.getAttribute('data-length-id');
-            const hasStock = details.some(d => d.lengthId === id && d.stock > 0);
-            b.disabled = !hasStock || (selectedHardnessId && !validLengthIds.has(id));
-        });
+            hardnessButtons.forEach(b => {
+                const id = b.getAttribute('data-hardness-id');
+                const hasStock = details.some(d => d.hardnessId === id && d.stock > 0);
+                b.disabled = !hasStock || (selectedLengthId && !validHardnessIds.has(id));
+            });
 
-        if (validDetails.length > 0) {
-            const prices = validDetails.map(d => Number(d.price));
-            const min = Math.min(...prices);
-            const max = Math.max(...prices);
-            const totalStock = validDetails.reduce((s,d)=> s + Number(d.stock), 0);
-            summaryEl.innerHTML = `<i class="fas fa-check-circle me-2"></i><strong>Giá:</strong> ${min.toLocaleString()}₫${min !== max ? ' – ' + max.toLocaleString() + '₫' : ''} | <strong>Còn:</strong> ${totalStock} sản phẩm`;
-            summaryEl.classList.remove('alert-danger');
-            summaryEl.classList.add('selection-summary');
-      
-            if (validDetails.length === 1) {
-                updateMainImageForVariant(validDetails[0].id);
+            lengthButtons.forEach(b => {
+                const id = b.getAttribute('data-length-id');
+                const hasStock = details.some(d => d.lengthId === id && d.stock > 0);
+                b.disabled = !hasStock || (selectedHardnessId && !validLengthIds.has(id));
+            });
+
+            if (validDetails.length > 0) {
+                const prices = validDetails.map(d => Number(d.price));
+                const min = Math.min(...prices);
+                const max = Math.max(...prices);
+                const totalStock = validDetails.reduce((s,d)=> s + Number(d.stock), 0);
+                summaryEl.innerHTML = `<i class="fas fa-check-circle me-2"></i><strong>Giá:</strong> ${min.toLocaleString()}₫${min !== max ? ' – ' + max.toLocaleString() + '₫' : ''} | <strong>Còn:</strong> ${totalStock} sản phẩm`;
+                summaryEl.classList.remove('alert-danger');
+                summaryEl.classList.add('selection-summary');
+          
+                if (validDetails.length === 1) {
+                    updateMainImageForVariant(validDetails[0].id);
+                } else {
+                    updateMainImageForVariant(null);
+                }
             } else {
+                summaryEl.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i><strong>Không có sản phẩm phù hợp với lựa chọn của bạn</strong>';
+                summaryEl.classList.remove('selection-summary');
+                summaryEl.classList.add('alert-danger');
                 updateMainImageForVariant(null);
             }
-        } else {
-            summaryEl.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i><strong>Không có sản phẩm phù hợp với lựa chọn của bạn</strong>';
-            summaryEl.classList.remove('selection-summary');
-            summaryEl.classList.add('alert-danger');
-            updateMainImageForVariant(null);
         }
-    }
 
-    hardnessButtons.forEach(b => {
-        b.addEventListener('click', () => {
-            const id = b.getAttribute('data-hardness-id');
-            selectedHardnessId = (selectedHardnessId === id) ? null : id;
-            setActive(hardnessButtons, 'data-hardness-id', selectedHardnessId);
-            updateAvailability();
-        });
-    });
-    
-    lengthButtons.forEach(b => {
-        b.addEventListener('click', () => {
-            const id = b.getAttribute('data-length-id');
-            selectedLengthId = (selectedLengthId === id) ? null : id;
-            setActive(lengthButtons, 'data-length-id', selectedLengthId);
-            updateAvailability();
-        });
-    });
-
-    document.getElementById('qty-minus').addEventListener('click', () => {
-        const qty = document.getElementById('qty');
-        qty.value = Math.max(1, parseInt(qty.value || '1') - 1);
-    });
-
-    document.getElementById('qty-plus').addEventListener('click', () => {
-        const qty = document.getElementById('qty');
-        const current = Math.max(1, parseInt(qty.value || '1'));
-        // If a variant is selected, cap by its stock
-        const selected = findSelectedDetail();
-        if (selected && current + 1 > Number(selected.stock)) {
-            alert(`Số lượng vượt quá tồn kho (${selected.stock}). Vui lòng giảm số lượng hoặc liên hệ shop.`);
-            qty.value = Number(selected.stock);
-            return;
-        }
-        qty.value = current + 1;
-    });
-
-    updateAvailability();
-
-    function findSelectedDetail() {
-        if (!selectedHardnessId || !selectedLengthId) return null;
-        return details.find(d => d.hardnessId === selectedHardnessId && d.lengthId === selectedLengthId && d.stock > 0) || null;
-    }
-
-    document.getElementById('add-to-cart').addEventListener('click', async () => {
-        const selected = findSelectedDetail();
-        if (!selected) { 
-            notify('danger', 'Vui lòng chọn độ dài và độ cứng có hàng.');
-            return;
-        }
-        const qty = Math.max(1, parseInt(document.getElementById('qty').value || '1'));
-        if (qty > Number(selected.stock)) {
-            notify('warning', `Số lượng vượt quá tồn kho (${selected.stock}). Vui lòng giảm số lượng hoặc liên hệ shop.`);
-            return;
-        }
-        const data = new URLSearchParams();
-        data.append('productDetailId', selected.id);
-        data.append('quantity', qty);
-        try {
-            const res = await fetch('/Cart/Add', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: data.toString(),
-                credentials: 'same-origin'
+        hardnessButtons.forEach(b => {
+            b.addEventListener('click', () => {
+                const id = b.getAttribute('data-hardness-id');
+                selectedHardnessId = (selectedHardnessId === id) ? null : id;
+                setActive(hardnessButtons, 'data-hardness-id', selectedHardnessId);
+                updateAvailability();
             });
-            const loginUrl = `/Account/Login?msg=login_required&returnUrl=${encodeURIComponent(location.pathname + location.search)}`;
-            // Not authenticated or redirected to login
-            if (res.status === 401 || res.status === 403 || (res.redirected && res.url.includes('/Account/Login'))) {
-                window.location.href = loginUrl;
+        });
+        
+        lengthButtons.forEach(b => {
+            b.addEventListener('click', () => {
+                const id = b.getAttribute('data-length-id');
+                selectedLengthId = (selectedLengthId === id) ? null : id;
+                setActive(lengthButtons, 'data-length-id', selectedLengthId);
+                updateAvailability();
+            });
+        });
+
+        document.getElementById('qty-minus').addEventListener('click', () => {
+            const qty = document.getElementById('qty');
+            qty.value = Math.max(1, parseInt(qty.value || '1') - 1);
+        });
+
+        document.getElementById('qty-plus').addEventListener('click', () => {
+            const qty = document.getElementById('qty');
+            const current = Math.max(1, parseInt(qty.value || '1'));
+            // If a variant is selected, cap by its stock
+            const selected = findSelectedDetail();
+            if (selected && current + 1 > Number(selected.stock)) {
+                alert(`Số lượng vượt quá tồn kho (${selected.stock}). Vui lòng giảm số lượng hoặc liên hệ shop.`);
+                qty.value = Number(selected.stock);
                 return;
             }
-            if (res.ok) {
-                // Server redirects to CartDetail; follow it
-                window.location.href = res.url || '/CartDetail';
-            } else {
-                notify('danger', 'Không thể thêm vào giỏ hàng. Vui lòng thử lại.');
-            }
-        } catch (e) {
-            notify('danger', 'Có lỗi xảy ra khi thêm vào giỏ hàng.');
-        }
-    });
+            qty.value = current + 1;
+        });
 
-    // Buy Now: attempts to add to cart then redirects user to cart/checkout.
-    document.getElementById('buy-now').addEventListener('click', async () => {
-        const selected = findSelectedDetail();
-        if (!selected) {
-            notify('danger', 'Vui lòng chọn độ dài và độ cứng có hàng.');
-            return;
+        updateAvailability();
+
+        function findSelectedDetail() {
+            if (!selectedHardnessId || !selectedLengthId) return null;
+            return details.find(d => d.hardnessId === selectedHardnessId && d.lengthId === selectedLengthId && d.stock > 0) || null;
         }
-        const qty = Math.max(1, parseInt(document.getElementById('qty').value || '1'));
-        if (qty > Number(selected.stock)) {
-            notify('warning', `Số lượng vượt quá tồn kho (${selected.stock}). Vui lòng giảm số lượng hoặc liên hệ shop.`);
-            return;
-        }
-        const data = new URLSearchParams();
-        data.append('productDetailId', selected.id);
-        data.append('quantity', qty);
-        try {
-            const res = await fetch('/Cart/Add', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: data.toString(),
-                credentials: 'same-origin'
-            });
-            const loginUrl = `/Account/Login?msg=login_required&returnUrl=${encodeURIComponent(location.pathname + location.search)}`;
-            if (res.status === 401 || res.status === 403 || (res.redirected && res.url.includes('/Account/Login'))) {
-                window.location.href = loginUrl;
+
+        document.getElementById('add-to-cart').addEventListener('click', async () => {
+            const selected = findSelectedDetail();
+            if (!selected) { 
+                notify('danger', 'Vui lòng chọn độ dài và độ cứng có hàng.');
                 return;
             }
-            if (res.ok) {
-                window.location.href = res.url || '/CartDetail';
-            } else {
-                notify('danger', 'Không thể mua ngay lúc này. Vui lòng thử lại.');
+            const qty = Math.max(1, parseInt(document.getElementById('qty').value || '1'));
+            if (qty > Number(selected.stock)) {
+                notify('warning', `Số lượng vượt quá tồn kho (${selected.stock}). Vui lòng giảm số lượng hoặc liên hệ shop.`);
+                return;
             }
-        } catch (e) {
-            notify('danger', 'Có lỗi xảy ra khi mua ngay.');
-        }
-    });
+            const data = new URLSearchParams();
+            data.append('productDetailId', selected.id);
+            data.append('quantity', qty);
+            try {
+                const res = await fetch('/Cart/Add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: data.toString(),
+                    credentials: 'same-origin'
+                });
+                const loginUrl = `/Account/Login?msg=login_required&returnUrl=${encodeURIComponent(location.pathname + location.search)}`;
+                // Not authenticated or redirected to login
+                if (res.status === 401 || res.status === 403 || (res.redirected && res.url.includes('/Account/Login'))) {
+                    window.location.href = loginUrl;
+                    return;
+                }
+                if (res.ok) {
+                    // Server redirects to CartDetail; follow it
+                    window.location.href = res.url || '/CartDetail';
+                } else {
+                    notify('danger', 'Không thể thêm vào giỏ hàng. Vui lòng thử lại.');
+                }
+            } catch (e) {
+                notify('danger', 'Có lỗi xảy ra khi thêm vào giỏ hàng.');
+            }
+        });
+
+        // Buy Now: attempts to add to cart then redirects user to cart/checkout.
+        document.getElementById('buy-now').addEventListener('click', async () => {
+            const selected = findSelectedDetail();
+            if (!selected) {
+                notify('danger', 'Vui lòng chọn độ dài và độ cứng có hàng.');
+                return;
+            }
+            const qty = Math.max(1, parseInt(document.getElementById('qty').value || '1'));
+            if (qty > Number(selected.stock)) {
+                notify('warning', `Số lượng vượt quá tồn kho (${selected.stock}). Vui lòng giảm số lượng hoặc liên hệ shop.`);
+                return;
+            }
+            const data = new URLSearchParams();
+            data.append('productDetailId', selected.id);
+            data.append('quantity', qty);
+            try {
+                const res = await fetch('/Cart/Add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: data.toString(),
+                    credentials: 'same-origin'
+                });
+                const loginUrl = `/Account/Login?msg=login_required&returnUrl=${encodeURIComponent(location.pathname + location.search)}`;
+                if (res.status === 401 || res.status === 403 || (res.redirected && res.url.includes('/Account/Login'))) {
+                    window.location.href = loginUrl;
+                    return;
+                }
+                if (res.ok) {
+                    window.location.href = res.url || '/CartDetail';
+                } else {
+                    notify('danger', 'Không thể mua ngay lúc này. Vui lòng thử lại.');
+                }
+            } catch (e) {
+                notify('danger', 'Có lỗi xảy ra khi mua ngay.');
+            }
+        });
+    }
 
     // Toast helper
     function notify(type, message) {
