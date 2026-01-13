@@ -86,10 +86,8 @@ namespace NT.WEB.Controllers
                 ? await _productService.GetAllAsync()
                 : await _productService.SearchByNameAsync(q);
 
-            // Dictionary để lưu tổng số lượng tồn kho của từng sản phẩm
-            var productStockQuantities = new Dictionary<Guid, int>();
-
             // ensure product has a thumbnail: pick first image from first active detail
+            // also load ProductDetails to calculate total stock
             foreach (var p in model)
             {
                 // Ensure Brand is loaded so the view can display brand name
@@ -106,13 +104,13 @@ namespace NT.WEB.Controllers
                     p.Status = NT.SHARED.Constants.ProductStatus.Active;
                 }
 
-                // Tính tổng số lượng tồn kho từ các biến thể
+                // Load ProductDetails for stock calculation and thumbnail
                 try
                 {
                     var details = await _productDetailService.GetWithLookupsByProductIdAsync(p.Id);
-                    var totalStock = details.Where(d => d.IsActive).Sum(d => d.StockQuantity);
-                    productStockQuantities[p.Id] = totalStock;
-
+                    p.ProductDetails = details.ToList();
+                    
+                    // Set thumbnail from first detail's image if not already set
                     if (string.IsNullOrWhiteSpace(p.Thumbnail))
                     {
                         var firstDetail = details.FirstOrDefault();
@@ -123,13 +121,8 @@ namespace NT.WEB.Controllers
                         }
                     }
                 }
-                catch
-                {
-                    productStockQuantities[p.Id] = 0;
-                }
+                catch { }
             }
-
-            ViewBag.ProductStockQuantities = productStockQuantities;
             return View(model);
         }
 
@@ -198,11 +191,19 @@ namespace NT.WEB.Controllers
             // Chỉ hiển thị các biến thể có IsActive = true và StockQuantity > 0
             var details = allDetails.Where(d => d.IsActive && d.StockQuantity > 0).ToList();
             
-            // Nếu không có biến thể hoạt động nào, hiển thị trang thông báo hết hàng
-            if (!details.Any())
+            // Nếu không có biến thể hoạt động nào, vẫn hiển thị sản phẩm nhưng đánh dấu hết hàng
+            bool isOutOfStock = !details.Any();
+            ViewBag.IsOutOfStock = isOutOfStock;
+            
+            // Nếu hết hàng, vẫn lấy tất cả details để hiển thị thông tin sản phẩm (nhưng không cho mua)
+            if (isOutOfStock)
             {
-                ViewBag.Product = product;
-                return View("OutOfStock");
+                details = allDetails.Where(d => d.IsActive).ToList();
+                // Nếu không có biến thể nào cả, vẫn hiển thị thông tin sản phẩm cơ bản
+                if (!details.Any())
+                {
+                    details = allDetails.Take(1).ToList(); // Lấy ít nhất 1 để hiển thị thông tin
+                }
             }
             
             var hardnessIds = details.Select(d => d.HardnessId).Distinct().ToList();
@@ -770,23 +771,18 @@ namespace NT.WEB.Controllers
             foreach (var p in items)
             {
                 decimal? min = null, max = null;
-                int totalStock = 0;
                 try
                 {
                     var details = await _productDetailService.GetByProductIdAsync(p.Id);
                     foreach (var d in details)
                     {
-                        if (d.IsActive)
-                        {
-                            totalStock += d.StockQuantity;
-                        }
                         if (min == null || d.Price < min) min = d.Price;
                         if (max == null || d.Price > max) max = d.Price;
                     }
                 }
                 catch { }
 
-                list.Add(new { p.Id, p.Name, p.ProductCode, p.Thumbnail, priceMin = min, priceMax = max, totalStock, isInStock = totalStock > 0 });
+                list.Add(new { p.Id, p.Name, p.ProductCode, p.Thumbnail, priceMin = min, priceMax = max });
             }
 
             return Json(list);

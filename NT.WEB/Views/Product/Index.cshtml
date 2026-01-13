@@ -3,7 +3,6 @@
 
 @{
     ViewBag.Title = "Quản lý sản phẩm";
-    var productStockQuantities = ViewBag.ProductStockQuantities as Dictionary<Guid, int> ?? new Dictionary<Guid, int>();
 }
 
 <div class="container-fluid py-4">
@@ -42,11 +41,9 @@
          <a asp-controller="OriginCountry" asp-action="Index" class="nav-link nav-link-primary fw-500">
     <i class="bi bi-globe me-2"></i>Xuất Xứ
          </a>
- @*  Ẩn phần Ảnh Sản Phẩm theo yêu cầu
  <a asp-controller="ProductImage" asp-action="Index" class="nav-link nav-link-primary fw-500">
              <i class="bi bi-image me-2"></i>Ảnh Sản Phẩm
       </a>
- *@
            </nav>
        </div>
     </div>
@@ -147,16 +144,17 @@
               </td>
    <td>
      @{
-         var stockQty = productStockQuantities.ContainsKey(p.Id) ? productStockQuantities[p.Id] : 0;
-         var isInStock = ProductStatus.IsInStock(stockQty);
+         // Tính tổng số lượng tồn kho từ các biến thể
+         var totalStock = p.ProductDetails?.Sum(d => d.StockQuantity) ?? 0;
+         var isInStock = totalStock > 0;
      }
      @if(isInStock)
      {
-         <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>@ProductStatus.GetStockDisplayName(stockQty) (@stockQty)</span>
+         <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Còn hàng (@totalStock)</span>
      }
      else
      {
-         <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i>@ProductStatus.GetStockDisplayName(stockQty)</span>
+         <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i>Hết hàng</span>
      }
    </td>
    <td>

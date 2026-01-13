@@ -62,20 +62,22 @@
  <span class="badge bg-secondary">@Model.Brand.Name</span>
       </div>
         }
-      @if (!string.IsNullOrWhiteSpace(Model.Status))
-      {
+      @{
+          // Tính tổng số lượng tồn kho từ các biến thể
+          var totalStock = details.Sum(d => d.StockQuantity);
+          var isInStock = totalStock > 0;
+      }
   <div class="col-12">
     <strong>Trạng thái:</strong> 
-              @if(Model.Status == ProductStatus.Active)
+              @if(isInStock)
               {
-                  <span class="badge bg-success">@ProductStatus.GetDisplayName(Model.Status)</span>
+                  <span class="badge bg-success">Còn hàng (@totalStock)</span>
               }
               else
               {
-                  <span class="badge bg-danger">@ProductStatus.GetDisplayName(Model.Status)</span>
+                  <span class="badge bg-danger">Hết hàng</span>
               }
   </div>
-   }
    </div>
      </div>
            </div>
